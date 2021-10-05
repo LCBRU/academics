@@ -12,13 +12,44 @@
             placeholder='enter search text - searches names',
             buttons=[
                 {
-                    'text': 'Add',
+                    'text': 'Add Author',
                     'endpoint': 'ui.add_author_search',
                 },
             ],
         ) }}
 
     </div>
+
+    <ul class="list-group">
+        {% for a in academics.items %}
+            <li class="list-group-item">
+                <div class='summary_details row'>
+                    <div class="col">
+                        <div class="d-flex w-100 justify-content-between">
+                            <header>
+                                <h1>{{a.full_name}}</h1>
+                                <h2>{{a.affiliation_full_address}}</h2>
+                            </header>
+                        </div>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Publications</th>
+                                <th>Citations</th>
+                                <th>h-index</th>
+                            </tr>
+                            <tr>
+                                <td>{{a.document_count}}</td>
+                                <td>{{a.citation_count}}</td>
+                                <td>{{a.h_index}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
 </section>
+
+{{ render_pagination(academics, 'ui.index', form=search_form) }}
 
 {% endblock %}

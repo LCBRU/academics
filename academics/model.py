@@ -1,30 +1,27 @@
-from dataclasses import dataclass
+from lbrc_flask.security import AuditMixin
+from lbrc_flask.model import CommonMixin
+from lbrc_flask.database import db
 
-@dataclass
-class ScopusAuthor():
 
-    scopus_id: str
-    eid: str
-    first_name: str
-    last_name: str
-    affiliation_id: str
-    affiliation_name: str
-    affiliation_city: str
-    affiliation_country: str
-    
-    def __init__(self, data):
-        self.scopus_id = data.get(u'dc:identifier', ':').split(':')[1]
-        self.eid = data.get(u'eid', '')
-        self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
-        self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
-        self.affiliation_id = data.get(u'affiliation-current', {}).get(u'affiliation-id', '')
-        self.affiliation_name = data.get(u'affiliation-current', {}).get(u'affiliation-name', '')
-        self.affiliation_city = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
-        self.affiliation_country = data.get(u'affiliation-current', {}).get(u'affiliation-country', '')
+class Academic(AuditMixin, CommonMixin, db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    scopus_id = db.Column(db.String)
+    eid = db.Column(db.String)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
+    affiliation_id = db.Column(db.String)
+    affiliation_name = db.Column(db.String)
+    affiliation_address = db.Column(db.String)
+    affiliation_city = db.Column(db.String)
+    affiliation_country = db.Column(db.String)
+    citation_count = db.Column(db.String)
+    document_count = db.Column(db.String)
+    h_index = db.Column(db.String)
 
     @property
     def full_name(self):
-        return ', '.join(
+        return ' '.join(
             filter(len, [
                 self.first_name,
                 self.last_name,
@@ -32,10 +29,11 @@ class ScopusAuthor():
         )
 
     @property
-    def affiliation_full_name(self):
+    def affiliation_full_address(self):
         return ', '.join(
             filter(len, [
                 self.affiliation_name,
+                self.affiliation_address,
                 self.affiliation_city,
                 self.affiliation_country,
             ])
