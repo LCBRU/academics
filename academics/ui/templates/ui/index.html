@@ -1,0 +1,24 @@
+{% extends "ui/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination %}
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>Academics</h1>
+
+        {{ render_search(
+            search_form,
+            'ui.index',
+            placeholder='enter search text - searches names',
+            buttons=[
+                {
+                    'text': 'Add',
+                    'endpoint': 'ui.add_author_search',
+                },
+            ],
+        ) }}
+
+    </div>
+</section>
+
+{% endblock %}

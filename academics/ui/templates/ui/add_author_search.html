@@ -1,0 +1,48 @@
+{% extends "lbrc_flask/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination %}
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>Add Academic</h1>
+        <p>
+            This page searches Scopus for academics affiliated to an organisation in Leicester with a name that matches the text entered below.
+            The search is not precise, so you will need to validate the author carefully.
+        </p>
+
+        {{ render_search(
+            search_form,
+            'ui.add_author_search',
+            placeholder='enter search text',
+            buttons=[
+                {
+                    'text': 'Back',
+                    'endpoint': 'ui.index',
+                },
+            ],
+        ) }}
+
+    </div>
+
+    <ul class="list-group">
+        {% for a in authors %}
+            <li class="list-group-item">
+                <div class='row'>
+                    <div class='col-1'>
+                        <form action="{{url_for('ui.add_author', id=a.id)}}", method="POST">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-plus-square"></i> Add</button>
+                        </form>
+                    </div>
+                    <div class='col'>
+                        <header>
+                            <h1><a href="https://www.scopus.com/authid/detail.uri?authorId={{a.scopus_id}}" target="_blank">{{a.full_name}} <i class="fas fa-external-link-alt fa-xs"></i></a></h1>
+                            <h2><a href="https://www.scopus.com/affil/profile.uri?afid={{a.affiliation_id}}" target="_blank">{{a.affiliation_full_name}} <i class="fas fa-external-link-alt fa-xs"></i></a></h2>
+                        </header>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% endblock %}
