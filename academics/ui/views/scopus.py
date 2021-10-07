@@ -48,7 +48,7 @@ def add_author_search():
     return render_template(
         "ui/add_author_search.html",
         authors=authors,
-        academics=Academic.query.all(),
+        academics=sorted(Academic.query.all(), key=lambda a: a.last_name + a.first_name),
         search_form=search_form,
         add_author_to_new_academic_form=AddAuthorToNewAcademicForm(),
         add_author_to_academic_form=AddAuthorToAcademicForm()

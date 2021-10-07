@@ -12,8 +12,16 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         return self.top_scopus_author.full_name
 
     @property
+    def last_name(self):
+        return self.top_scopus_author.last_name
+
+    @property
+    def first_name(self):
+        return self.top_scopus_author.first_name
+
+    @property
     def top_scopus_author(self):
-        return sorted(self.scopus_authors, key=lambda a: a.document_count)[0]
+        return sorted(self.scopus_authors, key=lambda a: a.document_count, reverse=True)[0]
 
 class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 
