@@ -1,22 +1,31 @@
 from flask import render_template, request, redirect, url_for
-from sqlalchemy import func
-from lbrc_flask.forms import SearchForm
+from lbrc_flask.forms import FlashingForm, SearchForm
 from lbrc_flask.database import db
+from wtforms.fields.simple import HiddenField
 from academics.scopus.service import author_search, get_author
-from academics.model import Academic
+from academics.model import Academic, ScopusAuthor
 from .. import blueprint
+
+
+class AddAuthorToNewAcademicForm(FlashingForm):
+    scopus_id = HiddenField()
+
+
+class AddAuthorToAcademicForm(FlashingForm):
+    scopus_id = HiddenField()
+    academic_id = HiddenField()
 
 
 @blueprint.route("/")
 def index():
     search_form = SearchForm(formdata=request.args)
 
-    q = Academic.query
+    q = Academic.query.distinct().join(Academic.scopus_authors)
 
     if search_form.search.data:
-        q = q.filter(Academic.first_name + ' ' + Academic.last_name).like("%{}%".format(search_form.search.data))
+        q = q.filter(ScopusAuthor.first_name + ' ' + ScopusAuthor.last_name).like("%{}%".format(search_form.search.data))
 
-    q = q.order_by(Academic.first_name + ' ' + Academic.last_name)
+    q = q.order_by(ScopusAuthor.first_name + ' ' + ScopusAuthor.last_name)
 
     academics = q.paginate(
             page=search_form.page.data,
@@ -36,17 +45,38 @@ def add_author_search():
     if search_form.search.data:
         authors = author_search(search_form.search.data)
 
-    return render_template("ui/add_author_search.html", authors=authors, search_form=search_form)
+    return render_template(
+        "ui/add_author_search.html",
+        authors=authors,
+        academics=Academic.query.all(),
+        search_form=search_form,
+        add_author_to_new_academic_form=AddAuthorToNewAcademicForm(),
+        add_author_to_academic_form=AddAuthorToAcademicForm()
+    )
 
 
-@blueprint.route("/add_author/<string:scopus_id>", methods=['POST'])
-def add_author(scopus_id):
+@blueprint.route("/add_author_to_new_academic", methods=['POST'])
+def add_author_to_new_academic():
+    form = AddAuthorToNewAcademicForm()
 
-    author = get_author(scopus_id)
+    return _add_author_to_academic(form.scopus_id.data, Academic())
 
-    academic = author.get_academic()
 
-    db.session.add(academic)
+@blueprint.route("/add_author_to_academic", methods=['POST'])
+def add_author_to_academic():
+    form = AddAuthorToAcademicForm()
+
+    academic = Academic.query.get_or_404(form.academic_id.data)
+
+    return _add_author_to_academic(form.scopus_id.data, academic)
+
+
+def _add_author_to_academic(scopus_id, academic):
+
+    author = get_author(scopus_id).get_scopus_author()
+    author.academic = academic
+
+    db.session.add(author)
     db.session.commit()
 
     return redirect(url_for('ui.index'))

@@ -28,20 +28,26 @@
                         <div class="d-flex w-100 justify-content-between">
                             <header>
                                 <h1>{{a.full_name}}</h1>
-                                <h2>{{a.affiliation_full_address}}</h2>
                             </header>
                         </div>
                         <table class="table table-sm">
                             <tr>
+                                <th>Author</th>
                                 <th>Publications</th>
                                 <th>Citations</th>
                                 <th>h-index</th>
                             </tr>
-                            <tr>
-                                <td>{{a.document_count}}</td>
-                                <td>{{a.citation_count}}</td>
-                                <td>{{a.h_index}}</td>
-                            </tr>
+                            {% for au in a.scopus_authors %}
+                                <tr>
+                                    <td>
+                                        <div>{{au.full_name}}</div>
+                                        <div><small class="text-muted">{{au.affiliation_name}}</small></div>
+                                    </td>
+                                    <td>{{au.document_count}}</td>
+                                    <td>{{au.citation_count}}</td>
+                                    <td>{{au.h_index}}</td>
+                                </tr>
+                            {% endfor %}
                         </table>
                     </div>
                 </div>

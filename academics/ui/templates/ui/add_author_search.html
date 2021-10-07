@@ -1,5 +1,6 @@
 {% extends "lbrc_flask/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination %}
+{% from "lbrc_flask/modal_macros.html" import render_modal %}
 
 {% block content %}
 <section>
@@ -28,14 +29,24 @@
         {% for a in authors %}
             <li class="list-group-item">
                 <div class='row'>
-                    <div class='col-1'>
-                        <form action="{{url_for('ui.add_author', scopus_id=a.scopus_id)}}", method="POST">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-plus-square"></i> Add</button>
-                        </form>
+                    <div class='col-2'>
+                        {% if not a.existing %}
+                            <a class="btn btn-primary"
+                                data-toggle="modal"
+                                data-target="#add_author_to_academic"
+                                data-scopus-id="{{ a.scopus_id }}"
+                                data-author-name="{{ a.full_name }}"
+                                href="#">Add</a>
+                        {% endif %}
                     </div>
                     <div class='col'>
                         <header>
-                            <h1><a href="https://www.scopus.com/authid/detail.uri?authorId={{a.scopus_id}}" target="_blank">{{a.full_name}} <i class="fas fa-external-link-alt fa-xs"></i></a></h1>
+                            <h1>
+                                <a href="https://www.scopus.com/authid/detail.uri?authorId={{a.scopus_id}}" target="_blank">{{a.full_name}} <i class="fas fa-external-link-alt fa-xs"></i></a>
+                                {% if a.existing %}
+                                    <span class="badge badge-secondary">Already Imported</span>
+                                {% endif %}
+                            </h1>
                             <h2><a href="https://www.scopus.com/affil/profile.uri?afid={{a.affiliation_id}}" target="_blank">{{a.affiliation_full_name}} <i class="fas fa-external-link-alt fa-xs"></i></a></h2>
                         </header>
                     </div>
@@ -44,5 +55,50 @@
         {% endfor %}
     </ul>
 </section>
+
+{% call render_modal('add_author_to_academic', 'Add Author to Academic') %}
+    <p id="modal_description">Add author "<span id="author_name"></span>" to one of the following academics or create a new academic.</p>
+
+    <div class="list-group">
+        <form id="add_author_to_new_academic" action="{{ url_for('ui.add_author_to_new_academic') }}" class="list-group-item" method="POST" enctype="multipart/form-data">
+            <fieldset>
+                {{ add_author_to_new_academic_form.csrf_token() }}
+                {{ add_author_to_new_academic_form.scopus_id() }}
+                <button type="submit" class="btn btn-primary">Create new Academic</button>
+            </fieldset>
+        </form>
+
+        {% for academic in academics %}
+            <form id="add_author_to_academic" action="{{ url_for('ui.add_author_to_academic') }}" class="list-group-item" method="POST" enctype="multipart/form-data">
+                <fieldset>
+                    {{ add_author_to_new_academic_form.csrf_token() }}
+                    {{ add_author_to_new_academic_form.scopus_id() }}
+                    <input type="hidden" id="academic_id" name="academic_id" value="{{academic.id}}">
+                    {{ add_author_to_academic_form.csrf_token() }}
+                    <button type="submit" class="btn btn-primary">Add Scopus author to academic "{{academic.full_name}}"</button>
+                </fieldset>
+            </form>
+        {% endfor %}
+    </ul>
+{% endcall %}
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    $(document).ready(function(){
+        $('#add_author_to_academic').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('scopus-id');
+            var name = button.data('author-name');
+
+            var modal = $(this);
+            modal.find('#author_name').text(name);
+
+            $('#add_author_to_academic #scopus_id').val(id);
+        });
+    });
+</script>
 
 {% endblock %}

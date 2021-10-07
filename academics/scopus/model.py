@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import Academic
+from academics.model import ScopusAuthor
 
 @dataclass
 class AuthorSearch():
@@ -13,6 +13,7 @@ class AuthorSearch():
     affiliation_name: str
     affiliation_city: str
     affiliation_country: str
+    existing : bool = False
     
     def __init__(self, data):
         self.scopus_id = data.get(u'dc:identifier', ':').split(':')[1]
@@ -76,8 +77,8 @@ class Author(ElsAuthor):
 
         return result
 
-    def get_academic(self):
-        return Academic(
+    def get_scopus_author(self):
+        return ScopusAuthor(
             scopus_id=self.scopus_id,
             eid=self.eid,
             first_name=self.first_name,

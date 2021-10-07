@@ -6,6 +6,21 @@ from lbrc_flask.database import db
 class Academic(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
+
+    @property
+    def full_name(self):
+        return self.top_scopus_author.full_name
+
+    @property
+    def top_scopus_author(self):
+        return sorted(self.scopus_authors, key=lambda a: a.document_count)[0]
+
+class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
+    academic = db.relationship(Academic, backref=db.backref("scopus_authors"))
+
     scopus_id = db.Column(db.String)
     eid = db.Column(db.String)
     first_name = db.Column(db.String)
