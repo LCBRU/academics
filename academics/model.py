@@ -23,6 +23,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def top_scopus_author(self):
         return sorted(self.scopus_authors, key=lambda a: a.document_count, reverse=True)[0]
 
+
 class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
