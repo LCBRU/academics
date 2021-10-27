@@ -1,8 +1,8 @@
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
-
 from academics.model import ScopusAuthor
+from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author
 
 
@@ -38,3 +38,13 @@ def get_author(scopus_id):
         return author
     else:
         return None
+
+
+def invoke_update_all_academics():
+    _update_all_academics.delay()
+
+
+@celery.task()
+def _update_all_academics():
+    for sa in ScopusAuthor.query.all():
+        print(sa)

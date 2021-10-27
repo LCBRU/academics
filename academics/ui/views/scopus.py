@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for
 from lbrc_flask.forms import FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField
-from academics.scopus.service import author_search, get_author
+from academics.scopus.service import author_search, get_author, invoke_update_all_academics
 from academics.model import Academic, ScopusAuthor
 from .. import blueprint
 
@@ -34,6 +34,12 @@ def index():
         )
 
     return render_template("ui/index.html", academics=academics, search_form=search_form)
+
+
+@blueprint.route("/update_all_academics")
+def update_all_academics():
+    invoke_update_all_academics()
+    return redirect(url_for('ui.index'))
 
 
 @blueprint.route("/add_author_search")

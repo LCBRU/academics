@@ -5,3 +5,5 @@ sqlalchemy-migrate
 pymysql
 elsapy
 pandas
+celery==5.0.0
+celery[redis]
