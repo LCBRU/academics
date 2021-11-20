@@ -1,5 +1,6 @@
 {% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar %}
+{% from "lbrc_flask/modal_macros.html" import render_modal %}
 
 {% block content %}
 <section>
@@ -26,16 +27,34 @@
 
     <ul class="list-group">
         {% for a in academics.items %}
-            <li class="list-group-item">
-                <div class='summary_details row'>
-                    <div class="col">
-                        <div class="d-flex w-100 justify-content-between">
+            <li class="list-group-item summary_details">
+                <div class='row'>
+                    <div class="col-7">
+                        <div>
                             <header>
                                 <h1>{{a.full_name}}</h1>
                             </header>
                         </div>
+                    </div>
+                    <div class="col-5">
+                        <div class="btn-toolbar float-right" role="toolbar">
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <a class="academic_delete"
+                                    data-toggle="modal"
+                                    data-academic-id="{{ a.id }}"
+                                    data-academic-name="{{ a.full_name }}"
+                                    title="Delete academic {{ a.full_name }}"
+                                    data-target="#deleteAcademicModal"
+                                    href="#"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
                         <table class="table table-sm">
                             <tr>
+                                <th></th>
                                 <th>Author</th>
                                 <th>Publications</th>
                                 <th>Citations</th>
@@ -43,6 +62,16 @@
                             </tr>
                             {% for au in a.scopus_authors %}
                                 <tr>
+                                    <td>
+                                        <a class="author_delete"
+                                        data-toggle="modal"
+                                        data-author-id="{{ au.id }}"
+                                        data-author-name="{{ au.full_name }}"
+                                        data-academic-name="{{ a.full_name }}"
+                                        title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
+                                        data-target="#deleteAuthorModal"
+                                        href="#"><i class="fas fa-trash"></i></a>    
+                                    </td>
                                     <td>
                                         <div>{{au.full_name}}</div>
                                         <div><small class="text-muted">{{au.affiliation_name}}</small></div>
@@ -61,5 +90,52 @@
 </section>
 
 {{ render_pagination(academics, 'ui.index', form=search_form) }}
+
+{% call render_modal('deleteAcademicModal', 'Delete Academic') %}
+    <p id="modal_description">Please confirm that you wish to delete the academic <span id="academic_name"></span>.</p>
+    <form id="academic_delete_form" action="{{ url_for('ui.delete_academic', prev=request.full_path) }}" method="POST" enctype="multipart/form-data">
+        <fieldset>
+            {{ confirm_form.hidden_tag() }}
+
+            {{ render_button_bar(cancel_url=request.full_path, submit_label="Delete") }}
+        </fieldset>
+    </form>
+{% endcall %}
+
+{% call render_modal('deleteAuthorModal', 'Delete Author') %}
+    <p id="modal_description">Please confirm that you wish to delete the author <span id="author_name"></span> from the academic <span id="academic_name"></span>.</p>
+    <form id="author_delete_form" action="{{ url_for('ui.delete_author', prev=request.full_path) }}" method="POST" enctype="multipart/form-data">
+        <fieldset>
+            {{ confirm_form.hidden_tag() }}
+
+            {{ render_button_bar(cancel_url=request.full_path, submit_label="Delete") }}
+        </fieldset>
+    </form>
+{% endcall %}
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    $(document).ready(function(){
+        $('#deleteAcademicModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+
+            modal.find('#academic_name').text(button.data('academic-name'));
+            modal.find("#id").val(button.data('academic-id'));
+        });
+
+        $('#deleteAuthorModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+
+            modal.find('#academic_name').text(button.data('academic-name'));
+            modal.find('#author_name').text(button.data('author-name'));
+            modal.find("#id").val(button.data('author-id'));
+        });
+    });
+</script>
 
 {% endblock %}

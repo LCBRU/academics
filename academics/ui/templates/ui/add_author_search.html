@@ -1,5 +1,5 @@
 {% extends "lbrc_flask/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_field %}
 {% from "lbrc_flask/modal_macros.html" import render_modal %}
 
 {% block content %}
@@ -15,12 +15,6 @@
             search_form,
             'ui.add_author_search',
             placeholder='enter search text',
-            buttons=[
-                {
-                    'text': 'Back',
-                    'endpoint': 'ui.index',
-                },
-            ],
         ) }}
 
     </div>
@@ -29,14 +23,9 @@
         {% for a in authors %}
             <li class="list-group-item">
                 <div class='row'>
-                    <div class='col-2'>
+                    <div class='col-1'>
                         {% if not a.existing %}
-                            <a class="btn btn-primary"
-                                data-toggle="modal"
-                                data-target="#add_author_to_academic"
-                                data-scopus-id="{{ a.scopus_id }}"
-                                data-author-name="{{ a.full_name }}"
-                                href="#">Add</a>
+                            <input type="checkbox" data-scopus-id="{{ a.scopus_id }}" data-author-name="{{ a.full_name }}" class="check_author" name="check_author_{{ a.scopus_id }}"/>
                         {% endif %}
                     </div>
                     <div class='col'>
@@ -54,31 +43,30 @@
             </li>
         {% endfor %}
     </ul>
+    <a class="btn btn-primary" href="{{ url_for('ui.index') }}">Back</a>
+    <a class="btn btn-primary"
+        id="add_authors"
+        data-toggle="modal"
+        data-target="#add_author"
+        href="#">Add</a>
 </section>
 
-{% call render_modal('add_author_to_academic', 'Add Author to Academic') %}
-    <p id="modal_description">Add author "<span id="author_name"></span>" to one of the following academics or create a new academic.</p>
+{% call render_modal('add_author', 'Add Author') %}
+    <p id="modal_description">Add the following authors to one of the following academics or create a new academic.</p>
+
+    <ul id="author_names"></ul>
 
     <div class="list-group">
-        <form id="add_author_to_new_academic" action="{{ url_for('ui.add_author_to_new_academic') }}" class="list-group-item" method="POST" enctype="multipart/form-data">
-            <fieldset>
-                {{ add_author_to_new_academic_form.csrf_token() }}
-                {{ add_author_to_new_academic_form.scopus_id() }}
-                <button type="submit" class="btn btn-primary">Create new Academic</button>
+        <form id="add_author" action="{{ url_for('ui.add_author') }}" class="list-group-item" method="POST" enctype="multipart/form-data">
+            <fieldset id="add_author_fieldset">
+                {{ add_author_form.csrf_token() }}
+
+                {{ render_field(add_author_form.academic_id) }}
+
+                <button type="submit" class="btn btn-primary">Add</button>
             </fieldset>
         </form>
 
-        {% for academic in academics %}
-            <form id="add_author_to_academic" action="{{ url_for('ui.add_author_to_academic') }}" class="list-group-item" method="POST" enctype="multipart/form-data">
-                <fieldset>
-                    {{ add_author_to_new_academic_form.csrf_token() }}
-                    {{ add_author_to_new_academic_form.scopus_id() }}
-                    <input type="hidden" id="academic_id" name="academic_id" value="{{academic.id}}">
-                    {{ add_author_to_academic_form.csrf_token() }}
-                    <button type="submit" class="btn btn-primary">Add Scopus author to academic "{{academic.full_name}}"</button>
-                </fieldset>
-            </form>
-        {% endfor %}
     </ul>
 {% endcall %}
 
@@ -87,17 +75,47 @@
 {% block js %}
 
 <script>
+    function toggle_add() {
+        var num_checked_authors = $('.check_author:checked').length;
+        $("#add_authors").prop('disabled', num_checked_authors == 0);
+    }
+
     $(document).ready(function(){
-        $('#add_author_to_academic').on('show.bs.modal', function (event) {
+        $('.check_author').on('click', function (event) {
+            toggle_add();
+        });
+
+        $('#add_author').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
-            var id = button.data('scopus-id');
-            var name = button.data('author-name');
 
             var modal = $(this);
             modal.find('#author_name').text(name);
 
-            $('#add_author_to_academic #scopus_id').val(id);
+            document.querySelectorAll('#add_author_fieldset input[name^="scopus_id"]').forEach((e) => {
+                e.remove();
+            });
+            document.querySelectorAll('#author_names li').forEach((e) => {
+                e.remove();
+            });
+
+            $('.check_author:checked').each(function() {
+                var scopus_id = $(this).data('scopus-id');
+                var author_name = $(this).data('author-name');
+
+                var hidden_id = document.createElement("input");
+                hidden_id.setAttribute("type", "hidden");
+                hidden_id.name = `scopus_id`;
+                hidden_id.value = scopus_id;
+                document.getElementById("add_author_fieldset").appendChild(hidden_id);
+
+                var author_name_span = document.createElement("li");
+                author_name_span.name = `author_name`;
+                author_name_span.appendChild(document.createTextNode(author_name));
+                document.getElementById("author_names").appendChild(author_name_span);
+            })
         });
+
+        toggle_add();
     });
 </script>
 

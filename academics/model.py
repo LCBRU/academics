@@ -28,7 +28,7 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
-    academic = db.relationship(Academic, backref=db.backref("scopus_authors"))
+    academic = db.relationship(Academic, backref=db.backref("scopus_authors", cascade="all,delete"))
 
     scopus_id = db.Column(db.String)
     eid = db.Column(db.String)

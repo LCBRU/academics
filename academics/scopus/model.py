@@ -38,9 +38,9 @@ class AuthorSearch():
     def affiliation_full_name(self):
         return ', '.join(
             filter(len, [
-                self.affiliation_name,
-                self.affiliation_city,
-                self.affiliation_country,
+                self.affiliation_name or '',
+                self.affiliation_city or '',
+                self.affiliation_country or '',
             ])
         )
 
