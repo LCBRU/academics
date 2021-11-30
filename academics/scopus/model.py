@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.model import ScopusAuthor
 
@@ -50,6 +51,12 @@ class Author(ElsAuthor):
         super().__init__(author_id=self.scopus_id)
 
     @property
+    def href(self):
+        for h in  self.data.get(u'coredata', {}).get(u'link', ''):
+            if h['@rel'] == 'scopus-author':
+                return h['@href']
+
+    @property
     def eid(self):
         return self.data.get(u'coredata', {}).get(u'eid', '')
 
@@ -77,21 +84,25 @@ class Author(ElsAuthor):
 
         return result
 
+    def update_scopus_author(self, scopus_author):
+        scopus_author.scopus_id = self.scopus_id
+        scopus_author.eid = self.eid
+        scopus_author.first_name = self.first_name
+        scopus_author.last_name = self.last_name
+        scopus_author.affiliation_id = self.affiliation_id
+        scopus_author.affiliation_name = self.affiliation.name
+        scopus_author.affiliation_address = self.affiliation.address
+        scopus_author.affiliation_city = self.affiliation.city
+        scopus_author.affiliation_country = self.affiliation.country
+        scopus_author.citation_count = self.citation_count
+        scopus_author.document_count = self.document_count
+        scopus_author.h_index = self.h_index
+        scopus_author.href = self.href
+
     def get_scopus_author(self):
-        return ScopusAuthor(
-            scopus_id=self.scopus_id,
-            eid=self.eid,
-            first_name=self.first_name,
-            last_name=self.last_name,
-            affiliation_id=self.affiliation_id,
-            affiliation_name=self.affiliation.name,
-            affiliation_address=self.affiliation.address,
-            affiliation_city=self.affiliation.city,
-            affiliation_country=self.affiliation.country,
-            citation_count=self.citation_count,
-            document_count=self.document_count,
-            h_index=self.h_index,
-        )
+        result = ScopusAuthor()
+        self.update_scopus_author(result)
+        return result
 
 
 class Affiliation(ElsAffil):

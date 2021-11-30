@@ -37,6 +37,7 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
     citation_count = db.Column(db.String)
     document_count = db.Column(db.String)
     h_index = db.Column(db.String)
+    href = db.Column(db.String)
 
     @property
     def full_name(self):

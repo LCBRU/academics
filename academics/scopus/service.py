@@ -64,7 +64,12 @@ def update_academics():
 @celery.task()
 def _update_all_academics():
     for sa in ScopusAuthor.query.all():
-        print(sa)
+        author = get_author(sa.scopus_id)
+        author.update_scopus_author(sa)
+
+        db.session.add(sa)
+
+    db.session.commit()
 
     for academic in Academic.query.all():
         _update_academic_name(academic_id=academic.id)
