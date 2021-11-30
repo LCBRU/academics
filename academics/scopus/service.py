@@ -16,9 +16,9 @@ def _client():
 def updating():
     inspector = celery.control.inspect()
 
-    reservedq = inspector.reserved() or {}
-    scheduledq = inspector.scheduled() or {}
-    activeq = inspector.active() or {}
+    reservedq = inspector.reserved() or {'': []}
+    scheduledq = inspector.scheduled() or {'': []}
+    activeq = inspector.active() or {'': []}
 
     reserved_jobs = list(reservedq.values())[0]
     scheduled_jobs = list(scheduledq.values())[0]
