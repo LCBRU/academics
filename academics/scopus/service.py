@@ -82,7 +82,7 @@ def _add_authors_to_academic(scopus_ids, academic_id=None):
         academic = Academic.query.get(academic_id)
     
     if not academic:
-        academic = Academic()
+        academic = Academic(first_name='', last_name='')
 
     for scopus_id in scopus_ids:
         author = get_author(scopus_id).get_scopus_author()
