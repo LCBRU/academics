@@ -1,8 +1,8 @@
+import logging
 from celery.utils.functional import first
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
-import academics
 from academics.model import Academic, ScopusAuthor
 from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author
@@ -60,9 +60,15 @@ def _update_all_academics():
     for sa in ScopusAuthor.query.all():
         print(sa)
 
+    for academic in Academic.query.all():
+        _update_academic_name(academic_id=academic.id)
+
+    logging.info('*'*100)
+
 
 def add_authors_to_academic(scopus_ids, academic_id=None):
     _add_authors_to_academic.delay(scopus_ids, academic_id)
+
 
 @celery.task()
 def _add_authors_to_academic(scopus_ids, academic_id=None):
@@ -80,4 +86,21 @@ def _add_authors_to_academic(scopus_ids, academic_id=None):
 
         db.session.add(author)
 
+    db.session.commit()
+
+    _update_academic_name(academic_id=academic.id)
+
+
+def _update_academic_name(academic_id):
+    academic = Academic.query.get(academic_id)
+
+    if not academic.scopus_authors:
+        return
+
+    top_author = sorted(academic.scopus_authors, key=lambda a: a.document_count, reverse=True)[0]
+
+    academic.first_name = top_author.first_name
+    academic.last_name = top_author.last_name
+
+    db.session.add(academic)
     db.session.commit()

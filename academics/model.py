@@ -6,22 +6,17 @@ from lbrc_flask.database import db
 class Academic(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
 
     @property
     def full_name(self):
-        return self.top_scopus_author.full_name
-
-    @property
-    def last_name(self):
-        return self.top_scopus_author.last_name
-
-    @property
-    def first_name(self):
-        return self.top_scopus_author.first_name
-
-    @property
-    def top_scopus_author(self):
-        return sorted(self.scopus_authors, key=lambda a: a.document_count, reverse=True)[0]
+        return ' '.join(
+            filter(len, [
+                self.first_name,
+                self.last_name,
+            ])
+        )
 
 
 class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
