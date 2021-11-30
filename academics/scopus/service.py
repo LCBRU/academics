@@ -14,11 +14,17 @@ def _client():
 
 
 def updating():
-    reservedq = list(celery.control.inspect().reserved().values())[0]
-    scheduledq = list(celery.control.inspect().scheduled().values())[0]
-    activeq = list(celery.control.inspect().active().values())[0]
+    inspector = celery.control.inspect()
 
-    return len(reservedq) + len(scheduledq) + len(activeq) > 0
+    reservedq = inspector.reserved() or {}
+    scheduledq = inspector.scheduled() or {}
+    activeq = inspector.active() or {}
+
+    reserved_jobs = list(reservedq.values())[0]
+    scheduled_jobs = list(scheduledq.values())[0]
+    active_jobs = list(activeq.values())[0]
+
+    return len(reserved_jobs) + len(scheduled_jobs) + len(active_jobs) > 0
 
 
 def author_search(search_string):
@@ -62,8 +68,6 @@ def _update_all_academics():
 
     for academic in Academic.query.all():
         _update_academic_name(academic_id=academic.id)
-
-    logging.info('*'*100)
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None):
