@@ -29,8 +29,11 @@ class AddAuthorForm(FlashingForm):
 def index():
     search_form = SearchForm(formdata=request.args)
 
-    subquery = ScopusAuthor.query.with_entities(ScopusAuthor.academic_id).filter((ScopusAuthor.first_name + ' ' + ScopusAuthor.last_name).like("%{}%".format(search_form.search.data)))
-    q = Academic.query.filter(Academic.id.in_(subquery))
+    q = Academic.query
+
+    if search_form.search.data:
+        subquery = ScopusAuthor.query.with_entities(ScopusAuthor.academic_id).filter((ScopusAuthor.first_name + ' ' + ScopusAuthor.last_name).like("%{}%".format(search_form.search.data)))
+        q = q.filter(Academic.id.in_(subquery))
 
     academics = q.paginate(
         page=search_form.page.data,
