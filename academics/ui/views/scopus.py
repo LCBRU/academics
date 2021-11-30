@@ -3,7 +3,7 @@ from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField
 from wtforms import SelectField
-from academics.scopus.service import author_search, get_author, invoke_update_all_academics
+from academics.scopus.service import add_authors_to_academic, author_search, get_author, update_academics, updating
 from academics.model import Academic, ScopusAuthor
 from .. import blueprint
 
@@ -47,12 +47,14 @@ def index():
         academics=academics,
         search_form=search_form,
         confirm_form=ConfirmForm(),
+        # updating=False,
+        updating=updating(),
     )
 
 
 @blueprint.route("/update_all_academics")
 def update_all_academics():
-    invoke_update_all_academics()
+    update_academics()
     return redirect(url_for('ui.index'))
 
 
@@ -78,17 +80,10 @@ def add_author_search():
 def add_author():
     form = AddAuthorForm()
 
-    if form.academic_id.data:
-        academic = Academic.query.get_or_404(form.academic_id.data)
-    else:
-        academic = Academic()
-
-    for id in request.form.getlist('scopus_id'):
-        author = get_author(id).get_scopus_author()
-        author.academic = academic
-
-        db.session.add(author)
-        db.session.commit()
+    add_authors_to_academic(
+        request.form.getlist('scopus_id'),
+        form.academic_id.data,
+    )
 
     return redirect(url_for('ui.index'))
 
@@ -109,9 +104,16 @@ def delete_academic():
 def delete_author():
     form = ConfirmForm()
 
+
     if form.validate_on_submit():
-        a = ScopusAuthor.query.get_or_404(form.id.data)
-        db.session.delete(a)
+        au = ScopusAuthor.query.get_or_404(form.id.data)
+        a = au.academic
+        db.session.delete(au)
+        db.session.flush()
+
+        if not a.scopus_authors:
+            db.session.delete(a)
+
         db.session.commit()
 
     return redirect(url_for('ui.index'))
