@@ -3,7 +3,7 @@ from celery.utils.functional import first
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
-from academics.model import Academic, ScopusAuthor
+from academics.model import Academic, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author
 from lbrc_flask.database import db
@@ -38,15 +38,23 @@ def author_search(search_string):
     return result
 
 
-def get_author(scopus_id):
-    author = Author(scopus_id)
+def get_els_author(scopus_id):
+    result = Author(scopus_id)
 
-    if not author.read(_client()):
+    if not result.read(_client()):
         return None
 
-    author.read_docs(_client())
+    return result
 
-    return author
+
+def add_scopus_publications(els_author, scopus_author):
+    els_author.read_docs(_client())
+
+    for p in els_author.get_scopus_publications():
+        publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.scopus_id).one_or_none() or p
+
+        if not publication.scopus_id in scopus_author.scopus_publications:
+            scopus_author.scopus_publications.append(publication)
 
 
 def update_academics():
@@ -62,11 +70,10 @@ def update_academics():
 @celery.task()
 def _update_all_academics():
     for sa in ScopusAuthor.query.all():
-        author = get_author(sa.scopus_id)
-        author.update_scopus_author(sa)
+        els_author = get_els_author(sa.scopus_id)
+        els_author.update_scopus_author(sa)
 
-        for p in author.get_scopus_publications():
-            sa.scopus_publications.append(p)
+        add_scopus_publications(els_author, sa)
 
         db.session.add(sa)
 
@@ -106,12 +113,11 @@ def _add_authors_to_academic(scopus_ids, academic_id):
     academic = Academic.query.get(academic_id)
  
     for scopus_id in scopus_ids:
-        author = get_author(scopus_id)
-        sa = author.get_scopus_author()
+        els_author = get_els_author(scopus_id)
+        sa = els_author.get_scopus_author()
         sa.academic = academic
 
-        for p in author.get_scopus_publications():
-            sa.scopus_publications.append(p)
+        add_scopus_publications(els_author, sa)
 
         db.session.add(sa)
 

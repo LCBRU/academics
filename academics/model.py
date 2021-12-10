@@ -82,7 +82,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    scopus_authors = db.relationship("ScopusAuthor", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications", lazy="joined"))
+    scopus_authors = db.relationship("ScopusAuthor", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications", lazy="joined"), collection_class=set)
 
     scopus_id = db.Column(db.String)
     doi = db.Column(db.String)

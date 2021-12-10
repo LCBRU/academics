@@ -3,7 +3,7 @@ from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField
 from wtforms import SelectField
-from academics.scopus.service import add_authors_to_academic, author_search, get_author, update_academics, updating
+from academics.scopus.service import add_authors_to_academic, author_search, update_academics, updating
 from academics.model import Academic, ScopusAuthor
 from .. import blueprint
 

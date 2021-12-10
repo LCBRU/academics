@@ -1,0 +1,46 @@
+{% extends "ui/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar %}
+{% from "lbrc_flask/modal_macros.html" import render_modal %}
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>{{ scopus_author.full_name }}</h1>
+        <h3>Publications</h3>
+
+        {{ render_search(
+            search_form,
+            'ui.publications',
+            author_id=scopus_author.id,
+            placeholder='enter search text - searches title and publication',
+            buttons=[],
+        ) }}
+
+    </div>
+
+    <ul class="list-group">
+        {% for p in publications.items %}
+            <li class="list-group-item summary_details">
+                <div class='row'>
+                    <div class="col-1">
+                        <div class="btn-toolbar float-right" role="toolbar">
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <a href="{{ p.href }}" target="_blank"><i class="fas fa-external-link-square-alt"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <h3>{{p.title}}</h3>
+                            <p><small class="text-muted">{{p.publication}} ({{p.publication_cover_date.year}})</small></p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{{ render_pagination(publications, 'ui.publications', form=search_form, author_id=scopus_author.id) }}
+
+{% endblock %}

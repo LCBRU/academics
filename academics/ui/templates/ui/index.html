@@ -81,7 +81,7 @@
                                         <div><a href="{{ au.href }}" target="_blank">{{au.full_name}}</a></div>
                                         <div><small class="text-muted">{{au.affiliation_name}}</small></div>
                                     </td>
-                                    <td>{{au.document_count}}</td>
+                                    <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
                                     <td>{{au.citation_count}}</td>
                                     <td>{{au.h_index}}</td>
                                 </tr>

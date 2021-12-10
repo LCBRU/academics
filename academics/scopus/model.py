@@ -108,13 +108,19 @@ class Author(ElsAuthor):
         result = []
 
         for d in self.doc_list:
+            href = ''
+
+            for h in  d.get(u'link', ''):
+                if h['@rel'] == 'scopus':
+                    href = h['@href']
+
             result.append(ScopusPublication(
                 scopus_id=d.get(u'dc:identifier', ':').split(':')[1],
                 doi=d.get(u'prism:doi', ''),
                 title=d.get(u'dc:title', ''),
                 publication=d.get(u'prism:publicationName', ''),
                 publication_cover_date=parse_date(d.get(u'prism:coverDate', '')),
-                href=d.get(u'prism:url', ''),
+                href=href,
             ))
 
         return result
