@@ -8,6 +8,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
+    updating = db.Column(db.Boolean, default=False)
+    initialised = db.Column(db.Boolean, default=False)
 
     @property
     def full_name(self):
@@ -18,6 +20,14 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             ])
         )
 
+    def set_name(self):
+        if not self.scopus_authors:
+            return
+
+        top_author = sorted(self.scopus_authors, key=lambda a: a.document_count, reverse=True)[0]
+
+        self.first_name = top_author.first_name
+        self.last_name = top_author.last_name
 
 class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 

@@ -30,6 +30,7 @@ def index():
     search_form = SearchForm(formdata=request.args)
 
     q = Academic.query
+    q = q.filter(Academic.initialised == True)
 
     if search_form.search.data:
         subquery = ScopusAuthor.query.with_entities(ScopusAuthor.academic_id).filter((ScopusAuthor.first_name + ' ' + ScopusAuthor.last_name).like("%{}%".format(search_form.search.data)))
@@ -101,7 +102,6 @@ def delete_academic():
 @blueprint.route("/delete_author", methods=['POST'])
 def delete_author():
     form = ConfirmForm()
-
 
     if form.validate_on_submit():
         au = ScopusAuthor.query.get_or_404(form.id.data)
