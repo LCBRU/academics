@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-import logging
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import ScopusAuthor
+from academics.model import ScopusAuthor, ScopusPublication
+from lbrc_flask.validators import parse_date
 
 @dataclass
 class AuthorSearch():
@@ -102,6 +102,21 @@ class Author(ElsAuthor):
     def get_scopus_author(self):
         result = ScopusAuthor()
         self.update_scopus_author(result)
+        return result
+
+    def get_scopus_publications(self):
+        result = []
+
+        for d in self.doc_list:
+            result.append(ScopusPublication(
+                scopus_id=d.get(u'dc:identifier', ':').split(':')[1],
+                doi=d.get(u'prism:doi', ''),
+                title=d.get(u'dc:title', ''),
+                publication=d.get(u'prism:publicationName', ''),
+                publication_cover_date=parse_date(d.get(u'prism:coverDate', '')),
+                href=d.get(u'prism:url', ''),
+            ))
+
         return result
 
 

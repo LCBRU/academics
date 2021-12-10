@@ -44,9 +44,7 @@ def get_author(scopus_id):
     if not author.read(_client()):
         return None
 
-    # author.read_docs(_client())
-
-    # logging.warning(author.doc_list)
+    author.read_docs(_client())
 
     return author
 
@@ -66,6 +64,9 @@ def _update_all_academics():
     for sa in ScopusAuthor.query.all():
         author = get_author(sa.scopus_id)
         author.update_scopus_author(sa)
+
+        for p in author.get_scopus_publications():
+            sa.scopus_publications.append(p)
 
         db.session.add(sa)
 
@@ -105,10 +106,14 @@ def _add_authors_to_academic(scopus_ids, academic_id):
     academic = Academic.query.get(academic_id)
  
     for scopus_id in scopus_ids:
-        author = get_author(scopus_id).get_scopus_author()
-        author.academic = academic
+        author = get_author(scopus_id)
+        sa = author.get_scopus_author()
+        sa.academic = academic
 
-        db.session.add(author)
+        for p in author.get_scopus_publications():
+            sa.scopus_publications.append(p)
+
+        db.session.add(sa)
 
     academic.set_name()
     academic.initialised = True

@@ -29,6 +29,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         self.first_name = top_author.first_name
         self.last_name = top_author.last_name
 
+
 class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -68,3 +69,26 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
                 self.affiliation_country,
             ])
         )
+
+
+scopus_author__scopus_publication = db.Table(
+    'scopus_author__scopus_publication',
+    db.Column('scopus_author_id', db.Integer(), db.ForeignKey('scopus_author.id'), primary_key=True),
+    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
+)
+
+
+class ScopusPublication(AuditMixin, CommonMixin, db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    scopus_authors = db.relationship("ScopusAuthor", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications", lazy="joined"))
+
+    scopus_id = db.Column(db.String)
+    doi = db.Column(db.String)
+    title = db.Column(db.String)
+    publication = db.Column(db.String)
+    publication_cover_date = db.Column(db.Date)
+
+    href = db.Column(db.String)
+    deleted = db.Column(db.Boolean, default=False)
