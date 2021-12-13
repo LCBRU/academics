@@ -22,16 +22,17 @@
         {% for p in publications.items %}
             <li class="list-group-item summary_details">
                 <div class='row'>
-                    <div class="col-1">
-                        <div class="btn-toolbar float-right" role="toolbar">
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a href="{{ p.href }}" target="_blank"><i class="fas fa-external-link-square-alt"></i></a>
-                            </div>
+                    <div class="col-2 col-md-1">
+                        <div class="btn-group-vertical" role="group" aria-label="Basic example">
+                            <a href="{{ p.href }}" class="btn btn-outline-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
+                            <a href="http://doi.org/{{ p.doi }}"class="btn btn-outline-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
                         </div>
                     </div>
                     <div class="col">
                         <div>
-                            <h3>{{p.title}}</h3>
+                            <h3>
+                                <span>{{p.title}}</span>
+                            </h3>
                             <p><small class="text-muted">{{p.publication}} ({{p.publication_cover_date.year}})</small></p>
                         </div>
                     </div>
