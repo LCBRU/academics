@@ -17,7 +17,7 @@ def publications(author_id):
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
             ScopusPublication.publication.like(f'%{search_form.search.data}%'),
         ))
-    q = q.order_by(ScopusPublication.publication_cover_date)
+    q = q.order_by(ScopusPublication.publication_cover_date.desc())
 
     publications = q.paginate(
         page=search_form.page.data,

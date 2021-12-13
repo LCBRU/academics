@@ -1,8 +1,7 @@
-import logging
-from celery.utils.functional import first
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
+from lbrc_flask.validators import parse_date
 from academics.model import Academic, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author
@@ -48,13 +47,31 @@ def get_els_author(scopus_id):
 
 
 def add_scopus_publications(els_author, scopus_author):
-    els_author.read_docs(_client())
+    search_results = ElsSearch(query=f'au-id({els_author.scopus_id})', index='scopus')
+    search_results.execute(_client(), get_all=True)
 
-    for p in els_author.get_scopus_publications():
-        publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.scopus_id).one_or_none() or p
+    for p in search_results.results:
+        scopus_id = p.get(u'dc:identifier', ':').split(':')[1]
 
-        if not publication.scopus_id in scopus_author.scopus_publications:
-            scopus_author.scopus_publications.append(publication)
+        publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == scopus_id).one_or_none()
+
+        if not publication:
+            publication = ScopusPublication(scopus_id=scopus_id)
+        
+        for h in p.get(u'link', ''):
+            if h['@ref'] == 'scopus':
+                href = h['@href']
+
+        publication.doi = p.get(u'prism:doi', '')
+        publication.title = p.get(u'dc:title', '')
+        publication.publication = p.get(u'prism:publicationName', '')
+        publication.publication_cover_date = parse_date(p.get(u'prism:coverDate', ''))
+        publication.href = href
+
+        if scopus_author not in publication.scopus_authors:
+            publication.scopus_authors.append(scopus_author)
+
+        db.session.add(publication)
 
 
 def update_academics():
