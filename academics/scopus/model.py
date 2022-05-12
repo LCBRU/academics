@@ -95,7 +95,7 @@ class Author(ElsAuthor):
         scopus_author.first_name = self.first_name
         scopus_author.last_name = self.last_name
 
-        if Affiliation:
+        if self.affiliation:
             scopus_author.affiliation_id = self.affiliation_id
             scopus_author.affiliation_name = self.affiliation.name
             scopus_author.affiliation_address = self.affiliation.address
