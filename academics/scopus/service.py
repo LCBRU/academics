@@ -2,6 +2,7 @@ import logging
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
+from elsapy.elsdoc import FullDoc, AbsDoc
 from lbrc_flask.validators import parse_date
 from academics.model import Academic, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
@@ -51,12 +52,7 @@ def add_scopus_publications(els_author, scopus_author):
     search_results = ElsSearch(query=f'au-id({els_author.scopus_id})', index='scopus')
     search_results.execute(_client(), get_all=True)
 
-    logging.warn('(' * 1000)
-    logging.warn(search_results.results)
-
     for p in search_results.results:
-        logging.warn('!' * 1000)
-
         scopus_id = p.get(u'dc:identifier', ':').split(':')[1]
 
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == scopus_id).one_or_none()
@@ -80,6 +76,22 @@ def add_scopus_publications(els_author, scopus_author):
             publication.scopus_authors.append(scopus_author)
 
         db.session.add(publication)
+
+        abstract = AbsDoc(doi = publication.doi)
+        abstract.read()
+
+        logging.warn('-'*100)
+        logging.warn(abstract)
+        logging.warn('-'*100)
+
+        full = FullDoc(doi = publication.doi)
+        full.read()
+
+        logging.warn('='*100)
+        logging.warn(abstract)
+        logging.warn('='*100)
+
+
 
 
 def update_academics():
