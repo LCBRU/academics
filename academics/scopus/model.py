@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 from tkinter.tix import Tree
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.model import ScopusAuthor, ScopusPublication
@@ -175,5 +176,6 @@ class Abstract(AbsDoc):
         try:
             super().read(client)
             return True
-        except Exception:
+        except Exception as e:
+            logging.error(e)
             return False
