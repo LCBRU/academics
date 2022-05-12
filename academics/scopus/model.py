@@ -94,11 +94,14 @@ class Author(ElsAuthor):
         scopus_author.eid = self.eid
         scopus_author.first_name = self.first_name
         scopus_author.last_name = self.last_name
-        scopus_author.affiliation_id = self.affiliation_id
-        scopus_author.affiliation_name = self.affiliation.name
-        scopus_author.affiliation_address = self.affiliation.address
-        scopus_author.affiliation_city = self.affiliation.city
-        scopus_author.affiliation_country = self.affiliation.country
+
+        if Affiliation:
+            scopus_author.affiliation_id = self.affiliation_id
+            scopus_author.affiliation_name = self.affiliation.name
+            scopus_author.affiliation_address = self.affiliation.address
+            scopus_author.affiliation_city = self.affiliation.city
+            scopus_author.affiliation_country = self.affiliation.country
+
         scopus_author.citation_count = self.citation_count
         scopus_author.document_count = self.document_count
         scopus_author.h_index = self.h_index
