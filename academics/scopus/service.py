@@ -77,11 +77,9 @@ def add_scopus_publications(els_author, scopus_author):
         abstract = Abstract(scopus_id)
 
         if abstract.read(_client()):
-            logging.warn(abstract.abstract)
+            publication.abstract = abstract.abstract
 
         db.session.add(publication)
-
-        logging.warn(abstract.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('abstracts', ''))
 
 
 def update_academics():
