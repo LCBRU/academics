@@ -77,25 +77,17 @@ def add_scopus_publications(els_author, scopus_author):
 
         db.session.add(publication)
 
-        logging.warn('.'*100)
-        logging.warn(p)
-        logging.warn('.'*100)
-
         abstract = AbsDoc(scp_id = scopus_id)
         abstract.read(_client())
 
+        logging.warn('.'*100)
+        logging.warn(abstract.data.get('item', {}))
         logging.warn('-'*100)
-        logging.warn(abstract.data)
-        logging.warn('-'*100)
-
-        full = FullDoc(doi = publication.doi)
-        full.read(_client())
-
+        logging.warn(abstract.data.get('item', {}).get('bibrecord', {}))
         logging.warn('='*100)
-        logging.warn(full.data)
-        logging.warn('='*100)
-
-
+        logging.warn(abstract.data.get('item', {}).get('bibrecord', {})).get('head', {})
+        logging.warn('+'*100)
+        logging.warn(abstract.data.get('item', {}).get('bibrecord', {})).get('head', {}).get('abstracts', {})
 
 
 def update_academics():
