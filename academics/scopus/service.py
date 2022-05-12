@@ -52,8 +52,11 @@ def add_scopus_publications(els_author, scopus_author):
     search_results.execute(_client(), get_all=True)
 
     logging.warn('(' * 1000)
+    logging.warn(search_results.results)
 
     for p in search_results.results:
+        logging.warn('!' * 1000)
+
         scopus_id = p.get(u'dc:identifier', ':').split(':')[1]
 
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == scopus_id).one_or_none()
@@ -66,8 +69,6 @@ def add_scopus_publications(els_author, scopus_author):
         for h in p.get(u'link', ''):
             if h['@ref'] == 'scopus':
                 href = h['@href']
-
-        logging.info('*'* 10000)
 
         publication.doi = p.get(u'prism:doi', '')
         publication.title = p.get(u'dc:title', '')
