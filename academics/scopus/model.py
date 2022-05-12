@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import logging
-from tkinter.tix import Tree
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.model import ScopusAuthor, ScopusPublication
 from lbrc_flask.validators import parse_date
