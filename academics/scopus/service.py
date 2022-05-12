@@ -1,3 +1,4 @@
+import logging
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
@@ -64,7 +65,7 @@ def add_scopus_publications(els_author, scopus_author):
             if h['@ref'] == 'scopus':
                 href = h['@href']
 
-        print(p)
+        logging.info(p)
 
         publication.doi = p.get(u'prism:doi', '')
         publication.title = p.get(u'dc:title', '')
