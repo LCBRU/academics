@@ -91,7 +91,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     publication_cover_date = db.Column(db.Date)
     pubmed_id = db.Column(db.String)
     pii = db.Column(db.String)
-    abstract = db.cColumn(db.String)
+    abstract = db.Column(db.String)
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
