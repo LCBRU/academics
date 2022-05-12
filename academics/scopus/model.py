@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from tkinter.tix import Tree
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.model import ScopusAuthor, ScopusPublication
 from lbrc_flask.validators import parse_date
@@ -172,8 +173,7 @@ class Abstract(AbsDoc):
 
     def read(self, client):
         try:
-            result = super().read(client)
+            super().read(client)
+            return True
         except Exception:
-            pass
-
-        return result
+            return False
