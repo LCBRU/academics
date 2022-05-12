@@ -77,7 +77,11 @@ class Author(ElsAuthor):
         return self.data.get(u'h-index', '')
 
     def read(self, client):
-        result = super().read(client) and super().read_metrics(client)
+        try:
+            result = super().read(client)
+            super().read_metrics(client)
+        except Exception:
+            pass
 
         self.affiliation = Affiliation(affiliation_id=self.affiliation_id)
         self.affiliation.read(client)
