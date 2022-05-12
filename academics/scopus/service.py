@@ -82,14 +82,14 @@ def add_scopus_publications(els_author, scopus_author):
         logging.warn('.'*100)
 
         abstract = AbsDoc(scp_id = scopus_id)
-        abstract.read()
+        abstract.read(_client())
 
         logging.warn('-'*100)
         logging.warn(abstract)
         logging.warn('-'*100)
 
         full = FullDoc(doi = publication.doi)
-        full.read()
+        full.read(_client())
 
         logging.warn('='*100)
         logging.warn(abstract)

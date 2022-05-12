@@ -156,3 +156,5 @@ class Affiliation(ElsAffil):
     @property
     def country(self):
         return self.data.get(u'country', '')
+
+
