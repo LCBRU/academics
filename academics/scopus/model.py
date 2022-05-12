@@ -74,7 +74,7 @@ class Author(ElsAuthor):
 
     @property
     def h_index(self):
-        return self.data.get(u'h-index', '')
+        return self.data.get(u'h-index', None)
 
     def read(self, client):
         try:
