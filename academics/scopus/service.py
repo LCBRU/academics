@@ -64,6 +64,8 @@ def add_scopus_publications(els_author, scopus_author):
             if h['@ref'] == 'scopus':
                 href = h['@href']
 
+        print(p)
+
         publication.doi = p.get(u'prism:doi', '')
         publication.title = p.get(u'dc:title', '')
         publication.publication = p.get(u'prism:publicationName', '')
