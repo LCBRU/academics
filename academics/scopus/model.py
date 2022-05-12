@@ -86,6 +86,8 @@ class Author(ElsAuthor):
         if self.affiliation_id:
             self.affiliation = Affiliation(affiliation_id=self.affiliation_id)
             self.affiliation.read(client)
+        else:
+            self.affiliation = None
 
         return result
 
