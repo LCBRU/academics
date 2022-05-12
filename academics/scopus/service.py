@@ -51,6 +51,8 @@ def add_scopus_publications(els_author, scopus_author):
     search_results = ElsSearch(query=f'au-id({els_author.scopus_id})', index='scopus')
     search_results.execute(_client(), get_all=True)
 
+    logging.warn('(' * 1000)
+
     for p in search_results.results:
         scopus_id = p.get(u'dc:identifier', ':').split(':')[1]
 
