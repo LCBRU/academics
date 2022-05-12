@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.model import ScopusAuthor, ScopusPublication
 from lbrc_flask.validators import parse_date
+from elsapy.elsdoc import AbsDoc
+
 
 @dataclass
 class AuthorSearch():
@@ -44,6 +46,7 @@ class AuthorSearch():
                 self.affiliation_country or '',
             ])
         )
+
 
 class Author(ElsAuthor):
     def __init__(self, scopus_id):
@@ -158,3 +161,19 @@ class Affiliation(ElsAffil):
         return self.data.get(u'country', '')
 
 
+class Abstract(AbsDoc):
+    def __init__(self, scopus_id):
+        self.scopus_id = scopus_id
+        super().__init__(scp_id=self.scopus_id)
+
+    @property
+    def abstract(self):
+        return self.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('abstracts', '')
+
+    def read(self, client):
+        try:
+            result = super().read(client)
+        except Exception:
+            pass
+
+        return result

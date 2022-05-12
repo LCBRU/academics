@@ -2,11 +2,10 @@ import logging
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
-from elsapy.elsdoc import FullDoc, AbsDoc
 from lbrc_flask.validators import parse_date
 from academics.model import Academic, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
-from .model import AuthorSearch, Author
+from .model import Abstract, AuthorSearch, Author
 from lbrc_flask.database import db
 
 
@@ -75,28 +74,12 @@ def add_scopus_publications(els_author, scopus_author):
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
 
+        abstract = Abstract(scopus_id)
+
+        if abstract.read(_client):
+            logging.warn(abstract.abstract)
+
         db.session.add(publication)
-
-        abstract = AbsDoc(scp_id = scopus_id)
-        abstract.read(_client())
-
-        # logging.warn('.'*100)
-        # if abstract.data.get('item', {}):
-        #     logging.warn('No Item')
-        # elif abstract.data.get('item', {}).get('bibrecord', {}):
-        #     logging.warn('No Item')
-        # elif abstract.data.get('item', {}).get('bibrecord', {})).get('head', {}):
-        #     logging.warn('No Item')
-        # elif abstract.data.get('item', {}).get('bibrecord', {})).get('head', {}):
-        #     logging.warn('No Item')
-
-        # logging.warn(abstract.data.get('item', {}))
-        # logging.warn('-'*100)
-        # logging.warn(abstract.data.get('item', {}).get('bibrecord', {}))
-        # logging.warn('='*100)
-        # logging.warn(abstract.data.get('item', {}).get('bibrecord', {}).get('head', {}))
-        # logging.warn('+'*100)
-        logging.warn(abstract.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('abstracts', {}))
 
 
 def update_academics():
