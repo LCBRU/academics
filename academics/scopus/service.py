@@ -77,12 +77,12 @@ def add_scopus_publications(els_author, scopus_author):
 
         db.session.add(publication)
 
-        abstract = AbsDoc(doi = publication.doi)
-        abstract.read()
-
         logging.warn('.'*100)
         logging.warn(p)
         logging.warn('.'*100)
+
+        abstract = AbsDoc(doi = publication.doi)
+        abstract.read()
 
         logging.warn('-'*100)
         logging.warn(abstract)
@@ -113,8 +113,6 @@ def _update_all_academics():
     for sa in ScopusAuthor.query.all():
         els_author = get_els_author(sa.scopus_id)
         els_author.update_scopus_author(sa)
-
-        logging.warn('-'* 1000)
 
         add_scopus_publications(els_author, sa)
 
