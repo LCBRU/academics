@@ -58,6 +58,8 @@ def add_scopus_publications(els_author, scopus_author):
         if not publication:
             publication = ScopusPublication(scopus_id=scopus_id)
         
+        href = None
+
         for h in p.get(u'link', ''):
             if h['@ref'] == 'scopus':
                 href = h['@href']
