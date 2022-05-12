@@ -95,6 +95,8 @@ def _update_all_academics():
         els_author = get_els_author(sa.scopus_id)
         els_author.update_scopus_author(sa)
 
+        logging.warn('-'* 1000)
+
         add_scopus_publications(els_author, sa)
 
         db.session.add(sa)
