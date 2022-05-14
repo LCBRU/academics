@@ -169,7 +169,8 @@ class Abstract(AbsDoc):
 
     @property
     def abstract(self):
-        return self.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('abstracts', '')
+        if self.data:
+            return self.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('abstracts', '')
 
     def read(self, client):
         try:
