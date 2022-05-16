@@ -56,10 +56,8 @@ def add_scopus_publications(els_author, scopus_author):
 
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == scopus_id).one_or_none()
 
-        if publication:
-            continue
-
-        publication = ScopusPublication(scopus_id=scopus_id)
+        if not publication:
+            publication = ScopusPublication(scopus_id=scopus_id)
         
         href = None
 
@@ -79,6 +77,7 @@ def add_scopus_publications(els_author, scopus_author):
         abstract = Abstract(scopus_id)
 
         if abstract.read(_client()):
+            logging.warn(f'abstract found - {abstract.abstract}')
             publication.abstract = abstract.abstract
 
         db.session.add(publication)
