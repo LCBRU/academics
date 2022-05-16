@@ -46,7 +46,7 @@ def publications():
     if search_form.publication_period.data:
         y = int(search_form.publication_period.data)
         start_date = datetime(y, 4, 1)
-        end_date = datetime(y + 1, 4, 1)
+        end_date = datetime(y + 1, 3, 31)
         q = q.filter(ScopusPublication.publication_cover_date.between(start_date, end_date))
 
     if search_form.search.data:
