@@ -7,7 +7,7 @@ from wtforms import SelectField
 
 
 def _get_author_choices():
-    return [('', '')] + [(a.id, a.full_name()) for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]]
+    return [('', '')] + [(a.id, a.full_name()) for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
 
 
 class TrackerSearchForm(SearchForm):
