@@ -28,7 +28,7 @@ class TrackerSearchForm(SearchForm):
 
         if datetime.now().month < 4:
             this_year -= 1
-
+ 
         self.publication_period.choices = [('', '')] + [(y, f'{y} - {y + 1}') for y in range(this_year, this_year - 20, -1)]
 
 
@@ -42,6 +42,11 @@ def publications():
 
     if search_form.author_id.data:
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
+
+    if search_form.publication_period.data:
+        start_date = datetime(search_form.publication_period.data, 4, 1)
+        end_date = datetime(search_form.publication_period.data + 1, 4, 1)
+        q = q.filter(ScopusPublication.publication_cover_date.between(start_date, end_date))
 
     if search_form.search.data:
         q = q.filter(or_(
