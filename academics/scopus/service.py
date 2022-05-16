@@ -58,7 +58,14 @@ def add_scopus_publications(els_author, scopus_author):
 
         if not publication:
             publication = ScopusPublication(scopus_id=scopus_id)
-        
+        else:
+            ##
+            ##
+            ## Take out to refresh
+            ##
+            ##
+            continue
+
         href = None
 
         for h in p.get(u'link', ''):
@@ -76,7 +83,7 @@ def add_scopus_publications(els_author, scopus_author):
 
         abstract = Abstract(scopus_id)
 
-        if abstract.read(_client()):
+        if abstract.read(_client()) and abstract.abstract:
             logging.warn(f'abstract found - {abstract.abstract}')
             publication.abstract = abstract.abstract
 
