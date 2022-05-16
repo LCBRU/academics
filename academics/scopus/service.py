@@ -96,6 +96,8 @@ def update_academics():
 
 @celery.task()
 def _update_all_academics():
+    logging.info('_update_all_academics: started')
+
     for sa in ScopusAuthor.query.all():
         els_author = get_els_author(sa.scopus_id)
         els_author.update_scopus_author(sa)
@@ -112,6 +114,8 @@ def _update_all_academics():
         db.session.add(academic)
 
     db.session.commit()
+
+    logging.info('_update_all_academics: Ended')
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None):
@@ -137,6 +141,8 @@ def add_authors_to_academic(scopus_ids, academic_id=None):
 
 @celery.task()
 def _add_authors_to_academic(scopus_ids, academic_id):
+    logging.info('_add_authors_to_academic: started')
+
     academic = Academic.query.get(academic_id)
  
     for scopus_id in scopus_ids:
@@ -154,3 +160,5 @@ def _add_authors_to_academic(scopus_ids, academic_id):
 
     db.session.add(academic)
     db.session.commit()
+
+    logging.info('_add_authors_to_academic: ended')
