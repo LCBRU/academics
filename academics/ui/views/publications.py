@@ -7,7 +7,7 @@ from sqlalchemy import or_
 
 @blueprint.route("/publications/")
 @blueprint.route("/author/<int:author_id>/publications/")
-def publications(author_id):
+def publications(author_id=None):
     search_form = SearchForm(formdata=request.args)
     
     if author_id:
