@@ -7,3 +7,5 @@ elsapy
 pandas
 celery==5.0.0
 celery[redis]
+weasyprint<53.0
+Flask-WeasyPrint
