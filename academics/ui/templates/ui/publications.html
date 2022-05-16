@@ -11,7 +11,14 @@
             search_form,
             'ui.publications',
             placeholder='enter search text - searches title and publication',
-            buttons=[],
+            buttons=[
+                {
+                    'id': 'export',
+                    'text': 'Export',
+                    'endpoint': 'ui.publication_export',
+                    'add_form_fields': True,
+                },
+            ],
         ) }}
 
     </div>

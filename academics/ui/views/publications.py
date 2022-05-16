@@ -5,7 +5,7 @@ from academics.model import ScopusAuthor, ScopusPublication
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField
-
+from lbrc_flask.export import excel_download
 
 def _get_period_choices():
     return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
@@ -36,9 +36,24 @@ class TrackerSearchForm(SearchForm):
 def publications():
     search_form = TrackerSearchForm(formdata=request.args)
     
-    q = ScopusPublication.query
+    q = _get_publication_query(search_form)
 
-    scopus_author = None
+    q = q.order_by(ScopusPublication.publication_cover_date.desc())
+
+    publications = q.paginate(
+        page=search_form.page.data,
+        per_page=5,
+        error_out=False,
+    )
+
+    return render_template(
+        "ui/publications.html",
+        search_form=search_form,
+        publications=publications,
+    )
+
+def _get_publication_query(search_form):
+    q = ScopusPublication.query
 
     if search_form.author_id.data:
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
@@ -54,17 +69,42 @@ def publications():
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
             ScopusPublication.publication.like(f'%{search_form.search.data}%'),
         ))
+        
+    return q
+
+
+@blueprint.route("/publications/export")
+def publication_export():
+    # Use of dictionary instead of set to maintain order of headers
+    headers = {
+        'scopus_id': None,
+        'doi': None,
+        'pubmed_id': None,
+        'publication': None,
+        'publication_cover_date': None,
+        'authors': None,
+        'title': None,
+        'abstract': None,
+    }
+
+    search_form = TrackerSearchForm(formdata=request.args)
+    
+    q = _get_publication_query(search_form)
+
     q = q.order_by(ScopusPublication.publication_cover_date.desc())
 
-    publications = q.paginate(
-        page=search_form.page.data,
-        per_page=5,
-        error_out=False,
-    )
+    publication_details = []
 
-    return render_template(
-        "ui/publications.html",
-        search_form=search_form,
-        scopus_author=scopus_author,
-        publications=publications,
-    )
+    for p in q.all():
+        publication_details.append({
+            'scopus_id': p.scopus_id,
+            'doi': p.doi,
+            'pubmed_id': p.pubmed_id,
+            'publication': p.publication,
+            'publication_cover_date': p.publication_cover_date,
+            'authors': '; '.join([a.full_name for a in p.scopus_authors])
+            'title': p.title,
+            'abstract': p.abstract,
+        })
+
+    return excel_download('Export', headers.keys(), publication_details)
