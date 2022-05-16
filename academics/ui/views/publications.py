@@ -11,27 +11,24 @@ def _get_author_choices():
 
 
 class TrackerSearchForm(SearchForm):
-    author = SelectField('Author', choices=[])
+    author_id = SelectField('Author', choices=[])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.author.choices = _get_author_choices()
+        self.author_id.choices = _get_author_choices()
 
 
 @blueprint.route("/publications/")
-@blueprint.route("/author/<int:author_id>/publications/")
-def publications(author_id=None):
+def publications():
     search_form = TrackerSearchForm(formdata=request.args)
     
     q = ScopusPublication.query
 
     scopus_author = None
 
-    if author_id:
-        scopus_author = ScopusAuthor.query.get(author_id)
-
-        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == author_id))
+    if search_form.author_id.data:
+        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
 
     if search_form.search.data:
         q = q.filter(or_(
