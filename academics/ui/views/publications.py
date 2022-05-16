@@ -102,7 +102,7 @@ def publication_export():
             'pubmed_id': p.pubmed_id,
             'publication': p.publication,
             'publication_cover_date': p.publication_cover_date,
-            'authors': '; '.join([a.full_name for a in p.scopus_authors])
+            'authors': '; '.join([a.full_name for a in p.scopus_authors]),
             'title': p.title,
             'abstract': p.abstract,
         })
