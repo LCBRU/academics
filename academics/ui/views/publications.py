@@ -5,7 +5,7 @@ from academics.model import ScopusAuthor, ScopusPublication
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField
-from lbrc_flask.export import excel_download
+from lbrc_flask.export import excel_download, pdf_download
 
 def _get_period_choices():
     return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
@@ -73,8 +73,8 @@ def _get_publication_query(search_form):
     return q
 
 
-@blueprint.route("/publications/export")
-def publication_export():
+@blueprint.route("/publications/export/xslt")
+def publication_export_xslt():
     # Use of dictionary instead of set to maintain order of headers
     headers = {
         'scopus_id': None,
@@ -99,9 +99,20 @@ def publication_export():
         'pubmed_id': p.pubmed_id,
         'publication': p.publication,
         'publication_cover_date': p.publication_cover_date,
-        'authors': '; '.join([a.full_name for a in p.scopus_authors]),
+        'authors': p.author_list,
         'title': p.title,
         'abstract': p.abstract,
     } for p in q.all())
 
-    return excel_download('Export', headers.keys(), publication_details)
+    return excel_download('Academics_Publications', headers.keys(), publication_details)
+
+
+@blueprint.route("/publications/export/pdf")
+def publication_export_pdf():
+    search_form = TrackerSearchForm(formdata=request.args)
+    
+    q = _get_publication_query(search_form)
+
+    publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
+
+    return pdf_download('ui/publications_pdf.html', title='Academics Publications', publications=publications)

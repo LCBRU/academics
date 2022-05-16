@@ -95,3 +95,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
+
+    @property
+    def author_list(self):
+        return '; '.join([a.full_name for a in self.scopus_authors])
