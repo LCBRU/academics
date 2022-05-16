@@ -12,6 +12,8 @@ def publications(author_id=None):
     
     q = ScopusPublication.query
 
+    scopus_author = None
+
     if author_id:
         scopus_author = ScopusAuthor.query.get(author_id)
 
