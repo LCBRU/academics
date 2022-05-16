@@ -53,7 +53,9 @@ def index():
 
 @blueprint.route("/update_all_academics")
 def update_all_academics():
-    update_academics()
+    if not updating():
+        update_academics()
+
     return redirect(url_for('ui.index'))
 
 
