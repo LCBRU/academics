@@ -118,28 +118,6 @@ class Author(ElsAuthor):
         self.update_scopus_author(result)
         return result
 
-    def get_scopus_publications(self):
-        result = []
-
-        for d in self.doc_list:
-            href = ''
-
-            for h in  d.get(u'link', ''):
-                if h['@rel'] == 'scopus':
-                    href = h['@href']
-
-            result.append(ScopusPublication(
-                scopus_id=d.get(u'dc:identifier', ':').split(':')[1],
-                doi=d.get(u'prism:doi', ''),
-                title=d.get(u'dc:title', ''),
-                publication=d.get(u'prism:publicationName', ''),
-                publication_cover_date=parse_date(d.get(u'prism:coverDate', '')),
-                href=href,
-            ))
-
-        return result
-
-
 class Affiliation(ElsAffil):
     def __init__(self, affiliation_id):
         self.affiliation_id = affiliation_id

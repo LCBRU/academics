@@ -56,8 +56,10 @@ def add_scopus_publications(els_author, scopus_author):
 
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == scopus_id).one_or_none()
 
-        if not publication:
-            publication = ScopusPublication(scopus_id=scopus_id)
+        if publication:
+            continue
+
+        publication = ScopusPublication(scopus_id=scopus_id)
         
         href = None
 
