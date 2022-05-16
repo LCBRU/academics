@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import render_template, request
 from lbrc_flask.forms import SearchForm
 from academics.model import ScopusAuthor, ScopusPublication
@@ -6,17 +7,25 @@ from sqlalchemy import or_
 from wtforms import SelectField
 
 
+def _get_period_choices():
+    return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
+
+
 def _get_author_choices():
     return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
 
 
 class TrackerSearchForm(SearchForm):
     author_id = SelectField('Author', choices=[])
+    publication_period = SelectField('Publication Period', choices=[])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.author_id.choices = _get_author_choices()
+
+        this_year = datetime.now().year
+        self.publication_period.choices = [(y, y) for y in range(this_year, this_year - 20, -1)]
 
 
 @blueprint.route("/publications/")
