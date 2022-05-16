@@ -93,18 +93,15 @@ def publication_export():
 
     q = q.order_by(ScopusPublication.publication_cover_date.desc())
 
-    publication_details = []
-
-    for p in q.all():
-        publication_details.append({
-            'scopus_id': p.scopus_id,
-            'doi': p.doi,
-            'pubmed_id': p.pubmed_id,
-            'publication': p.publication,
-            'publication_cover_date': p.publication_cover_date,
-            'authors': '; '.join([a.full_name for a in p.scopus_authors]),
-            'title': p.title,
-            'abstract': p.abstract,
-        })
+    publication_details = ({
+        'scopus_id': p.scopus_id,
+        'doi': p.doi,
+        'pubmed_id': p.pubmed_id,
+        'publication': p.publication,
+        'publication_cover_date': p.publication_cover_date,
+        'authors': '; '.join([a.full_name for a in p.scopus_authors]),
+        'title': p.title,
+        'abstract': p.abstract,
+    } for p in q.all())
 
     return excel_download('Export', headers.keys(), publication_details)
