@@ -44,8 +44,9 @@ def publications():
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
 
     if search_form.publication_period.data:
-        start_date = datetime(search_form.publication_period.data, 4, 1)
-        end_date = datetime(search_form.publication_period.data + 1, 4, 1)
+        y = int(search_form.publication_period.data)
+        start_date = datetime(y, 4, 1)
+        end_date = datetime(y + 1, 4, 1)
         q = q.filter(ScopusPublication.publication_cover_date.between(start_date, end_date))
 
     if search_form.search.data:
