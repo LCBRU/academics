@@ -14,8 +14,14 @@
             buttons=[
                 {
                     'id': 'export',
-                    'text': 'Export',
-                    'endpoint': 'ui.publication_export',
+                    'text': 'Excel',
+                    'endpoint': 'ui.publication_export_xlst',
+                    'add_form_fields': True,
+                },
+                {
+                    'id': 'export',
+                    'text': 'PDF',
+                    'endpoint': 'ui.publication_export_pdf',
                     'add_form_fields': True,
                 },
             ],
