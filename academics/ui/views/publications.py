@@ -4,13 +4,16 @@ from academics.model import ScopusAuthor, ScopusPublication
 from .. import blueprint
 from sqlalchemy import or_
 
+
+@blueprint.route("/publications/")
 @blueprint.route("/author/<int:author_id>/publications/")
 def publications(author_id):
     search_form = SearchForm(formdata=request.args)
     
-    scopus_author = ScopusAuthor.query.get(author_id)
+    if author_id:
+        scopus_author = ScopusAuthor.query.get(author_id)
 
-    q = ScopusPublication.query.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == author_id))
+        q = ScopusPublication.query.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == author_id))
 
     if search_form.search.data:
         q = q.filter(or_(
