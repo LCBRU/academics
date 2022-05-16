@@ -5,13 +5,11 @@
 {% block content %}
 <section>
     <div class="page-header">
-        <h1>{{ scopus_author.full_name }}</h1>
-        <h3>Publications</h3>
+        <h1>Publications</h1>
 
         {{ render_search(
             search_form,
             'ui.publications',
-            author_id=scopus_author.id,
             placeholder='enter search text - searches title and publication',
             buttons=[],
         ) }}
