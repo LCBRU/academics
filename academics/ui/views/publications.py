@@ -74,7 +74,7 @@ def _get_publication_query(search_form):
 
 
 @blueprint.route("/publications/export/xslt")
-def publication_export_xslt():
+def publication_export_xlsx():
     # Use of dictionary instead of set to maintain order of headers
     headers = {
         'scopus_id': None,
