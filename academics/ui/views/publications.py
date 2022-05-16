@@ -25,7 +25,11 @@ class TrackerSearchForm(SearchForm):
         self.author_id.choices = _get_author_choices()
 
         this_year = datetime.now().year
-        self.publication_period.choices = [(y, f'{y} - {y + 1}') for y in range(this_year, this_year - 20, -1)]
+
+        if datetime.now().month < 4:
+            this_year -= 1
+
+        self.publication_period.choices = [('', '')] + [(y, f'{y} - {y + 1}') for y in range(this_year, this_year - 20, -1)]
 
 
 @blueprint.route("/publications/")
