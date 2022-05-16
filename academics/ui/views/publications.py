@@ -10,10 +10,12 @@ from sqlalchemy import or_
 def publications(author_id=None):
     search_form = SearchForm(formdata=request.args)
     
+    q = ScopusPublication.query
+
     if author_id:
         scopus_author = ScopusAuthor.query.get(author_id)
 
-        q = ScopusPublication.query.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == author_id))
+        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == author_id))
 
     if search_form.search.data:
         q = q.filter(or_(
