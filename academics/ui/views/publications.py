@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import render_template, request
 from lbrc_flask.forms import SearchForm
-from academics.model import ScopusAuthor, ScopusPublication, Theme
+from academics.model import Academic, ScopusAuthor, ScopusPublication, Theme
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField
@@ -59,7 +59,9 @@ def _get_publication_query(search_form):
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
 
     if search_form.theme_id.data:
-        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.academic.theme_id == search_form.theme_id.data))
+        q.join(ScopusPublication.scopus_authors)
+        q.join(ScopusAuthor.academic)
+        q = q.filter(Academic.theme_id == search_form.theme_id.data)
 
     if search_form.publication_period.data:
         y = int(search_form.publication_period.data)
