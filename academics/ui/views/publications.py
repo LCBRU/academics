@@ -59,9 +59,12 @@ def _get_publication_query(search_form):
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
 
     if search_form.theme_id.data:
-        q.join(ScopusPublication.scopus_authors)
-        q.join(ScopusAuthor.academic)
-        q = q.filter(Academic.theme_id == search_form.theme_id.data)
+        aq = ScopusAuthor.query.with_entities(ScopusAuthor.id.distinct())
+        aq = aq.join(ScopusAuthor.academic)
+        aq = aq.filter(Academic.theme_id == search_form.theme_id.data)
+        aq = aq.subquery()
+
+        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
     if search_form.publication_period.data:
         y = int(search_form.publication_period.data)
