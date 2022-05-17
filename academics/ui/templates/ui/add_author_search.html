@@ -81,6 +81,10 @@
         $("#add_authors").prop('disabled', num_checked_authors == 0);
     }
 
+    function conditional_theme_selection() {
+        alert("Hello");
+    }
+
     $(document).ready(function(){
         $('.check_author').on('click', function (event) {
             toggle_add();
@@ -118,6 +122,9 @@
         });
 
         toggle_add();
+        conditional_theme_selection();
+        document.getElementById('theme_id').onchange = conditional_theme_selection;
+
     });
 </script>
 

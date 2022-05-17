@@ -5,7 +5,7 @@ from wtforms.fields.simple import HiddenField, StringField
 from wtforms import SelectField
 from academics.scopus.service import add_authors_to_academic, author_search, update_academics, updating
 from academics.model import Academic, ScopusAuthor, Theme
-from wtforms.validators import Length, DataRequired
+from wtforms.validators import Length
 from .. import blueprint
 
 
@@ -19,7 +19,7 @@ def _get_academic_choices():
 class AddAuthorForm(FlashingForm):
     scopus_id = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
-    theme_id = SelectField('Theme', coerce=int, validators=[DataRequired()])
+    theme_id = SelectField('Theme', coerce=int)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
