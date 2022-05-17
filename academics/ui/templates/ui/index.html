@@ -52,9 +52,11 @@
                                     title="Delete academic {{ a.full_name }}"
                                     data-target="#deleteAcademicModal"
                                     href="#"><i class="fas fa-trash"></i></a>
-                                <a class="academic_edit"
+                                </div>
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a class="academic_edit"
                                     title="Edit academic {{ a.full_name }}"
-                                    href="{ url_for('ui.academic_edit', id=a.id)}"><i class="fas fa-edit"></i></a>
+                                    href="{{ url_for('ui.academic_edit', id=a.id) }}"><i class="fas fa-edit"></i></a>
                             </div>
                         </div>
                     </div>
