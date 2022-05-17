@@ -85,7 +85,8 @@
         academic_id = document.getElementById('academic_id');
         theme_id = document.getElementById('theme_id');
 
-        alert(academic_id.value);
+        theme_id.value = 0;
+        theme.disabled = (academic_id.value == 0);
     }
 
     $(document).ready(function(){
