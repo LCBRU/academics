@@ -132,6 +132,7 @@ def add_author():
     add_authors_to_academic(
         request.form.getlist('scopus_id'),
         form.academic_id.data,
+        form.theme_id.data,
     )
 
     return redirect(url_for('ui.index'))
