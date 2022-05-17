@@ -64,6 +64,14 @@
             font-weight: 100;
         }
 
+        dt, dd {
+            display: inline-block;
+        }
+
+        dt {
+            font-weight: bold;
+        }
+
         .publications {
             padding: 20px;
             border: 1px solid #ddd;
@@ -84,7 +92,7 @@
 
     <dl>
         {% for p in parameters %}
-            <dt>{{p[0]}}</dt>
+            <dt>{{p[0]}}:</dt>
             <dd>{{p[1]}}</dd>
         {% endfor %}
     </dl>
