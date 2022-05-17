@@ -1,14 +1,11 @@
 from datetime import datetime
 from flask import render_template, request
 from lbrc_flask.forms import SearchForm
-from academics.model import ScopusAuthor, ScopusPublication
+from academics.model import ScopusAuthor, ScopusPublication, Theme
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField
 from lbrc_flask.export import excel_download, pdf_download
-
-def _get_period_choices():
-    return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
 
 
 def _get_author_choices():
@@ -18,6 +15,8 @@ def _get_author_choices():
 class TrackerSearchForm(SearchForm):
     author_id = SelectField('Author', choices=[])
     publication_period = SelectField('Publication Period', choices=[])
+    theme_id = SelectField('Theme', coerce=int)
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -30,6 +29,7 @@ class TrackerSearchForm(SearchForm):
             this_year -= 1
  
         self.publication_period.choices = [('', '')] + [(y, f'{y} - {y + 1}') for y in range(this_year, this_year - 20, -1)]
+        self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 @blueprint.route("/publications/")
@@ -57,6 +57,9 @@ def _get_publication_query(search_form):
 
     if search_form.author_id.data:
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
+
+    if search_form.theme_id.data:
+        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.theme_id == search_form.theme_id.data))
 
     if search_form.publication_period.data:
         y = int(search_form.publication_period.data)
