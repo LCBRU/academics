@@ -3,6 +3,12 @@ from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 
 
+class Theme(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+
 class Academic(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)

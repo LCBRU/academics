@@ -135,3 +135,5 @@ dump.json
 
 # redis
 dump.rdb
+
+*.sqlite3
