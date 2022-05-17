@@ -43,7 +43,7 @@ class AcademicSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme_id.choices = [(0, ''), (-1, 'Unset')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.theme_id.choices = [(0, ''), (-1, '[Unset]')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 @blueprint.route("/")
