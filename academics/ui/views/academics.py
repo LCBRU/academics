@@ -27,7 +27,7 @@ class AddAuthorForm(FlashingForm):
 
 
 def _get_theme_id_choices():
-    return [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
+    return [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 class AcademicEditForm(FlashingForm):
