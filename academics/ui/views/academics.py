@@ -19,11 +19,13 @@ def _get_academic_choices():
 class AddAuthorForm(FlashingForm):
     scopus_id = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
+    theme_id = SelectField('Theme', coerce=int, validators=[DataRequired])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.academic_id.choices = _get_academic_choices()
+        self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 class AcademicEditForm(FlashingForm):
