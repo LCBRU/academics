@@ -61,6 +61,9 @@ def index():
         subquery = ScopusAuthor.query.with_entities(ScopusAuthor.academic_id).filter((ScopusAuthor.first_name + ' ' + ScopusAuthor.last_name).like("%{}%".format(search_form.search.data)))
         q = q.filter(Academic.id.in_(subquery))
 
+    if search_form.theme_id.data:
+        q = q.filter(Academic.theme_id == search_form.theme_id.data)
+
     academics = q.paginate(
         page=search_form.page.data,
         per_page=5,
