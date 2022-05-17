@@ -13,7 +13,7 @@
     
             <div class="card-body">
     
-                <form id="edit" action="{{ url_for('ui.academic', id=academic.id) }}" method="POST" class="form panel-body" enctype="multipart/form-data">
+                <form id="edit" action="{{ url_for('ui.academic_edit', id=academic.id) }}" method="POST" class="form panel-body" enctype="multipart/form-data">
                     <fieldset>
                         {{ form.hidden_tag() }}
     
