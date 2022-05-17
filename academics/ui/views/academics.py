@@ -26,10 +26,6 @@ class AddAuthorForm(FlashingForm):
         self.academic_id.choices = _get_academic_choices()
 
 
-def _get_theme_id_choices():
-    return [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
-
-
 class AcademicEditForm(FlashingForm):
     first_name = StringField("First Name", validators=[Length(max=500)])
     last_name = StringField("Last Name", validators=[Length(max=500)])
@@ -38,7 +34,7 @@ class AcademicEditForm(FlashingForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme_id.choices = _get_theme_id_choices()
+        self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 class AcademicSearchForm(SearchForm):
@@ -47,7 +43,7 @@ class AcademicSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme_id.choices = _get_theme_id_choices()
+        self.theme_id.choices = [(0, ''), (-1, 'Unset')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 @blueprint.route("/")
@@ -62,7 +58,10 @@ def index():
         q = q.filter(Academic.id.in_(subquery))
 
     if search_form.theme_id.data:
-        q = q.filter(Academic.theme_id == search_form.theme_id.data)
+        if search_form.theme_id.data == -1:
+            q = q.filter(Academic.theme_id == None)
+        else:
+            q = q.filter(Academic.theme_id == search_form.theme_id.data)
 
     academics = q.paginate(
         page=search_form.page.data,
