@@ -82,6 +82,9 @@
     }
 
     function conditional_theme_selection() {
+        academic_id = document.getElementById('academic_id');
+        theme_id = document.getElementById('theme_id');
+
         alert("Hello");
     }
 
@@ -123,7 +126,7 @@
 
         toggle_add();
         conditional_theme_selection();
-        document.getElementById('theme_id').onchange = conditional_theme_selection;
+        document.getElementById('academic_id').onchange = conditional_theme_selection;
 
     });
 </script>
