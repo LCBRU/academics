@@ -64,17 +64,8 @@
             font-weight: 100;
         }
 
-        dl {
-        display: grid;
-        grid-template-columns: max-content auto;
-        }
-
-        dt {
-        grid-column-start: 1;
-        }
-
-        dd {
-        grid-column-start: 2;
+        span.param_head {
+            font-weight: bold;
         }
 
         .publications {
@@ -95,12 +86,12 @@
 	<h1>Academics</h1>
 	<h2>Publications</h2>
 
-    <dl>
-        {% for p in parameters %}
-            <dt>{{p[0]}}:</dt>
-            <dd>{{p[1]}}</dd>
-        {% endfor %}
-    </dl>
+    {% for p in parameters %}
+        <div>
+            <span class="param_head">{{p[0]}}:</span>
+            <span class="param_data">{{p[1]}}</span>
+        </div>
+    {% endfor %}
 
     <div>
         {% for p in publications %}
