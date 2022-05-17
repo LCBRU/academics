@@ -123,4 +123,4 @@ def publication_export_pdf():
 
     publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
 
-    return pdf_download('ui/publications_pdf.html', title='Academics Publications', publications=publications)
+    return pdf_download('ui/publications_pdf.html', title='Academics Publications', publications=publications, search_form=search_form)

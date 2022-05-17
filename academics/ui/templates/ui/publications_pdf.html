@@ -45,7 +45,7 @@
         h3 {
             font-size: 1.2em;
             margin: 0;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
         }
 
         h4 {
@@ -80,6 +80,13 @@
 
 	<h1>Academics</h1>
 	<h2>Publications</h2>
+
+    <dl>
+        {% for f in form | rejectattr("name", "eq", "page") | rejectattr("name", "eq", "csrf_token") | selectattr("data") %}
+            <dt>{{f.name}}</dt>
+            <dd>{{f.data}}</dd>
+        {% endfor %}
+    </dl>
 
     <div>
         {% for p in publications %}
