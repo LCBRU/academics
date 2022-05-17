@@ -124,7 +124,7 @@ def _update_all_academics():
     logging.info('_update_all_academics: Ended')
 
 
-def add_authors_to_academic(scopus_ids, academic_id=None):
+def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
     academic = None
 
     if academic_id:
@@ -135,6 +135,7 @@ def add_authors_to_academic(scopus_ids, academic_id=None):
             first_name='',
             last_name='',
             initialised=False,
+            theme_id=theme_id,
         )
 
     academic.updating = True
