@@ -19,7 +19,7 @@ def _get_academic_choices():
 class AddAuthorForm(FlashingForm):
     scopus_id = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
-    theme_id = SelectField('Theme', coerce=int, validators=[DataRequired])
+    theme_id = SelectField('Theme', coerce=int, validators=[DataRequired()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
