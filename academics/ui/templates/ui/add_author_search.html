@@ -64,7 +64,7 @@
                 {{ render_field(add_author_form.academic_id) }}
                 {{ render_field(add_author_form.theme_id) }}
 
-                <button type="submit" class="btn btn-primary">Add</button>
+                <button id="add_submit" type="submit" class="btn btn-primary">Add</button>
             </fieldset>
         </form>
 
@@ -87,6 +87,16 @@
 
         theme_id.value = 0;
         theme_id.disabled = !(academic_id.value == 0);
+
+        allow_submit();
+    }
+
+    function allow_submit() {
+        academic_id = document.getElementById('academic_id');
+        theme_id = document.getElementById('theme_id');
+        submit = document.getElementById('add_submit');
+
+        submit.disabled = !(theme_id.value == 0 && academic_id.value == 0);
     }
 
     $(document).ready(function(){
@@ -128,6 +138,7 @@
         toggle_add();
         conditional_theme_selection();
         document.getElementById('academic_id').onchange = conditional_theme_selection;
+        document.getElementById('theme_id').onchange = allow_submit;
 
     });
 </script>
