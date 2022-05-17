@@ -1,10 +1,11 @@
 from flask import render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
-from wtforms.fields.simple import HiddenField
+from wtforms.fields.simple import HiddenField, StringField
 from wtforms import SelectField
 from academics.scopus.service import add_authors_to_academic, author_search, update_academics, updating
-from academics.model import Academic, ScopusAuthor
+from academics.model import Academic, ScopusAuthor, Theme
+from wtforms.validators import Length, DataRequired
 from .. import blueprint
 
 
@@ -23,6 +24,21 @@ class AddAuthorForm(FlashingForm):
         super().__init__(**kwargs)
 
         self.academic_id.choices = _get_academic_choices()
+
+
+def _get_theme_id_choices():
+    return [('', '')] + [(t.id, t.name) for t in Theme.all()]
+
+
+class AcademicEditForm(FlashingForm):
+    first_name = StringField("First Name", validators=[Length(max=500)])
+    last_name = StringField("Last Name", validators=[Length(max=500)])
+    theme_id = SelectField('Theme', coerce=int)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.theme_id.choices = _get_theme_id_choices()
 
 
 @blueprint.route("/")
@@ -49,6 +65,25 @@ def index():
         confirm_form=ConfirmForm(),
         updating=updating(),
     )
+
+
+@blueprint.route("/academic/<int:id>/edit", methods=['GET', 'POST'])
+def academic_edit(id):
+    academic = Academic.query.get_or_404(id)
+
+    form = AcademicEditForm(obj=academic)
+
+    if form.validate_on_submit():
+        academic.first_name = form.first_name.data
+        academic.last_name = form.last_name.data
+        academic.theme_id = form.theme_id.data
+
+        db.session.add(academic)
+        db.session.commit()
+
+        return redirect(url_for('ui.index'))
+
+    return render_template("ui/academics/edit.html", form=form, academic=academic)
 
 
 @blueprint.route("/update_all_academics")

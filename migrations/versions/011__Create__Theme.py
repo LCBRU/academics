@@ -11,7 +11,8 @@ def upgrade(migrate_engine):
         "theme",
         meta,
         Column("id", Integer, primary_key=True),
-        Column("id", NVARCHAR(100), primary_key=True),
+        Column("name", NVARCHAR(200)),
+        *get_audit_mixin_columns(),
     )
 
     t.create()

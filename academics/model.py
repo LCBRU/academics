@@ -3,7 +3,7 @@ from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 
 
-class Theme(db.Model):
+class Theme(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -16,6 +16,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     last_name = db.Column(db.String)
     updating = db.Column(db.Boolean, default=False)
     initialised = db.Column(db.Boolean, default=False)
+    theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
+    theme = db.relationship(Theme)
 
     @property
     def full_name(self):
