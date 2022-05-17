@@ -83,7 +83,7 @@ def academic_edit(id):
 
         return redirect(url_for('ui.index'))
 
-    return render_template("ui/academics/edit.html", form=form, academic=academic)
+    return render_template("ui/academic_edit.html", form=form, academic=academic)
 
 
 @blueprint.route("/update_all_academics")
