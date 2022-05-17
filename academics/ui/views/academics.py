@@ -41,9 +41,18 @@ class AcademicEditForm(FlashingForm):
         self.theme_id.choices = _get_theme_id_choices()
 
 
+class AcademicSearchForm(SearchForm):
+    theme_id = SelectField('Theme', coerce=int)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.theme_id.choices = _get_theme_id_choices()
+
+
 @blueprint.route("/")
 def index():
-    search_form = SearchForm(formdata=request.args)
+    search_form = AcademicSearchForm(formdata=request.args)
 
     q = Academic.query
     q = q.filter(Academic.initialised == True)
