@@ -58,14 +58,6 @@ def add_scopus_publications(els_author, scopus_author):
 
         if not publication:
             publication = ScopusPublication(scopus_id=scopus_id)
-        else:
-            ##
-            ##
-            ## Take out to refresh
-            ##
-            ##
-            continue
-
 
         href = None
 
