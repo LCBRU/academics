@@ -64,17 +64,17 @@
             font-weight: 100;
         }
 
-        dt, dd {
-            display: inline-block;
+        dl {
+        display: grid;
+        grid-template-columns: max-content auto;
         }
 
         dt {
-            font-weight: bold;
+        grid-column-start: 1;
         }
 
-        dd:after{
-            display: block;
-            content: '';
+        dd {
+        grid-column-start: 2;
         }
 
         .publications {
