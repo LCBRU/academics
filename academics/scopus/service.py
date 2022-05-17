@@ -59,28 +59,28 @@ def add_scopus_publications(els_author, scopus_author):
         if not publication:
             publication = ScopusPublication(scopus_id=scopus_id)
 
-        href = None
+            href = None
 
-        for h in p.get(u'link', ''):
-            if h['@ref'] == 'scopus':
-                href = h['@href']
+            for h in p.get(u'link', ''):
+                if h['@ref'] == 'scopus':
+                    href = h['@href']
 
-        publication.doi = p.get(u'prism:doi', '')
-        publication.title = p.get(u'dc:title', '')
-        publication.publication = p.get(u'prism:publicationName', '')
-        publication.publication_cover_date = parse_date(p.get(u'prism:coverDate', ''))
-        publication.href = href
+            publication.doi = p.get(u'prism:doi', '')
+            publication.title = p.get(u'dc:title', '')
+            publication.publication = p.get(u'prism:publicationName', '')
+            publication.publication_cover_date = parse_date(p.get(u'prism:coverDate', ''))
+            publication.href = href
+
+            # Commented out because i've overshot the limit
+
+            # abstract = Abstract(scopus_id)
+
+            # if abstract.read(_client()) and abstract.abstract:
+            #     logging.warn(f'abstract found - {abstract.abstract}')
+            #     publication.abstract = abstract.abstract
 
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
-
-        # Commented out because i've overshot the limit
-
-        # abstract = Abstract(scopus_id)
-
-        # if abstract.read(_client()) and abstract.abstract:
-        #     logging.warn(f'abstract found - {abstract.abstract}')
-        #     publication.abstract = abstract.abstract
 
         db.session.add(publication)
 
