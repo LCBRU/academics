@@ -96,7 +96,7 @@
         theme_id = document.getElementById('theme_id');
         submit = document.getElementById('add_submit');
 
-        submit.disabled = !(theme_id.value == 0 && academic_id.value == 0);
+        submit.disabled = (theme_id.value == 0 && academic_id.value == 0);
     }
 
     $(document).ready(function(){
