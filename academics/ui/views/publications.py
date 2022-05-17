@@ -132,8 +132,8 @@ def publication_export_pdf():
         theme = Theme.query.get_or_404(search_form.theme_id.data)
         parameters.append(('Theme', theme.name))
 
-    if search_form.period.data:
-        y = int(search_form.period.data)
+    if search_form.publication_period.data:
+        y = int(search_form.publication_period.data)
         parameters.append(('Period', f'{y} - {y+1}'))
 
     publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
