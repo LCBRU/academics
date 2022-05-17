@@ -59,7 +59,7 @@ def _get_publication_query(search_form):
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
 
     if search_form.theme_id.data:
-        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.theme_id == search_form.theme_id.data))
+        q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.academic.theme_id == search_form.theme_id.data))
 
     if search_form.publication_period.data:
         y = int(search_form.publication_period.data)
