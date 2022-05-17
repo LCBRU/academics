@@ -83,9 +83,9 @@
 	<h2>Publications</h2>
 
     <dl>
-        {% for f in search_form | rejectattr("name", "eq", "page") | rejectattr("name", "eq", "csrf_token") | selectattr("data") %}
-            <dt>{{f.name}}</dt>
-            <dd>{{f.data}}</dd>
+        {% for p in parameters %}
+            <dt>{{p.name}}</dt>
+            <dd>{{p.data}}</dd>
         {% endfor %}
     </dl>
 

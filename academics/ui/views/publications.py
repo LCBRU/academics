@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import render_template, request
 from lbrc_flask.forms import SearchForm
 from academics.model import Academic, ScopusAuthor, ScopusPublication, Theme
+from academics.scopus.model import Author
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField
@@ -12,10 +13,10 @@ def _get_author_choices():
     return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
 
 
-class TrackerSearchForm(SearchForm):
-    author_id = SelectField('Author', choices=[])
-    publication_period = SelectField('Publication Period', choices=[])
+class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme', coerce=int)
+    publication_period = SelectField('Publication Period', choices=[])
+    author_id = SelectField('Author', choices=[])
 
 
     def __init__(self, **kwargs):
@@ -34,7 +35,7 @@ class TrackerSearchForm(SearchForm):
 
 @blueprint.route("/publications/")
 def publications():
-    search_form = TrackerSearchForm(formdata=request.args)
+    search_form = PublicationSearchForm(formdata=request.args)
     
     q = _get_publication_query(search_form)
 
@@ -95,7 +96,7 @@ def publication_export_xlsx():
         'abstract': None,
     }
 
-    search_form = TrackerSearchForm(formdata=request.args)
+    search_form = PublicationSearchForm(formdata=request.args)
     
     q = _get_publication_query(search_form)
 
@@ -117,10 +118,24 @@ def publication_export_xlsx():
 
 @blueprint.route("/publications/export/pdf")
 def publication_export_pdf():
-    search_form = TrackerSearchForm(formdata=request.args)
+    search_form = PublicationSearchForm(formdata=request.args)
     
     q = _get_publication_query(search_form)
 
+    parameters = []
+
+    if search_form.author_id.data:
+        author = Author.query.get_or_404(search_form.author_id.data)
+        parameters.append(('Author', author.full_name))
+
+    if search_form.theme_id.data:
+        theme = Theme.query.get_or_404(search_form.theme_id.data)
+        parameters.append(('Theme', theme.name))
+
+    if search_form.period.data:
+        y = int(search_form.period.data)
+        parameters.append(('Period', f'{y} - {y+1}'))
+
     publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
 
-    return pdf_download('ui/publications_pdf.html', title='Academics Publications', publications=publications, search_form=search_form)
+    return pdf_download('ui/publications_pdf.html', title='Academics Publications', publications=publications, parameters=parameters)
