@@ -125,7 +125,7 @@ def publication_export_pdf():
     parameters = []
 
     if search_form.author_id.data:
-        author = Author.query.get_or_404(search_form.author_id.data)
+        author = ScopusAuthor.query.get_or_404(search_form.author_id.data)
         parameters.append(('Author', author.full_name))
 
     if search_form.theme_id.data:
