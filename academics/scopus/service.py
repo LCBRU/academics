@@ -66,6 +66,7 @@ def add_scopus_publications(els_author, scopus_author):
             ##
             continue
 
+
         href = None
 
         for h in p.get(u'link', ''):
@@ -81,11 +82,13 @@ def add_scopus_publications(els_author, scopus_author):
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
 
-        abstract = Abstract(scopus_id)
+        # Commented out because i've overshot the limit
 
-        if abstract.read(_client()) and abstract.abstract:
-            logging.warn(f'abstract found - {abstract.abstract}')
-            publication.abstract = abstract.abstract
+        # abstract = Abstract(scopus_id)
+
+        # if abstract.read(_client()) and abstract.abstract:
+        #     logging.warn(f'abstract found - {abstract.abstract}')
+        #     publication.abstract = abstract.abstract
 
         db.session.add(publication)
 
