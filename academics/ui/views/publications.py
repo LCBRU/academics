@@ -1,12 +1,14 @@
 from datetime import datetime
+import logging
 from flask import render_template, request
 from lbrc_flask.forms import SearchForm
 from academics.model import Academic, ScopusAuthor, ScopusPublication, Theme
-from academics.scopus.model import Author
 from .. import blueprint
 from sqlalchemy import or_
-from wtforms import SelectField
+from wtforms import SelectField, MonthField
 from lbrc_flask.export import excel_download, pdf_download
+from lbrc_flask.validators import parse_date_or_none
+from dateutil.relativedelta import relativedelta
 
 
 def _get_author_choices():
@@ -15,7 +17,8 @@ def _get_author_choices():
 
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme', coerce=int)
-    publication_period = SelectField('Publication Period', choices=[])
+    publication_date_start = MonthField('Publication Start Date')
+    publication_date_end = MonthField('Publication End Date')
     author_id = SelectField('Author', choices=[])
 
 
@@ -26,10 +29,6 @@ class PublicationSearchForm(SearchForm):
 
         this_year = datetime.now().year
 
-        if datetime.now().month < 4:
-            this_year -= 1
- 
-        self.publication_period.choices = [('', '')] + [(y, f'{y} - {y + 1}') for y in range(this_year, this_year - 20, -1)]
         self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
@@ -67,11 +66,13 @@ def _get_publication_query(search_form):
 
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
-    if search_form.publication_period.data:
-        y = int(search_form.publication_period.data)
-        start_date = datetime(y, 4, 1)
-        end_date = datetime(y + 1, 3, 31)
-        q = q.filter(ScopusPublication.publication_cover_date.between(start_date, end_date))
+    publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
+    if publication_start_date:
+        q = q.filter(ScopusPublication.publication_cover_date >= publication_start_date)
+
+    publication_end_date = parse_date_or_none(search_form.publication_date_end.data)
+    if publication_end_date:
+        q = q.filter(ScopusPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
 
     if search_form.search.data:
         q = q.filter(or_(
@@ -132,9 +133,13 @@ def publication_export_pdf():
         theme = Theme.query.get_or_404(search_form.theme_id.data)
         parameters.append(('Theme', theme.name))
 
-    if search_form.publication_period.data:
-        y = int(search_form.publication_period.data)
-        parameters.append(('Period', f'{y} - {y+1}'))
+    publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
+    if publication_start_date:
+        parameters.append(('Publication Date', f'>= {publication_start_date | "%Y-%M"}'))
+
+    publication_end_date = parse_date_or_none(search_form.publication_date_end.data)
+    if publication_end_date:
+        parameters.append(('Publication Date', f'<= {publication_end_date | "%Y-%M"}'))
 
     publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
 
