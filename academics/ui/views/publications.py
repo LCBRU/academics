@@ -26,14 +26,13 @@ class PublicationSearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.author_id.choices = _get_author_choices()
-
-        this_year = datetime.now().year
-
         self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 @blueprint.route("/publications/")
 def publications():
+    logging.warn(request.args)
+
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = _get_publication_query(search_form)
@@ -66,6 +65,7 @@ def _get_publication_query(search_form):
 
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
+    logging.warn(search_form.publication_date_start.data)
     publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
     if publication_start_date:
         q = q.filter(ScopusPublication.publication_cover_date >= publication_start_date)
@@ -119,6 +119,8 @@ def publication_export_xlsx():
 
 @blueprint.route("/publications/export/pdf")
 def publication_export_pdf():
+    logging.warn(request.args)
+
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = _get_publication_query(search_form)
@@ -133,13 +135,15 @@ def publication_export_pdf():
         theme = Theme.query.get_or_404(search_form.theme_id.data)
         parameters.append(('Theme', theme.name))
 
+    logging.warn(search_form.publication_date_start.data)
+
     publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
     if publication_start_date:
-        parameters.append(('Publication Date', f'>= {publication_start_date | "%Y-%M"}'))
+        parameters.append(('Start Publication Date', f'{publication_start_date:%b %Y}'))
 
     publication_end_date = parse_date_or_none(search_form.publication_date_end.data)
     if publication_end_date:
-        parameters.append(('Publication Date', f'<= {publication_end_date | "%Y-%M"}'))
+        parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 
     publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
 
