@@ -31,8 +31,6 @@ class PublicationSearchForm(SearchForm):
 
 @blueprint.route("/publications/")
 def publications():
-    logging.warn(request.args)
-
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = _get_publication_query(search_form)
@@ -65,7 +63,6 @@ def _get_publication_query(search_form):
 
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
-    logging.warn(search_form.publication_date_start.data)
     publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
     if publication_start_date:
         q = q.filter(ScopusPublication.publication_cover_date >= publication_start_date)
@@ -119,8 +116,6 @@ def publication_export_xlsx():
 
 @blueprint.route("/publications/export/pdf")
 def publication_export_pdf():
-    logging.warn(request.args)
-
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = _get_publication_query(search_form)
@@ -134,8 +129,6 @@ def publication_export_pdf():
     if search_form.theme_id.data:
         theme = Theme.query.get_or_404(search_form.theme_id.data)
         parameters.append(('Theme', theme.name))
-
-    logging.warn(search_form.publication_date_start.data)
 
     publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
     if publication_start_date:
