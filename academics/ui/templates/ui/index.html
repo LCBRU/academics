@@ -40,7 +40,7 @@
                             <header>
                                 <h1>
                                     <span>{{a.full_name}}</span>
-                                    {% if a.orcid | len > 0 %}
+                                    {% if a.orcid | length > 0 %}
                                         <a href="{{a.orcid_link}}" target="_blank">ORCID: {{a.orcid}}</a>
                                     {% else %}
                                         <a href="https://orcid.org/register" target="_blank">NO ORCID: click to register</a>
