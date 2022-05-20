@@ -22,8 +22,10 @@ def author_search(search_string):
     re_orcid = re.compile(r'^\d{4}-d{4}-d{4}-d{4}$')
 
     if re_orcid.match(search_string):
+        logging.warning('MATCH '*100)
         q = f'ORCID($search_string)'
     else:
+        logging.warning('NOPE '*100)
         q = f'authlast({search_string})'
 
     auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
