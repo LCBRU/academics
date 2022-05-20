@@ -20,7 +20,7 @@ def updating():
 
 def author_search(search_string):
     logging.warning(search_string)
-    re_orcid = re.compile(r'^\d{4}\-d{4}\-d{4}\-d{4}$')
+    re_orcid = re.compile(r'\d{4}-d{4}-d{4}-d{4}$')
 
     if re_orcid.match(search_string):
         logging.warning('MATCH '*100)
