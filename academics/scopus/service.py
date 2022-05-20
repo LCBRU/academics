@@ -28,7 +28,7 @@ def author_search(search_string):
     for r in auth_srch.results:
         a = AuthorSearch(r)
 
-        logging.warning(a.data)
+        logging.warning(r)
 
         if len(a.scopus_id) == 0:
             continue
