@@ -70,6 +70,7 @@
                             <tr>
                                 <th></th>
                                 <th>Author</th>
+                                <th>ORCID</th>
                                 <th>Publications</th>
                                 <th>Citations</th>
                                 <th>h-index</th>
@@ -91,13 +92,13 @@
                                             <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
                                         </div>
                                         <div><small class="text-muted">{{au.affiliation_name}}</small></div>
-                                        <div>
-                                            {% if au.orcid | length > 0 %}
-                                                <a href="{{au.orcid_link}}" target="_blank">ORCID: {{au.orcid}}</a>
-                                            {% else %}
-                                                <a href="https://orcid.org/register" target="_blank">NO ORCID: click to register</a>
-                                            {% endif %}
-                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if au.orcid | length > 0 %}
+                                            <a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>
+                                        {% else %}
+                                            <a href="https://orcid.org/register" target="_blank">register</a>
+                                        {% endif %}
                                     </td>
                                     <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
                                     <td>{{au.citation_count}}</td>
