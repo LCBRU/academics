@@ -8,7 +8,7 @@ meta = MetaData()
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
 
-    t = Table("author", meta, autoload=True)
+    t = Table("scopus_author", meta, autoload=True)
 
     orcid = Column("orcid", NVARCHAR(50))
     orcid.create(t)
@@ -16,6 +16,6 @@ def upgrade(migrate_engine):
 
 def downgrade(migrate_engine):
     meta.bind = migrate_engine
-    t = Table("author", meta, autoload=True)
+    t = Table("scopus_author", meta, autoload=True)
 
     t.c.orcid.drop()
