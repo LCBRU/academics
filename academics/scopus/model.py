@@ -61,6 +61,10 @@ class Author(ElsAuthor):
                 return h['@href']
 
     @property
+    def orcid(self):
+        return self.data.get(u'coredata', {}).get(u'orcid', '')
+
+    @property
     def eid(self):
         return self.data.get(u'coredata', {}).get(u'eid', '')
 
@@ -98,6 +102,7 @@ class Author(ElsAuthor):
     def update_scopus_author(self, scopus_author):
         scopus_author.scopus_id = self.scopus_id
         scopus_author.eid = self.eid
+        scopus_author.orcid = self.orcid
         scopus_author.first_name = self.first_name
         scopus_author.last_name = self.last_name
 
