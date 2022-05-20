@@ -166,4 +166,6 @@ class Abstract(AbsDoc):
 
 
 class DocumentSearch(ElsSearch):
-    pass
+    @property
+    def uri(self):
+        return self._uri + '&view=complete'
