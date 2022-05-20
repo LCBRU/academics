@@ -81,7 +81,7 @@ def add_scopus_publications(els_author, scopus_author):
         publication.href = href
         publication.abstract = p.get(u'dc:description', '')
 
-        publication.author_list = ', '.join([a.get['authname'] for a in p.get('author', []) if a.get('author')])
+        publication.author_list = ', '.join([a.get['authname'] for a in p.get('author', []) if a.get('authname', None)])
 
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
