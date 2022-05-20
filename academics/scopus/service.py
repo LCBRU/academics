@@ -2,11 +2,10 @@ import logging
 import re
 from flask import current_app
 from elsapy.elsclient import ElsClient
-from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from academics.model import Academic, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
-from .model import Abstract, AuthorSearch, Author
+from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
 
 
@@ -58,7 +57,7 @@ def get_els_author(scopus_id):
 
 
 def add_scopus_publications(els_author, scopus_author):
-    search_results = ElsSearch(query=f'au-id({els_author.scopus_id})', index='scopus')
+    search_results = DocumentSearch(query=f'au-id({els_author.scopus_id})', index='scopus')
     search_results.execute(_client(), get_all=True)
 
     for p in search_results.results:

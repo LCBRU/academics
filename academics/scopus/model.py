@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import logging
+from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.model import ScopusAuthor, ScopusPublication
 from lbrc_flask.validators import parse_date
@@ -162,3 +163,7 @@ class Abstract(AbsDoc):
         except Exception as e:
             logging.error(e)
             return False
+
+
+class DocumentSearch(ElsSearch):
+    pass
