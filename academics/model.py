@@ -18,7 +18,6 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     initialised = db.Column(db.Boolean, default=False)
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme)
-    orcid = db.Column(db.String)
 
     @property
     def full_name(self):
@@ -58,6 +57,7 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
     document_count = db.Column(db.String)
     h_index = db.Column(db.String)
     href = db.Column(db.String)
+    orcid = db.Column(db.String)
 
     @property
     def full_name(self):
