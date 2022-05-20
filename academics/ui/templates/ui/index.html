@@ -93,9 +93,9 @@
                                         <div><small class="text-muted">{{au.affiliation_name}}</small></div>
                                         <div>
                                             {% if au.orcid | length > 0 %}
-                                                <a href="{{au.orcid_link}}" class="btn btn-success btn-sm" target="_blank">ORCID: {{au.orcid}}</a>
+                                                <a href="{{au.orcid_link}}" target="_blank">ORCID: {{au.orcid}}</a>
                                             {% else %}
-                                                <a href="https://orcid.org/register" class="btn btn-warning btn-sm" target="_blank">NO ORCID: click to register</a>
+                                                <a href="https://orcid.org/register" target="_blank">NO ORCID: click to register</a>
                                             {% endif %}
                                         </div>
                                     </td>
