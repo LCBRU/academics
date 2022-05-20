@@ -106,10 +106,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     pubmed_id = db.Column(db.String)
     pii = db.Column(db.String)
     abstract = db.Column(db.String)
+    author_list = db.Column(db.String)
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
-
-    @property
-    def author_list(self):
-        return '; '.join([a.full_name for a in self.scopus_authors])

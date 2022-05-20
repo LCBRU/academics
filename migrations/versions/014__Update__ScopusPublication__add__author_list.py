@@ -7,12 +7,12 @@ def upgrade(migrate_engine):
 
     t = Table("scopus_publication", meta, autoload=True)
 
-    abstract = Column("abstract", UnicodeText)
-    abstract.create(t)
+    author_list = Column("author_list", UnicodeText)
+    author_list.create(t)
 
 
 def downgrade(migrate_engine):
     meta.bind = migrate_engine
     t = Table("scopus_publication", meta, autoload=True)
 
-    t.c.abstract.drop()
+    t.c.author_list.drop()
