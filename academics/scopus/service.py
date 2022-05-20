@@ -57,7 +57,7 @@ def get_els_author(scopus_id):
 
 
 def add_scopus_publications(els_author, scopus_author):
-    search_results = DocumentSearch(query=f'au-id({els_author.scopus_id})', index='scopus')
+    search_results = DocumentSearch(els_author)
     search_results.execute(_client(), get_all=True)
 
     for p in search_results.results:

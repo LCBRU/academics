@@ -166,6 +166,6 @@ class Abstract(AbsDoc):
 
 
 class DocumentSearch(ElsSearch):
-    @property
-    def uri(self):
-        return self._uri + '&view=complete'
+    def __init__(self, author):
+        super().__init__(query=f'au-id({author.scopus_id})', index='scopus')
+        self._uri += '&view=complete'
