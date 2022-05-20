@@ -41,9 +41,9 @@
                                 <h1>
                                     <span>{{a.full_name}}</span>
                                     {% if a.orcid | length > 0 %}
-                                        <a href="{{a.orcid_link}}" target="_blank">ORCID: {{a.orcid}}</a>
+                                        <a href="{{a.orcid_link}}" class="btn btn-success btn-sm" target="_blank">ORCID: {{a.orcid}}</a>
                                     {% else %}
-                                        <a href="https://orcid.org/register" target="_blank">NO ORCID: click to register</a>
+                                        <a href="https://orcid.org/register" class="btn btn-warning btn-sm" target="_blank">NO ORCID: click to register</a>
                                     {% endif %}
                                 </h1>
                                 <h2>{{a.theme.name}}</h2>
