@@ -2,6 +2,7 @@ import logging
 import re
 from flask import current_app
 from elsapy.elsclient import ElsClient
+from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from academics.model import Academic, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
