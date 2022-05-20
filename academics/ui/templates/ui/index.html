@@ -40,11 +40,6 @@
                             <header>
                                 <h1>
                                     <span>{{a.full_name}}</span>
-                                    {% if a.orcid | length > 0 %}
-                                        <a href="{{a.orcid_link}}" class="btn btn-success btn-sm" target="_blank">ORCID: {{a.orcid}}</a>
-                                    {% else %}
-                                        <a href="https://orcid.org/register" class="btn btn-warning btn-sm" target="_blank">NO ORCID: click to register</a>
-                                    {% endif %}
                                 </h1>
                                 <h2>{{a.theme.name}}</h2>
                             </header>
@@ -90,6 +85,11 @@
                                         title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
                                         data-target="#deleteAuthorModal"
                                         href="#"><i class="fas fa-trash"></i></a>    
+                                        {% if a.orcid | length > 0 %}
+                                            <a href="{{au.orcid_link}}" class="btn btn-success btn-sm" target="_blank">ORCID: {{au.orcid}}</a>
+                                        {% else %}
+                                            <a href="https://orcid.org/register" class="btn btn-warning btn-sm" target="_blank">NO ORCID: click to register</a>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <div><a href="{{ au.href }}" target="_blank">{{au.full_name}}</a></div>
