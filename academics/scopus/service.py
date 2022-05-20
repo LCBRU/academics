@@ -1,4 +1,5 @@
 import logging
+import re
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
@@ -18,7 +19,14 @@ def updating():
 
 
 def author_search(search_string):
-    auth_srch = ElsSearch(f'authlast({search_string}) AND affil(leicester)','author')
+    re_orcid = re.compile(r'^\d{4}-d{4}-d{4}-d{4}$')
+
+    if re_orcid.match(search_string):
+        q = f'ORCID($search_string)'
+    else:
+        q = f'authlast({search_string})'
+
+    auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
     auth_srch.execute(_client())
 
     existing_scopus_ids = [id for id, in ScopusAuthor.query.with_entities(ScopusAuthor.scopus_id).all()]
