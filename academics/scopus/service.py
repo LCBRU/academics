@@ -79,14 +79,7 @@ def add_scopus_publications(els_author, scopus_author):
             publication.publication = p.get(u'prism:publicationName', '')
             publication.publication_cover_date = parse_date(p.get(u'prism:coverDate', ''))
             publication.href = href
-
-            # Commented out because i've overshot the limit
-
-            # abstract = Abstract(scopus_id)
-
-            # if abstract.read(_client()) and abstract.abstract:
-            #     logging.warn(f'abstract found - {abstract.abstract}')
-            #     publication.abstract = abstract.abstract
+            publication.abstract = p.get(u'dc:description', '')
 
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
