@@ -67,44 +67,52 @@
                 <div class="row">
                     <div class="col">
                         <table class="table table-sm">
-                            <tr>
-                                <th></th>
-                                <th>Author</th>
-                                <th>ORCID</th>
-                                <th>Publications</th>
-                                <th>Citations</th>
-                                <th>h-index</th>
-                            </tr>
-                            {% for au in a.scopus_authors %}
+                            <colgroup>
+                                <col style="width:40%">
+                                <col style="width:30%">
+                                <col style="width:10%">
+                                <col style="width:10%">
+                                <col style="width:10%">
+                            </colgroup>
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <a class="author_delete"
-                                        data-toggle="modal"
-                                        data-author-id="{{ au.id }}"
-                                        data-author-name="{{ au.full_name }}"
-                                        data-academic-name="{{ a.full_name }}"
-                                        title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
-                                        data-target="#deleteAuthorModal"
-                                        href="#"><i class="fas fa-trash"></i></a>    
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
-                                        </div>
-                                        <div><small class="text-muted">{{au.affiliation_name}}</small></div>
-                                    </td>
-                                    <td>
-                                        {% if au.orcid | length > 0 %}
-                                            <a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>
-                                        {% else %}
-                                            <a href="https://orcid.org/register" target="_blank">register</a>
-                                        {% endif %}
-                                    </td>
-                                    <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
-                                    <td>{{au.citation_count}}</td>
-                                    <td>{{au.h_index}}</td>
+                                    <th>Author</th>
+                                    <th>ORCID</th>
+                                    <th>Publications</th>
+                                    <th>Citations</th>
+                                    <th>h-index</th>
                                 </tr>
-                            {% endfor %}
+                            </thead>
+                            <tbody>
+                                {% for au in a.scopus_authors %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <a class="author_delete"
+                                                    data-toggle="modal"
+                                                    data-author-id="{{ au.id }}"
+                                                    data-author-name="{{ au.full_name }}"
+                                                    data-academic-name="{{ a.full_name }}"
+                                                    title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
+                                                    data-target="#deleteAuthorModal"
+                                                    href="#"><i class="fas fa-trash"></i></a>    
+                                                <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
+                                            </div>
+                                            <div><small class="text-muted">{{au.affiliation_name}}</small></div>
+                                        </td>
+                                        <td>
+                                            {% if au.orcid | length > 0 %}
+                                                <a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>
+                                            {% else %}
+                                                <a href="https://orcid.org/register" target="_blank">register</a>
+                                            {% endif %}
+                                        </td>
+                                        <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
+                                        <td>{{au.citation_count}}</td>
+                                        <td>{{au.h_index}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                 </div>
