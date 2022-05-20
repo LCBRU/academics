@@ -38,7 +38,14 @@
                     <div class="col-7">
                         <div>
                             <header>
-                                <h1>{{a.full_name}}</h1>
+                                <h1>
+                                    <span>{{a.full_name}}</span>
+                                    {% if a.orcid | len > 0 %}
+                                        <a href="{{a.orcid_link}}" target="_blank">ORCID: {{a.orcid}}</a>
+                                    {% else %}
+                                        <a href="https://orcid.org/register" target="_blank">NO ORCID: click to register</a>
+                                    {% endif %}
+                                </h1>
                                 <h2>{{a.theme.name}}</h2>
                             </header>
                         </div>

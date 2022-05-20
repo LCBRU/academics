@@ -69,6 +69,11 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
         )
 
     @property
+    def orcid_link(self):
+        if self.orcid:
+            return f'https://orcid.org/{self.orcid}'
+
+    @property
     def affiliation_full_address(self):
         return ', '.join(
             filter(len, [
