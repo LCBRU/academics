@@ -16,7 +16,7 @@ def _get_author_choices():
 
 
 def _get_keyword_choices():
-    return [('', '')] + [(k.id, {k.keyword}) for k in Keyword.query.order_by(Keyword.keyword).all()]
+    return [('', '')] + [(k.id, k.keyword.title()) for k in Keyword.query.order_by(Keyword.keyword).all()]
 
 
 class PublicationSearchForm(SearchForm):
