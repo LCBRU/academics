@@ -99,7 +99,9 @@ def _get_publication_query(search_form):
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
             ScopusPublication.publication.like(f'%{search_form.search.data}%'),
         ))
-        
+
+    logging.warning(q)
+
     return q
 
 
