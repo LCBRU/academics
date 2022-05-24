@@ -2,10 +2,10 @@ from datetime import datetime
 import logging
 from flask import render_template, request
 from lbrc_flask.forms import SearchForm
-from academics.model import Academic, ScopusAuthor, ScopusPublication, Theme
+from academics.model import Academic, Keyword, ScopusAuthor, ScopusPublication, Theme
 from .. import blueprint
 from sqlalchemy import or_
-from wtforms import SelectField, MonthField
+from wtforms import SelectField, MonthField, SelectMultipleField
 from lbrc_flask.export import excel_download, pdf_download
 from lbrc_flask.validators import parse_date_or_none
 from dateutil.relativedelta import relativedelta
@@ -15,11 +15,16 @@ def _get_author_choices():
     return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
 
 
+def _get_keyword_choices():
+    return [('', '')] + [(k.id, {k.keyword}) for k in Keyword.query.order_by(Keyword.keyword).all()]
+
+
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme', coerce=int)
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
-    author_id = SelectField('Author', choices=[])
+    keywords = SelectMultipleField('Keywords')
+    author_id = SelectField('Author')
 
 
     def __init__(self, **kwargs):
@@ -27,6 +32,7 @@ class PublicationSearchForm(SearchForm):
 
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.keywords.choices = _get_keyword_choices()
 
 
 @blueprint.route("/publications/")
