@@ -37,7 +37,7 @@ class PublicationSearchForm(SearchForm):
 
         self.journal_id.choices = _get_journal_choices()
         self.author_id.choices = _get_author_choices()
-        self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.choices = _get_keyword_choices()
 
 
@@ -78,9 +78,9 @@ def _get_publication_query(search_form):
 
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
-    if search_form.journal_id.data:
-        logging.warning(search_form.journal_id.data)
-        q = q.filter(ScopusPublication.journal_id == search_form.journal_id.data[0])
+    # if search_form.journal_id.data:
+    #     logging.warning(search_form.journal_id.data)
+    #     q = q.filter(ScopusPublication.journal_id == search_form.journal_id.data[0])
 
     if search_form.keywords.data:
         for k in search_form.keywords.data:
