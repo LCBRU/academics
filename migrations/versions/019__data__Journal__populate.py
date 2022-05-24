@@ -18,9 +18,7 @@ def upgrade(migrate_engine):
             j = Journal(name=pub_name)
             journals[pub_name] = j
             session.add(j)
-        
-        p.journal = journals[pub_name]
-        session.add(p)
+
     session.commit()
 
 
