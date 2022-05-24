@@ -70,6 +70,9 @@ def _get_publication_query(search_form):
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
     if search_form.keywords.data:
+
+        logging.warning('Keywords')
+        logging.warning(search_form.keywords.data)
         q.join(ScopusPublication.keywords)
         q.filter(Keyword.id.in_(search_form.keywords.data))
 
