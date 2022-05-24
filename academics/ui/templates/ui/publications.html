@@ -1,5 +1,5 @@
 {% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary %}
 {% from "lbrc_flask/modal_macros.html" import render_modal %}
 
 {% block content %}
@@ -29,7 +29,7 @@
 
     </div>
 
-    <p class="text-muted">Displaying {{ publications.items | length | separated_number}} of {{publications.total | separated_number}} found</p>
+    {{ pagination_summary(publications, 'publication') }}
 
     <ul class="list-group">
         {% for p in publications.items %}
