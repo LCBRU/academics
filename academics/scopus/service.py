@@ -103,7 +103,7 @@ def _add_keywords_to_publications(publication, keyword_list):
         keyword = Keyword.query.filter(Keyword.keyword == keyword_word).one_or_none()
 
         if not keyword:
-            keyword = Keyword(keyword=keyword)
+            keyword = Keyword(keyword=keyword_word)
             db.session.add(keyword)
         
         publication.keywords.add(keyword)
