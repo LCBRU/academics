@@ -1,5 +1,5 @@
 {% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary %}
 {% from "lbrc_flask/modal_macros.html" import render_modal %}
 
 {% block content %}
@@ -30,6 +30,8 @@
         ) }}
 
     </div>
+
+    {{ pagination_summary(academics, 'academic') }}
 
     <ul class="list-group">
         {% for a in academics.items %}
