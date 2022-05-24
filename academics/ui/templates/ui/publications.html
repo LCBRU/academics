@@ -49,9 +49,12 @@
                         </div>
                     </div>
                 </div>
-                {% for k in p.keywords %}
-                    <a href="" class="m-1 btn btn-outline-secondary btn-sm">{{ k.keyword }}</a>
-                {% endfor %}
+                <div>
+                    <h4>Keywords</h4>
+                    {% for k in p.keywords | sort(attribute='rating')%}
+                        <a href="" class="m-1 btn btn-outline-secondary btn-sm">{{ k.keyword }}</a>
+                    {% endfor %}
+                </div>
             </li>
         {% endfor %}
     </ul>
