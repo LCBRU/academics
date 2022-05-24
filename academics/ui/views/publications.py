@@ -55,8 +55,6 @@ def publications():
         error_out=False,
     )
 
-    logging.warning(publications.__dict__)
-
     return render_template(
         "ui/publications.html",
         search_form=search_form,
@@ -79,7 +77,6 @@ def _get_publication_query(search_form):
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
     if search_form.journal_id.data:
-        logging.warning(search_form.journal_id.data)
         q = q.filter(ScopusPublication.journal_id.in_(search_form.journal_id.data))
 
     if search_form.keywords.data:
@@ -99,8 +96,6 @@ def _get_publication_query(search_form):
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
             ScopusPublication.publication.like(f'%{search_form.search.data}%'),
         ))
-
-    logging.warning(q)
 
     return q
 
