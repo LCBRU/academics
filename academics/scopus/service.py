@@ -4,7 +4,7 @@ from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
-from academics.model import Academic, ScopusAuthor, ScopusPublication
+from academics.model import Academic, Keyword, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
@@ -86,7 +86,27 @@ def add_scopus_publications(els_author, scopus_author):
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
 
+        _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
+
         db.session.add(publication)
+
+
+def _add_keywords_to_publications(publication, keyword_list):
+    publication.keywords.clear()
+
+    for k in keyword_list.split('|'):
+        keyword_word = k.strip().lower()
+
+        if not keyword:
+            continue
+
+        keyword = Keyword.query.filter(Keyword.keyword == keyword_word).one_or_none()
+
+        if not keyword:
+            keyword = Keyword(keyword=keyword)
+            db.session.add(keyword)
+        
+        publication.keywords.add(keyword)
 
 
 def update_academics():
