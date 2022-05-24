@@ -130,6 +130,15 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
 
+    @property
+    def acknowledgement_status_name(self):
+        if self.acknowledgement_validated is None:
+            return 'Unknown'
+        elif self.acknowledgement_validated:
+            return 'Acknowledged'
+        else:
+            return 'Not Acknowledged'
+
 
 class Keyword(db.Model):
 

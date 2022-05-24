@@ -43,18 +43,32 @@
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a href="{{ p.href }}" class="btn btn-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
                             </div>
+
                             {% if p.doi %}
                                 <div class="btn-group mr-1 mb-1" role="group">
                                     <a href="http://doi.org/{{ p.doi }}" class="btn btn-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
                                 </div>
                             {% endif %}
+
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <button id="btnGroupAcknowledgement" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                                    <a class="dropdown-item" href="{{ url _for('ui.publication_acknowledgement_validation', id=p.id, status='unset') }}">Acknowledgement Unknown</a>
+                                    <a class="dropdown-item" href="{{ url _for('ui.publication_acknowledgement_validation', id=p.id, status='true') }}">Acknowledge</a>
+                                    <a class="dropdown-item" href="{{ url _for('ui.publication_acknowledgement_validation', id=p.id, status='false') }}">Not Acknowledged</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div>
                     <h4>{{p.author_list}}</h4>
                     <h5>{{p.journal.name | title_case}} ({{p.publication_cover_date | date_format}})</h5>
+ 
                     <h4>Keywords:</h4>
+
                     {% for k in p.keywords | sort(attribute='keyword')%}
                         <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="m-1 btn btn-outline-secondary btn-sm">{{ k.keyword }}</a>
                     {% endfor %}
