@@ -52,7 +52,7 @@
                 <div>
                     <h4>Keywords:</h4>
                     {% for k in p.keywords | sort(attribute='keyword')%}
-                        <a href="" class="m-1 btn btn-outline-secondary btn-sm">{{ k.keyword }}</a>
+                        <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="m-1 btn btn-outline-secondary btn-sm">{{ k.keyword }}</a>
                     {% endfor %}
                 </div>
             </li>

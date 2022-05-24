@@ -55,6 +55,7 @@ def publications():
         publications=publications,
     )
 
+
 def _get_publication_query(search_form):
     q = ScopusPublication.query
 
