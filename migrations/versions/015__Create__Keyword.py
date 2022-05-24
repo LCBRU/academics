@@ -10,7 +10,7 @@ def upgrade(migrate_engine):
         "keyword",
         meta,
         Column("id", Integer, primary_key=True),
-        Column("keyword", NVARCHAR(200)),
+        Column("keyword", NVARCHAR(200), index=True),
     )
 
     t.create()
