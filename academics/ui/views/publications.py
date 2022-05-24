@@ -78,9 +78,9 @@ def _get_publication_query(search_form):
 
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
-    # if search_form.journal_id.data:
-    #     logging.warning(search_form.journal_id.data)
-    #     q = q.filter(ScopusPublication.journal_id == search_form.journal_id.data[0])
+    if search_form.journal_id.data:
+        logging.warning(search_form.journal_id.data)
+        q = q.filter(ScopusPublication.journal_id == search_form.journal_id.data[0])
 
     if search_form.keywords.data:
         for k in search_form.keywords.data:
