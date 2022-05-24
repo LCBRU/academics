@@ -49,6 +49,8 @@ def publications():
         error_out=False,
     )
 
+    logging.warning(publications)
+
     return render_template(
         "ui/publications.html",
         search_form=search_form,

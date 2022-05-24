@@ -29,6 +29,8 @@
 
     </div>
 
+    <p>Displaying {{ publications.items | length }} of {{publications.total}} found.</p>
+
     <ul class="list-group">
         {% for p in publications.items %}
             <li class="list-group-item summary_details">
