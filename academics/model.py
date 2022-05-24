@@ -85,6 +85,12 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
         )
 
 
+class Journal(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+
 scopus_author__scopus_publication = db.Table(
     'scopus_author__scopus_publication',
     db.Column('scopus_author_id', db.Integer(), db.ForeignKey('scopus_author.id'), primary_key=True),
@@ -117,6 +123,9 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
+
+    journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
+    Journal = db.relationship(Journal, backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
 
