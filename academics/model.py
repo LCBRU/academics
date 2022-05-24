@@ -123,6 +123,8 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
 
+    acknowledgement_validated = db.Column(db.Boolean, default=None)
+
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
     journal = db.relationship(Journal, backref=db.backref("publications", cascade="all,delete"))
 
