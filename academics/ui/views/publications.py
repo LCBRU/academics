@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 from flask import render_template, request
 from lbrc_flask.forms import SearchForm
-from academics.model import Academic, Keyword, ScopusAuthor, ScopusPublication, Theme
+from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication, Theme
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField
@@ -19,8 +19,13 @@ def _get_keyword_choices():
     return [('', '')] + [(k.id, k.keyword.title()) for k in Keyword.query.order_by(Keyword.keyword).all()]
 
 
+def _get_journal_choices():
+    return [('', '')] + [(j.id, j.name.title()) for j in Journal.query.order_by(Journal.name).all()]
+
+
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme', coerce=int)
+    journal_id = SelectField('Journal', coerce=int)
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
     keywords = SelectMultipleField('Keywords')
@@ -30,6 +35,7 @@ class PublicationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.journal_id.choices = _get_journal_choices()
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.choices = _get_keyword_choices()
