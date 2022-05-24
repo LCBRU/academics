@@ -97,7 +97,7 @@ def _add_keywords_to_publications(publication, keyword_list):
     for k in keyword_list.split('|'):
         keyword_word = k.strip().lower()
 
-        if not keyword:
+        if not keyword_word:
             continue
 
         keyword = Keyword.query.filter(Keyword.keyword == keyword_word).one_or_none()
