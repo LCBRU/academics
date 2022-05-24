@@ -25,7 +25,7 @@ def _get_journal_choices():
 
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
-    journal_id = SelectField('Journal')
+    journal_id = SelectMultipleField('Journal')
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
     keywords = SelectMultipleField('Keywords')
@@ -78,8 +78,10 @@ def _get_publication_query(search_form):
 
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
-    if search_form.keywords.data:
+    if search_form.journal_id.data:
+        q = q.filter(ScopusPublication.journal_id.in_(search_form.journal_id.data))
 
+    if search_form.keywords.data:
         for k in search_form.keywords.data:
             q = q.filter(ScopusPublication.keywords.any(Keyword.id == k))
 
