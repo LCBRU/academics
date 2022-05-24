@@ -35,20 +35,18 @@
         {% for p in publications.items %}
             <li class="list-group-item summary_details">
                 <div class='row'>
-                    <div class="col-2 col-md-1">
-                        <div class="btn-group-vertical" role="group" aria-label="Basic example">
-                            <a href="{{ p.href }}" class="btn btn-outline-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
-                            {% if p.doi %}
-                                <a href="http://doi.org/{{ p.doi }}"class="btn btn-outline-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col">
+                    <div class="col-7">
                         <div>
                             <h3>{{p.title}}</h3>
                             <h4>{{p.author_list}}</h4>
                             <h5>{{p.journal.name | title_case}} ({{p.publication_cover_date | date_format}})</h5>
                         </div>
+                    </div>
+                    <div class="col-5">
+                        <a href="{{ p.href }}" class="btn btn-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
+                        {% if p.doi %}
+                            <a href="http://doi.org/{{ p.doi }}"class="btn btn-outline-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
+                        {% endif %}
                     </div>
                 </div>
                 <div>
