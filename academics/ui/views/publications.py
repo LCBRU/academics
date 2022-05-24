@@ -80,7 +80,7 @@ def _get_publication_query(search_form):
 
     if search_form.journal_id.data:
         logging.warning(search_form.journal_id.data)
-        q = q.filter(ScopusPublication.journal_id == search_form.journal_id.data[0])
+        q = q.filter(ScopusPublication.journal_id.in_(search_form.journal_id.data))
 
     if search_form.keywords.data:
         for k in search_form.keywords.data:
