@@ -25,7 +25,7 @@ def _get_journal_choices():
 
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
-    journal_id = SelectMultipleField('Journal')
+    journal_id = SelectMultipleField('Journal', coerce=int)
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
     keywords = SelectMultipleField('Keywords')
