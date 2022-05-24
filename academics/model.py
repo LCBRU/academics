@@ -92,6 +92,13 @@ scopus_author__scopus_publication = db.Table(
 )
 
 
+scopus_publications__keywords = db.Table(
+    'scopus_publication__keyword',
+    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
+    db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
+)
+
+
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -110,3 +117,13 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
+
+    keywords = db.relationship("Keyword", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
+
+
+class Keyword(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    keyword = db.Column(db.String)
+
+    publications = db.relationship("ScopusPublication", secondary=scopus_publications__keywords, back_populates="keywords", collection_class=set)
