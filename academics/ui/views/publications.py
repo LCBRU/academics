@@ -20,7 +20,7 @@ def _get_keyword_choices():
 
 
 def _get_journal_choices():
-    return [('', '')] + [(j.id, j.name.title()) for j in Journal.query.order_by(Journal.name).all()]
+    return [(j.id, j.name.title()) for j in Journal.query.order_by(Journal.name).all() if j.name]
 
 
 class PublicationSearchForm(SearchForm):
