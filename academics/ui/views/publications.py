@@ -71,9 +71,8 @@ def _get_publication_query(search_form):
 
     if search_form.keywords.data:
 
-        logging.warning('Keywords')
-        logging.warning(search_form.keywords.data)
-        q= q.filter(ScopusPublication.keywords.any(Keyword.id.in_(search_form.keywords.data)))
+        for k in search_form.keywords.data:
+            q = q.filter(ScopusPublication.keywords.any(Keyword.id == k))
 
     publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
     if publication_start_date:
