@@ -55,9 +55,9 @@
                                     {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                                    <a class="dropdown-item" href="{{ url _for('ui.publication_acknowledgement_validation', id=p.id, status='unset') }}">Acknowledgement Unknown</a>
-                                    <a class="dropdown-item" href="{{ url _for('ui.publication_acknowledgement_validation', id=p.id, status='true') }}">Acknowledge</a>
-                                    <a class="dropdown-item" href="{{ url _for('ui.publication_acknowledgement_validation', id=p.id, status='false') }}">Not Acknowledged</a>
+                                    <a class="dropdown-item" href="{{ url_for('ui.publication_acknowledgement_validation', id=p.id, status='unset') }}">Acknowledgement Unknown</a>
+                                    <a class="dropdown-item" href="{{ url_for('ui.publication_acknowledgement_validation', id=p.id, status='true') }}">Acknowledge</a>
+                                    <a class="dropdown-item" href="{{ url_for('ui.publication_acknowledgement_validation', id=p.id, status='false') }}">Not Acknowledged</a>
                                 </div>
                             </div>
                         </div>
