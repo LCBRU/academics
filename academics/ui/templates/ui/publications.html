@@ -41,11 +41,11 @@
                     <div class="col-5">
                         <div class="btn-toolbar float-right">
                             <div class="btn-group mr-1 mb-1" role="group">
-                                <a href="{{ p.href }}" class="btn btn-primary mr-1 mb-1" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
+                                <a href="{{ p.href }}" class="btn btn-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
                             </div>
                             {% if p.doi %}
                                 <div class="btn-group mr-1 mb-1" role="group">
-                                    <a href="http://doi.org/{{ p.doi }}" class="btn btn-primary mr-1 mb-1" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
+                                    <a href="http://doi.org/{{ p.doi }}" class="btn btn-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
                                 </div>
                             {% endif %}
                         </div>
