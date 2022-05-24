@@ -118,7 +118,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
 
-    keywords = db.relationship("Keyword", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
+    keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
 
 
 class Keyword(db.Model):
