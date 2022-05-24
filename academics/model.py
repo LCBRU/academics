@@ -114,7 +114,6 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     scopus_id = db.Column(db.String)
     doi = db.Column(db.String)
     title = db.Column(db.String)
-    publication = db.Column(db.String)
     publication_cover_date = db.Column(db.Date)
     pubmed_id = db.Column(db.String)
     pii = db.Column(db.String)
