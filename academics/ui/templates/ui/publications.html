@@ -29,7 +29,7 @@
 
     </div>
 
-    <p>Displaying {{ publications.items | length }} of {{publications.total}} found.</p>
+    <p>Displaying {{ publications.items | length | separated_number}} of {{publications.total | separated_number}} found.</p>
 
     <ul class="list-group">
         {% for p in publications.items %}

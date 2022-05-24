@@ -49,7 +49,7 @@ def publications():
         error_out=False,
     )
 
-    logging.warning(publications)
+    logging.warning(publications.__dict__)
 
     return render_template(
         "ui/publications.html",
