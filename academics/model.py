@@ -124,7 +124,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     deleted = db.Column(db.Boolean, default=False)
 
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
-    Journal = db.relationship(Journal, backref=db.backref("publications", cascade="all,delete"))
+    journal = db.relationship(Journal, backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
 
