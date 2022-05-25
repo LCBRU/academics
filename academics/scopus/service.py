@@ -4,7 +4,8 @@ from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
-from academics.model import Academic, Keyword, ScopusAuthor, ScopusPublication
+from sqlalchemy import and_, exists
+from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
@@ -75,7 +76,7 @@ def add_scopus_publications(els_author, scopus_author):
 
         publication.doi = p.get(u'prism:doi', '')
         publication.title = p.get(u'dc:title', '')
-        publication.publication = p.get(u'prism:publicationName', '')
+        publication.journal = _get_journal(p.get(u'prism:publicationName', ''))
         publication.publication_cover_date = parse_date(p.get(u'prism:coverDate', ''))
         publication.href = href
         publication.abstract = p.get(u'dc:description', '')
@@ -88,6 +89,21 @@ def add_scopus_publications(els_author, scopus_author):
         _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
 
         db.session.add(publication)
+
+
+def _get_journal(journal_name):
+    journal_name = (journal_name or '').lower().strip()
+
+    if not journal_name:
+        return None
+
+    result = Journal.query.filter(Journal.name == journal_name).one_or_none()
+
+    if not result:
+        result = Journal(name=journal_name)
+        db.session.add(result)
+
+    return result
 
 
 def _get_author_list(authors):
@@ -145,6 +161,8 @@ def _update_all_academics():
 
     db.session.commit()
 
+    delete_orphan_publications()
+
     logging.info('_update_all_academics: Ended')
 
 
@@ -192,4 +210,11 @@ def _add_authors_to_academic(scopus_ids, academic_id):
     db.session.add(academic)
     db.session.commit()
 
+    delete_orphan_publications()
+
     logging.info('_add_authors_to_academic: ended')
+
+
+def delete_orphan_publications():
+    ScopusPublication.query.filter(~ScopusPublication.scopus_authors.any()).delete(synchronize_session='fetch')
+    db.session.commit()
