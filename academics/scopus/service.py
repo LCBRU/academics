@@ -80,7 +80,7 @@ def add_scopus_publications(els_author, scopus_author):
         publication.href = href
         publication.abstract = p.get(u'dc:description', '')
 
-        publication.author_list = ', '.join([a['authname'] for a in p.get('author', []) if a.get('authname', None)])
+        publication.author_list = _get_author_list(p.get('author', []))
 
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
@@ -88,6 +88,12 @@ def add_scopus_publications(els_author, scopus_author):
         _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
 
         db.session.add(publication)
+
+
+def _get_author_list(authors):
+    author_names = [a['authname'] for a in authors]
+    unique_author_names = list(dict.fromkeys(filter(len, author_names)))
+    return ', '.join(unique_author_names)
 
 
 def _add_keywords_to_publications(publication, keyword_list):
