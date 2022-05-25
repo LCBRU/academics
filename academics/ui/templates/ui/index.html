@@ -103,7 +103,7 @@
                                             <div><small class="text-muted">{{au.affiliation_name}}</small></div>
                                         </td>
                                         <td>
-                                            {% if au.orcid | length > 0 %}
+                                            {% if au.orcid | blank_if_none | length > 0 %}
                                                 <a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>
                                             {% else %}
                                                 <a href="https://orcid.org/register" target="_blank">register</a>
