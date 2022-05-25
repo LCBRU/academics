@@ -1,30 +1,21 @@
 from sqlalchemy import MetaData
-from sqlalchemy.orm.session import sessionmaker
-from academics.model import Journal, ScopusPublication
-
 
 meta = MetaData()
 
 def upgrade(migrate_engine):
     conn = migrate_engine.connect()
-    Session = sessionmaker(bind=migrate_engine)
-    session = Session()
 
-    journals = {j.name: j for j in session.query(Journal).all()}
-
-    for p in session.query(ScopusPublication).all():
-        pub_name = p.publication.lower().strip()
-        if pub_name not in journals:
-            j = Journal(name=pub_name)
-            journals[pub_name] = j
-            session.add(j)
-
-    session.commit()
-
+    conn.execute('''
+        INSERT INTO journal (name)
+        SELECT DISTINCT TRIM(LOWER(publication))
+        FROM scopus_publication
+        ;
+    ''')
 
 def downgrade(migrate_engine):
-    Session = sessionmaker(bind=migrate_engine)
-    session = Session()
+    conn = migrate_engine.connect()
 
-    session.query(Journal).delete()
-    session.commit()
+    conn.execute('''
+        DELETE FROM journal;
+        ;
+    ''')

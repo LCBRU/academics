@@ -5,21 +5,28 @@ from academics.model import Journal, ScopusPublication
 
 meta = MetaData()
 
+from sqlalchemy import MetaData
+
+meta = MetaData()
+
 def upgrade(migrate_engine):
     conn = migrate_engine.connect()
-    Session = sessionmaker(bind=migrate_engine)
-    session = Session()
 
-    journals = {j.name: j for j in session.query(Journal).all()}
-
-    for p in session.query(ScopusPublication).all():
-        pub_name = p.publication.lower().strip()
-
-        p.journal_id = journals[pub_name].id
-        session.add(p)
-
-    session.commit()
-
+    conn.execute('''
+        UPDATE scopus_publication
+        SET journal_id = (
+            SELECT id
+            FROM journal j
+            WHERE j.name = TRIM(LOWER(scopus_publication.publication))
+        )
+        ;
+    ''')
 
 def downgrade(migrate_engine):
-    pass
+    conn = migrate_engine.connect()
+
+    conn.execute('''
+        UPDATE scopus_publication sp
+        SET sp.journal_id = NULL
+        ;
+    ''')
