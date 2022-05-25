@@ -1,5 +1,6 @@
 import logging
 import re
+from time import sleep
 from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
@@ -144,26 +145,38 @@ def update_academics():
 def _update_all_academics():
     logging.info('_update_all_academics: started')
 
-    for sa in ScopusAuthor.query.all():
+    while True:
+        a = Academic.query.filter(Academic.updating == 1).first()
+
+        if not a:
+            break
+
+        try:
+            _update_academic(a)
+
+            a.set_name()
+            a.updating = False
+            db.session.add(a)
+
+            db.session.commit()
+        except Exception as e:
+            logging.error(e)
+
+            sleep(30)
+
+    delete_orphan_publications()
+
+    logging.info('_update_all_academics: Ended')
+
+
+def _update_academic(academic):
+    for sa in academic.scopus_authors:
         els_author = get_els_author(sa.scopus_id)
         els_author.update_scopus_author(sa)
 
         add_scopus_publications(els_author, sa)
 
         db.session.add(sa)
-
-    db.session.commit()
-
-    for academic in Academic.query.all():
-        academic.set_name()
-        academic.updating = False
-        db.session.add(academic)
-
-    db.session.commit()
-
-    delete_orphan_publications()
-
-    logging.info('_update_all_academics: Ended')
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
