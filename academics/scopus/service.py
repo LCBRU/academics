@@ -6,7 +6,7 @@ from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from academics.model import Academic, Keyword, ScopusAuthor, ScopusPublication
 from lbrc_flask.celery import celery
-from .model import Abstract, AuthorSearch, Author, DocumentSearch
+from .model import AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
 
 

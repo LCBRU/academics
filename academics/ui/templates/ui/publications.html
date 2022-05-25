@@ -55,9 +55,9 @@
                                     {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                                    <a class="dropdown-item" href="{{ url_for('ui.publication_acknowledgement_validation', id=p.id, status='unset') }}">Acknowledgement Unknown</a>
-                                    <a class="dropdown-item" href="{{ url_for('ui.publication_acknowledgement_validation', id=p.id, status='true') }}">Acknowledge</a>
-                                    <a class="dropdown-item" href="{{ url_for('ui.publication_acknowledgement_validation', id=p.id, status='false') }}">Not Acknowledged</a>
+                                    <a class="dropdown-item" href="javascript://" onclick="publication_acknowledgement_validation({{p.id}}, '{{ p.ACKNOWLEDGEMENT_UNKNOWN }}')">Unknown</a>
+                                    <a class="dropdown-item" href="javascript://" onclick="publication_acknowledgement_validation({{p.id}}, '{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}')">Acknowledged</a>
+                                    <a class="dropdown-item" href="javascript://" onclick="publication_acknowledgement_validation({{p.id}}, '{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}')">Not Acknowledged</a>
                                 </div>
                             </div>
                         </div>
@@ -79,5 +79,23 @@
 </section>
 
 {{ render_pagination(publications, 'ui.publications', form=search_form) }}
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    function publication_acknowledgement_validation(id, status) {
+        fetch("{{ url_for('ui.publication_acknowledgement_validation') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                id: id,
+                status: status,
+            }),
+        })
+        .then(standard_status_actions);
+    }
+</script>
 
 {% endblock %}

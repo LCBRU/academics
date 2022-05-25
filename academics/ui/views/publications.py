@@ -1,6 +1,4 @@
-from datetime import datetime
-import logging
-from flask import render_template, request
+from flask import abort, jsonify, render_template, request
 from lbrc_flask.forms import SearchForm
 from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication, Theme
 from .. import blueprint
@@ -8,7 +6,9 @@ from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField
 from lbrc_flask.export import excel_download, pdf_download
 from lbrc_flask.validators import parse_date_or_none
+from lbrc_flask.json import validate_json
 from dateutil.relativedelta import relativedelta
+from lbrc_flask.database import db
 
 
 def _get_author_choices():
@@ -30,6 +30,12 @@ class PublicationSearchForm(SearchForm):
     publication_date_end = MonthField('Publication End Date')
     keywords = SelectMultipleField('Keywords')
     author_id = SelectField('Author')
+    acknowledgement = SelectField('Acknowledgement', choices=[
+        ('', ''),
+        (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
+        (ScopusPublication.ACKNOWLEDGEMENT_ACKNOWLEDGED, 'Acknowledged'),
+        (ScopusPublication.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED, 'Not Acknowledged')
+    ])
 
 
     def __init__(self, **kwargs):
@@ -97,6 +103,9 @@ def _get_publication_query(search_form):
             ScopusPublication.publication.like(f'%{search_form.search.data}%'),
         ))
 
+    if search_form.acknowledgement.data:
+        q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
+
     return q
 
 
@@ -163,6 +172,25 @@ def publication_export_pdf():
     return pdf_download('ui/publications_pdf.html', title='Academics Publications', publications=publications, parameters=parameters)
 
 
-@blueprint.route("/publications/<int:id>/acknowledgement_validation/<string:status>", methods=['POST'])
-def publication_acknowledgement_validation(id, status):
-    pass
+@blueprint.route("/publications/acknowledgement_validation", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'integer'},
+        'status': {'type': 'string'},
+    },
+    "required": ["id", "status"]
+})
+def publication_acknowledgement_validation():
+    p = ScopusPublication.query.get_or_404(request.json.get('id'))
+
+    status = request.json.get('status')
+
+    if status not in ScopusPublication.ACKNOWLEDGEMENTS:
+        abort(400)
+
+    p.acknowledgement_validated = ScopusPublication.ACKNOWLEDGEMENTS[status]
+
+    db.session.commit()
+
+    return jsonify({}), 205

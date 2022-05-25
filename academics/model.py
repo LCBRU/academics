@@ -107,6 +107,16 @@ scopus_publications__keywords = db.Table(
 
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
+    ACKNOWLEDGEMENT_UNKNOWN = 'unknown'
+    ACKNOWLEDGEMENT_ACKNOWLEDGED = 'acknowledged'
+    ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED = 'not_acknowledged'
+
+    ACKNOWLEDGEMENTS = {
+        ACKNOWLEDGEMENT_UNKNOWN: None,
+        ACKNOWLEDGEMENT_ACKNOWLEDGED: True,
+        ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED: False,
+    }
+
     id = db.Column(db.Integer, primary_key=True)
 
     scopus_authors = db.relationship("ScopusAuthor", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications"), lazy="joined")
@@ -133,7 +143,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     @property
     def acknowledgement_status_name(self):
         if self.acknowledgement_validated is None:
-            return 'Unknown'
+            return 'Acknowledgement Unknown'
         elif self.acknowledgement_validated:
             return 'Acknowledged'
         else:
