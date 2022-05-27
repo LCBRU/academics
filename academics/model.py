@@ -1,6 +1,7 @@
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
+from lbrc_flask.security import User
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):
@@ -105,6 +106,13 @@ scopus_publications__keywords = db.Table(
 )
 
 
+folders__scopus_publications = db.Table(
+    'folders__scopus_publications',
+    db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
+    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
+)
+
+
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     ACKNOWLEDGEMENT_UNKNOWN = 'unknown'
@@ -142,6 +150,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     journal = db.relationship(Journal, backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
+    folders = db.relationship("Folder", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
 
     @property
     def acknowledgement_status_name(self):
@@ -173,3 +182,14 @@ class Keyword(db.Model):
     keyword = db.Column(db.String)
 
     publications = db.relationship("ScopusPublication", secondary=scopus_publications__keywords, back_populates="keywords", collection_class=set)
+
+
+class Folder(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
+
+    publications = db.relationship("ScopusPublication", secondary=folders__scopus_publications, back_populates="folders", collection_class=set)

@@ -101,7 +101,7 @@
                         <div>
                             <h3>{{p.title}}</h3>
                             <h4>{{p.author_list}}</h4>
-                            <h5>{{p.journal.name}} ({{p.publication_cover_date | date_format}})</h5>
+                            <h5>{{p.journal.name}} ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</h5>
                         </div>
                     </header>
                     <p>{{p.abstract | blank_if_none}}</p>
