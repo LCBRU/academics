@@ -10,6 +10,7 @@ from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.json import validate_json
 from dateutil.relativedelta import relativedelta
 from lbrc_flask.database import db
+from lbrc_flask.forms import MultiCheckboxField
 
 
 def _get_author_choices():
@@ -54,7 +55,7 @@ class PublicationSearchForm(SearchForm):
 
 class PublicationFolderForm(FlashingForm):
     scopus_publication_id = HiddenField('scopus_publication_id')
-    folder_id = SelectField('Folders', coerce=int)
+    folder_id = MultiCheckboxField('Folders', coerce=int)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
