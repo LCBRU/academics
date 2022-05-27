@@ -133,6 +133,17 @@
         })
         .then(standard_status_actions);
     }
+
+    $(document).ready(function(){
+        $('#publicationFolderModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+
+            document.querySelectorAll('#publicationFolderModal input[name="folder_id"]').forEach((e) => {
+                e.checked = false;
+            });
+        });
+    });
 </script>
 
 {% endblock %}
