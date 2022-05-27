@@ -1,9 +1,10 @@
-from flask import abort, jsonify, render_template, request
-from lbrc_flask.forms import SearchForm
-from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication, Theme
+from flask import abort, jsonify, redirect, render_template, request
+from flask_login import current_user
+from lbrc_flask.forms import SearchForm, FlashingForm
+from academics.model import Academic, Folder, Journal, Keyword, ScopusAuthor, ScopusPublication, Theme
 from .. import blueprint
 from sqlalchemy import or_
-from wtforms import SelectField, MonthField, SelectMultipleField
+from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
 from lbrc_flask.export import excel_download, pdf_download
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.json import validate_json
@@ -21,6 +22,10 @@ def _get_keyword_choices():
 
 def _get_journal_choices():
     return [(j.id, j.name.title()) for j in Journal.query.order_by(Journal.name).all() if j.name]
+
+
+def _get_folder_choices():
+    return [(f.id, f.name.title()) for f in Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all()]
 
 
 class PublicationSearchForm(SearchForm):
@@ -47,6 +52,16 @@ class PublicationSearchForm(SearchForm):
         self.keywords.choices = _get_keyword_choices()
 
 
+class PublicationFolderForm(FlashingForm):
+    scopus_publication_id = HiddenField('scopus_publication_id')
+    folder_id = SelectMultipleField('Folders', coerce=int)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.folder_id.choices = _get_folder_choices()
+
+
 @blueprint.route("/publications/")
 def publications():
     search_form = PublicationSearchForm(formdata=request.args)
@@ -64,6 +79,7 @@ def publications():
     return render_template(
         "ui/publications.html",
         search_form=search_form,
+        publication_folder_form=PublicationFolderForm(),
         publications=publications,
     )
 
@@ -200,3 +216,24 @@ def publication_acknowledgement_validation():
     db.session.commit()
 
     return jsonify({}), 205
+
+
+@blueprint.route("/publication/folders", methods=['POST'])
+def publication_folder():
+    form = PublicationFolderForm()
+
+    # if form.validate_on_submit():
+    #     id = form.id.data
+
+    #     if id:
+    #         folder = Folder.query.get_or_404(id)
+    #     else:
+    #         folder = Folder()
+    #         folder.owner = current_user
+
+    #     folder.name = form.name.data
+
+    #     db.session.add(folder)
+    #     db.session.commit()
+
+    return redirect(request.referrer)
