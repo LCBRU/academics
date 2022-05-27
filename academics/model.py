@@ -129,6 +129,9 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     pii = db.Column(db.String)
     abstract = db.Column(db.String)
     author_list = db.Column(db.String)
+    volume = db.Column(db.String)
+    issue = db.Column(db.String)
+    pages = db.Column(db.String)
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
@@ -148,6 +151,20 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
             return 'Acknowledged'
         else:
             return 'Not Acknowledged'
+    
+    @property
+    def issue_volume(self):
+        if self.issue and self.volume:
+            return f' {self.issue}/{self.volume}'
+        else:
+            return ''
+
+    @property
+    def pp(self):
+        if self.pages:
+            return f' pp{self.pages}'
+        else:
+            return ''
 
 
 class Keyword(db.Model):

@@ -81,6 +81,9 @@ def add_scopus_publications(els_author, scopus_author):
         publication.publication_cover_date = parse_date(p.get(u'prism:coverDate', ''))
         publication.href = href
         publication.abstract = p.get(u'dc:description', '')
+        publication.volume = p.get(u'prism:volume', '')
+        publication.issue = p.get(u'prism:issueIdentifier', '')
+        publication.pages = p.get(u'prism:pageRange', '')
 
         publication.author_list = _get_author_list(p.get('author', []))
 
