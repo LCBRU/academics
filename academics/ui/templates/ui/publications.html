@@ -103,7 +103,7 @@
 {{ render_pagination(publications, 'ui.publications', form=search_form) }}
 
 {% call render_modal('publicationFolderModal', 'Publication Folders') %}
-    <form  action="{{ url_for('ui.publication_folder') }}" method="POST" enctype="multipart/form-data">
+    <form class="form" action="{{ url_for('ui.publication_folder') }}" method="POST" enctype="multipart/form-data">
         <fieldset>
             {{ publication_folder_form.hidden_tag() }}
 

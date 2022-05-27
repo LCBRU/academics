@@ -54,7 +54,7 @@ class PublicationSearchForm(SearchForm):
 
 class PublicationFolderForm(FlashingForm):
     scopus_publication_id = HiddenField('scopus_publication_id')
-    folder_id = SelectMultipleField('Folders', coerce=int)
+    folder_id = SelectField('Folders', coerce=int)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
