@@ -1,4 +1,4 @@
-from flask import abort, jsonify, redirect, render_template, request
+from flask import abort, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import SearchForm, FlashingForm
 from academics.model import Academic, Folder, Journal, Keyword, ScopusAuthor, ScopusPublication, Theme
@@ -18,7 +18,7 @@ def _get_author_choices():
 
 
 def _get_keyword_choices():
-    return [('', '')] + [(k.id, k.keyword.title()) for k in Keyword.query.order_by(Keyword.keyword).all()]
+    return [(k.id, k.keyword.title()) for k in Keyword.query.order_by(Keyword.keyword).all()]
 
 
 def _get_journal_choices():
@@ -31,7 +31,7 @@ def _get_folder_choices():
 
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
-    journal_id = SelectMultipleField('Journal', coerce=int)
+    journal_id = SelectMultipleField('Journal', coerce=int, )
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
     keywords = SelectMultipleField('Keywords')
@@ -52,6 +52,7 @@ class PublicationSearchForm(SearchForm):
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.choices = _get_keyword_choices()
+        self.render_kw={'data-data-href': url_for('ui.publication_keyword_options')}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
 
 
@@ -239,3 +240,8 @@ def publication_folder():
     db.session.commit()
 
     return redirect(request.referrer)
+
+
+@blueprint.route("/publication/keywords/options", methods=['POST'])
+def publication_keyword_options():
+    return jsonify(_get_keyword_choices())
