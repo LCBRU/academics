@@ -51,13 +51,6 @@
                             {% endif %}
 
                             <div class="btn-group mr-1 mb-1" role="group">
-                                <a class="btn btn-primary"
-                                    data-toggle="modal"
-                                    data-id="{{ p.id }}"
-                                    data-name="{{ p.title }}"
-                                    title="Publication folders"
-                                    data-target="#publicationFolderModal"
-                                    href="#"><i class="fas fa-folder-plus"></i></a>
                             </div>
 
                             <div class="btn-group mr-1 mb-1" role="group">
@@ -65,9 +58,9 @@
                                     {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                                    <a class="dropdown-item" href="javascript://" onclick="publication_acknowledgement_validation({{p.id}}, '{{ p.ACKNOWLEDGEMENT_UNKNOWN }}')">Unknown</a>
-                                    <a class="dropdown-item" href="javascript://" onclick="publication_acknowledgement_validation({{p.id}}, '{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}')">Acknowledged</a>
-                                    <a class="dropdown-item" href="javascript://" onclick="publication_acknowledgement_validation({{p.id}}, '{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}')">Not Acknowledged</a>
+                                    <a class="dropdown-item" href="#" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_UNKNOWN }}">Unknown</a>
+                                    <a class="dropdown-item" href="#" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}">Acknowledged</a>
+                                    <a class="dropdown-item" href="#" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
                                 </div>
                             </div>
                         </div>
@@ -79,21 +72,38 @@
  
                     <p>{{p.abstract | blank_if_none}}</p>
 
-                    {% if p.keywords | length > 0%}
-                        <h4>Keywords:</h4>
-
-                        {% for k in p.keywords | sort(attribute='keyword')%}
-                            <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="m-1 btn btn-outline-secondary btn-sm">{{ k.keyword }}</a>
-                        {% endfor %}
+                    {% if p.keywords | length > 0 %}
+                        <h5>Keywords</h5>
+                        <div>
+                            {% for k in p.keywords | sort(attribute='keyword')%}
+                                <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1"><i class="fas fa-key"></i> {{ k.keyword }}</a>
+                            {% endfor %}
+                        </div>
                     {% endif %}
 
-                    {% if p.folders | length > 0%}
-                        <h4>Folders:</h4>
-
+                    <div>
+                        <h5>Folders</h5>
                         {% for f in p.folders | sort(attribute='name')%}
-                            <a href="{{ url_for('ui.publications', keywords=f.id ) }}" class="m-1 btn btn-outline-secondary btn-sm">{{ f.name }}</a>
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ f.name }}</button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                                    <a class="dropdown-item" href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications</a>
+                                    <a class="dropdown-item" href="#" data-folder-id="{{f.id}}" onclick="folder_remove_publication()" data-scopus-publication-id="{{p.id}}">Remove</a>
+                                </div>
+                            </div>
                         {% endfor %}
-                    {% endif %}
+
+                        {% if folders | reject('in', p.folders) | list | length > 0 %}
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                                    {% for f in folders | reject('in', p.folders) | sort(attribute='name') %}
+                                        <a class="dropdown-item" href="#" data-folder-id="{{f.id}}" onclick="folder_add_publication()" data-scopus-publication-id="{{p.id}}">Add to '{{f.name}}' folder</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </li>
         {% endfor %}
@@ -102,48 +112,52 @@
 
 {{ render_pagination(publications, 'ui.publications', form=search_form) }}
 
-{% call render_modal('publicationFolderModal', 'Publication Folders') %}
-    <form class="form" action="{{ url_for('ui.publication_folder') }}" method="POST" enctype="multipart/form-data">
-        <fieldset>
-            {{ publication_folder_form.hidden_tag() }}
-
-            {{ render_field(publication_folder_form.folder_id) }}
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </div>
-        </fieldset>
-    </form>
-{% endcall %}
-
 {% endblock %}
 
 {% block js %}
 
 <script>
-    function publication_acknowledgement_validation(id, status) {
-        fetch("{{ url_for('ui.publication_acknowledgement_validation') }}", {
+    function folder_remove_publication() {
+        var button = $(window.event.target);
+
+        fetch("{{ url_for('ui.folder_remove_publication') }}", {
             method: 'post',
             headers: {"Content-type": "application/json; charset=UTF-8"},
             body: JSON.stringify({
-                id: id,
-                status: status,
+                folder_id: button.data('folder-id'),
+                scopus_publication_id: button.data('scopus-publication-id'),
             }),
         })
         .then(standard_status_actions);
     }
 
-    $(document).ready(function(){
-        $('#publicationFolderModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var modal = $(this);
+    function folder_add_publication() {
+        var button = $(window.event.target);
 
-            document.querySelectorAll('#publicationFolderModal input[name="folder_id"]').forEach((e) => {
-                e.checked = false;
-            });
-        });
-    });
+        fetch("{{ url_for('ui.folder_add_publication') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                folder_id: button.data('folder-id'),
+                scopus_publication_id: button.data('scopus-publication-id'),
+            }),
+        })
+        .then(standard_status_actions);
+    }
+
+    function publication_acknowledgement_validation(id, status) {
+        var button = $(window.event.target);
+
+        fetch("{{ url_for('ui.publication_acknowledgement_validation') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                id: button.data('id'),
+                status: button.data('status'),
+            }),
+        })
+        .then(standard_status_actions);
+    }
 </script>
 
 {% endblock %}

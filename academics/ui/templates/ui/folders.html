@@ -34,6 +34,9 @@
                     <div class="col-5">
                         <div class="btn-toolbar float-right">
                             <div class="btn-group mr-1 mb-1" role="group">
+                                <a href="{{ url_for('ui.publications', folder_id=f.id ) }}" title="Publications in {{ f.name }}"><i class="far fa-newspaper"></i></a>
+                            </div>
+                            <div class="btn-group mr-1 mb-1" role="group">
                                 <a
                                     data-toggle="modal"
                                     data-id="{{ f.id }}"
@@ -44,14 +47,19 @@
                             </div>
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a
-                                data-toggle="modal"
-                                data-id="{{ f.id }}"
-                                data-name="{{ f.name }}"
-                                title="Delete folder {{ f.name }}"
-                                data-target="#deleteModal"
-                                href="#"><i class="fas fa-trash"></i></a>
+                                    data-toggle="modal"
+                                    data-id="{{ f.id }}"
+                                    data-name="{{ f.name }}"
+                                    title="Delete folder {{ f.name }}"
+                                    data-target="#deleteModal"
+                                    href="#"><i class="fas fa-trash"></i></a>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <h4><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">{{f.publication_count}} publication(s)</a></h4>
                     </div>
                 </div>
             </li>

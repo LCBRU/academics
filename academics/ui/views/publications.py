@@ -36,6 +36,7 @@ class PublicationSearchForm(SearchForm):
     publication_date_end = MonthField('Publication End Date')
     keywords = SelectMultipleField('Keywords')
     author_id = SelectField('Author')
+    folder_id = SelectField('Folder')
     acknowledgement = SelectField('Acknowledgement', choices=[
         ('', ''),
         (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
@@ -51,16 +52,17 @@ class PublicationSearchForm(SearchForm):
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.choices = _get_keyword_choices()
+        self.folder_id.choices = [('', '')] + _get_folder_choices()
 
 
 class PublicationFolderForm(FlashingForm):
     scopus_publication_id = HiddenField('scopus_publication_id')
-    folder_id = MultiCheckboxField('Folders', coerce=int)
+    folder_ids = MultiCheckboxField('Folders', coerce=int)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.folder_id.choices = _get_folder_choices()
+        self.folder_ids.choices = _get_folder_choices()
 
 
 @blueprint.route("/publications/")
@@ -82,6 +84,7 @@ def publications():
         search_form=search_form,
         publication_folder_form=PublicationFolderForm(),
         publications=publications,
+        folders=Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all(),
     )
 
 
@@ -122,6 +125,9 @@ def _get_publication_query(search_form):
 
     if search_form.acknowledgement.data:
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
+
+    if search_form.folder_id.data:
+        q = q.filter(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
 
     return q
 
@@ -223,18 +229,13 @@ def publication_acknowledgement_validation():
 def publication_folder():
     form = PublicationFolderForm()
 
-    # if form.validate_on_submit():
-    #     id = form.id.data
+    publication = ScopusPublication.query.get_or_404(form.scopus_publication_id.data)
 
-    #     if id:
-    #         folder = Folder.query.get_or_404(id)
-    #     else:
-    #         folder = Folder()
-    #         folder.owner = current_user
+    folders = Folder.query.filter(Folder.id.in_(form.folder_ids.data)).all()
 
-    #     folder.name = form.name.data
+    publication.folders = set(folders)
 
-    #     db.session.add(folder)
-    #     db.session.commit()
+    db.session.add(publication)
+    db.session.commit()
 
     return redirect(request.referrer)

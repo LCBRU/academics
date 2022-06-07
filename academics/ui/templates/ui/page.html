@@ -2,6 +2,6 @@
 {% from "lbrc_flask/nav_macros.html" import render_nav_item with context %}
 
 {% block navlinks %}
-    {{ render_nav_item('ui.publications', 'Publications') }}
-    {{ render_nav_item('ui.folders', 'Folders') }}
+    {{ render_nav_item('ui.publications', 'Publications', 'far fa-newspaper') }}
+    {{ render_nav_item('ui.folders', 'Folders', 'fas fa-folder') }}
 {% endblock %}

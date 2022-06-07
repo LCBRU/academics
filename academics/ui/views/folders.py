@@ -1,10 +1,11 @@
-from flask import redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from academics.model import Folder
+from academics.model import Folder, ScopusPublication
 from .. import blueprint
 from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
+from lbrc_flask.json import validate_json
 
 
 class FolderEditForm(FlashingForm):
@@ -76,3 +77,45 @@ def folder_delete():
         db.session.commit()
 
     return redirect(request.referrer)
+
+
+@blueprint.route("/folder/remove_publication", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'folder_id': {'type': 'integer'},
+        'scopus_publication_id': {'type': 'integer'},
+    },
+    "required": ["folder_id", "scopus_publication_id"]
+})
+def folder_remove_publication():
+    p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
+    f = Folder.query.get_or_404(request.json.get('folder_id'))
+
+    f.publications.remove(p)
+
+    db.session.add(f)
+    db.session.commit()
+
+    return jsonify({}), 205
+
+
+@blueprint.route("/folder/add_publication", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'folder_id': {'type': 'integer'},
+        'scopus_publication_id': {'type': 'integer'},
+    },
+    "required": ["folder_id", "scopus_publication_id"]
+})
+def folder_add_publication():
+    p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
+    f = Folder.query.get_or_404(request.json.get('folder_id'))
+
+    f.publications.add(p)
+
+    db.session.add(f)
+    db.session.commit()
+
+    return jsonify({}), 205

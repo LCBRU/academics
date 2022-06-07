@@ -175,6 +175,10 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         else:
             return ''
 
+    @property
+    def folder_ids(self):
+        return ','.join([str(f.id) for f in self.folders])
+
 
 class Keyword(db.Model):
 
@@ -193,3 +197,7 @@ class Folder(db.Model):
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
 
     publications = db.relationship("ScopusPublication", secondary=folders__scopus_publications, back_populates="folders", collection_class=set)
+
+    @property
+    def publication_count(self):
+        return ScopusPublication.query.filter(ScopusPublication.folders.any(Folder.id == self.id)).count()
