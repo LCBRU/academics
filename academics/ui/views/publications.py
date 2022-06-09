@@ -51,7 +51,6 @@ class PublicationSearchForm(SearchForm):
         self.journal_id.choices = _get_journal_choices()
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
-        self.keywords.choices= [('', '')] + _get_keyword_choices()
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options')}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
 
@@ -79,6 +78,8 @@ def publications():
         per_page=5,
         error_out=False,
     )
+
+    search_form.keywords.choices= [('', '')] + [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
 
     return render_template(
         "ui/publications.html",
