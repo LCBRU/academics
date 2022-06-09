@@ -1,11 +1,14 @@
-from flask import jsonify, redirect, render_template, request, url_for
+from flask import jsonify, redirect, render_template, request
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
+from sqlalchemy import or_
 from academics.model import Folder, ScopusPublication
 from .. import blueprint
 from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
 from lbrc_flask.json import validate_json
+from lbrc_flask.security.model import User
+from lbrc_flask.security import current_user_id, system_user_id
 
 
 class FolderEditForm(FlashingForm):
@@ -27,17 +30,25 @@ def folders():
         error_out=False,
     )
 
+    print(current_user.shared_folders)
+
     return render_template(
         "ui/folders.html",
         search_form=search_form,
         folders=folders,
+        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
         edit_folder_form=FolderEditForm(),
         confirm_form=ConfirmForm(),
     )
 
 
 def _get_folder_query(search_form):
-    q = Folder.query.filter(Folder.owner == current_user)
+    q = Folder.query
+
+    q = q.filter(or_(
+        Folder.owner_id == current_user_id(),
+        Folder.shared_users.any(User.id == current_user_id()),
+    ))
 
     if search_form.search.data:
         q = q.filter(Folder.name.like(f'%{search_form.search.data}%'))
@@ -114,6 +125,48 @@ def folder_add_publication():
     f = Folder.query.get_or_404(request.json.get('folder_id'))
 
     f.publications.add(p)
+
+    db.session.add(f)
+    db.session.commit()
+
+    return jsonify({}), 205
+
+
+@blueprint.route("/folder/remove_shared_user", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'folder_id': {'type': 'integer'},
+        'user_id': {'type': 'integer'},
+    },
+    "required": ["folder_id", "user_id"]
+})
+def folder_remove_shared_user():
+    u = User.query.get_or_404(request.json.get('user_id'))
+    f = Folder.query.get_or_404(request.json.get('folder_id'))
+
+    f.shared_users.remove(u)
+
+    db.session.add(f)
+    db.session.commit()
+
+    return jsonify({}), 205
+
+
+@blueprint.route("/folder/add_shared_user", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'folder_id': {'type': 'integer'},
+        'user_id': {'type': 'integer'},
+    },
+    "required": ["folder_id", "user_id"]
+})
+def folder_add_shared_user():
+    u = User.query.get_or_404(request.json.get('user_id'))
+    f = Folder.query.get_or_404(request.json.get('folder_id'))
+
+    f.shared_users.add(u)
 
     db.session.add(f)
     db.session.commit()

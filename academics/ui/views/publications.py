@@ -11,6 +11,8 @@ from lbrc_flask.json import validate_json
 from dateutil.relativedelta import relativedelta
 from lbrc_flask.database import db
 from lbrc_flask.forms import MultiCheckboxField
+from lbrc_flask.security.model import User
+from lbrc_flask.security import current_user_id
 
 
 def _get_author_choices():
@@ -82,12 +84,19 @@ def publications():
     search_form.keywords.choices = [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
     search_form.journal_id.choices = [(j.id, j.name.title()) for j in Journal.query.filter(Journal.id.in_(search_form.journal_id.data)).all()]
 
+    folder_query = Folder.query
+
+    folder_query = folder_query.filter(or_(
+        Folder.owner_id == current_user_id(),
+        Folder.shared_users.any(User.id == current_user_id()),
+    ))
+
     return render_template(
         "ui/publications.html",
         search_form=search_form,
         publication_folder_form=PublicationFolderForm(),
         publications=publications,
-        folders=Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all(),
+        folders=folder_query.all(),
     )
 
 
@@ -247,6 +256,7 @@ def publication_folder():
 @blueprint.route("/publication/keywords/options")
 def publication_keyword_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices()]})
+
 
 @blueprint.route("/publication/journal/options")
 def publication_journal_options():

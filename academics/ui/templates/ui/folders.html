@@ -36,31 +36,62 @@
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a href="{{ url_for('ui.publications', folder_id=f.id ) }}" title="Publications in {{ f.name }}"><i class="far fa-newspaper"></i></a>
                             </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a
-                                    data-toggle="modal"
-                                    data-id="{{ f.id }}"
-                                    data-name="{{ f.name }}"
-                                    title="Edit folder {{ f.name }}"
-                                    data-target="#editFolderModal"
-                                    href="#"><i class="fas fa-edit"></i></a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a
-                                    data-toggle="modal"
-                                    data-id="{{ f.id }}"
-                                    data-name="{{ f.name }}"
-                                    title="Delete folder {{ f.name }}"
-                                    data-target="#deleteModal"
-                                    href="#"><i class="fas fa-trash"></i></a>
-                            </div>
+                            {% if f.owner == current_user %}
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a
+                                        data-toggle="modal"
+                                        data-id="{{ f.id }}"
+                                        data-name="{{ f.name }}"
+                                        title="Edit folder {{ f.name }}"
+                                        data-target="#editFolderModal"
+                                        href="#"><i class="fas fa-edit"></i></a>
+                                </div>
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a
+                                        data-toggle="modal"
+                                        data-id="{{ f.id }}"
+                                        data-name="{{ f.name }}"
+                                        title="Delete folder {{ f.name }}"
+                                        data-target="#deleteModal"
+                                        href="#"><i class="fas fa-trash"></i></a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 <div>
                     <div>
+                        {% if f.owner != current_user %}
+                            <h5>Owned by {{f.owner.full_name}}</h4>
+                        {% endif %}
                         <h4><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">{{f.publication_count}} publication(s)</a></h4>
                     </div>
+                </div>
+                <div>
+                    {% if users | length > 0 and f.owner == current_user %}
+                        <div>
+                            <h5>Shared With</h5>
+                            {% for u in f.shared_users | sort(attribute='full_name')%}
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ u.full_name }}</button>
+                                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                                        <a class="dropdown-item" href="#" data-folder-id="{{f.id}}" onclick="folder_remove_shared_user()" data-user-id="{{u.id}}">Remove</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            {% if users | reject('in', f.shared_users) | list | length > 0 %}
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
+                                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                                        {% for u in users | reject('in', f.shared_users) | sort(attribute='full_name') %}
+                                            <a class="dropdown-item" href="#" data-folder-id="{{f.id}}" onclick="folder_add_shared_user()" data-user-id="{{u.id}}">Shared with '{{u.full_name}}'</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </div>
             </li>
         {% endfor %}
@@ -105,6 +136,34 @@
 {% block js %}
 
 <script>
+    function folder_remove_shared_user() {
+        var button = $(window.event.target);
+
+        fetch("{{ url_for('ui.folder_remove_shared_user') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                folder_id: button.data('folder-id'),
+                user_id: button.data('user-id'),
+            }),
+        })
+        .then(standard_status_actions);
+    }
+
+    function folder_add_shared_user() {
+        var button = $(window.event.target);
+
+        fetch("{{ url_for('ui.folder_add_shared_user') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                folder_id: button.data('folder-id'),
+                user_id: button.data('user-id'),
+            }),
+        })
+        .then(standard_status_actions);
+    }
+
     $(document).ready(function(){
         $('#add_folder').click(function (event) {
             event.preventDefault();

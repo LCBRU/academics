@@ -188,6 +188,13 @@ class Keyword(db.Model):
     publications = db.relationship("ScopusPublication", secondary=scopus_publications__keywords, back_populates="keywords", collection_class=set)
 
 
+folders__shared_users = db.Table(
+    'folders__shared_users',
+    db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
+    db.Column('user_id', db.Integer(), db.ForeignKey('user.id'), primary_key=True),
+)
+
+
 class Folder(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -197,6 +204,7 @@ class Folder(db.Model):
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
 
     publications = db.relationship("ScopusPublication", secondary=folders__scopus_publications, back_populates="folders", collection_class=set)
+    shared_users = db.relationship("User", secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set)
 
     @property
     def publication_count(self):
