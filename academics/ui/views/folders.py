@@ -1,8 +1,10 @@
+from os import abort
 from flask import jsonify, redirect, render_template, request
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from sqlalchemy import or_
 from academics.model import Folder, ScopusPublication
+from academics.ui.views.decorators import assert_folder_user
 from .. import blueprint
 from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
@@ -69,6 +71,9 @@ def folder_save():
             folder = Folder()
             folder.owner = current_user
 
+        if folder.owner != current_user:
+            abort(403)
+
         folder.name = form.name.data
 
         db.session.add(folder)
@@ -78,6 +83,7 @@ def folder_save():
 
 
 @blueprint.route("/folders/delete", methods=['POST'])
+@assert_folder_user()
 def folder_delete():
     form = ConfirmForm()
 
@@ -99,6 +105,7 @@ def folder_delete():
     },
     "required": ["folder_id", "scopus_publication_id"]
 })
+@assert_folder_user()
 def folder_remove_publication():
     p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
     f = Folder.query.get_or_404(request.json.get('folder_id'))
@@ -120,6 +127,7 @@ def folder_remove_publication():
     },
     "required": ["folder_id", "scopus_publication_id"]
 })
+@assert_folder_user()
 def folder_add_publication():
     p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
     f = Folder.query.get_or_404(request.json.get('folder_id'))
@@ -141,6 +149,7 @@ def folder_add_publication():
     },
     "required": ["folder_id", "user_id"]
 })
+@assert_folder_user()
 def folder_remove_shared_user():
     u = User.query.get_or_404(request.json.get('user_id'))
     f = Folder.query.get_or_404(request.json.get('folder_id'))
@@ -162,6 +171,7 @@ def folder_remove_shared_user():
     },
     "required": ["folder_id", "user_id"]
 })
+@assert_folder_user()
 def folder_add_shared_user():
     u = User.query.get_or_404(request.json.get('user_id'))
     f = Folder.query.get_or_404(request.json.get('folder_id'))

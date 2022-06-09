@@ -237,22 +237,6 @@ def publication_acknowledgement_validation():
     return jsonify({}), 205
 
 
-@blueprint.route("/publication/folders", methods=['POST'])
-def publication_folder():
-    form = PublicationFolderForm()
-
-    publication = ScopusPublication.query.get_or_404(form.scopus_publication_id.data)
-
-    folders = Folder.query.filter(Folder.id.in_(form.folder_ids.data)).all()
-
-    publication.folders = set(folders)
-
-    db.session.add(publication)
-    db.session.commit()
-
-    return redirect(request.referrer)
-
-
 @blueprint.route("/publication/keywords/options")
 def publication_keyword_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices()]})
