@@ -48,10 +48,10 @@ class PublicationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.journal_id.choices = _get_journal_choices()
+        self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
-        self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options')}
+        self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 200px'}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
 
 
@@ -79,7 +79,8 @@ def publications():
         error_out=False,
     )
 
-    search_form.keywords.choices= [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
+    search_form.keywords.choices = [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
+    search_form.journal_id.choices = [(j.id, j.name.title()) for j in Journal.query.filter(Journal.id.in_(search_form.journal_id.data)).all()]
 
     return render_template(
         "ui/publications.html",
@@ -246,4 +247,7 @@ def publication_folder():
 @blueprint.route("/publication/keywords/options")
 def publication_keyword_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices()]})
- 
+
+@blueprint.route("/publication/journal/options")
+def publication_journal_options():
+    return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_journal_choices()]})
