@@ -51,7 +51,8 @@ class PublicationSearchForm(SearchForm):
         self.journal_id.choices = _get_journal_choices()
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
-        self.render_kw={'data-data-href': url_for('ui.publication_keyword_options')}
+        self.keywords.choices= [('', '')] + _get_keyword_choices()
+        self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options')}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
 
 
@@ -241,6 +242,7 @@ def publication_folder():
     return redirect(request.referrer)
 
 
-@blueprint.route("/publication/keywords/options", methods=['POST'])
+@blueprint.route("/publication/keywords/options")
 def publication_keyword_options():
-    return jsonify(_get_keyword_choices())
+    return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices()]})
+ 
