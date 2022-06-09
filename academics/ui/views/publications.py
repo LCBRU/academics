@@ -51,7 +51,7 @@ class PublicationSearchForm(SearchForm):
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
         self.author_id.choices = _get_author_choices()
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
-        self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 200px'}
+        self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
 
 
