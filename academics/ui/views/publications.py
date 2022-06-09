@@ -79,7 +79,7 @@ def publications():
         error_out=False,
     )
 
-    search_form.keywords.choices= [('', '')] + [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
+    search_form.keywords.choices= [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
 
     return render_template(
         "ui/publications.html",
