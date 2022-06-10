@@ -100,6 +100,29 @@ def publications():
     )
 
 
+@blueprint.route("/publications/folders", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'integer'},
+    },
+    "required": ["id"]
+})
+def publication_folders():
+    publication = ScopusPublication.query.get_or_404(request.json.get('id'))
+
+    folder_query = Folder.query.filter(or_(
+        Folder.owner_id == current_user_id(),
+        Folder.shared_users.any(User.id == current_user_id()),
+    ))
+
+    return render_template(
+        "ui/publication_folders.html",
+        publication=publication,
+        folders=folder_query.all(),
+    )
+
+
 def _get_publication_query(search_form):
     q = ScopusPublication.query
 
@@ -240,7 +263,7 @@ def publication_acknowledgement_validation():
 
     db.session.commit()
 
-    return jsonify({}), 205
+    return jsonify({'status': p.acknowledgement_status_name}), 200
 
 
 @blueprint.route("/publication/keywords/options")

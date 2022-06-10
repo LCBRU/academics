@@ -115,7 +115,7 @@ def folder_remove_publication():
     db.session.add(f)
     db.session.commit()
 
-    return jsonify({}), 205
+    return jsonify({}), 200
 
 
 @blueprint.route("/folder/add_publication", methods=['POST'])
@@ -137,7 +137,7 @@ def folder_add_publication():
     db.session.add(f)
     db.session.commit()
 
-    return jsonify({}), 205
+    return jsonify({}), 200
 
 
 @blueprint.route("/folder/remove_shared_user", methods=['POST'])
