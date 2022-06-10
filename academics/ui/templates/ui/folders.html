@@ -1,6 +1,7 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary, render_field %}
 {% from "lbrc_flask/modal_macros.html" import render_modal %}
+{% from "ui/_folder_users.html" import render_folder_users %}
 
 
 {% block content %}
@@ -68,30 +69,7 @@
                     </div>
                 </div>
                 <div>
-                    {% if users | length > 0 and f.owner == current_user %}
-                        <div>
-                            <h5>Shared With</h5>
-                            {% for u in f.shared_users | sort(attribute='full_name')%}
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ u.full_name }}</button>
-                                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                                        <a class="dropdown-item" href="#" data-folder-id="{{f.id}}" onclick="folder_remove_shared_user()" data-user-id="{{u.id}}">Remove</a>
-                                    </div>
-                                </div>
-                            {% endfor %}
-
-                            {% if users | reject('in', f.shared_users) | list | length > 0 %}
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
-                                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                                        {% for u in users | reject('in', f.shared_users) | sort(attribute='full_name') %}
-                                            <a class="dropdown-item" href="#" data-folder-id="{{f.id}}" onclick="folder_add_shared_user()" data-user-id="{{u.id}}">Shared with '{{u.full_name}}'</a>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
+                    {{ render_folder_users(f, users, current_user) }}
                 </div>
             </li>
         {% endfor %}
