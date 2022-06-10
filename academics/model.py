@@ -147,10 +147,10 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     acknowledgement_validated = db.Column(db.Boolean, default=None)
 
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
-    journal = db.relationship(Journal, backref=db.backref("publications", cascade="all,delete"))
+    journal = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
-    folders = db.relationship("Folder", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
+    folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
 
     @property
     def acknowledgement_status_name(self):
