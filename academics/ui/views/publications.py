@@ -165,6 +165,9 @@ def publication_export_xlsx():
     
     q = _get_publication_query(search_form)
 
+    if q.count() > 100:
+        abort(413)
+
     q = q.order_by(ScopusPublication.publication_cover_date.desc())
 
     publication_details = ({
@@ -207,6 +210,9 @@ def publication_export_pdf():
     publication_end_date = parse_date_or_none(search_form.publication_date_end.data)
     if publication_end_date:
         parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
+
+    if q.count() > 100:
+        abort(413)
 
     publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
 

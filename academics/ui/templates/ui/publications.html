@@ -17,12 +17,14 @@
                     'text': 'Excel',
                     'endpoint': 'ui.publication_export_xlsx',
                     'add_form_fields': True,
+                    'disabled': publications.total > 100,
                 },
                 {
                     'id': 'export',
                     'text': 'PDF',
                     'endpoint': 'ui.publication_export_pdf',
                     'add_form_fields': True,
+                    'disabled': publications.total > 100,
                 },
             ],
         ) }}
