@@ -32,8 +32,6 @@ def folders():
         error_out=False,
     )
 
-    print(current_user.shared_folders)
-
     return render_template(
         "ui/folders.html",
         search_form=search_form,
@@ -138,6 +136,26 @@ def folder_add_publication():
     db.session.commit()
 
     return jsonify({}), 200
+
+
+@blueprint.route("/folder/users", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'integer'},
+    },
+    "required": ["id"]
+})
+def folder_users():
+    folder = Folder.query.get_or_404(request.json.get('id'))
+
+    resp = render_template(
+        "ui/folder_users.html",
+        folder=folder,
+        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
+    )
+
+    return resp
 
 
 @blueprint.route("/folder/remove_shared_user", methods=['POST'])

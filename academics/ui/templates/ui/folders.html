@@ -61,14 +61,12 @@
                     </div>
                 </div>
                 <div>
-                    <div>
-                        {% if f.owner != current_user %}
-                            <h5>Owned by {{f.owner.full_name}}</h4>
-                        {% endif %}
-                        <h4><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">{{f.publication_count}} publication(s)</a></h4>
-                    </div>
+                    {% if f.owner != current_user %}
+                        <h5>Owned by {{f.owner.full_name}}</h4>
+                    {% endif %}
+                    <h4><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">{{f.publication_count}} publication(s)</a></h4>
                 </div>
-                <div>
+                <div id="folder_users_{{f.id}}">
                     {{ render_folder_users(f, users, current_user) }}
                 </div>
             </li>
@@ -114,10 +112,10 @@
 {% block js %}
 
 <script>
-    function folder_remove_shared_user() {
+    async function folder_remove_shared_user() {
         var button = $(window.event.target);
 
-        fetch("{{ url_for('ui.folder_remove_shared_user') }}", {
+        let response = await fetch("{{ url_for('ui.folder_remove_shared_user') }}", {
             method: 'post',
             headers: {"Content-type": "application/json; charset=UTF-8"},
             body: JSON.stringify({
@@ -125,13 +123,14 @@
                 user_id: button.data('user-id'),
             }),
         })
-        .then(standard_status_actions);
+
+        await replace_folder_users(button.data('folder-id'));
     }
 
-    function folder_add_shared_user() {
+    async function folder_add_shared_user() {
         var button = $(window.event.target);
 
-        fetch("{{ url_for('ui.folder_add_shared_user') }}", {
+        let response = await fetch("{{ url_for('ui.folder_add_shared_user') }}", {
             method: 'post',
             headers: {"Content-type": "application/json; charset=UTF-8"},
             body: JSON.stringify({
@@ -139,7 +138,20 @@
                 user_id: button.data('user-id'),
             }),
         })
-        .then(standard_status_actions);
+
+        await replace_folder_users(button.data('folder-id'));
+    }
+
+    async function replace_folder_users(folder_id) {
+        let response = await fetch("{{ url_for('ui.folder_users') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                id: folder_id,
+            }),
+        })
+        let data = await response.text();
+        document.getElementById(`folder_users_${folder_id}`).innerHTML = data;
     }
 
     $(document).ready(function(){
