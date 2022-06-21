@@ -140,7 +140,7 @@ def _get_sponsor(p):
     result = Sponsor.query.filter(Sponsor.name == name).one_or_none()
 
     if not result:
-        result = Sponsor(code=name)
+        result = Sponsor(name=name)
         db.session.add(result)
 
     return result
