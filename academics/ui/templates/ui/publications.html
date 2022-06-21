@@ -89,11 +89,11 @@
                             <dd class="col-auto">{{ p.cited_by_count }}</dd>
                         {% endif %}
                         {% if p.sponsor %}
-                            <dt class="col-auto">Sponsor</dt>
+                            <dt class="col-auto">Funding Sponsor</dt>
                             <dd class="col-auto">{{ p.sponsor.name }}</dd>
                         {% endif %}
                         {% if p.funding_acr %}
-                            <dt class="col-auto">Fund ACR</dt>
+                            <dt class="col-auto">Funding Acronym</dt>
                             <dd class="col-auto">{{ p.funding_acr.name }}</dd>
                         {% endif %}
                         {% if p.is_open_access %}
