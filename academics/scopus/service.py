@@ -152,7 +152,7 @@ def _get_funding_acr(p):
     if not name:
         return None
 
-    result = FundingAcr.query.filter(FundingAcr.code == name).one_or_none()
+    result = FundingAcr.query.filter(FundingAcr.name == name).one_or_none()
 
     if not result:
         result = FundingAcr(name=name)
