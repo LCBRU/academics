@@ -74,24 +74,33 @@
                 </div>
                 <div>
                     <h4>{{p.author_list | blank_if_none}}</h4>
-                    <h5><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a> ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</h5>
-                    <h5 class="row">
-                        {% if p.sponsor %}
-                            <div class="col-auto">Sponsor: {{ p.sponsor.name }}</div>
+                    <dl class="row">
+                        {% if p.journal %}
+                            <dt class="col-auto">Journal</dt>
+                            <dd class="col-auto"><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
                         {% endif %}
-                        {% if p.is_open_access %}
-                            <div class="col-auto">Open Access: <i class="fas fa-check"></i></div>
+                        <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
+                        {% if p.subtype %}
+                            <dt class="col-auto">Type</dt>
+                            <dd class="col-auto">{{ p.subtype.description }}</dd>
                         {% endif %}
                         {% if p.cited_by_count is not none %}
-                            <div class="col-auto">Citations: {{ p.cited_by_count }}</div>
+                            <dt class="col-auto">Citations</dt>
+                            <dd class="col-auto">{{ p.cited_by_count }}</dd>
                         {% endif %}
-                        {% if p.subtype %}
-                            <div class="col-auto">Type: {{ p.subtype.description }}</div>
+                        {% if p.sponsor %}
+                            <dt class="col-auto">Sponsor</dt>
+                            <dd class="col-auto">{{ p.sponsor.name }}</dd>
                         {% endif %}
                         {% if p.funding_acr %}
-                            <div class="col-auto">Fund ACR: {{ p.funding_acr.name }}</div>
+                            <dt class="col-auto">Fund ACR</dt>
+                            <dd class="col-auto">{{ p.funding_acr.name }}</dd>
                         {% endif %}
-                    </h5>
+                        {% if p.is_open_access %}
+                            <dt class="col-auto">Open Access</dt>
+                            <dd class="col-auto"><i class="fas fa-check"></i></dd>
+                        {% endif %}
+                    </dl>
  
                     <p>{{p.abstract | blank_if_none}}</p>
 
