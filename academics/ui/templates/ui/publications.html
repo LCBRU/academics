@@ -75,6 +75,21 @@
                 <div>
                     <h4>{{p.author_list | blank_if_none}}</h4>
                     <h5><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a> ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</h5>
+                    <h5 class="row">
+                        {% if p.sponsor | length > 0%}
+                            <div class="col">Sponsor: {{ p.sponsor }}</div>
+                        {% endif %}
+                        {% if p.is_open_access %}
+                            <div class="col">Open Access: <i class="fa-solid fa-check"></i></div>
+                        {% endif %}
+                        <div class="col">Citations: {{ p.cited_by_count }}</div>
+                        {% if p.subtype %}
+                            <div class="col">Type: {{ p.subtype.name }}</div>
+                        {% endif %}
+                        {% if p.funding_acr %}
+                            <div class="col">Fund ACR: {{ p.funding_acr.name }}</div>
+                        {% endif %}
+                    </h5>
  
                     <p>{{p.abstract | blank_if_none}}</p>
 
