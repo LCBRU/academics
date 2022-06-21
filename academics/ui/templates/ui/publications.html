@@ -86,7 +86,7 @@
                             <div class="col-auto">Citations: {{ p.cited_by_count }}</div>
                         {% endif %}
                         {% if p.subtype %}
-                            <div class="col-auto">Type: {{ p.subtype.name }}</div>
+                            <div class="col-auto">Type: {{ p.subtype.description }}</div>
                         {% endif %}
                         {% if p.funding_acr %}
                             <div class="col-auto">Fund ACR: {{ p.funding_acr.name }}</div>
