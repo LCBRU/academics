@@ -6,7 +6,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from sqlalchemy import and_, exists
-from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication, Subtype
+from academics.model import Academic, FundingAcr, Journal, Keyword, ScopusAuthor, ScopusPublication, Sponsor, Subtype
 from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
@@ -86,6 +86,9 @@ def add_scopus_publications(els_author, scopus_author):
         publication.pages = p.get(u'prism:pageRange', '')
         publication.is_open_access = p.get(u'openaccess', '0') == "1"
         publication.subtype = _get_subtype(p)
+        publication.sponsor = _get_sponsor(p)
+        publication.funding_acr = _get_funding_acr(p)
+        publication_cited_by_count = int(p.get(u'citedby-count', '0'))
 
         publication.author_list = _get_author_list(p.get('author', []))
 
@@ -123,6 +126,36 @@ def _get_subtype(p):
 
     if not result:
         result = Subtype(code=code, description=description)
+        db.session.add(result)
+
+    return result
+
+
+def _get_sponsor(p):
+    name = p.get(u'fund-sponsor', '')
+
+    if not name:
+        return None
+
+    result = Sponsor.query.filter(Sponsor.name == name).one_or_none()
+
+    if not result:
+        result = Sponsor(code=name)
+        db.session.add(result)
+
+    return result
+
+
+def _get_funding_acr(p):
+    name = p.get(u'fund-acr', '')
+
+    if not name:
+        return None
+
+    result = FundingAcr.query.filter(FundingAcr.code == name).one_or_none()
+
+    if not result:
+        result = FundingAcr(name=name)
         db.session.add(result)
 
     return result

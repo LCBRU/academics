@@ -119,6 +119,16 @@ class Subtype(db.Model):
     description = db.Column(db.String)
 
 
+class Sponsor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+
+class FundingAcr(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     ACKNOWLEDGEMENT_UNKNOWN = 'unknown'
@@ -147,6 +157,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     issue = db.Column(db.String)
     pages = db.Column(db.String)
     is_open_access = db.Column(db.Boolean)
+    cited_by_count = db.Column(db.Integer)
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
@@ -158,6 +169,12 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     subtype_id = db.Column(db.Integer, db.ForeignKey(Subtype.id))
     subtype = db.relationship(Subtype, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
+
+    sponsor_id = db.Column(db.Integer, db.ForeignKey(Sponsor.id))
+    sponsor = db.relationship(Sponsor, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
+
+    funding_acr_id = db.Column(db.Integer, db.ForeignKey(FundingAcr.id))
+    funding_acr = db.relationship(FundingAcr, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
