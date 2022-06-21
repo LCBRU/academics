@@ -157,7 +157,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     journal = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     subtype_id = db.Column(db.Integer, db.ForeignKey(SubType.id))
-    subtype = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
+    subtype = db.relationship(SubType, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
