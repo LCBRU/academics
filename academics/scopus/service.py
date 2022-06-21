@@ -6,7 +6,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from sqlalchemy import and_, exists
-from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication, SubType
+from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication, Subtype
 from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
@@ -119,10 +119,10 @@ def _get_subtype(p):
     if not code:
         return None
 
-    result = SubType.query.filter(SubType.code == code).one_or_none()
+    result = Subtype.query.filter(Subtype.code == code).one_or_none()
 
     if not result:
-        result = SubType(code=code, description=description)
+        result = Subtype(code=code, description=description)
         db.session.add(result)
 
     return result

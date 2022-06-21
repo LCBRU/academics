@@ -113,7 +113,7 @@ folders__scopus_publications = db.Table(
 )
 
 
-class SubType(db.Model):
+class Subtype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String)
     description = db.Column(db.String)
@@ -156,8 +156,8 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
     journal = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
-    subtype_id = db.Column(db.Integer, db.ForeignKey(SubType.id))
-    subtype = db.relationship(SubType, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
+    subtype_id = db.Column(db.Integer, db.ForeignKey(Subtype.id))
+    subtype = db.relationship(Subtype, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
