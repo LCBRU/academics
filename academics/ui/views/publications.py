@@ -1,7 +1,7 @@
 from flask import abort, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import SearchForm, FlashingForm
-from academics.model import Academic, Folder, Journal, Keyword, ScopusAuthor, ScopusPublication, Theme
+from academics.model import Academic, Folder, Journal, Keyword, ScopusAuthor, ScopusPublication, Subtype, Theme
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
@@ -36,6 +36,7 @@ class PublicationSearchForm(SearchForm):
     journal_id = SelectMultipleField('Journal', coerce=int, )
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
+    subtype_id = SelectMultipleField('Type')
     keywords = SelectMultipleField('Keywords')
     author_id = SelectField('Author')
     folder_id = SelectField('Folder')
@@ -52,6 +53,7 @@ class PublicationSearchForm(SearchForm):
 
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
         self.author_id.choices = _get_author_choices()
+        self.subtype_id.choices = [('', '')] + [(t.id, t.name) for t in Subtype.query.order_by(Subtype.description).all()]
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
@@ -139,6 +141,9 @@ def _get_publication_query(search_form):
 
     if search_form.journal_id.data:
         q = q.filter(ScopusPublication.journal_id.in_(search_form.journal_id.data))
+
+    if search_form.subtype_id.data:
+        q = q.filter(ScopusPublication.subtype_id.in_(search_form.subtype_id.data))
 
     if search_form.keywords.data:
         for k in search_form.keywords.data:
