@@ -113,6 +113,12 @@ folders__scopus_publications = db.Table(
 )
 
 
+class SubType(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String)
+    description = db.Column(db.String)
+
+
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     ACKNOWLEDGEMENT_UNKNOWN = 'unknown'
@@ -140,6 +146,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     volume = db.Column(db.String)
     issue = db.Column(db.String)
     pages = db.Column(db.String)
+    is_open_access = db.Column(db.Boolean)
 
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
@@ -148,6 +155,9 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
     journal = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
+
+    subtype_id = db.Column(db.Integer, db.ForeignKey(SubType.id))
+    subtype = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)

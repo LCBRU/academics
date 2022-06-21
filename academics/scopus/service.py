@@ -6,7 +6,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from sqlalchemy import and_, exists
-from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication
+from academics.model import Academic, Journal, Keyword, ScopusAuthor, ScopusPublication, SubType
 from lbrc_flask.celery import celery
 from .model import AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
@@ -84,6 +84,8 @@ def add_scopus_publications(els_author, scopus_author):
         publication.volume = p.get(u'prism:volume', '')
         publication.issue = p.get(u'prism:issueIdentifier', '')
         publication.pages = p.get(u'prism:pageRange', '')
+        publication.is_open_access = p.get(u'openaccess', '0') == "1"
+        publication.subtype = _get_subtype(p)
 
         publication.author_list = _get_author_list(p.get('author', []))
 
@@ -105,6 +107,22 @@ def _get_journal(journal_name):
 
     if not result:
         result = Journal(name=journal_name)
+        db.session.add(result)
+
+    return result
+
+
+def _get_subtype(p):
+    code = p.get(u'subtype', '')
+    description = p.get(u'subtypeDescription', '')
+
+    if not code:
+        return None
+
+    result = SubType.query.filter(SubType.code == code).one_or_none()
+
+    if not result:
+        result = SubType(code=code, description=description)
         db.session.add(result)
 
     return result
