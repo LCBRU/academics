@@ -82,7 +82,7 @@
                         {% if p.is_open_access %}
                             <div class="col-auto">Open Access: <i class="fas fa-check"></i></div>
                         {% endif %}
-                        {% if p.cited_by_count is not None %}
+                        {% if p.cited_by_count is not none %}
                             <div class="col-auto">Citations: {{ p.cited_by_count }}</div>
                         {% endif %}
                         {% if p.subtype %}
