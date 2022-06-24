@@ -79,15 +79,19 @@
         }
 
         dt {
-            display: inline-block;
-            width: 30%;
+            float: left;
+            clear: left;
+            width: 110px;
             font-weight: bold;
         }
+
+        dt::after {
+            content: ":";
+        }
+  
         dd {
-            display: inline-block;
-            margin: 0;
-            padding: 0;
-            padding-left: 10px;
+            margin: 0 0 0 80px;
+            padding: 0 0 0.5em 0;
         }
 
 </style>
@@ -118,9 +122,8 @@
                     <dl>
                         {% if p.journal %}
                             <dt>Journal</dt>
-                            <dd><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
+                            <dd>{{p.journal.name | blank_if_none | title_case}} ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
                         {% endif %}
-                        <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
                         {% if p.subtype %}
                             <dt>Type</dt>
                             <dd>{{ p.subtype.description }}</dd>
