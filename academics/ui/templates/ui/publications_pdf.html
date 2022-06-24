@@ -104,6 +104,34 @@
                             <h5>{{p.journal.name}} ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</h5>
                         </div>
                     </header>
+                    <dl>
+                        {% if p.journal %}
+                            <dt class="col-auto">Journal</dt>
+                            <dd class="col-auto"><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
+                        {% endif %}
+                        <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
+                        {% if p.subtype %}
+                            <dt class="col-auto">Type</dt>
+                            <dd class="col-auto">{{ p.subtype.description }}</dd>
+                        {% endif %}
+                        {% if p.cited_by_count is not none %}
+                            <dt class="col-auto">Citations</dt>
+                            <dd class="col-auto">{{ p.cited_by_count }}</dd>
+                        {% endif %}
+                        {% if p.sponsor %}
+                            <dt class="col-auto">Funding Sponsor</dt>
+                            <dd class="col-auto">{{ p.sponsor.name }}</dd>
+                        {% endif %}
+                        {% if p.funding_acr %}
+                            <dt class="col-auto">Funding Acronym</dt>
+                            <dd class="col-auto">{{ p.funding_acr.name }}</dd>
+                        {% endif %}
+                        {% if p.is_open_access %}
+                            <dt class="col-auto">Open Access</dt>
+                            <dd class="col-auto"><i class="fas fa-check"></i></dd>
+                        {% endif %}
+                    </dl>
+
                     <p>{{p.abstract | blank_if_none}}</p>
                 </div>
             </div>
