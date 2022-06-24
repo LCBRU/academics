@@ -180,6 +180,7 @@ def publication_export_xlsx():
         'doi': None,
         'pubmed_id': None,
         'journal': None,
+        'type': None,
         'volume': None,
         'issue': None,
         'pages': None,
@@ -187,6 +188,10 @@ def publication_export_xlsx():
         'authors': None,
         'title': None,
         'abstract': None,
+        'open access': None,
+        'citations': None,
+        'sponsor': None,
+        'funding acronym': None,
     }
 
     search_form = PublicationSearchForm(formdata=request.args)
@@ -203,6 +208,7 @@ def publication_export_xlsx():
         'doi': p.doi,
         'pubmed_id': p.pubmed_id,
         'journal': p.journal.name if p.journal else '',
+        'type': p.subtype.description if p.subtype else '',
         'volume': p.volume,
         'issue': p.issue,
         'pages': p.pages,
@@ -210,6 +216,10 @@ def publication_export_xlsx():
         'authors': p.author_list,
         'title': p.title,
         'abstract': p.abstract,
+        'open access': p.is_open_access,
+        'citations': p.cited_by_count,
+        'sponsor': p.sponsor.name if p.sponsor else '',
+        'funding acronym': p.funding_acr.name if p.funding_acr else '',
     } for p in q.all())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
