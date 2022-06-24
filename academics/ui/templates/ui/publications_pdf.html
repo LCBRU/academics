@@ -78,6 +78,16 @@
             background-color: #f2f2f2;
         }
 
+        dt {
+            display: inline-block;
+            width: 30%;
+            font-weight: bold;
+        }
+        dd {
+            display: inline-block;
+            width: 70%;
+        }
+
 </style>
 </head>
 
@@ -101,34 +111,33 @@
                         <div>
                             <h3>{{p.title}}</h3>
                             <h4>{{p.author_list}}</h4>
-                            <h5>{{p.journal.name}} ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</h5>
                         </div>
                     </header>
                     <dl>
                         {% if p.journal %}
-                            <dt class="col-auto">Journal</dt>
-                            <dd class="col-auto"><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
+                            <dt>Journal</dt>
+                            <dd><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
                         {% endif %}
                         <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
                         {% if p.subtype %}
-                            <dt class="col-auto">Type</dt>
-                            <dd class="col-auto">{{ p.subtype.description }}</dd>
+                            <dt>Type</dt>
+                            <dd>{{ p.subtype.description }}</dd>
                         {% endif %}
                         {% if p.cited_by_count is not none %}
-                            <dt class="col-auto">Citations</dt>
-                            <dd class="col-auto">{{ p.cited_by_count }}</dd>
+                            <dt>Citations</dt>
+                            <dd>{{ p.cited_by_count }}</dd>
                         {% endif %}
                         {% if p.sponsor %}
-                            <dt class="col-auto">Funding Sponsor</dt>
-                            <dd class="col-auto">{{ p.sponsor.name }}</dd>
+                            <dt>Funding Sponsor</dt>
+                            <dd>{{ p.sponsor.name }}</dd>
                         {% endif %}
                         {% if p.funding_acr %}
-                            <dt class="col-auto">Funding Acronym</dt>
-                            <dd class="col-auto">{{ p.funding_acr.name }}</dd>
+                            <dt>Funding Acronym</dt>
+                            <dd>{{ p.funding_acr.name }}</dd>
                         {% endif %}
                         {% if p.is_open_access %}
-                            <dt class="col-auto">Open Access</dt>
-                            <dd class="col-auto"><i class="fas fa-check"></i></dd>
+                            <dt>Open Access</dt>
+                            <dd><i class="fas fa-check"></i></dd>
                         {% endif %}
                     </dl>
 
