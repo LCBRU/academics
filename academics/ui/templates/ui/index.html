@@ -1,6 +1,6 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary %}
-{% from "lbrc_flask/modal_macros.html" import render_modal %}
+{% from "lbrc_flask/modal_macros.html" import render_delete_modal %}
 
 {% block content %}
 <section>
@@ -57,8 +57,8 @@
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a class="academic_delete"
                                     data-toggle="modal"
-                                    data-academic-id="{{ a.id }}"
-                                    data-academic-name="{{ a.full_name }}"
+                                    data-id="{{ a.id }}"
+                                    data-name="{{ a.full_name }}"
                                     title="Delete academic {{ a.full_name }}"
                                     data-target="#deleteAcademicModal"
                                     href="#"><i class="fas fa-trash"></i></a>
@@ -92,9 +92,8 @@
                                             <div>
                                                 <a class="author_delete"
                                                     data-toggle="modal"
-                                                    data-author-id="{{ au.id }}"
-                                                    data-author-name="{{ au.full_name }}"
-                                                    data-academic-name="{{ a.full_name }}"
+                                                    data-id="{{ au.id }}"
+                                                    data-name="{{ au.full_name }}"
                                                     title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
                                                     data-target="#deleteAuthorModal"
                                                     href="#"><i class="fas fa-trash"></i></a>    
@@ -125,51 +124,7 @@
 
 {{ render_pagination(academics, 'ui.index', form=search_form) }}
 
-{% call render_modal('deleteAcademicModal', 'Delete Academic') %}
-    <p id="modal_description">Please confirm that you wish to delete the academic <span id="academic_name"></span>.</p>
-    <form id="academic_delete_form" action="{{ url_for('ui.delete_academic', prev=request.full_path) }}" method="POST" enctype="multipart/form-data">
-        <fieldset>
-            {{ confirm_form.hidden_tag() }}
-
-            {{ render_button_bar(cancel_url=request.full_path, submit_label="Delete") }}
-        </fieldset>
-    </form>
-{% endcall %}
-
-{% call render_modal('deleteAuthorModal', 'Delete Author') %}
-    <p id="modal_description">Please confirm that you wish to delete the author <span id="author_name"></span> from the academic <span id="academic_name"></span>.</p>
-    <form id="author_delete_form" action="{{ url_for('ui.delete_author', prev=request.full_path) }}" method="POST" enctype="multipart/form-data">
-        <fieldset>
-            {{ confirm_form.hidden_tag() }}
-
-            {{ render_button_bar(cancel_url=request.full_path, submit_label="Delete") }}
-        </fieldset>
-    </form>
-{% endcall %}
-
-{% endblock %}
-
-{% block js %}
-
-<script>
-    $(document).ready(function(){
-        $('#deleteAcademicModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var modal = $(this);
-
-            modal.find('#academic_name').text(button.data('academic-name'));
-            modal.find("#id").val(button.data('academic-id'));
-        });
-
-        $('#deleteAuthorModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var modal = $(this);
-
-            modal.find('#academic_name').text(button.data('academic-name'));
-            modal.find('#author_name').text(button.data('author-name'));
-            modal.find("#id").val(button.data('author-id'));
-        });
-    });
-</script>
+{{ render_delete_modal('deleteAcademicModal', 'Delete Academic', url_for('ui.delete_academic', prev=request.full_path), confirm_form) }}
+{{ render_delete_modal('deleteAuthorModal', 'Delete Author', url_for('ui.delete_author', prev=request.full_path), confirm_form) }}
 
 {% endblock %}

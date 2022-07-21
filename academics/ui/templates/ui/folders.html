@@ -1,6 +1,6 @@
 {% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary, render_field %}
-{% from "lbrc_flask/modal_macros.html" import render_modal %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
+{% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal %}
 {% from "ui/_folder_users.html" import render_folder_users %}
 
 
@@ -17,6 +17,10 @@
                 {
                     'id': 'add_folder',
                     'text': 'Add',
+                    'data-toggle': "modal",
+                    'data-id': "",
+                    'data-name': "",
+                    'data-target': "#editFolderModal",
                 },
             ],
         ) }}
@@ -76,36 +80,8 @@
 
 {{ render_pagination(folders, 'ui.folders', form=search_form) }}
 
-{% call render_modal('editFolderModal', 'Folder Details') %}
-    <form  action="{{ url_for('ui.folder_save') }}" method="POST" enctype="multipart/form-data">
-        <fieldset>
-            {{ edit_folder_form.hidden_tag() }}
-
-            {% for f in edit_folder_form %}
-                {{ render_field(f) }}
-            {% endfor %}
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </div>
-        </fieldset>
-    </form>
-{% endcall %}
-
-{% call render_modal('deleteModal', 'Delete Folder') %}
-    <p id="modal_description">Please confirm that you wish to delete the folder '<span id="name"></span>'.</p>
-    <form action="{{ url_for('ui.folder_delete') }}" method="POST" enctype="multipart/form-data">
-        <fieldset>
-            {{ confirm_form.hidden_tag() }}
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Delete</button>
-            </div>
-        </fieldset>
-    </form>
-{% endcall %}
+{{ render_edit_modal('editFolderModal', 'Folder Details', url_for('ui.folder_save', prev=request.full_path), edit_folder_form) }}
+{{ render_delete_modal('deleteModal', 'Delete Folder', url_for('ui.folder_delete', prev=request.full_path), confirm_form) }}
 
 {% endblock %}
 
@@ -153,34 +129,6 @@
         let data = await response.text();
         document.getElementById(`folder_users_${folder_id}`).innerHTML = data;
     }
-
-    $(document).ready(function(){
-        $('#add_folder').click(function (event) {
-            event.preventDefault();
-
-            modal = $('#editFolderModal')
-            modal.modal('show');
-
-            return false;
-        });
-
-        $('#editFolderModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var modal = $(this);
-
-            modal.find('#name').val(button.data('name'));
-            modal.find("#id").val(button.data('id'));
-        });
-
-        $('#deleteModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var modal = $(this);
-
-            modal.find('#name').text(button.data('name'));
-            modal.find("#id").val(button.data('id'));
-        });
-
-    });
 </script>
 
 {% endblock %}
