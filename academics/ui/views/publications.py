@@ -160,7 +160,7 @@ def _get_publication_query(search_form):
     if search_form.search.data:
         q = q.filter(or_(
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
-            ScopusPublication.publication.like(f'%{search_form.search.data}%'),
+            Journal.name.like(f'%{search_form.search.data}%'),
         ))
 
     if search_form.acknowledgement.data:
