@@ -160,14 +160,14 @@ def _get_publication_query(search_form):
     if search_form.search.data:
         q = q.filter(or_(
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
-            Journal.name.like(f'%{search_form.search.data}%'),
+            ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%'))
         ))
 
     if search_form.acknowledgement.data:
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
 
     if search_form.folder_id.data:
-        q = q.filter(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
+        q = q.filter()
 
     return q
 
