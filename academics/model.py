@@ -145,6 +145,16 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED: False,
     }
 
+    OPEN_ACCESS_UNKNOWN = 'unknown'
+    OPEN_ACCESS_OPEN_ACCESS = 'open_access'
+    OPEN_ACCESS_NOT_OPEN_ACCESS = 'not_open_access'
+
+    OPEN_ACCESS = {
+        OPEN_ACCESS_UNKNOWN: None,
+        OPEN_ACCESS_OPEN_ACCESS: True,
+        OPEN_ACCESS_NOT_OPEN_ACCESS: False,
+    }
+
     id = db.Column(db.Integer, primary_key=True)
 
     scopus_authors = db.relationship("ScopusAuthor", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications"), lazy="joined")
@@ -193,6 +203,15 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
             return 'Acknowledged'
         else:
             return 'Not Acknowledged'
+    
+    @property
+    def open_access_status_name(self):
+        if self.open_access_validated is None:
+            return 'Unknown'
+        elif self.open_access_validated:
+            return 'Open Access'
+        else:
+            return 'Not Open Access'
     
     @property
     def issue_volume(self):
