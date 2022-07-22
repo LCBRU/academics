@@ -91,13 +91,13 @@
                                 Open Access
                                 <div class="btn-toolbar float-right">
                                     <div class="btn-group mr-1 mb-1" role="group">
-                                        <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <button id="btnGroupOpenAccess_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             {{ p.open_access_status_name | default_if_none('Unknown') }}
                                         </button>
-                                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
-                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_UNKNOWN }}">Unknown</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_OPEN_ACCESS }}">Open Access</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_NOT_OPEN_ACCESS }}">Not Open Access</a>
+                                        <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
+                                            <a class="dropdown-item" href="Javascript://" onclick="open_access_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_UNKNOWN }}">Unknown</a>
+                                            <a class="dropdown-item" href="Javascript://" onclick="open_access_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_OPEN_ACCESS }}">Open Access</a>
+                                            <a class="dropdown-item" href="Javascript://" onclick="open_access_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_NOT_OPEN_ACCESS }}">Not Open Access</a>
                                         </div>
                                     </div>
                                 </div>
@@ -154,7 +154,7 @@
             }),
         })
         let data = await response.json();
-        document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`).innerHTML = data['status'];
+        document.getElementById(`btnGroupOpenAccess_${button.data('id')}`).innerHTML = data['status'];
     }
 </script>
 
