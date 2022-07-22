@@ -102,6 +102,28 @@ def publications():
     )
 
 
+@blueprint.route("/validation/")
+def validation():
+    search_form = PublicationSearchForm()
+    search_form.acknowledgement.data = ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN
+    search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
+    
+    q = _get_publication_query(search_form)
+
+    q = q.order_by(ScopusPublication.publication_cover_date.asc())
+
+    publications = q.paginate(
+        page=search_form.page.data,
+        per_page=5,
+        error_out=False,
+    )
+
+    return render_template(
+        "ui/validation.html",
+        publications=publications,
+    )
+
+
 @blueprint.route("/publications/folders", methods=['POST'])
 @validate_json({
     'type': 'object',

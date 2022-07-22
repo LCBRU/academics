@@ -118,6 +118,10 @@ class Subtype(db.Model):
     code = db.Column(db.String)
     description = db.Column(db.String)
 
+    @classmethod
+    def get_validation_types(cls):
+        return Subtype.query.filter(Subtype.description.in_(['article', 'book'])).all()
+
 
 class Sponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)

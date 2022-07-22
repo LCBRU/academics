@@ -1,0 +1,86 @@
+{% extends "ui/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary, render_field %}
+{% from "lbrc_flask/modal_macros.html" import render_modal %}
+{% from "ui/_publications_folders.html" import render_publication_folders %}
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>Validation</h1>
+    </div>
+
+    {{ pagination_summary(publications, 'publication') }}
+
+    <ul class="list-group">
+        {% for p in publications.items %}
+            <li class="list-group-item summary_details">
+                <div class='row'>
+                    <div class="col-7">
+                        <h3>{{p.title}}</h3>
+                    </div>
+                    <div class="col-5">
+                        <div class="btn-toolbar float-right">
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <a href="{{ p.href }}" class="btn btn-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
+                            </div>
+
+                            {% if p.doi %}
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a href="http://doi.org/{{ p.doi }}" class="btn btn-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
+                                </div>
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a href="https://google.com/search?q={{ p.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
+                                </div>
+                            {% endif %}
+
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
+                                    <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_UNKNOWN }}">Unknown</a>
+                                    <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}">Acknowledged</a>
+                                    <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4>{{p.author_list | blank_if_none}}</h4>
+                    <dl class="row">
+                        {% if p.journal %}
+                            <dt class="col-auto">Journal</dt>
+                            <dd class="col-auto"><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
+                        {% endif %}
+                        <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
+                        {% if p.subtype %}
+                            <dt class="col-auto">Type</dt>
+                            <dd class="col-auto">{{ p.subtype.description }}</dd>
+                        {% endif %}
+                        {% if p.sponsor %}
+                            <dt class="col-auto">Funding Sponsor</dt>
+                            <dd class="col-auto">{{ p.sponsor.name }}</dd>
+                        {% endif %}
+                        {% if p.funding_acr %}
+                            <dt class="col-auto">Funding Acronym</dt>
+                            <dd class="col-auto">{{ p.funding_acr.name }}</dd>
+                        {% endif %}
+                        {% if p.is_open_access %}
+                            <dt class="col-auto">Open Access</dt>
+                            <dd class="col-auto"><i class="fas fa-check"></i></dd>
+                        {% endif %}
+                    </dl>
+
+                    <div id="publication_folders_{{p.id}}">
+                        {{ render_publication_folders(p, folders) }}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{{ render_pagination(publications, 'ui.publications', form=search_form) }}
+
+{% endblock %}
