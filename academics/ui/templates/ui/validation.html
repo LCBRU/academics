@@ -71,16 +71,12 @@
                             <dd class="col-auto"><i class="fas fa-check"></i></dd>
                         {% endif %}
                     </dl>
-
-                    <div id="publication_folders_{{p.id}}">
-                        {{ render_publication_folders(p, folders) }}
-                    </div>
                 </div>
             </li>
         {% endfor %}
     </ul>
 </section>
 
-{{ render_pagination(publications, 'ui.publications', form=search_form) }}
+{{ render_pagination(publications, 'ui.validation', form=search_form) }}
 
 {% endblock %}
