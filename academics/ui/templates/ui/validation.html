@@ -71,14 +71,14 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <dl class="row">
+                                <dl>
                                     {% if p.sponsor %}
-                                        <dt class="col-auto">Funding Sponsor</dt>
-                                        <dd class="col-auto">{{ p.sponsor.name }}</dd>
+                                        <dt>Funding Sponsor</dt>
+                                        <dd>{{ p.sponsor.name }}</dd>
                                     {% endif %}
                                     {% if p.funding_acr %}
-                                        <dt class="col-auto">Funding Acronym</dt>
-                                        <dd class="col-auto">{{ p.funding_acr.name }}</dd>
+                                        <dt>Funding Acronym</dt>
+                                        <dd>{{ p.funding_acr.name }}</dd>
                                     {% endif %}
                                 </dl>
                             </div>
@@ -103,12 +103,12 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <dl class="row">
-                                    <dt class="col-auto">Open Access</dt>
+                                <dl>
+                                    <dt>Open Access</dt>
                                     {% if p.is_open_access %}
-                                        <dd class="col-auto"><i class="fas fa-check"></i></dd>
+                                        <dd><i class="fas fa-check"></i></dd>
                                     {% else %}
-                                        <dd class="col-auto"><i class="fas fa-question"></i></dd>
+                                        <dd><i class="fas fa-question"></i></dd>
                                     {% endif %}
                                 </dl>
                             </div>
