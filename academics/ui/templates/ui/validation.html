@@ -35,19 +35,21 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <h4>{{p.author_list | blank_if_none}}</h4>
-                    <dl class="row">
-                        {% if p.journal %}
-                            <dt class="col-auto">Journal</dt>
-                            <dd class="col-auto">{{p.journal.name | blank_if_none | title_case}}</dd>
-                        {% endif %}
-                        <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
-                        {% if p.subtype %}
-                            <dt class="col-auto">Type</dt>
-                            <dd class="col-auto">{{ p.subtype.description }}</dd>
-                        {% endif %}
-                    </dl>
+                <div class="row">
+                    <div class="col">
+                        <h4>{{p.author_list | blank_if_none}}</h4>
+                        <dl class="row">
+                            {% if p.journal %}
+                                <dt class="col-auto">Journal</dt>
+                                <dd class="col-auto">{{p.journal.name | blank_if_none | title_case}}</dd>
+                            {% endif %}
+                            <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
+                            {% if p.subtype %}
+                                <dt class="col-auto">Type</dt>
+                                <dd class="col-auto">{{ p.subtype.description }}</dd>
+                            {% endif %}
+                        </dl>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col">
