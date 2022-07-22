@@ -58,6 +58,9 @@
                             <dt class="col-auto">Type</dt>
                             <dd class="col-auto">{{ p.subtype.description }}</dd>
                         {% endif %}
+                    </dl>
+                    <h5>NIHR Funding Acknowledgement</h5>
+                    <dl class="row">
                         {% if p.sponsor %}
                             <dt class="col-auto">Funding Sponsor</dt>
                             <dd class="col-auto">{{ p.sponsor.name }}</dd>
@@ -66,6 +69,9 @@
                             <dt class="col-auto">Funding Acronym</dt>
                             <dd class="col-auto">{{ p.funding_acr.name }}</dd>
                         {% endif %}
+                    </dl>
+                    <h5>Open Access</h5>
+                    <dl class="row">
                         {% if p.is_open_access %}
                             <dt class="col-auto">Open Access</dt>
                             <dd class="col-auto"><i class="fas fa-check"></i></dd>
