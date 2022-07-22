@@ -104,7 +104,7 @@ def publications():
 
 @blueprint.route("/validation/")
 def validation():
-    search_form = PublicationSearchForm()
+    search_form = PublicationSearchForm(formdata=request.args)
     search_form.acknowledgement.data = ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
