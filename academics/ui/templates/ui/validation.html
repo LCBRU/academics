@@ -84,17 +84,8 @@
 
                     <div class="col">
                         <div class="card">
-                            <div class="card-header">Open Access</div>
-                            <div class="card-body">
-                                <dl class="row">
-                                    <dt class="col-auto">Open Access</dt>
-                                    {% if p.is_open_access %}
-                                        <dd class="col-auto"><i class="fas fa-check"></i></dd>
-                                    {% else %}
-                                        <dd class="col-auto"><i class="fas fa-question"></i></dd>
-                                    {% endif %}
-                                </dl>
-
+                            <div class="card-header">
+                                Open Access
                                 <div class="btn-group mr-1 mb-1" role="group">
                                     <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
@@ -105,6 +96,16 @@
                                         <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-auto">Open Access</dt>
+                                    {% if p.is_open_access %}
+                                        <dd class="col-auto"><i class="fas fa-check"></i></dd>
+                                    {% else %}
+                                        <dd class="col-auto"><i class="fas fa-question"></i></dd>
+                                    {% endif %}
+                                </dl>
                             </div>
                         </div>
                     </div>
