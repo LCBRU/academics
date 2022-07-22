@@ -40,7 +40,7 @@
                     <dl class="row">
                         {% if p.journal %}
                             <dt class="col-auto">Journal</dt>
-                            <dd class="col-auto"><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
+                            <dd class="col-auto">{{p.journal.name | blank_if_none | title_case}}</dd>
                         {% endif %}
                         <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
                         {% if p.subtype %}
@@ -48,7 +48,9 @@
                             <dd class="col-auto">{{ p.subtype.description }}</dd>
                         {% endif %}
                     </dl>
-                    <h5>NIHR Funding Acknowledgement</h5>
+
+                    <h3>NIHR Funding Acknowledgement</h3>
+
                     <dl class="row">
                         {% if p.sponsor %}
                             <dt class="col-auto">Funding Sponsor</dt>
@@ -59,6 +61,7 @@
                             <dd class="col-auto">{{ p.funding_acr.name }}</dd>
                         {% endif %}
                     </dl>
+
                     <div class="btn-group mr-1 mb-1" role="group">
                         <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
@@ -69,7 +72,9 @@
                             <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
                         </div>
                     </div>
-                    <h5>Open Access</h5>
+
+                    <h3>Open Access</h3>
+
                     <dl class="row">
                         <dt class="col-auto">Open Access</dt>
                         {% if p.is_open_access %}
