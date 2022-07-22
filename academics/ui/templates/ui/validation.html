@@ -55,7 +55,21 @@
                 <div class="row">
                     <div class="col">
                         <div class="card">
-                            <div class="card-header">NIHR Funding Acknowledgement</div>
+                            <div class="card-header">
+                                NIHR Funding Acknowledgement
+                                <div class="btn-toolbar float-right">
+                                    <div class="btn-group mr-1 mb-1" role="group">
+                                        <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
+                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_UNKNOWN }}">Unknown</a>
+                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}">Acknowledged</a>
+                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card-body">
                                 <dl class="row">
                                     {% if p.sponsor %}
@@ -67,17 +81,6 @@
                                         <dd class="col-auto">{{ p.funding_acr.name }}</dd>
                                     {% endif %}
                                 </dl>
-
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
-                                        <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_UNKNOWN }}">Unknown</a>
-                                        <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}">Acknowledged</a>
-                                        <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

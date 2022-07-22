@@ -188,7 +188,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     @property
     def acknowledgement_status_name(self):
         if self.acknowledgement_validated is None:
-            return 'Acknowledgement Unknown'
+            return 'Unknown'
         elif self.acknowledgement_validated:
             return 'Acknowledged'
         else:
