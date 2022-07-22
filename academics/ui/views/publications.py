@@ -303,6 +303,30 @@ def publication_acknowledgement_validation():
     return jsonify({'status': p.acknowledgement_status_name}), 200
 
 
+@blueprint.route("/publications/open_access_validation", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'integer'},
+        'status': {'type': 'string'},
+    },
+    "required": ["id", "status"]
+})
+def publication_open_access_validation():
+    p = ScopusPublication.query.get_or_404(request.json.get('id'))
+
+    status = request.json.get('status')
+
+    if status not in ScopusPublication.OPEN_ACCESS:
+        abort(400)
+
+    p.open_access_validated = ScopusPublication.OPEN_ACCESS[status]
+
+    db.session.commit()
+
+    return jsonify({'status': p.open_access_status_name}), 200
+
+
 @blueprint.route("/publication/keywords/options")
 def publication_keyword_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices()]})
