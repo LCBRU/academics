@@ -8,7 +8,7 @@ from lbrc_flask.validators import parse_date
 from sqlalchemy import and_, exists
 from academics.model import Academic, FundingAcr, Journal, Keyword, ScopusAuthor, ScopusPublication, Sponsor, Subtype
 from lbrc_flask.celery import celery
-from .model import AuthorSearch, Author, DocumentSearch
+from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
 
 
@@ -69,6 +69,11 @@ def add_scopus_publications(els_author, scopus_author):
         if not publication:
             publication = ScopusPublication(scopus_id=scopus_id)
 
+            abstract = Abstract(scopus_id)
+
+            if abstract.read(_client()) and abstract.abstract:
+                logging.warn(abstract.data)
+
         href = None
 
         for h in p.get(u'link', ''):
@@ -88,8 +93,7 @@ def add_scopus_publications(els_author, scopus_author):
         publication.subtype = _get_subtype(p)
         publication.sponsor = _get_sponsor(p)
         publication.funding_acr = _get_funding_acr(p)
-        publication_cited_by_count = int(p.get(u'citedby-count', '0'))
-
+        publication.cited_by_count = int(p.get(u'citedby-count', '0'))
         publication.author_list = _get_author_list(p.get('author', []))
 
         if scopus_author not in publication.scopus_authors:
