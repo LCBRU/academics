@@ -154,6 +154,11 @@ class Abstract(AbsDoc):
     @property
     def abstract(self):
         if self.data:
+            return self.data.get('xocs:meta', {})
+
+    @property
+    def funding_list(self):
+        if self.data:
             return self.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('abstracts', '')
 
     def read(self, client):
