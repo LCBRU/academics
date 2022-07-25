@@ -154,11 +154,11 @@ class Abstract(AbsDoc):
     @property
     def funding_list(self):
         if not self.data:
-            return None
+            return set()
 
         result = set()
 
-        funding_section = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', {})
+        funding_section = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', None)
 
         logging.warn(funding_section)
 
@@ -177,11 +177,17 @@ class Abstract(AbsDoc):
 
     @property
     def funding_text(self):
-        if self.data:
-            result = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding-text', '')
-
-            logging.warn(f'result = {result}')
+        if not self.data:
             return ''
+
+        funding_text = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding-text', '')
+
+        logging.warn(funding_text)
+
+        if type(funding_text) is dict:
+            return '\n'.join(funding_text.values())
+        else:
+            return funding_text
 
     def read(self, client):
         try:
