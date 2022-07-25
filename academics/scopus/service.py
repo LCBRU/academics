@@ -71,8 +71,8 @@ def add_scopus_publications(els_author, scopus_author):
 
             abstract = Abstract(scopus_id)
 
-            if abstract.read(_client()) and abstract.abstract:
-                logging.warn(abstract.data)
+            if abstract.read(_client()):
+                logging.warn(abstract.abstract)
 
         href = None
 
