@@ -153,20 +153,27 @@ class Abstract(AbsDoc):
 
     @property
     def funding_list(self):
-        if self.data:
-            result = set()
+        if not self.data:
+            return None
 
-            logging.warn(self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}))
+        result = set()
 
-            for f in self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', {}):
-                logging.warn(f'f = {f}')
+        logging.warn(self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}))
 
-                # if f.get('xocs:funding-agency-matched-string', None):
-                #     result.add(f.get('xocs:funding-agency-matched-string', None))
-                # if f.get('xocs:funding-agency', None):
-                #     result.add(f.get('xocs:funding-agency', None))
+        funding_section = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {})
 
-            return result
+        if type(funding_section) is list:
+
+            for f in funding_section.get('xocs:funding', {}):
+                if f.get('xocs:funding-agency-matched-string', None):
+                    result.add(f.get('xocs:funding-agency-matched-string', None))
+                if f.get('xocs:funding-agency', None):
+                    result.add(f.get('xocs:funding-agency', None))
+
+        elif type(funding_section) is dict:
+            result.add(funding_section.get('xocs:funding-agency', None))
+
+        return result
 
     @property
     def funding_text(self):
