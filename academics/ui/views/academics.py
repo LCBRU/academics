@@ -159,6 +159,9 @@ def delete_author():
     if form.validate_on_submit():
         au = ScopusAuthor.query.get_or_404(form.id.data)
         a = au.academic
+        au.publications = []
+        db.session.add(au)
+        db.session.flush()
         db.session.delete(au)
         db.session.flush()
 
