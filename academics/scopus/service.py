@@ -287,5 +287,7 @@ def _add_authors_to_academic(scopus_ids, academic_id):
 
 
 def delete_orphan_publications():
-    ScopusPublication.query.filter(~ScopusPublication.scopus_authors.any()).delete(synchronize_session='fetch')
+    for p in ScopusPublication.query.filter(~ScopusPublication.scopus_authors.any()).all():
+        db.session.delete(p)
+
     db.session.commit()

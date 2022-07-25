@@ -167,6 +167,6 @@ def delete_author():
 
         db.session.commit()
 
-        # delete_orphan_publications()
+        delete_orphan_publications()
 
     return redirect(url_for('ui.index'))
