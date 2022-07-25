@@ -154,7 +154,7 @@ class Abstract(AbsDoc):
     @property
     def funding_list(self):
         if self.data:
-            result = {}
+            result = set()
 
             for f in self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', {}):
                 if f.get('xocs:funding-agency-matched-string', None):
