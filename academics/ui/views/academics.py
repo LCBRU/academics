@@ -159,17 +159,14 @@ def delete_author():
     if form.validate_on_submit():
         au = ScopusAuthor.query.get_or_404(form.id.data)
         a = au.academic
-        au.scopus_publications[:] = []
-        db.session.add(au)
+        db.session.delete(au)
         db.session.flush()
-        # db.session.delete(au)
-        # db.session.flush()
 
-        # if not a.scopus_authors:
-        #     db.session.delete(a)
+        if not a.scopus_authors:
+            db.session.delete(a)
 
         db.session.commit()
 
-        delete_orphan_publications()
+        # delete_orphan_publications()
 
     return redirect(url_for('ui.index'))
