@@ -152,14 +152,9 @@ class Abstract(AbsDoc):
         super().__init__(scp_id=self.scopus_id)
 
     @property
-    def abstract(self):
-        if self.data:
-            return self.data.get('xocs:meta', {})
-
-    @property
     def funding_list(self):
         if self.data:
-            return self.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('abstracts', '')
+            return self.data.get('item', {}).get('xocs:meta', {})
 
     def read(self, client):
         try:
