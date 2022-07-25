@@ -170,6 +170,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     volume = db.Column(db.String)
     issue = db.Column(db.String)
     pages = db.Column(db.String)
+    funding_text = db.Column(db.String)
     is_open_access = db.Column(db.Boolean)
     cited_by_count = db.Column(db.Integer)
 
