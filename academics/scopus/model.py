@@ -184,8 +184,8 @@ class Abstract(AbsDoc):
 
         logging.warn(funding_text)
 
-        if type(funding_text) is dict:
-            return '\n'.join(funding_text.values())
+        if type(funding_text) is list:
+            return '\n'.join([t.values()[0] for t in funding_text])
         else:
             return funding_text
 
