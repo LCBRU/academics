@@ -158,9 +158,9 @@ class Abstract(AbsDoc):
 
         result = set()
 
-        logging.warn(self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}))
+        funding_section = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', {})
 
-        funding_section = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {})
+        logging.warn(funding_section)
 
         if type(funding_section) is list:
 
