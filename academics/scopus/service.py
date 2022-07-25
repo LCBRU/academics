@@ -72,8 +72,9 @@ def add_scopus_publications(els_author, scopus_author):
             abstract = Abstract(scopus_id)
 
             if abstract.read(_client()):
-                publication.funding_text = abstract.funding_text
-                logging.warn(abstract.funding_list)
+                pass
+                # publication.funding_text = abstract.funding_text
+                # logging.warn(abstract.funding_list)
 
         href = None
 
