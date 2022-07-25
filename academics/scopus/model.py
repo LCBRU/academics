@@ -157,17 +157,21 @@ class Abstract(AbsDoc):
             result = set()
 
             for f in self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', {}):
-                if f.get('xocs:funding-agency-matched-string', None):
-                    result.add(f.get('xocs:funding-agency-matched-string', None))
-                if f.get('xocs:funding-agency', None):
-                    result.add(f.get('xocs:funding-agency', None))
+                logging.warn(f'{f=}')
+                # if f.get('xocs:funding-agency-matched-string', None):
+                #     result.add(f.get('xocs:funding-agency-matched-string', None))
+                # if f.get('xocs:funding-agency', None):
+                #     result.add(f.get('xocs:funding-agency', None))
 
             return result
 
     @property
     def funding_text(self):
         if self.data:
-            return self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding-text', '')
+            result = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding-text', '')
+
+            logging.warn(f'{result=}')
+            return ''
 
     def read(self, client):
         try:
