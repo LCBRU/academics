@@ -156,8 +156,11 @@ class Abstract(AbsDoc):
         if self.data:
             result = set()
 
+            logging.warn(self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}))
+
             for f in self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', {}):
                 logging.warn(f'f = {f}')
+
                 # if f.get('xocs:funding-agency-matched-string', None):
                 #     result.add(f.get('xocs:funding-agency-matched-string', None))
                 # if f.get('xocs:funding-agency', None):
