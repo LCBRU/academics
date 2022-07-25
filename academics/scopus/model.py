@@ -157,7 +157,7 @@ class Abstract(AbsDoc):
             result = set()
 
             for f in self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', {}):
-                logging.warn(f'{f=}')
+                logging.warn(f'f = {f}')
                 # if f.get('xocs:funding-agency-matched-string', None):
                 #     result.add(f.get('xocs:funding-agency-matched-string', None))
                 # if f.get('xocs:funding-agency', None):
@@ -170,7 +170,7 @@ class Abstract(AbsDoc):
         if self.data:
             result = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding-text', '')
 
-            logging.warn(f'{result=}')
+            logging.warn(f'result = {result}')
             return ''
 
     def read(self, client):
