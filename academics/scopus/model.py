@@ -160,8 +160,6 @@ class Abstract(AbsDoc):
 
         funding_section = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding', None)
 
-        logging.warn(funding_section)
-
         if type(funding_section) is list:
 
             for f in funding_section:
