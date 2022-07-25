@@ -154,7 +154,7 @@ class Abstract(AbsDoc):
     @property
     def funding_list(self):
         if self.data:
-            return self.data.get('item', {}).get('xocs:meta', {})
+            return self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding', {})
 
     def read(self, client):
         try:
