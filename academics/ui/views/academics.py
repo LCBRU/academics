@@ -162,11 +162,11 @@ def delete_author():
         au.publications = []
         db.session.add(au)
         db.session.flush()
-        db.session.delete(au)
-        db.session.flush()
+        # db.session.delete(au)
+        # db.session.flush()
 
-        if not a.scopus_authors:
-            db.session.delete(a)
+        # if not a.scopus_authors:
+        #     db.session.delete(a)
 
         db.session.commit()
 
