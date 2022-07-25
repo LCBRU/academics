@@ -192,7 +192,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     funding_acr_id = db.Column(db.Integer, db.ForeignKey(FundingAcr.id))
     funding_acr = db.relationship(FundingAcr, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
-    keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set, cascade="all, delete-orphan")
+    keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set, cascade="all, delete")
     folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
 
     @property
