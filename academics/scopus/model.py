@@ -164,7 +164,7 @@ class Abstract(AbsDoc):
 
         if type(funding_section) is list:
 
-            for f in funding_section.get('xocs:funding', {}):
+            for f in funding_section:
                 if f.get('xocs:funding-agency-matched-string', None):
                     result.add(f.get('xocs:funding-agency-matched-string', None))
                 if f.get('xocs:funding-agency', None):
