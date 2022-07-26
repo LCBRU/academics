@@ -40,6 +40,19 @@ class PublicationSearchForm(SearchForm):
     keywords = SelectMultipleField('Keywords')
     author_id = SelectField('Author')
     folder_id = SelectField('Folder')
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
+        self.author_id.choices = _get_author_choices()
+        self.subtype_id.choices = [('', '')] + [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
+        self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
+        self.folder_id.choices = [('', '')] + _get_folder_choices()
+
+
+class ValidationSearchForm(SearchForm):
     acknowledgement = SelectField('Acknowledgement Validation', choices=[
         ('', ''),
         (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
@@ -52,17 +65,6 @@ class PublicationSearchForm(SearchForm):
         (ScopusPublication.OPEN_ACCESS_OPEN_ACCESS, 'Open Access'),
         (ScopusPublication.OPEN_ACCESS_NOT_OPEN_ACCESS, 'Not Open Access')
     ])
-
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
-        self.author_id.choices = _get_author_choices()
-        self.subtype_id.choices = [('', '')] + [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
-        self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
-        self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
-        self.folder_id.choices = [('', '')] + _get_folder_choices()
 
 
 class PublicationFolderForm(FlashingForm):
@@ -110,7 +112,7 @@ def publications():
 
 @blueprint.route("/validation/")
 def validation():
-    search_form = PublicationSearchForm(formdata=request.args)
+    search_form = ValidationSearchForm(formdata=request.args)
     search_form.acknowledgement.data = ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
