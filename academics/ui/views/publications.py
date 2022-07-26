@@ -195,10 +195,10 @@ def _get_publication_query(search_form):
             ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%'))
         ))
 
-    if search_form.data['acknowledgement']:
+    if 'acknowledgement' in search_form.data:
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
 
-    if search_form.data['open_access']:
+    if 'open_access' in search_form.data:
         q = q.filter(ScopusPublication.open_access_validated == ScopusPublication.OPEN_ACCESS[search_form.open_access.data])
 
     if search_form.folder_id.data:
