@@ -73,6 +73,7 @@ def add_scopus_publications(els_author, scopus_author):
 
             if abstract.read(_client()):
                 publication.funding_text = abstract.funding_text
+                _add_sponsors_to_publications(publication=publication, sponsor_names=abstract.funding_list)
 
         href = None
 
@@ -187,6 +188,22 @@ def _add_keywords_to_publications(publication, keyword_list):
             db.session.add(keyword)
         
         publication.keywords.add(keyword)
+
+
+def _add_sponsors_to_publications(publication, sponsor_names):
+    publication.keywords.clear()
+
+    for name in sponsor_names:
+        if not name:
+            continue
+
+        sponsor = Sponsor.query.filter(Sponsor.name == name).one_or_none()
+
+        if not sponsor:
+            sponsor = Sponsor(name=name)
+            db.session.add(sponsor)
+        
+        publication.sponsors.add(sponsor)
 
 
 def update_academics():
