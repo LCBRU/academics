@@ -197,7 +197,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     subtype = db.relationship(Subtype, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     sponsor_id = db.Column(db.Integer, db.ForeignKey(Sponsor.id))
-    sponsor = db.relationship(Sponsor, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
+    sponsor = db.relationship(Sponsor, lazy="joined")
 
     funding_acr_id = db.Column(db.Integer, db.ForeignKey(FundingAcr.id))
     funding_acr = db.relationship(FundingAcr, lazy="joined")
