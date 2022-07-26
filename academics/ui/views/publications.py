@@ -31,10 +31,6 @@ def _get_folder_choices():
     return [(f.id, f.name.title()) for f in Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all()]
 
 
-def _default_validation_types():
-    [s.id for s in Subtype.get_validation_types()]
-
-
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
     journal_id = SelectMultipleField('Journal', coerce=int, )
@@ -57,7 +53,7 @@ class PublicationSearchForm(SearchForm):
 
 
 class ValidationSearchForm(SearchForm):
-    subtype_id = SelectMultipleField('Type')
+    subtype_id = HiddenField()
     acknowledgement = SelectField('Acknowledgement Validation', choices=[
         ('', ''),
         (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
@@ -70,12 +66,6 @@ class ValidationSearchForm(SearchForm):
         (ScopusPublication.OPEN_ACCESS_OPEN_ACCESS, 'Open Access'),
         (ScopusPublication.OPEN_ACCESS_NOT_OPEN_ACCESS, 'Not Open Access')
     ], default=ScopusPublication.OPEN_ACCESS_UNKNOWN)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.subtype_id.choices = [('', '')] + [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
-        self.subtype_id.default = _default_validation_types()
 
 
 class PublicationFolderForm(FlashingForm):
@@ -124,6 +114,7 @@ def publications():
 @blueprint.route("/validation/")
 def validation():
     search_form = ValidationSearchForm(formdata=request.args)
+    search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
     q = _get_publication_query(search_form)
 
