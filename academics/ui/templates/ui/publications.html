@@ -55,17 +55,6 @@
                                     <a href="https://google.com/search?q={{ p.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
                                 </div>
                             {% endif %}
-
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
-                                    <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_UNKNOWN }}">Unknown</a>
-                                    <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}">Acknowledged</a>
-                                    <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
