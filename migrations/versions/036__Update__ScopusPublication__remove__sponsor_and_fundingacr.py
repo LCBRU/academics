@@ -6,8 +6,8 @@ def upgrade(migrate_engine):
     meta.bind = migrate_engine
     t = Table("scopus_publication", meta, autoload=True)
 
-    t.c.sponsor_id.drop()
-    t.c.funding_acr_id.drop()
+    # t.c.sponsor_id.drop()
+    # t.c.funding_acr_id.drop()
 
 
 def downgrade(migrate_engine):
