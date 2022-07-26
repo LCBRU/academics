@@ -72,10 +72,17 @@
                             </div>
                             <div class="card-body">
                                 <dl>
-                                    <dt>Funding Sponsor</dt>
-                                    {% for s in p.sponsors %}
-                                        <dd>{{ s.name }}</dd>
-                                    {% endfor %}
+                                    {% if p.sponsors | len > 0 %}
+                                        <dt>Funding Sponsors</dt>
+                                        {% for s in p.sponsors %}
+                                            <dd>{{ s.name }}</dd>
+                                        {% endfor %}
+                                    {% endif %}
+
+                                    {% if p.funding_text %}
+                                        <dt>Funding Text</dt>
+                                        <dd>{{ p.funding_text }}</dd>
+                                    {% endif%}
                                 </dl>
                             </div>
                         </div>
