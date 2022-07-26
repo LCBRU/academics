@@ -103,9 +103,11 @@
                             {% endfor %}
                         {% endif %}
                     </dl>
- 
-                    <h5>Abstract</h5>
-                    <p>{{p.abstract | blank_if_none}}</p>
+
+                    <dl>
+                        <dt>Abstract</dt>
+                        <dd>{{p.abstract | blank_if_none}}</dd>
+                    </dl>
 
                     {% if p.funding_text %}
                         <h5>Funding Text</h5>
