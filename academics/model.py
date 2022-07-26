@@ -139,6 +139,8 @@ class FundingAcr(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
 
+    publications = db.relationship("ScopusPublication", secondary=funding_acr__scopus_publication, back_populates="funders", collection_class=set)
+
 
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
@@ -198,10 +200,11 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     sponsor = db.relationship(Sponsor, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
     funding_acr_id = db.Column(db.Integer, db.ForeignKey(FundingAcr.id))
-    funding_acr = db.relationship(FundingAcr, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
+    funding_acr = db.relationship(FundingAcr, lazy="joined")
 
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
+    funders = db.relationship("FundingAcr", lazy="joined", secondary=funding_acr__scopus_publication, back_populates="publications", collection_class=set)
 
     @property
     def acknowledgement_status_name(self):
