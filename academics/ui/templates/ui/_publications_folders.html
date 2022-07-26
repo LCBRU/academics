@@ -1,4 +1,5 @@
 {% macro render_publication_folders(publication, folders) %}
+
     {% if folders | length > 0 %}
         <dt>Folders</dt>
         {% for f in publication.folders | sort(attribute='name')%}

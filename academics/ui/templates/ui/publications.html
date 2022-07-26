@@ -121,11 +121,11 @@
                                 {% endfor %}
                             </dd>
                         {% endif %}
-    
-                        <div id="publication_folders_{{p.id}}">
-                            {{ render_publication_folders(p, folders) }}
-                        </div>
                     </dl>
+    
+                    <div id="publication_folders_{{p.id}}">
+                        {{ render_publication_folders(p, folders) }}
+                    </div>
                 </div>
             </li>
         {% endfor %}
