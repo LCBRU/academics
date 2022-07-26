@@ -100,7 +100,7 @@
                     <dl>
                         {% if p.sponsors | length > 0 %}
                             <dt>Funding Sponsors</dt>
-                            {% for s in p.sponsors %}
+                            {% for s in p.sponsors | sort(attribute='name') %}
                                 <dd>{{ s.name }}</dd>
                             {% endfor %}
                         {% endif %}
