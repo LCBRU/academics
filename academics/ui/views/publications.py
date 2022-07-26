@@ -40,13 +40,13 @@ class PublicationSearchForm(SearchForm):
     keywords = SelectMultipleField('Keywords')
     author_id = SelectField('Author')
     folder_id = SelectField('Folder')
-    acknowledgement = SelectField('Acknowledgement', choices=[
+    acknowledgement = SelectField('Acknowledgement Validation', choices=[
         ('', ''),
         (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
         (ScopusPublication.ACKNOWLEDGEMENT_ACKNOWLEDGED, 'Acknowledged'),
         (ScopusPublication.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED, 'Not Acknowledged')
     ])
-    open_access = SelectField('Open Access', choices=[
+    open_access = SelectField('Open Access Validation', choices=[
         ('', ''),
         (ScopusPublication.OPEN_ACCESS_UNKNOWN, 'Unknown'),
         (ScopusPublication.OPEN_ACCESS_OPEN_ACCESS, 'Open Access'),
