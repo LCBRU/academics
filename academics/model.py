@@ -113,6 +113,13 @@ folders__scopus_publications = db.Table(
 )
 
 
+funding_acr__scopus_publication = db.Table(
+    'funding_acr__scopus_publication',
+    db.Column('funding_acr_id', db.Integer(), db.ForeignKey('funding_acr.id'), primary_key=True),
+    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
+)
+
+
 class Subtype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String)

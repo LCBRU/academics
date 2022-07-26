@@ -124,6 +124,7 @@ class Author(ElsAuthor):
         self.update_scopus_author(result)
         return result
 
+
 class Affiliation(ElsAffil):
     def __init__(self, affiliation_id):
         self.affiliation_id = affiliation_id
