@@ -1,5 +1,6 @@
 from flask import abort, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
+from flask_security import roles_accepted
 from lbrc_flask.forms import SearchForm, FlashingForm
 from academics.model import Academic, Folder, Journal, Keyword, ScopusAuthor, ScopusPublication, Subtype, Theme
 from .. import blueprint
@@ -112,6 +113,7 @@ def publications():
 
 
 @blueprint.route("/validation/")
+@roles_accepted('validator')
 def validation():
     search_form = ValidationSearchForm(formdata=request.args)
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
@@ -302,6 +304,7 @@ def publication_export_pdf():
     },
     "required": ["id", "status"]
 })
+@roles_accepted('validator')
 def publication_acknowledgement_validation():
     p = ScopusPublication.query.get_or_404(request.json.get('id'))
 
@@ -326,6 +329,7 @@ def publication_acknowledgement_validation():
     },
     "required": ["id", "status"]
 })
+@roles_accepted('validator')
 def publication_open_access_validation():
     p = ScopusPublication.query.get_or_404(request.json.get('id'))
 

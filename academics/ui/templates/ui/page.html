@@ -3,6 +3,10 @@
 
 {% block navlinks %}
     {{ render_nav_item('ui.publications', 'Publications', 'far fa-newspaper') }}
-    {{ render_nav_item('ui.validation', 'Validation', 'far fa-check-circle') }}
+
+    {% if current_user.has_role('validator') %}
+        {{ render_nav_item('ui.validation', 'Validation', 'far fa-check-circle') }}
+    {% endif %}
+
     {{ render_nav_item('ui.folders', 'Folders', 'fas fa-folder') }}
 {% endblock %}
