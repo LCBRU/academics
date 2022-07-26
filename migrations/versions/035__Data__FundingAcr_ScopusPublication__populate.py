@@ -9,6 +9,7 @@ def upgrade(migrate_engine):
         INSERT INTO funding_acr__scopus_publications (funding_acr_id, scopus_publication_id)
         SELECT DISTINCT funding_acr_id, id
         FROM scopus_publication
+        WHERE funding_acr_id IS NOT NULL
         ;
     ''')
 
