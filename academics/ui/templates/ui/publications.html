@@ -89,11 +89,11 @@
                             <dd class="col-auto">{{ p.cited_by_count }}</dd>
                         {% endif %}
 
-                        <dt>Open Access</dt>
+                        <dt class="col-auto">Open Access</dt>
                         {% if p.is_open_access %}
-                            <dd><i class="fas fa-check"></i></dd>
+                            <dd class="col-auto"><i class="fas fa-check"></i></dd>
                         {% else %}
-                            <dd><i class="fas fa-question"></i></dd>
+                            <dd class="col-auto"><i class="fas fa-question"></i></dd>
                         {% endif %}
 
                         {% if p.sponsors | length > 0 %}
