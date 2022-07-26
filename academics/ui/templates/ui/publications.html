@@ -95,37 +95,37 @@
                         {% else %}
                             <dd class="col-auto"><i class="fas fa-question"></i></dd>
                         {% endif %}
-
-                        {% if p.sponsors | length > 0 %}
-                            <dt class="col-auto">Funding Sponsors</dt>
-                            {% for s in p.sponsors %}
-                                <dd class="col-auto">{{ s.name }}</dd>
-                            {% endfor %}
-                        {% endif %}
                     </dl>
 
                     <dl>
-                        <dt>Abstract</dt>
-                        <dd>{{p.abstract | blank_if_none}}</dd>
-                    </dl>
-
-                    {% if p.funding_text %}
-                        <h5>Funding Text</h5>
-                        <p>{{ p.funding_text }}</p>
-                    {% endif%}
-
-                    {% if p.keywords | length > 0 %}
-                        <h5>Keywords</h5>
-                        <div>
-                            {% for k in p.keywords | sort(attribute='keyword')%}
-                                <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1"><i class="fas fa-key"></i> {{ k.keyword }}</a>
+                        {% if p.sponsors | length > 0 %}
+                            <dt>Funding Sponsors</dt>
+                            {% for s in p.sponsors %}
+                                <dd>{{ s.name }}</dd>
                             {% endfor %}
-                        </div>
-                    {% endif %}
+                        {% endif %}
 
-                    <div id="publication_folders_{{p.id}}">
-                        {{ render_publication_folders(p, folders) }}
-                    </div>
+                        <dt>Abstract</dt>
+                        <dd>{{p.abstract | blank_if_none}}</>
+
+                        {% if p.funding_text %}
+                            <dt>Funding Text</dt>
+                            <dd>{{ p.funding_text }}</dd>
+                        {% endif%}
+    
+                        {% if p.keywords | length > 0 %}
+                            <dt>Keywords</dt>
+                            <dd>
+                                {% for k in p.keywords | sort(attribute='keyword')%}
+                                    <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1"><i class="fas fa-key"></i> {{ k.keyword }}</a>
+                                {% endfor %}
+                            </dd>
+                        {% endif %}
+    
+                        <div id="publication_folders_{{p.id}}">
+                            {{ render_publication_folders(p, folders) }}
+                        </div>
+                    </dl>
                 </div>
             </li>
         {% endfor %}
