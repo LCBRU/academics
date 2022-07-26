@@ -180,8 +180,6 @@ class Abstract(AbsDoc):
 
         funding_text = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding-text', '')
 
-        logging.warn(funding_text)
-
         if type(funding_text) is list:
             return '\n'.join([t.get('$', '') for t in funding_text])
         else:
