@@ -46,6 +46,12 @@ class PublicationSearchForm(SearchForm):
         (ScopusPublication.ACKNOWLEDGEMENT_ACKNOWLEDGED, 'Acknowledged'),
         (ScopusPublication.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED, 'Not Acknowledged')
     ])
+    open_access = SelectField('Open Access', choices=[
+        ('', ''),
+        (ScopusPublication.OPEN_ACCESS_UNKNOWN, 'Unknown'),
+        (ScopusPublication.OPEN_ACCESS_OPEN_ACCESS, 'Open Access'),
+        (ScopusPublication.OPEN_ACCESS_NOT_OPEN_ACCESS, 'Not Open Access')
+    ])
 
 
     def __init__(self, **kwargs):
