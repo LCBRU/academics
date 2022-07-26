@@ -114,7 +114,7 @@ folders__scopus_publications = db.Table(
 
 
 sponsors__scopus_publications = db.Table(
-    'funding_acr__scopus_publications',
+    'sponsors__scopus_publications',
     db.Column('sponsor_id', db.Integer(), db.ForeignKey('sponsor.id'), primary_key=True),
     db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
 )
