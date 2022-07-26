@@ -110,8 +110,10 @@
                             <dd>{{ p.funding_text }}</dd>
                         {% endif%}
     
-                        <dt>Abstract</dt>
-                        <dd>{{p.abstract | blank_if_none}}</>
+                        {% if p.abstract %}
+                            <dt>Abstract</dt>
+                            <dd>{{p.abstract | blank_if_none}}</>
+                        {% endif%}
 
                         {% if p.keywords | length > 0 %}
                             <dt>Keywords</dt>
