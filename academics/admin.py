@@ -23,9 +23,6 @@ class UserView(AdminCustomView):
             'query_factory': lambda: db.session.query(Role)
         },
     }
-    form_overrides = {
-        'roles': QuerySelectMultipleFieldSet,
-    }
 
 
 class ThemeView(AdminCustomView):
