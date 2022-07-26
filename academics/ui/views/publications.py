@@ -131,6 +131,7 @@ def validation():
     return render_template(
         "ui/validation.html",
         publications=publications,
+        search_form=search_form,
     )
 
 
