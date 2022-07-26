@@ -89,19 +89,22 @@
                             <dd class="col-auto">{{ p.cited_by_count }}</dd>
                         {% endif %}
 
+                        <dt>Open Access</dt>
+                        {% if p.is_open_access %}
+                            <dd><i class="fas fa-check"></i></dd>
+                        {% else %}
+                            <dd><i class="fas fa-question"></i></dd>
+                        {% endif %}
+
                         {% if p.sponsors | length > 0 %}
                             <dt class="col-auto">Funding Sponsors</dt>
                             {% for s in p.sponsors %}
                                 <dd class="col-auto">{{ s.name }}</dd>
                             {% endfor %}
                         {% endif %}
-
-                        {% if p.is_open_access %}
-                            <dt class="col-auto">Open Access</dt>
-                            <dd class="col-auto"><i class="fas fa-check"></i></dd>
-                        {% endif %}
                     </dl>
  
+                    <h5>Abstract</h5>
                     <p>{{p.abstract | blank_if_none}}</p>
 
                     {% if p.funding_text %}
