@@ -195,7 +195,7 @@ def _get_publication_query(search_form):
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
 
     if search_form.open_access.data:
-        q = q.filter(ScopusPublication.is_open_access == ScopusPublication.OPEN_ACCESS[search_form.open_access.data])
+        q = q.filter(ScopusPublication.open_access_validated == ScopusPublication.OPEN_ACCESS[search_form.open_access.data])
 
     if search_form.folder_id.data:
         q = q.filter()
