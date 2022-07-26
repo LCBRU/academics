@@ -196,12 +196,6 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     subtype_id = db.Column(db.Integer, db.ForeignKey(Subtype.id))
     subtype = db.relationship(Subtype, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
-    sponsor_id = db.Column(db.Integer, db.ForeignKey(Sponsor.id))
-    sponsor = db.relationship(Sponsor, lazy="joined")
-
-    funding_acr_id = db.Column(db.Integer, db.ForeignKey(FundingAcr.id))
-    funding_acr = db.relationship(FundingAcr, lazy="joined")
-
     keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
     sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__scopus_publications, back_populates="publications", collection_class=set)
