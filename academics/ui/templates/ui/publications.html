@@ -90,16 +90,11 @@
                         {% endif %}
 
                         {% if p.sponsors | length > 0 %}
-                            <dt>Funding Sponsors</dt>
+                            <dt class="col-auto">Funding Sponsors</dt>
                             {% for s in p.sponsors %}
-                                <dd>{{ s.name }}</dd>
+                                <dd class="col-auto">{{ s.name }}</dd>
                             {% endfor %}
                         {% endif %}
-
-                        {% if p.funding_text %}
-                            <dt>Funding Text</dt>
-                            <dd>{{ p.funding_text }}</dd>
-                        {% endif%}
 
                         {% if p.is_open_access %}
                             <dt class="col-auto">Open Access</dt>
@@ -108,6 +103,11 @@
                     </dl>
  
                     <p>{{p.abstract | blank_if_none}}</p>
+
+                    {% if p.funding_text %}
+                        <h5>Funding Text</h5>
+                        <p>{{ p.funding_text }}</p>
+                    {% endif%}
 
                     {% if p.keywords | length > 0 %}
                         <h5>Keywords</h5>
