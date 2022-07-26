@@ -72,7 +72,7 @@
                             </div>
                             <div class="card-body">
                                 <dl>
-                                    {% if p.sponsors | len > 0 %}
+                                    {% if p.sponsors | length > 0 %}
                                         <dt>Funding Sponsors</dt>
                                         {% for s in p.sponsors %}
                                             <dd>{{ s.name }}</dd>
