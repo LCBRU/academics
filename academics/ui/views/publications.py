@@ -57,7 +57,7 @@ class PublicationSearchForm(SearchForm):
 
 
 class ValidationSearchForm(SearchForm):
-    subtype_id = SelectMultipleField('Type', default=_default_validation_types)
+    subtype_id = SelectMultipleField('Type')
     acknowledgement = SelectField('Acknowledgement Validation', choices=[
         ('', ''),
         (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
@@ -75,6 +75,7 @@ class ValidationSearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.subtype_id.choices = [('', '')] + [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
+        self.subtype_id.default = _default_validation_types()
 
 
 class PublicationFolderForm(FlashingForm):
