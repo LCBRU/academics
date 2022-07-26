@@ -59,13 +59,13 @@ class ValidationSearchForm(SearchForm):
         (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
         (ScopusPublication.ACKNOWLEDGEMENT_ACKNOWLEDGED, 'Acknowledged'),
         (ScopusPublication.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED, 'Not Acknowledged')
-    ])
+    ], default=ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN)
     open_access = SelectField('Open Access Validation', choices=[
         ('', ''),
         (ScopusPublication.OPEN_ACCESS_UNKNOWN, 'Unknown'),
         (ScopusPublication.OPEN_ACCESS_OPEN_ACCESS, 'Open Access'),
         (ScopusPublication.OPEN_ACCESS_NOT_OPEN_ACCESS, 'Not Open Access')
-    ])
+    ], default=ScopusPublication.OPEN_ACCESS_UNKNOWN)
 
 
 class PublicationFolderForm(FlashingForm):
@@ -114,8 +114,6 @@ def publications():
 @blueprint.route("/validation/")
 def validation():
     search_form = ValidationSearchForm(formdata=request.args)
-    search_form.acknowledgement.data = ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN
-    search_form.open_access.data = ScopusPublication.OPEN_ACCESS_UNKNOWN
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
     q = _get_publication_query(search_form)
