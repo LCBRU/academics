@@ -160,10 +160,10 @@ def publication_folders():
 def _get_publication_query(search_form):
     q = ScopusPublication.query
 
-    if 'author_id' in search_form.data:
+    if search_form.has_value('author_id'):
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
 
-    if 'theme_id' in search_form.data:
+    if search_form.has_value('theme_id'):
         aq = ScopusAuthor.query.with_entities(ScopusAuthor.id.distinct())
         aq = aq.join(ScopusAuthor.academic)
         aq = aq.filter(Academic.theme_id == search_form.theme_id.data)
@@ -171,39 +171,39 @@ def _get_publication_query(search_form):
 
         q = q.filter(ScopusPublication.scopus_authors.any(ScopusAuthor.id.in_(aq)))
 
-    if 'journal_id' in search_form.data:
+    if  search_form.has_value('journal_id'):
         q = q.filter(ScopusPublication.journal_id.in_(search_form.journal_id.data))
 
-    if 'subtype_id' in search_form.data:
+    if search_form.has_value('subtype_id'):
         q = q.filter(ScopusPublication.subtype_id.in_(search_form.subtype_id.data))
 
-    if 'keywords' in search_form.data:
+    if search_form.has_value('keywords'):
         for k in search_form.keywords.data:
             q = q.filter(ScopusPublication.keywords.any(Keyword.id == k))
 
-    if 'publication_date_start' in search_form.data:
+    if search_form.has_value('publication_date_start'):
         publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
         if publication_start_date:
             q = q.filter(ScopusPublication.publication_cover_date >= publication_start_date)
 
-    if 'publication_date_end' in search_form.data:
+    if search_form.has_value('publication_date_end'):
         publication_end_date = parse_date_or_none(search_form.publication_date_end.data)
         if publication_end_date:
             q = q.filter(ScopusPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
 
-    if 'search' in search_form.data:
+    if search_form.has_value('search'):
         q = q.filter(or_(
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
             ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%'))
         ))
 
-    if 'acknowledgement' in search_form.data:
+    if search_form.has_value('acknowledgement'):
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
 
-    if 'open_access' in search_form.data:
+    if search_form.has_value('open_access'):
         q = q.filter(ScopusPublication.open_access_validated == ScopusPublication.OPEN_ACCESS[search_form.open_access.data])
 
-    if 'folder_id' in search_form.data:
+    if search_form.has_value('folder_id'):
         q = q.filter()
 
     return q
