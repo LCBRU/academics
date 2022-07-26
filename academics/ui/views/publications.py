@@ -53,6 +53,7 @@ class PublicationSearchForm(SearchForm):
 
 
 class ValidationSearchForm(SearchForm):
+    subtype_id = HiddenField()
     acknowledgement = SelectField('Acknowledgement Validation', choices=[
         ('', ''),
         (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
@@ -114,6 +115,7 @@ def publications():
 def validation():
     search_form = ValidationSearchForm(formdata=request.args)
     search_form.acknowledgement.data = ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN
+    search_form.open_access.data = ScopusPublication.OPEN_ACCESS_UNKNOWN
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
     q = _get_publication_query(search_form)
