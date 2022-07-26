@@ -88,14 +88,19 @@
                             <dt class="col-auto">Citations</dt>
                             <dd class="col-auto">{{ p.cited_by_count }}</dd>
                         {% endif %}
-                        {% if p.sponsor %}
-                            <dt class="col-auto">Funding Sponsor</dt>
-                            <dd class="col-auto">{{ p.sponsor.name }}</dd>
+
+                        {% if p.sponsors | length > 0 %}
+                            <dt>Funding Sponsors</dt>
+                            {% for s in p.sponsors %}
+                                <dd>{{ s.name }}</dd>
+                            {% endfor %}
                         {% endif %}
-                        {% if p.funding_acr %}
-                            <dt class="col-auto">Funding Acronym</dt>
-                            <dd class="col-auto">{{ p.funding_acr.name }}</dd>
-                        {% endif %}
+
+                        {% if p.funding_text %}
+                            <dt>Funding Text</dt>
+                            <dd>{{ p.funding_text }}</dd>
+                        {% endif%}
+
                         {% if p.is_open_access %}
                             <dt class="col-auto">Open Access</dt>
                             <dd class="col-auto"><i class="fas fa-check"></i></dd>
