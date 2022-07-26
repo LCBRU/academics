@@ -105,14 +105,14 @@
                             {% endfor %}
                         {% endif %}
 
-                        <dt>Abstract</dt>
-                        <dd>{{p.abstract | blank_if_none}}</>
-
                         {% if p.funding_text %}
                             <dt>Funding Text</dt>
                             <dd>{{ p.funding_text }}</dd>
                         {% endif%}
     
+                        <dt>Abstract</dt>
+                        <dd>{{p.abstract | blank_if_none}}</>
+
                         {% if p.keywords | length > 0 %}
                             <dt>Keywords</dt>
                             <dd>
