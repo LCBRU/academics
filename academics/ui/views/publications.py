@@ -337,7 +337,7 @@ def publication_acknowledgement_validation():
 def publication_nihr_funded_open_access():
     p = ScopusPublication.query.get_or_404(request.json.get('id'))
 
-    n = NihrFundedOpenAccess.query.get_or_none(request.json.get('nihr_funded_open_access_id'))
+    n = NihrFundedOpenAccess.query.filter_by(id=request.json.get('nihr_funded_open_access_id')).one_or_none()
 
     p.nihr_funded_open_access = n
 
