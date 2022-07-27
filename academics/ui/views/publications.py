@@ -65,7 +65,7 @@ class ValidationSearchForm(SearchForm):
         (ScopusPublication.ACKNOWLEDGEMENT_ACKNOWLEDGED, 'Acknowledged'),
         (ScopusPublication.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED, 'Not Acknowledged')
     ], default=ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN)
-    nihr_funded_open_access_id = SelectField('NIHR Funded Open Access')
+    nihr_funded_open_access_id = SelectField('NIHR Funded Open Access', default='-1')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
