@@ -1,3 +1,4 @@
+from turtle import title
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
@@ -256,7 +257,29 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         if len(authors) > 6:
             author_list = f'{author_list}, et al'
 
-        return f'{author_list}. {self.title} {self.journal.name}'
+        parts = []
+
+        parts.append(author_list)
+        parts.append(self.title)
+        
+        if self.journal:
+            parts.append(self.journal.name)
+        
+        ishparts = []
+
+        if self.publication_cover_date:
+            ishparts.append(f'{self.publication_cover_date:%B %y}')
+        if self.volume:
+            ishparts.append(self.volume)
+        if self.issue:
+            ishparts.append(self.issue)
+        if self.pp:
+            ishparts.append(self.pp)
+        
+        if len(ishparts):
+            parts.append(ishparts)
+
+        return '. '.join(parts)
 
     @property
     def folder_ids(self):
