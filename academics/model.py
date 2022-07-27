@@ -234,6 +234,22 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
             return 'Not Acknowledged'
     
     @property
+    def acknowledgement_status_yesno(self):
+        if self.acknowledgement_validated is None:
+            return ''
+        elif self.acknowledgement_validated:
+            return 'Yes'
+        else:
+            return 'No'
+    
+    @property
+    def is_open_access_yesno(self):
+        if self.is_open_access:
+            return 'Yes'
+        else:
+            return 'No'
+    
+    @property
     def issue_volume(self):
         if self.issue and self.volume:
             return f' {self.issue}/{self.volume}'
