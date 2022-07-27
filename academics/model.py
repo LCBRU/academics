@@ -1,4 +1,3 @@
-from turtle import title
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
