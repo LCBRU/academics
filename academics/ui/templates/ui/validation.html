@@ -106,7 +106,7 @@
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
                                             {% for n in nihr_funded_open_accesses %}
-                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-status="{{ n.id }}">{{ n.name }}</a>
+                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-nihr_funded_open_access_id="{{ n.id }}">{{ n.name }}</a>
                                             {% endfor %}
                                         </div>
                                     </div>
@@ -155,12 +155,12 @@
     async function nihr_funded_open_access) {
         var button = $(window.event.target);
 
-        let response = await fetch("{{ url_for('ui.publication_open_access_validation') }}", {
+        let response = await fetch("{{ url_for('ui.publication_nihr_funded_open_access') }}", {
             method: 'post',
             headers: {"Content-type": "application/json; charset=UTF-8"},
             body: JSON.stringify({
                 id: button.data('id'),
-                status: button.data('status'),
+                nihr_funded_open_access_id: button.data('nihr_funded_open_access_id'),
             }),
         })
         let data = await response.json();

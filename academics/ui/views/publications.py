@@ -324,29 +324,25 @@ def publication_acknowledgement_validation():
     return jsonify({'status': p.acknowledgement_status_name}), 200
 
 
-@blueprint.route("/publications/open_access_validation", methods=['POST'])
+@blueprint.route("/publications/nihr_funded_open_access", methods=['POST'])
 @validate_json({
     'type': 'object',
     'properties': {
         'id': {'type': 'integer'},
-        'status': {'type': 'string'},
+        'nihr_funded_open_access_id': {'type': 'integer'},
     },
     "required": ["id", "status"]
 })
 @roles_accepted('validator')
-def publication_open_access_validation():
+def publication_nihr_funded_open_access():
     p = ScopusPublication.query.get_or_404(request.json.get('id'))
+    n = NihrFundedOpenAccess.query.get_or_404(request.json.get('nihr_funded_open_access_id'))
 
-    status = request.json.get('status')
-
-    if status not in ScopusPublication.OPEN_ACCESS:
-        abort(400)
-
-    # p.open_access_validated = ScopusPublication.OPEN_ACCESS[status]
+    p.nihr_funded_open_access = n
 
     db.session.commit()
 
-    return jsonify({'status': p.open_access_status_name}), 200
+    return jsonify({'status': n.name}), 200
 
 
 @blueprint.route("/publication/keywords/options")
