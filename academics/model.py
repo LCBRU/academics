@@ -276,7 +276,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
             ishparts.append(self.pp)
         
         if len(ishparts):
-            parts.append(ishparts)
+            parts.append(', '.join(ishparts))
 
         return '. '.join(parts)
 
