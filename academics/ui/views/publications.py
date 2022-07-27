@@ -337,13 +337,19 @@ def publication_acknowledgement_validation():
 def publication_nihr_funded_open_access():
     p = ScopusPublication.query.get_or_404(request.json.get('id'))
 
-    n = NihrFundedOpenAccess.query.filter_by(id=request.json.get('nihr_funded_open_access_id')).one_or_none()
+    if request.json.get('nihr_funded_open_access_id') == -1:
+        p.nihr_funded_open_access = None
+        db.session.commit()
 
-    p.nihr_funded_open_access = n
+        return jsonify({'status': 'Unknown'}), 200
+    else:
+        n = NihrFundedOpenAccess.query.get_or_404(request.json.get('nihr_funded_open_access_id'))
 
-    db.session.commit()
+        p.nihr_funded_open_access = n
 
-    return jsonify({'status': n.name}), 200
+        db.session.commit()
+
+        return jsonify({'status': n.name}), 200
 
 
 @blueprint.route("/publication/keywords/options")
