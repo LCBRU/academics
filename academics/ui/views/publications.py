@@ -291,7 +291,7 @@ def publication_full_annual_report_xlsx():
     publication_details = ({
         'Publication Reference': p.vancouverish,
         'DOI': p.doi,
-        'Theme': '',
+        'Theme': p.theme,
         'NIHR Acknowledgement': p.journal.name if p.journal else '',
         'NIHR Not Acknowledged Detail': p.subtype.description if p.subtype else '',
         'Open Access': p.is_open_access,

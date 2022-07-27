@@ -272,6 +272,15 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     def folder_ids(self):
         return ','.join([str(f.id) for f in self.folders])
 
+    @property
+    def academics(self):
+        return {a.academic for a in self.scopus_authors}
+
+    @property
+    def theme(self):
+        themes = [a.theme.name for a in self.academics]
+        return max(themes, key=themes.count)
+
 
 class Keyword(db.Model):
 
