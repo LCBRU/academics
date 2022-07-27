@@ -210,7 +210,6 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     deleted = db.Column(db.Boolean, default=False)
 
     acknowledgement_validated = db.Column(db.Boolean, default=None)
-    open_access_validated = db.Column(db.Boolean, default=None)
     validation_historic = db.Column(db.Boolean, default=None)
 
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))

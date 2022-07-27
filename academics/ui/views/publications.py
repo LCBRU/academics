@@ -201,8 +201,8 @@ def _get_publication_query(search_form):
     if search_form.has_value('acknowledgement'):
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
 
-    if search_form.has_value('open_access'):
-        q = q.filter(ScopusPublication.open_access_validated == ScopusPublication.OPEN_ACCESS[search_form.open_access.data])
+    # if search_form.has_value('open_access'):
+    #     q = q.filter(ScopusPublication.open_access_validated == ScopusPublication.OPEN_ACCESS[search_form.open_access.data])
 
     if search_form.has_value('folder_id'):
         q = q.filter()
@@ -337,7 +337,7 @@ def publication_open_access_validation():
     if status not in ScopusPublication.OPEN_ACCESS:
         abort(400)
 
-    p.open_access_validated = ScopusPublication.OPEN_ACCESS[status]
+    # p.open_access_validated = ScopusPublication.OPEN_ACCESS[status]
 
     db.session.commit()
 
