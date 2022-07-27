@@ -164,6 +164,8 @@
             }),
         })
         let data = await response.json();
+
+        console.log(data);
         document.getElementById(`btnGroupOpenAccess_${button.data('id')}`).innerHTML = data['status'];
     }
 </script>
