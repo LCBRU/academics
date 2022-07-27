@@ -298,7 +298,7 @@ def publication_full_annual_report_xlsx():
         'NIHR Acknowledgement': p.journal.name if p.journal else '',
         'NIHR Not Acknowledged Detail': p.subtype.description if p.subtype else '',
         'Open Access': p.is_open_access,
-        'NIHR Funding Used for Open Access': p.nihr_funded_open_access.name,
+        'NIHR Funding Used for Open Access': p.nihr_funded_open_access.name if p.nihr_funded_open_access else '',
     } for p in q.all())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
