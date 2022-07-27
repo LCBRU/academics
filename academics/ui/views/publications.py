@@ -206,8 +206,8 @@ def _get_publication_query(search_form):
     if search_form.has_value('acknowledgement'):
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
 
-    # if search_form.has_value('open_access'):
-    #     q = q.filter(ScopusPublication.open_access_validated == ScopusPublication.OPEN_ACCESS[search_form.open_access.data])
+    if search_form.has_value('nihr_funded_open_access_id'):
+        q = q.filter(ScopusPublication.nihr_funded_open_access_id == search_form.nihr_funded_open_access_id.data)
 
     if search_form.has_value('folder_id'):
         q = q.filter()
