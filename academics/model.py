@@ -142,6 +142,29 @@ class FundingAcr(db.Model):
     name = db.Column(db.String)
 
 
+class NihrFundedOpenAccess(db.Model):
+    UKNOWN = 'unknown'
+    NIHR_FUNDED = 'NIHR Funded'
+    OTHER_NIHR_PROGRAMME_FUNDED = 'Other NIHR Programme Funded'
+    OTHER_NIHR_INFRASTRUCTURE_FUNDED = 'Other NIHR Infrastructure Funded'
+    NON_NIHR_FUNDED = 'Non NIHR Funded'
+
+    all_details = [
+        UKNOWN,
+        NIHR_FUNDED,
+        OTHER_NIHR_PROGRAMME_FUNDED,
+        OTHER_NIHR_INFRASTRUCTURE_FUNDED,
+        NON_NIHR_FUNDED,
+    ]
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+    @classmethod
+    def get_instance_by_name(cls, name):
+        return NihrFundedOpenAccess.query.filter_by(name=name).one()
+
+
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     ACKNOWLEDGEMENT_UNKNOWN = 'unknown'
@@ -266,3 +289,16 @@ class Folder(db.Model):
     @property
     def publication_count(self):
         return ScopusPublication.query.filter(ScopusPublication.folders.any(Folder.id == self.id)).count()
+
+
+def init_model(app):
+    
+    @app.before_first_request
+    def data_setup():
+        for name in NihrFundedOpenAccess.all_details:
+            if NihrFundedOpenAccess.query.filter(NihrFundedOpenAccess.name == name).count() == 0:
+                db.session.add(
+                    NihrFundedOpenAccess(name=name)
+                )
+
+        db.session.commit()
