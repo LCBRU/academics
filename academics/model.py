@@ -264,7 +264,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         if self.journal:
             parts.append(self.journal.name)
         
-        parts.append(f'({{self.publication_cover_date:%B %y}}{{self.issue_volume}}{{self.pp}})')
+        parts.append(f'({self.publication_cover_date:%B %y}{self.issue_volume}{self.pp})')
 
         return '. '.join(parts)
 
