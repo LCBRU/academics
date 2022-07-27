@@ -150,7 +150,6 @@ class NihrFundedOpenAccess(db.Model):
     NON_NIHR_FUNDED = 'Non NIHR Funded'
 
     all_details = [
-        UKNOWN,
         NIHR_FUNDED,
         OTHER_NIHR_PROGRAMME_FUNDED,
         OTHER_NIHR_INFRASTRUCTURE_FUNDED,

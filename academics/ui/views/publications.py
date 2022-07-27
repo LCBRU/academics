@@ -2,7 +2,7 @@ from flask import abort, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_security import roles_accepted
 from lbrc_flask.forms import SearchForm, FlashingForm
-from academics.model import Academic, Folder, Journal, Keyword, ScopusAuthor, ScopusPublication, Subtype, Theme
+from academics.model import Academic, Folder, Journal, Keyword, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Subtype, Theme
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
@@ -30,6 +30,10 @@ def _get_journal_choices():
 
 def _get_folder_choices():
     return [(f.id, f.name.title()) for f in Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all()]
+
+
+def _get_nihr_funded_open_access_choices():
+    return [(f.id, f.name.title()) for f in NihrFundedOpenAccess.query.order_by(NihrFundedOpenAccess.name).all()]
 
 
 class PublicationSearchForm(SearchForm):
@@ -61,12 +65,12 @@ class ValidationSearchForm(SearchForm):
         (ScopusPublication.ACKNOWLEDGEMENT_ACKNOWLEDGED, 'Acknowledged'),
         (ScopusPublication.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED, 'Not Acknowledged')
     ], default=ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN)
-    open_access = SelectField('Open Access Validation', choices=[
-        ('', ''),
-        (ScopusPublication.OPEN_ACCESS_UNKNOWN, 'Unknown'),
-        (ScopusPublication.OPEN_ACCESS_OPEN_ACCESS, 'Open Access'),
-        (ScopusPublication.OPEN_ACCESS_NOT_OPEN_ACCESS, 'Not Open Access')
-    ], default=ScopusPublication.OPEN_ACCESS_UNKNOWN)
+    nihr_funded_open_access_id = SelectField('NIHR Funded Open Access')
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.nihr_funded_open_access_id.choices = [('', '')] + _get_nihr_funded_open_access_choices()
 
 
 class PublicationFolderForm(FlashingForm):
