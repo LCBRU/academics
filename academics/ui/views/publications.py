@@ -70,7 +70,7 @@ class ValidationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.nihr_funded_open_access_id.choices = [('', '')] + _get_nihr_funded_open_access_choices()
+        self.nihr_funded_open_access_id.choices = [('', ''), (None, 'Unknown')] + _get_nihr_funded_open_access_choices()
 
 
 class PublicationFolderForm(FlashingForm):
