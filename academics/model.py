@@ -249,7 +249,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     @property
     def vancouverish(self):
-        authors = self.author_list.split(',')[0:6]
+        authors = (self.author_list or '').split(',')[0:6]
 
         return f'{authors}'
 
