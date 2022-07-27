@@ -105,6 +105,7 @@
                                             {{ p.nihr_funded_open_access.name | default_if_none('Unknown') }}
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
+                                            <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-nihr_funded_open_access_id="-1">Unknown</a>
                                             {% for n in nihr_funded_open_accesses %}
                                                 <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-nihr_funded_open_access_id="{{ n.id }}">{{ n.name }}</a>
                                             {% endfor %}
