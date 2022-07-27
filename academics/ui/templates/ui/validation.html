@@ -106,7 +106,7 @@
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
                                             {% for n in nihr_funded_open_accesses %}
-                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-status="{{ n.id }}">n.name</a>
+                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-status="{{ n.id }}">{{ n.name }}</a>
                                             {% endfor %}
                                         </div>
                                     </div>
