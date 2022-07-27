@@ -71,7 +71,6 @@ class ValidationSearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.nihr_funded_open_access_id.choices = [('', ''), ('-1', 'Unknown')] + _get_nihr_funded_open_access_choices()
-        self.nihr_funded_open_access_id.default = '-1'
 
 
 class PublicationFolderForm(FlashingForm):
