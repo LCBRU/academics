@@ -212,6 +212,9 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     acknowledgement_validated = db.Column(db.Boolean, default=None)
     validation_historic = db.Column(db.Boolean, default=None)
 
+    nihr_funded_open_access_id = db.Column(db.Integer, db.ForeignKey(NihrFundedOpenAccess.id))
+    nihr_funded_open_access = db.relationship(NihrFundedOpenAccess, lazy="joined")
+
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
     journal = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
 
