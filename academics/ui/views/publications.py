@@ -256,8 +256,7 @@ def publication_export_xlsx():
         'abstract': p.abstract,
         'open access': p.is_open_access,
         'citations': p.cited_by_count,
-        'sponsor': p.sponsor.name if p.sponsor else '',
-        'funding acronym': p.funding_acr.name if p.funding_acr else '',
+        'sponsor': '; '.join([s.name for s in p.sponsors]),
     } for p in q.all())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
