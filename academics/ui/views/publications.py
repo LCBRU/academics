@@ -331,7 +331,7 @@ def publication_acknowledgement_validation():
         'id': {'type': 'integer'},
         'nihr_funded_open_access_id': {'type': 'integer'},
     },
-    "required": ["id", "status"]
+    "required": ["id", "nihr_funded_open_access_id"]
 })
 @roles_accepted('validator')
 def publication_nihr_funded_open_access():
