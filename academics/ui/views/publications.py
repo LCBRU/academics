@@ -136,6 +136,7 @@ def validation():
         "ui/validation.html",
         publications=publications,
         search_form=search_form,
+        nihr_funded_open_accesses=NihrFundedOpenAccess.query.all(),
     )
 
 

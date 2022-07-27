@@ -102,12 +102,12 @@
                                 <div class="btn-toolbar float-right">
                                     <div class="btn-group mr-1 mb-1" role="group">
                                         <button id="btnGroupOpenAccess_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            {{ p.open_access_status_name | default_if_none('Unknown') }}
+                                            {{ p.nihr_funded_open_access.name | default_if_none('Unknown') }}
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
-                                            <a class="dropdown-item" href="Javascript://" onclick="open_access_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_UNKNOWN }}">Unknown</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="open_access_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_OPEN_ACCESS }}">Open Access</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="open_access_validation()" data-id="{{p.id}}" data-status="{{ p.OPEN_ACCESS_NOT_OPEN_ACCESS }}">Not Open Access</a>
+                                            {% for n in nihr_funded_open_accesses %}
+                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-status="{{ n.id }}">n.name</a>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -152,7 +152,7 @@
         document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`).innerHTML = data['status'];
     }
 
-    async function open_access_validation() {
+    async function nihr_funded_open_access) {
         var button = $(window.event.target);
 
         let response = await fetch("{{ url_for('ui.publication_open_access_validation') }}", {

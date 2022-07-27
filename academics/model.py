@@ -234,15 +234,6 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
             return 'Not Acknowledged'
     
     @property
-    def open_access_status_name(self):
-        if self.open_access_validated is None:
-            return 'Unknown'
-        elif self.open_access_validated:
-            return 'Open Access'
-        else:
-            return 'Not Open Access'
-    
-    @property
     def issue_volume(self):
         if self.issue and self.volume:
             return f' {self.issue}/{self.volume}'
