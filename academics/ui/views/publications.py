@@ -207,7 +207,12 @@ def _get_publication_query(search_form):
         q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
 
     if search_form.has_value('nihr_funded_open_access_id'):
-        q = q.filter(ScopusPublication.nihr_funded_open_access_id == search_form.nihr_funded_open_access_id.data)
+        nihr_funded_open_access_id = search_form.nihr_funded_open_access_id.data
+
+        if nihr_funded_open_access_id == -1:
+            nihr_funded_open_access_id = None
+
+        q = q.filter(ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
 
     if search_form.has_value('folder_id'):
         q = q.filter()
