@@ -256,7 +256,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         if len(authors) > 6:
             author_list = f'{author_list}, et al'
 
-        return f'{authors}'
+        return f'{author_list}.'
 
     @property
     def folder_ids(self):

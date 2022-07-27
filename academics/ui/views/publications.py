@@ -246,9 +246,6 @@ def publication_full_export_xlsx():
     
     q = _get_publication_query(search_form)
 
-    if q.count() > 100:
-        abort(413)
-
     q = q.order_by(ScopusPublication.publication_cover_date.desc())
 
     publication_details = ({
