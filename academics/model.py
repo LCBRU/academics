@@ -248,6 +248,12 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
             return ''
 
     @property
+    def vancouverish(self):
+        authors = self.author_list.split(',')[0:6]
+
+        return f'{authors}'
+
+    @property
     def folder_ids(self):
         return ','.join([str(f.id) for f in self.folders])
 

@@ -272,6 +272,38 @@ def publication_full_export_xlsx():
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
 
+@blueprint.route("/publications/export/annual_report")
+def publication_full_annual_report_xlsx():
+    # Use of dictionary instead of set to maintain order of headers
+    headers = {
+        'Publication Reference': None,
+        'DOI': None,
+        'Theme': None,
+        'NIHR Acknowledgement': None,
+        'NIHR Not Acknowledged Detail': None,
+        'Open Access': None,
+        'NIHR Funding Used for Open Access': None,
+    }
+
+    search_form = PublicationSearchForm(formdata=request.args)
+    
+    q = _get_publication_query(search_form)
+
+    q = q.order_by(ScopusPublication.publication_cover_date.desc())
+
+    publication_details = ({
+        'Publication Reference': p.vancouverish,
+        'DOI': p.doi,
+        'Theme': '',
+        'NIHR Acknowledgement': p.journal.name if p.journal else '',
+        'NIHR Not Acknowledged Detail': p.subtype.description if p.subtype else '',
+        'Open Access': p.is_open_access,
+        'NIHR Funding Used for Open Access': p.nihr_funded_open_access.name,
+    } for p in q.all())
+
+    return excel_download('Academics_Publications', headers.keys(), publication_details)
+
+
 @blueprint.route("/publications/export/pdf")
 def publication_export_pdf():
     search_form = PublicationSearchForm(formdata=request.args)
