@@ -152,7 +152,7 @@
         document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`).innerHTML = data['status'];
     }
 
-    async function nihr_funded_open_access) {
+    async function nihr_funded_open_access() {
         var button = $(window.event.target);
 
         let response = await fetch("{{ url_for('ui.publication_nihr_funded_open_access') }}", {
