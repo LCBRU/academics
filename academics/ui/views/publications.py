@@ -298,8 +298,8 @@ def publication_full_annual_report_xlsx():
         'Publication Reference': p.vancouverish,
         'DOI': p.doi,
         'Theme': p.theme,
-        'NIHR Acknowledgement': p.acknowledgement_status_yesno,
-        'NIHR Not Acknowledged Detail': '',
+        'NIHR Acknowledgement': p.nihr_acknowledgement_yesno,
+        'NIHR Not Acknowledged Detail': p.nihr_acknowledgement_detail,
         'Open Access': p.is_open_access_yesno,
         'NIHR Funding Used for Open Access': p.nihr_funded_open_access.name if p.nihr_funded_open_access else '',
     } for p in q.all())

@@ -250,22 +250,20 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__scopus_publications, back_populates="publications", collection_class=set)
 
     @property
-    def acknowledgement_status_name(self):
-        if self.acknowledgement_validated is None:
-            return 'Unknown'
-        elif self.acknowledgement_validated:
-            return 'Acknowledged'
-        else:
-            return 'Not Acknowledged'
-    
-    @property
-    def acknowledgement_status_yesno(self):
-        if self.acknowledgement_validated is None:
+    def nihr_acknowledgement_yesno(self):
+        if self.nihr_acknowledgement is None:
             return ''
-        elif self.acknowledgement_validated:
+        elif self.nihr_acknowledgement.acknowledged:
             return 'Yes'
         else:
             return 'No'
+    
+    @property
+    def nihr_acknowledgement_detail(self):
+        if self.nihr_acknowledgement is None or self.nihr_acknowledgement.acknowledged:
+            return ''
+        else:
+            return self.nihr_acknowledgement.name
     
     @property
     def is_open_access_yesno(self):
