@@ -1,3 +1,4 @@
+from multiprocessing.reduction import ACKNOWLEDGE
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
@@ -162,6 +163,27 @@ class NihrFundedOpenAccess(db.Model):
     @classmethod
     def get_instance_by_name(cls, name):
         return NihrFundedOpenAccess.query.filter_by(name=name).one()
+
+
+class NihrAcknowledgement(db.Model):
+    UKNOWN = 'unknown'
+    NIHR_ACKNOWLEDGED = 'NIHR Acknowledged'
+    NIHR_NOT_ACKNOWLEDGED = 'NIHR Not Acknowledged'
+    UNABLE_TO_CHECK = 'Unable to check - full paper not available'
+
+    all_details = {
+        NIHR_ACKNOWLEDGED: True,
+        NIHR_NOT_ACKNOWLEDGED: False,
+        UNABLE_TO_CHECK: False,
+    }
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    acknowledged = db.Column(db.Boolean)
+
+    @classmethod
+    def get_instance_by_name(cls, name):
+        return NihrAcknowledgement.query.filter_by(name=name).one()
 
 
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
@@ -337,6 +359,15 @@ def init_model(app):
             if NihrFundedOpenAccess.query.filter(NihrFundedOpenAccess.name == name).count() == 0:
                 db.session.add(
                     NihrFundedOpenAccess(name=name)
+                )
+
+        for name, acknowledged in NihrAcknowledgement.all_details.items():
+            if NihrAcknowledgement.query.filter(NihrFundedOpenAccess.name == name).count() == 0:
+                db.session.add(
+                    NihrAcknowledgement(
+                        name=name,
+                        acknowledged = acknowledged,
+                    )
                 )
 
         db.session.commit()
