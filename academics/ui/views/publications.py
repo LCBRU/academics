@@ -334,29 +334,32 @@ def publication_export_pdf():
     return pdf_download('ui/publications_pdf.html', title='Academics Publications', publications=publications, parameters=parameters)
 
 
-@blueprint.route("/publications/acknowledgement_validation", methods=['POST'])
+@blueprint.route("/publications/nihr_acknowledgement", methods=['POST'])
 @validate_json({
     'type': 'object',
     'properties': {
         'id': {'type': 'integer'},
-        'status': {'type': 'string'},
+        'nihr_acknowledgement_id': {'type': 'integer'},
     },
-    "required": ["id", "status"]
+    "required": ["id", "nihr_acknowledgement_id"]
 })
 @roles_accepted('validator')
-def publication_acknowledgement_validation():
+def publication_nihr_acknowledgement():
     p = ScopusPublication.query.get_or_404(request.json.get('id'))
 
-    status = request.json.get('status')
+    if request.json.get('nihr_acknowledgement_id') == -1:
+        p.nihr_acknowledgement = None
+        db.session.commit()
 
-    if status not in ScopusPublication.ACKNOWLEDGEMENTS:
-        abort(400)
+        return jsonify({'status': 'Unknown'}), 200
+    else:
+        n = NihrAcknowledgement.query.get_or_404(request.json.get('nihr_acknowledgement_id'))
 
-    p.acknowledgement_validated = ScopusPublication.ACKNOWLEDGEMENTS[status]
+        p.nihr_acknowledgement = n
 
-    db.session.commit()
+        db.session.commit()
 
-    return jsonify({'status': p.acknowledgement_status_name}), 200
+        return jsonify({'status': n.name}), 200
 
 
 @blueprint.route("/publications/nihr_funded_open_access", methods=['POST'])

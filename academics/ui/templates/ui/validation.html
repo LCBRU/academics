@@ -70,22 +70,10 @@
                                             {{ p.nihr_acknowledgement.name | default_if_none('Unknown') }}
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
-                                            <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-nihr_funded_open_access_id="-1">Unknown</a>
+                                            <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{p.id}}" data-nihr_acknowledgement_id="-1">Unknown</a>
                                             {% for n in nihr_acknowledgements %}
-                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-nihr_funded_open_access_id="{{ n.id }}">{{ n.name }}</a>
+                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{p.id}}" data-nihr_acknowledgement_id="{{ n.id }}">{{ n.name }}</a>
                                             {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="btn-toolbar float-right">
-                                    <div class="btn-group mr-1 mb-1" role="group">
-                                        <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            {{ p.acknowledgement_status_name | default_if_none('Unknown') }}
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
-                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_UNKNOWN }}">Unknown</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_ACKNOWLEDGED }}">Acknowledged</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="publication_acknowledgement_validation()" data-id="{{p.id}}" data-status="{{ p.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED }}">Not Acknowledged</a>
                                         </div>
                                     </div>
                                 </div>
@@ -151,15 +139,15 @@
 {% block js %}
 
 <script>
-    async function publication_acknowledgement_validation() {
+    async function nihr_acknowledgement() {
         var button = $(window.event.target);
 
-        let response = await fetch("{{ url_for('ui.publication_acknowledgement_validation') }}", {
+        let response = await fetch("{{ url_for('ui.publication_nihr_acknowledgement') }}", {
             method: 'post',
             headers: {"Content-type": "application/json; charset=UTF-8"},
             body: JSON.stringify({
                 id: button.data('id'),
-                status: button.data('status'),
+                nihr_acknowledgement_id: button.data('nihr_acknowledgement_id'),
             }),
         })
         let data = await response.json();
