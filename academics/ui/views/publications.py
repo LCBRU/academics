@@ -36,6 +36,10 @@ def _get_nihr_funded_open_access_choices():
     return [(f.id, f.name.title()) for f in NihrFundedOpenAccess.query.order_by(NihrFundedOpenAccess.name).all()]
 
 
+def _get_nihr_acknowledgement_choices():
+    return [(f.id, f.name.title()) for f in NihrAcknowledgement.query.order_by(NihrAcknowledgement.name).all()]
+
+
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
     journal_id = SelectMultipleField('Journal', coerce=int, )
@@ -59,17 +63,13 @@ class PublicationSearchForm(SearchForm):
 
 class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
-    acknowledgement = SelectField('Acknowledgement Validation', choices=[
-        ('', ''),
-        (ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN, 'Unknown'),
-        (ScopusPublication.ACKNOWLEDGEMENT_ACKNOWLEDGED, 'Acknowledged'),
-        (ScopusPublication.ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED, 'Not Acknowledged')
-    ], default=ScopusPublication.ACKNOWLEDGEMENT_UNKNOWN)
+    nihr_acknowledgement_id = SelectField('Acknowledgement', default="-1")
     nihr_funded_open_access_id = SelectField('NIHR Funded Open Access', default='-1')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.nihr_acknowledgement_id.choices = [('', ''), ('-1', 'Unknown')] + _get_nihr_acknowledgement_choices()
         self.nihr_funded_open_access_id.choices = [('', ''), ('-1', 'Unknown')] + _get_nihr_funded_open_access_choices()
 
 
@@ -204,8 +204,13 @@ def _get_publication_query(search_form):
             ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%'))
         ))
 
-    if search_form.has_value('acknowledgement'):
-        q = q.filter(ScopusPublication.acknowledgement_validated == ScopusPublication.ACKNOWLEDGEMENTS[search_form.acknowledgement.data])
+    if search_form.has_value('nihr_acknowledgement_id'):
+        nihr_acknowledgement_id = search_form.nihr_acknowledgement_id.data
+
+        if nihr_acknowledgement_id == '-1':
+            nihr_acknowledgement_id = None
+
+        q = q.filter(ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
 
     if search_form.has_value('nihr_funded_open_access_id'):
         nihr_funded_open_access_id = search_form.nihr_funded_open_access_id.data
