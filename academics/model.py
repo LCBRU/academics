@@ -365,7 +365,7 @@ def init_model(app):
                 )
 
         for name, acknowledged in NihrAcknowledgement.all_details.items():
-            if NihrAcknowledgement.query.filter(NihrFundedOpenAccess.name == name).count() == 0:
+            if NihrAcknowledgement.query.filter(NihrAcknowledgement.name == name).count() == 0:
                 db.session.add(
                     NihrAcknowledgement(
                         name=name,
