@@ -170,21 +170,6 @@
         let data = await response.text();
         document.getElementById(`publication_folders_${publication_id}`).innerHTML = data;
     }
-
-    async function publication_acknowledgement_validation() {
-        var button = $(window.event.target);
-
-        let response = await fetch("{{ url_for('ui.publication_acknowledgement_validation') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                id: button.data('id'),
-                status: button.data('status'),
-            }),
-        })
-        let data = await response.json();
-        document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`).innerHTML = data['status'];
-    }
 </script>
 
 {% endblock %}
