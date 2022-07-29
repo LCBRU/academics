@@ -2,7 +2,7 @@ from flask import abort, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_security import roles_accepted
 from lbrc_flask.forms import SearchForm, FlashingForm
-from academics.model import Academic, Folder, Journal, Keyword, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Subtype, Theme
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Subtype, Theme
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
@@ -137,6 +137,7 @@ def validation():
         publications=publications,
         search_form=search_form,
         nihr_funded_open_accesses=NihrFundedOpenAccess.query.all(),
+        nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
 
 
