@@ -230,7 +230,6 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     href = db.Column(db.String)
     deleted = db.Column(db.Boolean, default=False)
 
-    acknowledgement_validated = db.Column(db.Boolean, default=None)
     validation_historic = db.Column(db.Boolean, default=None)
 
     nihr_acknowledgement_id = db.Column(db.Integer, db.ForeignKey(NihrAcknowledgement.id))
