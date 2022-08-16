@@ -164,7 +164,7 @@ def publication_folders():
     )
 
 
-def _get_publication_query(search_form, or_status=False):
+def _get_publication_query(search_form, or_status=False, supress_validation_historic=False):
     q = ScopusPublication.query
 
     if search_form.has_value('author_id'):
@@ -229,6 +229,9 @@ def _get_publication_query(search_form, or_status=False):
 
     if search_form.has_value('folder_id'):
         q = q.filter(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
+
+    if supress_validation_historic:
+        q = q.filter(ScopusPublication.validation_historic != True)
 
     return q
 
