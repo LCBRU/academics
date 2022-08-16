@@ -222,8 +222,10 @@ def _get_publication_query(search_form, or_status=False):
 
         status_filter = (*status_filter, ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
 
-
-    q = q.filter(*status_filter)
+    if or_status:
+        q = q.filter(or_(*status_filter))
+    else:
+        q = q.filter(*status_filter)
 
     # if search_form.has_value('folder_id'):
     #     q = q.filter()
