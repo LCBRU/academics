@@ -212,7 +212,7 @@ def _get_publication_query(search_form, or_status=False):
         if nihr_acknowledgement_id == '-1':
             nihr_acknowledgement_id = None
 
-        status_filter.add(ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
+        status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
 
     if search_form.has_value('nihr_funded_open_access_id'):
         nihr_funded_open_access_id = search_form.nihr_funded_open_access_id.data
@@ -220,7 +220,7 @@ def _get_publication_query(search_form, or_status=False):
         if nihr_funded_open_access_id == '-1':
             nihr_funded_open_access_id = None
 
-        status_filter.add(ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
+        status_filter.add(*status_filter, ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
 
 
     q = q.filter(status_filter)
