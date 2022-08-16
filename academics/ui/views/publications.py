@@ -231,7 +231,10 @@ def _get_publication_query(search_form, or_status=False, supress_validation_hist
         q = q.filter(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
 
     if supress_validation_historic:
-        q = q.filter(ScopusPublication.validation_historic != True)
+        q = q.filter(or_(
+            ScopusPublication.validation_historic == False,
+            ScopusPublication.validation_historic == None,
+        ))
 
     return q
 
