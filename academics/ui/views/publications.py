@@ -220,7 +220,7 @@ def _get_publication_query(search_form, or_status=False):
         if nihr_funded_open_access_id == '-1':
             nihr_funded_open_access_id = None
 
-        status_filter.add(*status_filter, ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
+        status_filter = (*status_filter, ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
 
 
     q = q.filter(status_filter)
