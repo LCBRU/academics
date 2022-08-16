@@ -122,7 +122,7 @@ def validation():
     search_form = ValidationSearchForm(formdata=request.args)
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
-    q = _get_publication_query(search_form)
+    q = _get_publication_query(search_form, or_status=True)
 
     q = q.order_by(ScopusPublication.publication_cover_date.asc())
 
