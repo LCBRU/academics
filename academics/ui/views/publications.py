@@ -164,7 +164,7 @@ def publication_folders():
     )
 
 
-def _get_publication_query(search_form):
+def _get_publication_query(search_form, or_status=False):
     q = ScopusPublication.query
 
     if search_form.has_value('author_id'):
@@ -204,13 +204,15 @@ def _get_publication_query(search_form):
             ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%'))
         ))
 
+    status_filter = tuple()
+
     if search_form.has_value('nihr_acknowledgement_id'):
         nihr_acknowledgement_id = search_form.nihr_acknowledgement_id.data
 
         if nihr_acknowledgement_id == '-1':
             nihr_acknowledgement_id = None
 
-        q = q.filter(ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
+        status_filter.add(ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
 
     if search_form.has_value('nihr_funded_open_access_id'):
         nihr_funded_open_access_id = search_form.nihr_funded_open_access_id.data
@@ -218,7 +220,10 @@ def _get_publication_query(search_form):
         if nihr_funded_open_access_id == '-1':
             nihr_funded_open_access_id = None
 
-        q = q.filter(ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
+        status_filter.add(ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
+
+
+    q = q.filter(status_filter)
 
     if search_form.has_value('folder_id'):
         q = q.filter()
