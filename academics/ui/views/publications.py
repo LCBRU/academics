@@ -227,8 +227,8 @@ def _get_publication_query(search_form, or_status=False):
     else:
         q = q.filter(*status_filter)
 
-    # if search_form.has_value('folder_id'):
-    #     q = q.filter()
+    if search_form.has_value('folder_id'):
+        q = q.filter(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
 
     return q
 
