@@ -18,6 +18,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     last_name = db.Column(db.String)
     updating = db.Column(db.Boolean, default=False)
     initialised = db.Column(db.Boolean, default=False)
+    error = db.Column(db.Boolean, default=False)
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme)
 
