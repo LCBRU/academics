@@ -251,12 +251,16 @@ def _update_all_academics():
 
 def _update_academic(academic):
     for sa in academic.scopus_authors:
-        els_author = get_els_author(sa.scopus_id)
-        els_author.update_scopus_author(sa)
+        try:
 
-        add_scopus_publications(els_author, sa)
+            els_author = get_els_author(sa.scopus_id)
+            els_author.update_scopus_author(sa)
 
-        db.session.add(sa)
+            add_scopus_publications(els_author, sa)
+        except:
+            sa.error = True
+        finally:
+            db.session.add(sa)
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
