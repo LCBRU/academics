@@ -251,6 +251,9 @@ def _update_all_academics():
 
 def _update_academic(academic):
     for sa in academic.scopus_authors:
+        if sa.error:
+            continue
+
         try:
 
             els_author = get_els_author(sa.scopus_id)
