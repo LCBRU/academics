@@ -221,7 +221,7 @@ def _update_all_academics():
     logging.info('_update_all_academics: started')
 
     while True:
-        a = Academic.query.filter(Academic.updating == 1).first()
+        a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
 
         if not a:
             break
@@ -236,6 +236,11 @@ def _update_all_academics():
             db.session.commit()
         except Exception as e:
             logging.error(e)
+
+            a.error = True
+            db.session.add(a)
+
+            db.session.commit()
 
             sleep(30)
 
