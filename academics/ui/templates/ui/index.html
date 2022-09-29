@@ -89,10 +89,6 @@
                                                     href="#"><i class="fas fa-trash"></i></a>    
                                                 <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
                                             </div>
-                                            {% if au.last_fetched_datetime %}
-                                                <div><span class="font-italic float-right">Last fetched from Scopus {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
-                                            {% endif %}
-                                            <div><span class="text-muted">{{au.affiliation_name}}</span></div>
                                         </td>
                                         <td>
                                             {% if au.orcid | blank_if_none | length > 0 %}
@@ -104,6 +100,14 @@
                                         <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
                                         <td>{{au.citation_count}}</td>
                                         <td>{{au.h_index}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5">
+                                            {% if au.last_fetched_datetime %}
+                                                <div><span class="font-italic float-right">Last fetched from Scopus {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
+                                            {% endif %}
+                                            <div><span class="text-muted">{{au.affiliation_name}}</span></div>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
