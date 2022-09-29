@@ -10,6 +10,7 @@ from academics.model import Academic, FundingAcr, Journal, Keyword, ScopusAuthor
 from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
+from datetime import datetime
 
 
 def _client():
@@ -301,6 +302,7 @@ def _add_authors_to_academic(scopus_ids, academic_id):
 
         add_scopus_publications(els_author, sa)
 
+        sa.last_fetched_datetime = datetime.utcnow()
         db.session.add(sa)
 
     academic.set_name()
