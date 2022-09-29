@@ -1,5 +1,6 @@
 {% extends "lbrc_flask/page.html" %}
 {% from "lbrc_flask/nav_macros.html" import render_nav_item with context %}
+{% from "lbrc_flask/nav_macros.html" import render_nav_link %}
 
 {% block navlinks %}
     {{ render_nav_item('ui.publications', 'Publications', 'far fa-newspaper') }}
@@ -12,5 +13,11 @@
 
     {% if updating %}
         <div class="badge rounded-pill bg-warning text-dark fixed-top">Fetching data from Scopus <span class="inline_loader"></span></div>
+    {% endif %}
+{% endblock %}
+
+{% block adminlinks %}
+    {% if not updating %}
+        {{ render_nav_link('ui.update_all_academics', 'Update All', icon='fas fa-recycle') }}
     {% endif %}
 {% endblock %}
