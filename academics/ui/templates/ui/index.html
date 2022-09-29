@@ -5,12 +5,7 @@
 {% block content %}
 <section>
     <div class="page-header">
-        <h1>
-            Academics
-            {% if updating %}
-                <span class="badge rounded-pill bg-warning text-dark float-right">Updating <span class="inline_loader"></span></span>
-            {% endif %}
-        </h1>
+        <h1>Academics</h1>
 
         {{ render_search(
             search_form,

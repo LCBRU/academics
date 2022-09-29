@@ -9,4 +9,8 @@
     {% endif %}
 
     {{ render_nav_item('ui.folders', 'Folders', 'fas fa-folder') }}
+
+    {% if updating %}
+        <div class="badge rounded-pill bg-warning text-dark fixed-top">Fetching data from Scopus <span class="inline_loader"></span></div>
+    {% endif %}
 {% endblock %}
