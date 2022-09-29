@@ -89,10 +89,10 @@
                                                     href="#"><i class="fas fa-trash"></i></a>    
                                                 <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
                                             </div>
-                                            <div><span class="text-muted">{{au.affiliation_name}}</span></div>
                                             {% if au.last_fetched_datetime %}
-                                                <div><span class="font-italic">Last Fetched from Scopus: {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
+                                                <div><span class="font-italic float-right">Last fetched from Scopus {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
                                             {% endif %}
+                                            <div><span class="text-muted">{{au.affiliation_name}}</span></div>
                                         </td>
                                         <td>
                                             {% if au.orcid | blank_if_none | length > 0 %}
