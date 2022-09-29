@@ -34,7 +34,6 @@
                                     <span>{{a.full_name}}</span>
                                 </h1>
                                 <h2>{{a.theme.name}}</h2>
-                                <h2>Last Fetched from Scopus: {{ a.last_fetched_datetime | datetime_humanize }}</h2>
                             </header>
                         </div>
                     </div>
@@ -90,7 +89,10 @@
                                                     href="#"><i class="fas fa-trash"></i></a>    
                                                 <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
                                             </div>
-                                            <div><small class="text-muted">{{au.affiliation_name}}</small></div>
+                                            <div><span class="text-muted">{{au.affiliation_name}}</span></div>
+                                            {% if au.last_fetched_datetime %}
+                                                <div><span class="font-italic">Last Fetched from Scopus: {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
+                                            {% endif %}
                                         </td>
                                         <td>
                                             {% if au.orcid | blank_if_none | length > 0 %}
