@@ -261,6 +261,8 @@ def _update_academic(academic):
             els_author.update_scopus_author(sa)
 
             add_scopus_publications(els_author, sa)
+
+            sa.last_fetched_datetime = datetime.utcnow()
         except:
             sa.error = True
         finally:
