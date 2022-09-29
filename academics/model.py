@@ -62,6 +62,7 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
     href = db.Column(db.String)
     orcid = db.Column(db.String)
     error = db.Column(db.Boolean, default=False)
+    last_fetched_datetime = db.Column(db.DateTime)
 
     @property
     def full_name(self):

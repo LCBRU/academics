@@ -34,6 +34,7 @@
                                     <span>{{a.full_name}}</span>
                                 </h1>
                                 <h2>{{a.theme.name}}</h2>
+                                <h2>Last Fetched from Scopus: {{ a.last_fetched_datetime | datetime_humanize }}</h2>
                             </header>
                         </div>
                     </div>
