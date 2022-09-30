@@ -208,13 +208,14 @@ def _add_sponsors_to_publications(publication, sponsor_names):
 
 
 def update_academics():
-    for academic in Academic.query.all():
-        academic.updating = True
-        db.session.add(academic)
+    if not updating():
+        for academic in Academic.query.all():
+            academic.updating = True
+            db.session.add(academic)
 
-    db.session.commit()
+        db.session.commit()
 
-    _update_all_academics.delay()
+        _update_all_academics.delay()
 
 
 @celery.task()

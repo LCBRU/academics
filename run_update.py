@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from academics import create_app
-from academics.scopus.service import _update_all_academics
+from academics.scopus.service import update_academics
 
 application = create_app()
 application.app_context().push()
 
 application.config['SERVER_NAME'] = os.environ["CELERY_SERVER_NAME"]
 
-_update_all_academics()
+update_academics()
