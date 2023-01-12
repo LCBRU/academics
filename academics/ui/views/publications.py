@@ -35,7 +35,7 @@ def _get_journal_choices(search_string):
 
     if search_string:
         for s in search_string.split():
-            q = q.filter(Keyword.keyword.like(f'%{s}%'))
+            q = q.filter(Journal.name.like(f'%{s}%'))
 
     return [(j.id, j.name.title()) for j in q.all() if j.name]
 
