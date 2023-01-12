@@ -410,6 +410,7 @@ def publication_nihr_funded_open_access():
 
 @blueprint.route("/publication/keywords/options")
 def publication_keyword_options():
+    print(request.args.get('q'))
     return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices()]})
 
 
