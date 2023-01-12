@@ -24,7 +24,8 @@ def _get_keyword_choices(search_string):
     q = Keyword.query.order_by(Keyword.keyword)
 
     if search_string:
-        q = q.filter(Keyword.keyword.like(f'%{search_string}%'))
+        for s in search_string.split():
+            q = q.filter(Keyword.keyword.like(f'%{s}%'))
 
     return [(k.id, k.keyword.title()) for k in q.all()]
 
@@ -33,7 +34,8 @@ def _get_journal_choices(search_string):
     q = Journal.query.order_by(Journal.name)
 
     if search_string:
-        q = q.filter(Journal.name.like(f'%{search_string}%'))
+        for s in search_string.split():
+            q = q.filter(Keyword.keyword.like(f'%{s}%'))
 
     return [(j.id, j.name.title()) for j in q.all() if j.name]
 
