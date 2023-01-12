@@ -20,12 +20,22 @@ def _get_author_choices():
     return [('', '')] + [(a.id, f'{a.full_name} ({a.affiliation_name})') for a in ScopusAuthor.query.order_by(ScopusAuthor.last_name, ScopusAuthor.first_name).all()]
 
 
-def _get_keyword_choices():
-    return [(k.id, k.keyword.title()) for k in Keyword.query.order_by(Keyword.keyword).all()]
+def _get_keyword_choices(search_string):
+    q = Keyword.query.order_by(Keyword.keyword)
+
+    if search_string:
+        q = q.filter(Keyword.keyword.like(f'%{search_string}%'))
+
+    return [(k.id, k.keyword.title()) for k in q.all()]
 
 
-def _get_journal_choices():
-    return [(j.id, j.name.title()) for j in Journal.query.order_by(Journal.name).all() if j.name]
+def _get_journal_choices(search_string):
+    q = Journal.query.order_by(Journal.name)
+
+    if search_string:
+        q = q.filter(Journal.name.like(f'%{search_string}%'))
+
+    return [(j.id, j.name.title()) for j in q.all() if j.name]
 
 
 def _get_folder_choices():
@@ -410,10 +420,9 @@ def publication_nihr_funded_open_access():
 
 @blueprint.route("/publication/keywords/options")
 def publication_keyword_options():
-    print(request.args.get('q'))
-    return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices()]})
+    return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_keyword_choices(request.args.get('q'))]})
 
 
 @blueprint.route("/publication/journal/options")
 def publication_journal_options():
-    return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_journal_choices()]})
+    return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_journal_choices(request.args.get('q'))]})
