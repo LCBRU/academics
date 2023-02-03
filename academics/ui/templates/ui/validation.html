@@ -66,7 +66,13 @@
                                 Acknowledgement
                                 <div class="btn-toolbar float-right">
                                     <div class="btn-group mr-1 mb-1" role="group">
-                                        <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {%
+                                            set cls = 'btn-info'
+                                            if p.nihr_acknowledgement.name | default_if_none('Unknown') == 'Unknown'
+                                                set cls = 'btn-primary'
+                                            endif
+                                        %}
+                                        <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn {{cls}} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             {{ p.nihr_acknowledgement.name | default_if_none('Unknown') }}
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
