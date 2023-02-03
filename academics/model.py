@@ -183,11 +183,15 @@ class NihrAcknowledgement(db.Model):
     NIHR_ACKNOWLEDGED = 'NIHR Acknowledged'
     NIHR_NOT_ACKNOWLEDGED = 'NIHR Not Acknowledged'
     UNABLE_TO_CHECK = 'Unable to check - full paper not available'
+    NIHR_NOT_ACKNOWLEDGED_NO_BRC_INVESTIGATORS = 'BRC Investigator associated with study and NIHR not Acknowledged'
+    NIHR_NOT_ACKNOWLEDGED_WITH_BRC_INVESTIGATORS = 'No BRC Investigator associated with study and NIHR not Acknowledged'
 
     all_details = {
         NIHR_ACKNOWLEDGED: True,
         NIHR_NOT_ACKNOWLEDGED: False,
         UNABLE_TO_CHECK: False,
+        NIHR_NOT_ACKNOWLEDGED_NO_BRC_INVESTIGATORS: False,
+        NIHR_NOT_ACKNOWLEDGED_WITH_BRC_INVESTIGATORS: False,
     }
 
     id = db.Column(db.Integer, primary_key=True)
@@ -245,11 +249,17 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     validation_historic = db.Column(db.Boolean, default=None)
 
+    auto_nihr_acknowledgement_id = db.Column(db.Integer, db.ForeignKey(NihrAcknowledgement.id))
+    auto_nihr_acknowledgement = db.relationship(NihrAcknowledgement, foreign_keys=[auto_nihr_acknowledgement_id])
+
+    auto_nihr_funded_open_access_id = db.Column(db.Integer, db.ForeignKey(NihrFundedOpenAccess.id))
+    auto_nihr_funded_open_access = db.relationship(NihrFundedOpenAccess, foreign_keys=[auto_nihr_funded_open_access_id])
+
     nihr_acknowledgement_id = db.Column(db.Integer, db.ForeignKey(NihrAcknowledgement.id))
-    nihr_acknowledgement = db.relationship(NihrAcknowledgement, lazy="joined")
+    nihr_acknowledgement = db.relationship(NihrAcknowledgement, foreign_keys=[nihr_acknowledgement_id], lazy="joined")
 
     nihr_funded_open_access_id = db.Column(db.Integer, db.ForeignKey(NihrFundedOpenAccess.id))
-    nihr_funded_open_access = db.relationship(NihrFundedOpenAccess, lazy="joined")
+    nihr_funded_open_access = db.relationship(NihrFundedOpenAccess, foreign_keys=[nihr_funded_open_access_id], lazy="joined")
 
     journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
     journal = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
@@ -331,6 +341,26 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     def theme(self):
         themes = [a.theme.name for a in self.academics]
         return max(themes, key=themes.count)
+
+    NIHR_NAMES = [
+        'NIHR',
+        'National Institute of Health Research',
+        'National Institute of Health and Care Research',
+    ]
+    @property
+    def is_nihr_acknowledged(self):
+        for s in self.sponsors:
+            for n in self.NIHR_NAMES:
+                if n in s.name:
+                    return True
+        return False
+
+    @property
+    def all_nihr_acknowledged(self):
+        for s in self.sponsors:
+            if all([n not in s.name for n in self.NIHR_NAMES]):
+                return False
+        return True
 
 
 class Keyword(db.Model):

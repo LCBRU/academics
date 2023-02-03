@@ -6,7 +6,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from sqlalchemy import and_, exists
-from academics.model import Academic, FundingAcr, Journal, Keyword, ScopusAuthor, ScopusPublication, Sponsor, Subtype
+from academics.model import Academic, FundingAcr, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Sponsor, Subtype
 from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
@@ -98,6 +98,12 @@ def add_scopus_publications(els_author, scopus_author):
         publication.cited_by_count = int(p.get(u'citedby-count', '0'))
         publication.author_list = _get_author_list(p.get('author', []))
 
+        publication.auto_nihr_acknowledgement_id = _get_nihr_acknowledgement(publication)
+        publication.nihr_acknowledgement_id = _get_nihr_acknowledgement(publication)
+
+        publication.auto_nihr_funded_open_access = _get_nihr_funded_open_access(publication)
+        publication.nihr_funded_open_access = _get_nihr_funded_open_access(publication)
+
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
 
@@ -165,6 +171,16 @@ def _get_funding_acr(p):
         db.session.add(result)
 
     return result
+
+
+def _get_nihr_acknowledgement(pub):
+    if pub.is_nihr_acknowledged:
+        return NihrAcknowledgement.get_instance_by_name(NihrAcknowledgement.NIHR_ACKNOWLEDGED)
+
+
+def _get_nihr_funded_open_access(pub):
+    if pub.all_nihr_acknowledged and pub.is_open_access:
+        return NihrFundedOpenAccess.get_instance_by_name(NihrFundedOpenAccess.NIHR_FUNDED)
 
 
 def _get_author_list(authors):
