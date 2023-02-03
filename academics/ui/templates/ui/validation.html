@@ -151,7 +151,16 @@
             }),
         })
         let data = await response.json();
-        document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`).innerHTML = data['status'];
+        b = document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`)
+        b.innerHTML = data['status'];
+
+        if (data['status'] == 'Unknown') {
+            b.classList.delete("btn-primary")
+            b.classList.add("btn-info")
+        } else {
+            b.classList.delete("btn-info")
+            b.classList.add("btn-primary")
+        }
     }
 
     async function nihr_funded_open_access() {
