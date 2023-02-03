@@ -5,3 +5,5 @@ def get_roles():
     return [
         ROLE_VALIDATOR,
     ]
+
+

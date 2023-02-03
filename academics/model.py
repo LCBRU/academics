@@ -2,13 +2,23 @@ from multiprocessing.reduction import ACKNOWLEDGE
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
-from lbrc_flask.security import User
+from lbrc_flask.security import User as BaseUser
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
+
+    def __str__(self):
+        return self.name or ""
+
+
+class User(BaseUser):
+    __table_args__ = {'extend_existing': True}
+
+    theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
+    theme = db.relationship(Theme)
 
 
 class Academic(AuditMixin, CommonMixin, db.Model):
@@ -334,7 +344,7 @@ class Keyword(db.Model):
 folders__shared_users = db.Table(
     'folders__shared_users',
     db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
-    db.Column('user_id', db.Integer(), db.ForeignKey('user.id'), primary_key=True),
+    db.Column('user_id', db.Integer(), db.ForeignKey(User.id), primary_key=True),
 )
 
 
@@ -347,7 +357,7 @@ class Folder(db.Model):
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
 
     publications = db.relationship("ScopusPublication", secondary=folders__scopus_publications, back_populates="folders", collection_class=set)
-    shared_users = db.relationship("User", secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set)
+    shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set)
 
     @property
     def publication_count(self):

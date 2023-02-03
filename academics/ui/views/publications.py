@@ -1,8 +1,8 @@
-from flask import abort, jsonify, redirect, render_template, request, url_for
+from flask import abort, jsonify, render_template, request, url_for
 from flask_login import current_user
 from flask_security import roles_accepted
 from lbrc_flask.forms import SearchForm, FlashingForm
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Subtype, Theme
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Subtype, Theme, User
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
@@ -12,7 +12,6 @@ from lbrc_flask.json import validate_json
 from dateutil.relativedelta import relativedelta
 from lbrc_flask.database import db
 from lbrc_flask.forms import MultiCheckboxField
-from lbrc_flask.security.model import User
 from lbrc_flask.security import current_user_id
 
 
@@ -75,6 +74,7 @@ class PublicationSearchForm(SearchForm):
 
 class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
+    theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectField('Acknowledgement', default="-1")
     nihr_funded_open_access_id = SelectField('NIHR Funded Open Access', default='-1')
 
@@ -83,6 +83,7 @@ class ValidationSearchForm(SearchForm):
 
         self.nihr_acknowledgement_id.choices = [('', ''), ('-1', 'Unknown')] + _get_nihr_acknowledgement_choices()
         self.nihr_funded_open_access_id.choices = [('', ''), ('-1', 'Unknown')] + _get_nihr_funded_open_access_choices()
+        self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 class PublicationFolderForm(FlashingForm):

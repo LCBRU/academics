@@ -1,11 +1,11 @@
 import datetime
 from flask_admin.contrib.sqla import fields
 from lbrc_flask.database import db
-from lbrc_flask.security import Role, User
+from lbrc_flask.security import Role
 from lbrc_flask.admin import AdminCustomView, init_admin as flask_init_admin
 from flask_login import current_user
 
-from academics.model import Theme
+from academics.model import Theme, User
 
 
 class QuerySelectMultipleFieldSet(fields.QuerySelectMultipleField):
@@ -15,7 +15,7 @@ class QuerySelectMultipleFieldSet(fields.QuerySelectMultipleField):
 
 class UserView(AdminCustomView):
     column_list = ["username", "first_name", "last_name", "active", "roles"]
-    form_columns = ["username", "roles"]
+    form_columns = ["username", "roles", "theme"]
 
     # form_args and form_overrides required to allow roles to be sets.
     form_args = {

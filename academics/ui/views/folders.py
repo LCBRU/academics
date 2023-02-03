@@ -3,13 +3,12 @@ from flask import jsonify, redirect, render_template, request
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from sqlalchemy import or_
-from academics.model import Folder, ScopusPublication
+from academics.model import Folder, ScopusPublication, User
 from academics.ui.views.decorators import assert_folder_user
 from .. import blueprint
 from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
 from lbrc_flask.json import validate_json
-from lbrc_flask.security.model import User
 from lbrc_flask.security import current_user_id, system_user_id
 
 
