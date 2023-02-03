@@ -181,11 +181,11 @@
         b.innerHTML = data['status'];
 
         if (data['status'] == 'Unknown') {
-            b.classList.remove("btn-primary")
-            b.classList.add("btn-info")
-        } else {
             b.classList.remove("btn-info")
             b.classList.add("btn-primary")
+        } else {
+            b.classList.remove("btn-primary")
+            b.classList.add("btn-info")
         }
     }
 </script>
