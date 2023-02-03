@@ -129,6 +129,18 @@
 {% block js %}
 
 <script>
+    document.querySelectorAll('.search-filters input, .search-filters select').forEach(function(f){
+        f.addEventListener('change', onChangeHandler);
+    })
+
+    function onChangeHandler() {
+        document.querySelectorAll('form a[href^="/publications/export"]').forEach(function(f){
+            f.removeAttribute('href');
+            f.classList.add("disabled");
+            f.title = "disabled";
+        })
+    }
+    
     async function folder_remove_publication() {
         var button = $(window.event.target);
 
