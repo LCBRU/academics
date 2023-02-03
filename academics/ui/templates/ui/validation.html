@@ -106,7 +106,11 @@
                                 Open Access
                                 <div class="btn-toolbar float-right">
                                     <div class="btn-group mr-1 mb-1" role="group">
-                                        <button id="btnGroupOpenAccess_{{p.id}}" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {% set cls = 'btn-info' %}
+                                        {% if p.nihr_acknowledgement.name | default_if_none('Unknown') == 'Unknown' %}
+                                            {% set cls = 'btn-primary' %}
+                                        {% endif %}
+                                        <button id="btnGroupOpenAccess_{{p.id}}" type="button" class="btn {{cls}} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             {{ p.nihr_funded_open_access.name | default_if_none('Unknown') }}
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
