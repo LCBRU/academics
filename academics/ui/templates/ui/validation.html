@@ -155,10 +155,10 @@
         b.innerHTML = data['status'];
 
         if (data['status'] == 'Unknown') {
-            b.classList.delete("btn-primary")
+            b.classList.remove("btn-primary")
             b.classList.add("btn-info")
         } else {
-            b.classList.delete("btn-info")
+            b.classList.remove("btn-info")
             b.classList.add("btn-primary")
         }
     }
@@ -177,7 +177,16 @@
         let data = await response.json();
 
         console.log(data);
-        document.getElementById(`btnGroupOpenAccess_${button.data('id')}`).innerHTML = data['status'];
+        b = document.getElementById(`btnGroupOpenAccess_${button.data('id')}`)
+        b.innerHTML = data['status'];
+
+        if (data['status'] == 'Unknown') {
+            b.classList.remove("btn-primary")
+            b.classList.add("btn-info")
+        } else {
+            b.classList.remove("btn-info")
+            b.classList.add("btn-primary")
+        }
     }
 </script>
 
