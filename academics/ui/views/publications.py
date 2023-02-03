@@ -132,7 +132,7 @@ def publications():
 @blueprint.route("/validation/")
 @roles_accepted('validator')
 def validation():
-    search_form = ValidationSearchForm(formdata=request.args)
+    search_form = ValidationSearchForm(theme_id=current_user.theme_id, formdata=request.args)
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
     q = _get_publication_query(search_form, or_status=True, supress_validation_historic=True)
