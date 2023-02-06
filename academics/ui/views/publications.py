@@ -82,9 +82,9 @@ class ValidationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.nihr_acknowledgement_id.choices = [('', ''), ('-1', 'Unknown')] + _get_nihr_acknowledgement_choices()
-        self.nihr_funded_open_access_id.choices = [('', ''), ('-1', 'Unknown')] + _get_nihr_funded_open_access_choices()
-        self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unknown')] + _get_nihr_acknowledgement_choices()
+        self.nihr_funded_open_access_id.choices = [('0', ''), ('-1', 'Unknown')] + _get_nihr_funded_open_access_choices()
+        self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 class PublicationFolderForm(FlashingForm):
@@ -139,10 +139,6 @@ def validation():
     q = _get_publication_query(search_form, or_status=True, supress_validation_historic=True)
 
     q = q.order_by(ScopusPublication.publication_cover_date.asc())
-
-    print('-'*100)
-    print(q)
-    print('-'*100)
 
     publications = q.paginate(
         page=search_form.page.data,
@@ -434,6 +430,7 @@ def publication_keyword_options():
 @blueprint.route("/publication/journal/options")
 def publication_journal_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_journal_choices(request.args.get('q'))]})
+
 
 @blueprint.route("/publication/auto_validate")
 def publication_auto_validate():
