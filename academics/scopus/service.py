@@ -132,7 +132,7 @@ def auto_validate():
         auto_open = _get_nihr_funded_open_access(p)
 
         if auto_ack or auto_open:
-            amended_open += 1
+            amended_count += 1
 
             p.auto_nihr_acknowledgement_id = auto_ack
             p.nihr_acknowledgement_id = auto_ack
