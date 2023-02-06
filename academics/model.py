@@ -357,11 +357,13 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     @property
     def all_nihr_acknowledged(self):
+        if len(self.sponsors) < 1:
+            return False
+
         for s in self.sponsors:
             if all([n not in s.name for n in self.NIHR_NAMES]):
                 return False
-        else:
-            False
+
         return True
 
 
