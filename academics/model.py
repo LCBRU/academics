@@ -360,6 +360,8 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         for s in self.sponsors:
             if all([n not in s.name for n in self.NIHR_NAMES]):
                 return False
+        else:
+            False
         return True
 
 

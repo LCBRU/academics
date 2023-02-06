@@ -99,12 +99,6 @@ def add_scopus_publications(els_author, scopus_author):
         publication.cited_by_count = int(p.get(u'citedby-count', '0'))
         publication.author_list = _get_author_list(p.get('author', []))
 
-        publication.auto_nihr_acknowledgement_id = _get_nihr_acknowledgement(publication)
-        publication.nihr_acknowledgement_id = _get_nihr_acknowledgement(publication)
-
-        publication.auto_nihr_funded_open_access = _get_nihr_funded_open_access(publication)
-        publication.nihr_funded_open_access = _get_nihr_funded_open_access(publication)
-
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
 
@@ -298,6 +292,7 @@ def _update_all_academics():
             sleep(30)
 
     delete_orphan_publications()
+    auto_validate()
 
     logging.info('_update_all_academics: Ended')
 
@@ -367,6 +362,7 @@ def _add_authors_to_academic(scopus_ids, academic_id):
     db.session.commit()
 
     delete_orphan_publications()
+    auto_validate()
 
     logging.info('_add_authors_to_academic: ended')
 
