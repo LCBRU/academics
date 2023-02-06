@@ -134,8 +134,8 @@ def auto_validate():
         if auto_ack or auto_open:
             amended_count += 1
 
-            p.auto_nihr_acknowledgement_id = auto_ack
-            p.nihr_acknowledgement_id = auto_ack
+            p.auto_nihr_acknowledgement = auto_ack
+            p.nihr_acknowledgement = auto_ack
 
             p.auto_nihr_funded_open_access = auto_open
             p.nihr_funded_open_access = auto_open
