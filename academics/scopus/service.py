@@ -129,10 +129,10 @@ def auto_validate():
     open_count = 0
 
     for p in q.all():
-        if _get_nihr_acknowledgement(publication):
+        if _get_nihr_acknowledgement(p):
             ack_count += 1
 
-        if _get_nihr_funded_open_access(publication):
+        if _get_nihr_funded_open_access(p):
             open_count +=1
 
     return ack_count, open_count
