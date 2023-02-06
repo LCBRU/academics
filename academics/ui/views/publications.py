@@ -140,6 +140,8 @@ def validation():
 
     q = q.order_by(ScopusPublication.publication_cover_date.asc())
 
+    print(q)
+    
     publications = q.paginate(
         page=search_form.page.data,
         per_page=5,

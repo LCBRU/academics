@@ -122,6 +122,10 @@ def auto_validate():
             ScopusPublication.validation_historic == None,
         ))
 
+    print('='*100)
+    print(q)
+    print('='*100)
+
     return q.count()
 
 
