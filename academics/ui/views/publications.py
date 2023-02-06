@@ -437,6 +437,6 @@ def publication_journal_options():
 
 @blueprint.route("/publication/auto_validate")
 def publication_auto_validate():
-    ack_count, open_count = auto_validate()
-    flash(f'Acknowledgement: {ack_count}; Open Access: {open_count}')
+    amended_count = auto_validate()
+    flash(f'{amended_count} record(s) automatically updated')
     return redirect(url_for('ui.index'))

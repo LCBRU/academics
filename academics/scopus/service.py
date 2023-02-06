@@ -11,7 +11,7 @@ from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
 from datetime import datetime
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 
 def _client():
@@ -115,7 +115,7 @@ def add_scopus_publications(els_author, scopus_author):
 
 def auto_validate():
     q = ScopusPublication.query
-    q = q.filter(or_(
+    q = q.filter(and_(
             ScopusPublication.nihr_acknowledgement_id == None,
             ScopusPublication.nihr_funded_open_access_id == None,
         ))
@@ -125,17 +125,26 @@ def auto_validate():
         ))
     q = q.filter(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
 
-    ack_count = 0
-    open_count = 0
+    amended_count = 0
 
     for p in q.all():
-        if _get_nihr_acknowledgement(p):
-            ack_count += 1
+        auto_ack = _get_nihr_acknowledgement(p)
+        auto_open = _get_nihr_funded_open_access(p)
 
-        if _get_nihr_funded_open_access(p):
-            open_count +=1
+        if auto_ack or auto_open:
+            amended_open += 1
 
-    return ack_count, open_count
+            p.auto_nihr_acknowledgement_id = auto_ack
+            p.nihr_acknowledgement_id = auto_ack
+
+            p.auto_nihr_funded_open_access = auto_open
+            p.nihr_funded_open_access = auto_open
+
+            db.session.add(p)
+
+    db.session.commit()
+
+    return amended_count
 
 
 def _get_journal(journal_name):
