@@ -90,11 +90,6 @@
                                             <dd>{{ s.name }}</dd>
                                         {% endfor %}
                                     {% endif %}
-
-                                    {% if p.funding_text %}
-                                        <dt>Funding Text</dt>
-                                        <dd>{{ p.funding_text }}</dd>
-                                    {% endif%}
                                 </dl>
                             </div>
                         </div>
@@ -135,6 +130,18 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col">
+                        <dl class="row">
+                            {% if p.funding_text %}
+                                <dt>Funding Text</dt>
+                                <dd>{{ p.funding_text }}</dd>
+                            {% endif%}
+                        </dl>
+                    </div>
+                </div>
+
             </li>
         {% endfor %}
     </ul>
