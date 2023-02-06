@@ -140,8 +140,10 @@ def validation():
 
     q = q.order_by(ScopusPublication.publication_cover_date.asc())
 
+    print('-'*100)
     print(q)
-    
+    print('-'*100)
+
     publications = q.paginate(
         page=search_form.page.data,
         per_page=5,
@@ -435,6 +437,6 @@ def publication_journal_options():
 
 @blueprint.route("/publication/auto_validate")
 def publication_auto_validate():
-    n = auto_validate()
-    flash(f'{n} record(s) processed')
+    ack_count, open_count = auto_validate()
+    flash(f'Acknowledgement: {ack_count}; Open Access: {open_count}')
     return redirect(url_for('ui.index'))

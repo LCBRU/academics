@@ -125,11 +125,17 @@ def auto_validate():
         ))
     q = q.filter(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
 
-    print('='*100)
-    print(q)
-    print('='*100)
+    ack_count = 0
+    open_count = 0
 
-    return q.count()
+    for p in q.all():
+        if _get_nihr_acknowledgement(publication):
+            ack_count += 1
+
+        if _get_nihr_funded_open_access(publication):
+            open_count +=1
+
+    return ack_count, open_count
 
 
 def _get_journal(journal_name):
