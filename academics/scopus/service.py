@@ -11,6 +11,7 @@ from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
 from datetime import datetime
+from sqlalchemy import or_
 
 
 def _client():
@@ -110,6 +111,18 @@ def add_scopus_publications(els_author, scopus_author):
         _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
 
         db.session.add(publication)
+
+
+def auto_validate():
+    q = ScopusPublication.query
+    q = q.filter(ScopusPublication.nihr_acknowledgement_id is None)
+    q = q.filter(ScopusPublication.nihr_funded_open_access_id is None)
+    q = q.filter(or_(
+            ScopusPublication.validation_historic == False,
+            ScopusPublication.validation_historic == None,
+        ))
+
+    return q.count()
 
 
 def _get_journal(journal_name):
@@ -313,7 +326,7 @@ def _add_authors_to_academic(scopus_ids, academic_id):
     logging.info('_add_authors_to_academic: started')
 
     academic = Academic.query.get(academic_id)
- 
+
     for scopus_id in scopus_ids:
         els_author = get_els_author(scopus_id)
         sa = els_author.get_scopus_author()

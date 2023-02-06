@@ -1,4 +1,4 @@
-from flask import abort, jsonify, render_template, request, url_for
+from flask import abort, jsonify, render_template, request, url_for, redirect, flash
 from flask_login import current_user
 from flask_security import roles_accepted
 from lbrc_flask.forms import SearchForm, FlashingForm
@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 from lbrc_flask.database import db
 from lbrc_flask.forms import MultiCheckboxField
 from lbrc_flask.security import current_user_id
+from academics.scopus.service import auto_validate
 
 
 def _get_author_choices():
@@ -429,3 +430,9 @@ def publication_keyword_options():
 @blueprint.route("/publication/journal/options")
 def publication_journal_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in _get_journal_choices(request.args.get('q'))]})
+
+@blueprint.route("/publication/auto_validate")
+def publication_auto_validate():
+    n = auto_validate()
+    flash(f'{n} record(s) processed')
+    return redirect(url_for('ui.index'))
