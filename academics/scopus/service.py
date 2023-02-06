@@ -115,12 +115,15 @@ def add_scopus_publications(els_author, scopus_author):
 
 def auto_validate():
     q = ScopusPublication.query
-    q = q.filter(ScopusPublication.nihr_acknowledgement_id == None)
-    q = q.filter(ScopusPublication.nihr_funded_open_access_id == None)
+    q = q.filter(or_(
+            ScopusPublication.nihr_acknowledgement_id == None,
+            ScopusPublication.nihr_funded_open_access_id == None,
+        ))
     q = q.filter(or_(
             ScopusPublication.validation_historic == False,
             ScopusPublication.validation_historic == None,
         ))
+    q = q.filter(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
 
     print('='*100)
     print(q)
