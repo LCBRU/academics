@@ -398,8 +398,16 @@ class Folder(db.Model):
         return ScopusPublication.query.filter(ScopusPublication.folders.any(Folder.id == self.id)).count()
 
 
+class Objective(db.Model, AuditMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    completed = db.Column(db.Boolean, default=False)
+
+    theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
+    theme = db.relationship(Theme, backref=db.backref("objectives", cascade="all,delete"))
+
+
 def init_model(app):
-    
     @app.before_first_request
     def data_setup():
         for name in NihrFundedOpenAccess.all_details:

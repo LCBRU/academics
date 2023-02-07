@@ -1,0 +1,62 @@
+{% extends "ui/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
+{% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal %}
+
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>Objectives</h1>
+
+        {{ render_search(
+            search_form,
+            'ui.objectives',
+            placeholder='enter search text - searches name',
+            buttons=[
+                {
+                    'id': 'add_objective',
+                    'text': 'Add',
+                    'data-toggle': "modal",
+                    'data-id': "",
+                    'data-name': "",
+                    'data-theme_id': search_form.theme_id.data,
+                    'data-target': "#editObjectiveModal",
+                },
+            ],
+        ) }}
+
+    </div>
+
+    {{ pagination_summary(objectives, 'objective') }}
+
+    <ul class="list-group">
+        {% for o in objectives.items %}
+            <li class="list-group-item summary_details">
+                <div class='row'>
+                    <div class="col-7">
+                        <h3>{{o.name}}</h3>
+                    </div>
+                    <div class="col-5">
+                        <div class="btn-toolbar float-right">
+                        </div>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{{ render_pagination(objectives, 'ui.objectives', form=search_form) }}
+
+{{ render_edit_modal('editObjectiveModal', 'Objective Details', url_for('ui.objective_save', prev=request.full_path), edit_objective_form) }}
+{{ render_delete_modal('deleteModal', 'Delete Objective', url_for('ui.objective_delete', prev=request.full_path), confirm_form) }}
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    document.getElementById('theme_id').onchange = function(){this.form.submit()};
+</script>
+
+{% endblock %}
