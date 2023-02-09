@@ -2,7 +2,7 @@ from flask import abort, jsonify, render_template, request, url_for, redirect, f
 from flask_login import current_user
 from flask_security import roles_accepted
 from lbrc_flask.forms import SearchForm, FlashingForm
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Subtype, Theme, User
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, Objective, ScopusAuthor, ScopusPublication, Subtype, Theme, User
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
@@ -44,6 +44,10 @@ def _get_folder_choices():
     return [(f.id, f.name.title()) for f in Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all()]
 
 
+def _get_objective_choices():
+    return [(o.id, o.name.title()) for o in Objective.query.order_by(Objective.name).all()]
+
+
 def _get_nihr_funded_open_access_choices():
     return [(f.id, f.name.title()) for f in NihrFundedOpenAccess.query.order_by(NihrFundedOpenAccess.name).all()]
 
@@ -61,6 +65,7 @@ class PublicationSearchForm(SearchForm):
     keywords = SelectMultipleField('Keywords')
     author_id = SelectField('Author')
     folder_id = SelectField('Folder')
+    objective_id = SelectField('Objective')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -71,6 +76,7 @@ class PublicationSearchForm(SearchForm):
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
+        self.objective_id.choices = [('', '')] + _get_objective_choices()
 
 
 class ValidationSearchForm(SearchForm):
@@ -243,6 +249,9 @@ def _get_publication_query(search_form, or_status=False, supress_validation_hist
 
     if search_form.has_value('folder_id'):
         q = q.filter(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
+
+    if search_form.has_value('objective_id'):
+        q = q.filter(ScopusPublication.objectives.any(Objective.id == search_form.objective_id.data))
 
     if supress_validation_historic:
         q = q.filter(or_(

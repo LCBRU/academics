@@ -407,6 +407,29 @@ class Objective(db.Model, AuditMixin):
     theme = db.relationship(Theme, backref=db.backref("objectives", cascade="all,delete"))
 
 
+class Evidence(db.Model, AuditMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(100), nullable=False)
+    notes = db.Column(db.UnicodeText)
+
+    objective_id = db.Column(db.Integer, db.ForeignKey(Objective.id))
+    objective = db.relationship(Objective, backref=db.backref("evidences", cascade="all,delete"))
+
+    __mapper_args__ = {
+        "polymorphic_identity": "evidence",
+        "polymorphic_on": "type",
+    }
+
+
+class EvidencePublication(Evidence):
+    publication_id = db.Column(db.Integer, db.ForeignKey(ScopusPublication.id))
+    publication = db.relationship(ScopusPublication, backref=db.backref("evidences", cascade="all,delete"))
+
+    __mapper_args__ = {
+        "polymorphic_identity": "publication",
+    } 
+
+
 def init_model(app):
     @app.before_first_request
     def data_setup():

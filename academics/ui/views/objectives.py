@@ -1,9 +1,9 @@
 from os import abort
 from flask import jsonify, redirect, render_template, request
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from academics.model import Objective, ScopusPublication, User, Theme
+from academics.model import Evidence, Objective, ScopusPublication, User, Theme
 from .. import blueprint
-from wtforms import HiddenField, StringField
+from wtforms import HiddenField, StringField, TextAreaField
 from lbrc_flask.database import db
 from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id, system_user_id
@@ -29,10 +29,20 @@ class ObjectiveSearchForm(SearchForm):
         else:
             return self.theme_id.default
 
+
 class ObjectiveEditForm(FlashingForm):
     id = HiddenField('id')
     name = StringField('Name', validators=[DataRequired(), Length(max=500)])
     theme_id = HiddenField('Theme', validators=[DataRequired()])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class EvidenceEditForm(FlashingForm):
+    id = HiddenField('id')
+    notes = TextAreaField('Notes', validators=[DataRequired()])
+    objective_id = HiddenField('Objective', validators=[DataRequired()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -58,6 +68,7 @@ def objectives():
         objectives=objectives,
         users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
         edit_objective_form=ObjectiveEditForm(),
+        edit_evidence_form=EvidenceEditForm(),
         confirm_form=ConfirmForm(),
     )
 
@@ -106,43 +117,33 @@ def objective_delete():
     return redirect(request.referrer)
 
 
-@blueprint.route("/objective/remove_publication", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'objective_id': {'type': 'integer'},
-        'scopus_publication_id': {'type': 'integer'},
-    },
-    "required": ["objective_id", "scopus_publication_id"]
-})
-def objective_remove_publication():
-    p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
-    f = Objective.query.get_or_404(request.json.get('objective_id'))
+@blueprint.route("/evidence/save", methods=['POST'])
+def evidence_save():
+    form = EvidenceEditForm()
 
-    f.publications.remove(p)
+    if form.validate_on_submit():
+        id = form.id.data
 
-    db.session.add(f)
-    db.session.commit()
+        if id:
+            e = Evidence.query.get_or_404(id)
+        else:
+            e = Evidence()
 
-    return jsonify({}), 200
+        e.notes = form.notes.data
+        e.objective_id = form.objective_id.data
+
+        db.session.add(e)
+        db.session.commit()
+
+    return redirect(request.referrer)
 
 
-@blueprint.route("/objective/add_publication", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'objective_id': {'type': 'integer'},
-        'scopus_publication_id': {'type': 'integer'},
-    },
-    "required": ["objective_id", "scopus_publication_id"]
-})
-def objective_add_publication():
-    p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
-    f = Objective.query.get_or_404(request.json.get('objective_id'))
+@blueprint.route("/evidence/delete", methods=['POST'])
+def evidence_delete():
+    form = ConfirmForm()
 
-    f.publications.add(p)
+    if form.validate_on_submit():
+        db.session.delete(Evidence.query.get_or_404(form.id.data))
+        db.session.commit()
 
-    db.session.add(f)
-    db.session.commit()
-
-    return jsonify({}), 200
+    return redirect(request.referrer)
