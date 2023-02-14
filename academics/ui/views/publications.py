@@ -317,11 +317,6 @@ def publication_full_annual_report_xlsx():
     headers = {
         'Publication Reference': None,
         'DOI': None,
-        'Theme': None,
-        'NIHR Acknowledgement': None,
-        'NIHR Not Acknowledged Detail': None,
-        'Open Access': None,
-        'NIHR Funding Used for Open Access': None,
     }
 
     search_form = PublicationSearchForm(formdata=request.args)
