@@ -1,7 +1,6 @@
 requests
 -e git+https://github.com/LCBRU/lbrc_flask.git@main#egg=lbrc_flask
 Flask
-sqlalchemy-migrate
 sqlalchemy==1.4.46
 pymysql
 elsapy
