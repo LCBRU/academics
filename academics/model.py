@@ -428,24 +428,3 @@ class EvidencePublication(Evidence):
     __mapper_args__ = {
         "polymorphic_identity": "publication",
     } 
-
-
-def init_model(app):
-    @app.before_first_request
-    def data_setup():
-        for name in NihrFundedOpenAccess.all_details:
-            if NihrFundedOpenAccess.query.filter(NihrFundedOpenAccess.name == name).count() == 0:
-                db.session.add(
-                    NihrFundedOpenAccess(name=name)
-                )
-
-        for name, acknowledged in NihrAcknowledgement.all_details.items():
-            if NihrAcknowledgement.query.filter(NihrAcknowledgement.name == name).count() == 0:
-                db.session.add(
-                    NihrAcknowledgement(
-                        name=name,
-                        acknowledged = acknowledged,
-                    )
-                )
-
-        db.session.commit()

@@ -1,5 +1,5 @@
 from flask import Flask
-from academics.model import init_model, User
+from academics.model import User
 
 from academics.security import get_roles
 from .ui import blueprint as ui_blueprint
@@ -23,7 +23,6 @@ def create_app(config=Config):
         init_security(app, user_class=User, role_class=Role, roles=get_roles())
         init_admin(app, TITLE)
         init_celery(app, TITLE)
-        init_model(app)
 
     app.register_blueprint(ui_blueprint)
 
