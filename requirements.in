@@ -1,0 +1,11 @@
+requests
+-e git+https://github.com/LCBRU/lbrc_flask.git@main#egg=lbrc_flask
+Flask
+sqlalchemy
+pymysql
+elsapy
+pandas
+celery
+celery[redis]
+weasyprint==52.5
+Flask-WeasyPrint
