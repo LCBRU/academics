@@ -63,7 +63,7 @@ def folder_save():
         id = form.id.data
 
         if id:
-            folder = Folder.query.get_or_404(id)
+            folder = db.get_or_404(Folder, id)
         else:
             folder = Folder()
             folder.owner = current_user
@@ -85,7 +85,7 @@ def folder_delete():
     form = ConfirmForm()
 
     if form.validate_on_submit():
-        folder = Folder.query.get_or_404(form.id.data)
+        folder = db.get_or_404(Folder, form.id.data)
 
         db.session.delete(folder)
         db.session.commit()
@@ -104,8 +104,8 @@ def folder_delete():
 })
 @assert_folder_user()
 def folder_remove_publication():
-    p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
-    f = Folder.query.get_or_404(request.json.get('folder_id'))
+    p = db.get_or_404(ScopusPublication, request.json.get('scopus_publication_id'))
+    f = db.get_or_404(Folder, request.json.get('folder_id'))
 
     f.publications.remove(p)
 
@@ -126,8 +126,8 @@ def folder_remove_publication():
 })
 @assert_folder_user()
 def folder_add_publication():
-    p = ScopusPublication.query.get_or_404(request.json.get('scopus_publication_id'))
-    f = Folder.query.get_or_404(request.json.get('folder_id'))
+    p = db.get_or_404(ScopusPublication, request.json.get('scopus_publication_id'))
+    f = db.get_or_404(Folder, request.json.get('folder_id'))
 
     f.publications.add(p)
 
@@ -146,7 +146,7 @@ def folder_add_publication():
     "required": ["id"]
 })
 def folder_users():
-    folder = Folder.query.get_or_404(request.json.get('id'))
+    folder = db.get_or_404(Folder, request.json.get('id'))
 
     resp = render_template(
         "ui/folder_users.html",
@@ -168,8 +168,8 @@ def folder_users():
 })
 @assert_folder_user()
 def folder_remove_shared_user():
-    u = User.query.get_or_404(request.json.get('user_id'))
-    f = Folder.query.get_or_404(request.json.get('folder_id'))
+    u = db.get_or_404(User, request.json.get('user_id'))
+    f = db.get_or_404(Folder, request.json.get('folder_id'))
 
     f.shared_users.remove(u)
 
@@ -190,8 +190,8 @@ def folder_remove_shared_user():
 })
 @assert_folder_user()
 def folder_add_shared_user():
-    u = User.query.get_or_404(request.json.get('user_id'))
-    f = Folder.query.get_or_404(request.json.get('folder_id'))
+    u = db.get_or_404(User, request.json.get('user_id'))
+    f = db.get_or_404(Folder, request.json.get('folder_id'))
 
     f.shared_users.add(u)
 

@@ -91,7 +91,7 @@ def objective_save():
         id = form.id.data
 
         if id:
-            obj = Objective.query.get_or_404(id)
+            obj = db.get_or_404(Objective, id)
         else:
             obj = Objective()
 
@@ -109,7 +109,7 @@ def objective_delete():
     form = ConfirmForm()
 
     if form.validate_on_submit():
-        objective = Objective.query.get_or_404(form.id.data)
+        objective = db.get_or_404(Objective, form.id.data)
 
         db.session.delete(objective)
         db.session.commit()
@@ -125,7 +125,7 @@ def evidence_save():
         id = form.id.data
 
         if id:
-            e = Evidence.query.get_or_404(id)
+            e = db.get_or_404(Evidence, id)
         else:
             e = Evidence()
 
@@ -143,7 +143,7 @@ def evidence_delete():
     form = ConfirmForm()
 
     if form.validate_on_submit():
-        db.session.delete(Evidence.query.get_or_404(form.id.data))
+        db.session.delete(db.get_or_404(Evidence, form.id.data))
         db.session.commit()
 
     return redirect(request.referrer)

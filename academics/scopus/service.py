@@ -320,7 +320,7 @@ def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
     academic = None
 
     if academic_id:
-        academic = Academic.query.get(academic_id)
+        academic = db.session.get(Academic, academic_id)
 
     if not academic:
         academic = Academic(
@@ -342,7 +342,7 @@ def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
 def _add_authors_to_academic(scopus_ids, academic_id):
     logging.info('_add_authors_to_academic: started')
 
-    academic = Academic.query.get(academic_id)
+    academic = db.sessio.get(Academic, academic_id)
 
     for scopus_id in scopus_ids:
         els_author = get_els_author(scopus_id)

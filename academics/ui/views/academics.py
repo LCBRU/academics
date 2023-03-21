@@ -82,7 +82,7 @@ def index():
 
 @blueprint.route("/academic/<int:id>/edit", methods=['GET', 'POST'])
 def academic_edit(id):
-    academic = Academic.query.get_or_404(id)
+    academic = db.get_or_404(Academic, id)
 
     form = AcademicEditForm(obj=academic)
 
@@ -143,7 +143,7 @@ def delete_academic():
     form = ConfirmForm()
 
     if form.validate_on_submit():
-        a = Academic.query.get_or_404(form.id.data)
+        a = db.get_or_404(Academic, form.id.data)
         db.session.delete(a)
         db.session.commit()
 
@@ -157,7 +157,7 @@ def delete_author():
     form = ConfirmForm()
 
     if form.validate_on_submit():
-        au = ScopusAuthor.query.get_or_404(form.id.data)
+        au = db.get_or_404(ScopusAuthor, form.id.data)
         a = au.academic
         db.session.delete(au)
         db.session.flush()

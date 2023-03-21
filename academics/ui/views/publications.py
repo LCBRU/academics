@@ -170,7 +170,7 @@ def validation():
     "required": ["id"]
 })
 def publication_folders():
-    publication = ScopusPublication.query.get_or_404(request.json.get('id'))
+    publication = db.get_or_404(ScopusPublication, request.json.get('id'))
 
     folder_query = Folder.query.filter(or_(
         Folder.owner_id == current_user_id(),
@@ -347,11 +347,11 @@ def publication_export_pdf():
     parameters = []
 
     if search_form.author_id.data:
-        author = ScopusAuthor.query.get_or_404(search_form.author_id.data)
+        author = db.get_or_404(ScopusAuthor, search_form.author_id.data)
         parameters.append(('Author', author.full_name))
 
     if search_form.theme_id.data:
-        theme = Theme.query.get_or_404(search_form.theme_id.data)
+        theme = db.get_or_404(Theme, search_form.theme_id.data)
         parameters.append(('Theme', theme.name))
 
     publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
@@ -381,7 +381,7 @@ def publication_export_pdf():
 })
 @roles_accepted('validator')
 def publication_nihr_acknowledgement():
-    p = ScopusPublication.query.get_or_404(request.json.get('id'))
+    p = db.get_or_404(ScopusPublication, request.json.get('id'))
 
     if request.json.get('nihr_acknowledgement_id') == -1:
         p.nihr_acknowledgement = None
@@ -389,7 +389,7 @@ def publication_nihr_acknowledgement():
 
         return jsonify({'status': 'Unknown'}), 200
     else:
-        n = NihrAcknowledgement.query.get_or_404(request.json.get('nihr_acknowledgement_id'))
+        n = db.get_or_404(NihrAcknowledgement, request.json.get('nihr_acknowledgement_id'))
 
         p.nihr_acknowledgement = n
 
@@ -409,7 +409,7 @@ def publication_nihr_acknowledgement():
 })
 @roles_accepted('validator')
 def publication_nihr_funded_open_access():
-    p = ScopusPublication.query.get_or_404(request.json.get('id'))
+    p = db.get_or_404(ScopusPublication, request.json.get('id'))
 
     if request.json.get('nihr_funded_open_access_id') == -1:
         p.nihr_funded_open_access = None
@@ -417,7 +417,7 @@ def publication_nihr_funded_open_access():
 
         return jsonify({'status': 'Unknown'}), 200
     else:
-        n = NihrFundedOpenAccess.query.get_or_404(request.json.get('nihr_funded_open_access_id'))
+        n = db.get_or_404(NihrFundedOpenAccess, request.json.get('nihr_funded_open_access_id'))
 
         p.nihr_funded_open_access = n
 
