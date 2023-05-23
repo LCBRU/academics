@@ -9,3 +9,5 @@ celery
 celery[redis]
 weasyprint==52.5
 Flask-WeasyPrint
+alembic
+flask-security-too[fsqla,common]
