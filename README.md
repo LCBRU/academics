@@ -38,3 +38,13 @@ To run the celery work, use the command:
 ```
 celery -A celery_worker.celery worker -l 'INFO'
 ```
+
+### Installation on MacOS (Dev only)
+
+Installation of the cairo library must be done using homebrew
+as these cannot be done using the pip installation processes
+
+```
+brew install cairo
+brew install pango
+```
