@@ -8,7 +8,8 @@ from lbrc_flask.security import User as BaseUser
 class Theme(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    # MariaDB backends need a VARChar variable, added 255 to set a max length
+    name = db.Column(db.String(255))
 
     def __str__(self):
         return self.name or ""
@@ -22,10 +23,11 @@ class User(BaseUser):
 
 
 class Academic(AuditMixin, CommonMixin, db.Model):
+    # MariaDB backends need a VARChar variable, added 255 to set a max length
 
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String)
-    last_name = db.Column(db.String)
+    first_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
     updating = db.Column(db.Boolean, default=False)
     initialised = db.Column(db.Boolean, default=False)
     error = db.Column(db.Boolean, default=False)
@@ -57,20 +59,20 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
     academic = db.relationship(Academic, backref=db.backref("scopus_authors", cascade="all,delete"))
 
-    scopus_id = db.Column(db.String)
-    eid = db.Column(db.String)
-    first_name = db.Column(db.String)
-    last_name = db.Column(db.String)
-    affiliation_id = db.Column(db.String)
-    affiliation_name = db.Column(db.String)
-    affiliation_address = db.Column(db.String)
-    affiliation_city = db.Column(db.String)
-    affiliation_country = db.Column(db.String)
-    citation_count = db.Column(db.String)
-    document_count = db.Column(db.String)
-    h_index = db.Column(db.String)
-    href = db.Column(db.String)
-    orcid = db.Column(db.String)
+    scopus_id = db.Column(db.String(1000))
+    eid = db.Column(db.String(1000))
+    first_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
+    affiliation_id = db.Column(db.String(255))
+    affiliation_name = db.Column(db.String(1000))
+    affiliation_address = db.Column(db.String(1000))
+    affiliation_city = db.Column(db.String(1000))
+    affiliation_country = db.Column(db.String(1000))
+    citation_count = db.Column(db.String(1000))
+    document_count = db.Column(db.String(1000))
+    h_index = db.Column(db.String(100))
+    href = db.Column(db.String(1000))
+    orcid = db.Column(db.String(255))
     error = db.Column(db.Boolean, default=False)
     last_fetched_datetime = db.Column(db.DateTime)
 
@@ -103,7 +105,8 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 class Journal(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    # MariaDB backends need a VARChar variable, added 255 to set a max length
+    name = db.Column(db.String(255))
 
 
 scopus_author__scopus_publication = db.Table(
@@ -136,8 +139,8 @@ sponsors__scopus_publications = db.Table(
 
 class Subtype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String)
-    description = db.Column(db.String)
+    code = db.Column(db.String(1000))
+    description = db.Column(db.String(10000))
 
     @classmethod
     def get_validation_types(cls):
@@ -146,14 +149,14 @@ class Subtype(db.Model):
 
 class Sponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(255))
 
     publications = db.relationship("ScopusPublication", secondary=sponsors__scopus_publications, back_populates="sponsors", collection_class=set)
 
 
 class FundingAcr(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(255))
 
 
 class NihrFundedOpenAccess(db.Model):
@@ -171,7 +174,7 @@ class NihrFundedOpenAccess(db.Model):
     ]
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(255))
 
     @classmethod
     def get_instance_by_name(cls, name):
@@ -195,7 +198,7 @@ class NihrAcknowledgement(db.Model):
     }
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(1000))
     acknowledged = db.Column(db.Boolean)
 
     @classmethod
@@ -229,22 +232,22 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     scopus_authors = db.relationship("ScopusAuthor", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications"), lazy="joined")
 
-    scopus_id = db.Column(db.String)
-    doi = db.Column(db.String)
-    title = db.Column(db.String)
+    scopus_id = db.Column(db.String(1000))
+    doi = db.Column(db.String(1000))
+    title = db.Column(db.String(1000))
     publication_cover_date = db.Column(db.Date)
-    pubmed_id = db.Column(db.String)
-    pii = db.Column(db.String)
-    abstract = db.Column(db.String)
-    author_list = db.Column(db.String)
-    volume = db.Column(db.String)
-    issue = db.Column(db.String)
-    pages = db.Column(db.String)
-    funding_text = db.Column(db.String)
+    pubmed_id = db.Column(db.String(1000))
+    pii = db.Column(db.String(1000))
+    abstract = db.Column(db.String(1000))
+    author_list = db.Column(db.String(1000))
+    volume = db.Column(db.String(1000))
+    issue = db.Column(db.String(1000))
+    pages = db.Column(db.String(1000))
+    funding_text = db.Column(db.String(1000))
     is_open_access = db.Column(db.Boolean)
     cited_by_count = db.Column(db.Integer)
 
-    href = db.Column(db.String)
+    href = db.Column(db.String(1000))
     deleted = db.Column(db.Boolean, default=False)
 
     validation_historic = db.Column(db.Boolean, default=None)
@@ -370,7 +373,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 class Keyword(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    keyword = db.Column(db.String)
+    keyword = db.Column(db.String(1000))
 
     publications = db.relationship("ScopusPublication", secondary=scopus_publications__keywords, back_populates="keywords", collection_class=set)
 
@@ -385,7 +388,7 @@ folders__shared_users = db.Table(
 class Folder(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(1000))
 
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
@@ -400,7 +403,7 @@ class Folder(db.Model):
 
 class Objective(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(1000))
     completed = db.Column(db.Boolean, default=False)
 
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))

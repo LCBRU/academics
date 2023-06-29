@@ -48,3 +48,9 @@ as these cannot be done using the pip installation processes
 brew install cairo
 brew install pango
 ```
+
+If using mariadb as your database backend
+
+```
+brew install mariadb-connector-c
+```
