@@ -100,7 +100,7 @@
                                     </div>
                                     <div class="col">
                                         <h3>Funding text</h3>
-                                        <p>{{ p.funding_text | blank_if_none | br}}</p>
+                                        {{ p.funding_text | blank_if_none | paragraphs }}
                                     </div>
                                 </div>
                             </div>
