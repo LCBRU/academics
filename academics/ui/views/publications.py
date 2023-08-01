@@ -150,7 +150,6 @@ def validation():
         "ui/validation.html",
         publications=publications,
         search_form=search_form,
-        nihr_funded_open_accesses=NihrFundedOpenAccess.query.all(),
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
 
@@ -227,14 +226,6 @@ def _get_publication_query(search_form, or_status=False, supress_validation_hist
             nihr_acknowledgement_id = None
 
         status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
-
-    if search_form.has_value('nihr_funded_open_access_id'):
-        nihr_funded_open_access_id = search_form.nihr_funded_open_access_id.data
-
-        if nihr_funded_open_access_id == '-1':
-            nihr_funded_open_access_id = None
-
-        status_filter = (*status_filter, ScopusPublication.nihr_funded_open_access_id == nihr_funded_open_access_id)
 
     if or_status:
         q = q.filter(or_(*status_filter))
@@ -326,7 +317,6 @@ def publication_full_annual_report_xlsx():
         'NIHR Acknowledgement': p.nihr_acknowledgement_yesno,
         'NIHR Not Acknowledged Detail': p.nihr_acknowledgement_detail,
         'Open Access': p.is_open_access_yesno,
-        'NIHR Funding Used for Open Access': p.nihr_funded_open_access.name if p.nihr_funded_open_access else '',
     } for p in q.all())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
@@ -386,34 +376,6 @@ def publication_nihr_acknowledgement():
         n = db.get_or_404(NihrAcknowledgement, request.json.get('nihr_acknowledgement_id'))
 
         p.nihr_acknowledgement = n
-
-        db.session.commit()
-
-        return jsonify({'status': n.name}), 200
-
-
-@blueprint.route("/publications/nihr_funded_open_access", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'integer'},
-        'nihr_funded_open_access_id': {'type': 'integer'},
-    },
-    "required": ["id", "nihr_funded_open_access_id"]
-})
-@roles_accepted('validator')
-def publication_nihr_funded_open_access():
-    p = db.get_or_404(ScopusPublication, request.json.get('id'))
-
-    if request.json.get('nihr_funded_open_access_id') == -1:
-        p.nihr_funded_open_access = None
-        db.session.commit()
-
-        return jsonify({'status': 'Unknown'}), 200
-    else:
-        n = db.get_or_404(NihrFundedOpenAccess, request.json.get('nihr_funded_open_access_id'))
-
-        p.nihr_funded_open_access = n
 
         db.session.commit()
 
