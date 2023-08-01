@@ -55,6 +55,12 @@
                                 <dt class="col-auto">Type</dt>
                                 <dd class="col-auto">{{ p.subtype.description }}</dd>
                             {% endif %}
+                            <dt class="col-auto">Open Access</dt>
+                            {% if p.is_open_access %}
+                                <dd class="col-auto"><i class="fas fa-check"></i></dd>
+                            {% else %}
+                                <dd class="col-auto"><i class="fas fa-question"></i></dd>
+                            {% endif %}
                         </dl>
                     </div>
                 </div>
@@ -83,65 +89,24 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <dl>
-                                    {% if p.sponsors | length > 0 %}
-                                        <dt>Funding Sponsors</dt>
-                                        {% for s in p.sponsors %}
-                                            <dd>{{ s.name }}</dd>
-                                        {% endfor %}
-                                    {% endif %}
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col">
-                        <div class="card">
-                            <div class="card-header">
-                                Open Access
-                                <div class="btn-toolbar float-right">
-                                    <div class="btn-group mr-1 mb-1" role="group">
-                                        {% set cls = 'btn-info' %}
-                                        {% if p.nihr_funded_open_access.name | default_if_none('Unknown') == 'Unknown' %}
-                                            {% set cls = 'btn-primary' %}
-                                        {% endif %}
-                                        <button id="btnGroupOpenAccess_{{p.id}}" type="button" class="btn {{cls}} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            {{ p.nihr_funded_open_access.name | default_if_none('Unknown') }}
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="btnGroupOpenAccess_{{p.id}}">
-                                            <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-nihr_funded_open_access_id="-1">Unknown</a>
-                                            {% for n in nihr_funded_open_accesses %}
-                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_funded_open_access()" data-id="{{p.id}}" data-nihr_funded_open_access_id="{{ n.id }}">{{ n.name }}</a>
+                                <div class="row">
+                                    <div class="col">
+                                        <h3>Funding Sponsors</h3>
+                                        <ul class="list-group">
+                                            {% for s in p.sponsors %}
+                                                <li class="list-group-item">{{ s.name }}</li>
                                             {% endfor %}
-                                        </div>
+                                        </ul>
+                                    </div>
+                                    <div class="col">
+                                        <h3>Funding text</h3>
+                                        <p>{{ p.funding_text | blank_if_none | br}}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <dl>
-                                    <dt>Open Access</dt>
-                                    {% if p.is_open_access %}
-                                        <dd><i class="fas fa-check"></i></dd>
-                                    {% else %}
-                                        <dd><i class="fas fa-question"></i></dd>
-                                    {% endif %}
-                                </dl>
-                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col">
-                        <dl>
-                            {% if p.funding_text %}
-                                <dt>Funding Text</dt>
-                                <dd>{{ p.funding_text }}</dd>
-                            {% endif%}
-                        </dl>
-                    </div>
-                </div>
-
             </li>
         {% endfor %}
     </ul>
