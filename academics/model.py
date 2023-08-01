@@ -188,6 +188,7 @@ class NihrAcknowledgement(db.Model):
     UNABLE_TO_CHECK = 'Unable to check - full paper not available'
     NIHR_NOT_ACKNOWLEDGED_NO_BRC_INVESTIGATORS = 'BRC Investigator associated with study and NIHR not Acknowledged'
     NIHR_NOT_ACKNOWLEDGED_WITH_BRC_INVESTIGATORS = 'No BRC Investigator associated with study and NIHR not Acknowledged'
+    NIHR_NOT_ACKNOWLEDGED_BRC_INVESTIGATORS_NOT_PRIMARY = 'BRC Investigators not a primary author'
 
     all_details = {
         NIHR_ACKNOWLEDGED: True,
@@ -195,6 +196,7 @@ class NihrAcknowledgement(db.Model):
         UNABLE_TO_CHECK: False,
         NIHR_NOT_ACKNOWLEDGED_NO_BRC_INVESTIGATORS: False,
         NIHR_NOT_ACKNOWLEDGED_WITH_BRC_INVESTIGATORS: False,
+        NIHR_NOT_ACKNOWLEDGED_BRC_INVESTIGATORS_NOT_PRIMARY: False,
     }
 
     id = db.Column(db.Integer, primary_key=True)

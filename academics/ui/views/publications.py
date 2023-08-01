@@ -2,7 +2,7 @@ from flask import abort, jsonify, render_template, request, url_for, redirect, f
 from flask_login import current_user
 from flask_security import roles_accepted
 from lbrc_flask.forms import SearchForm, FlashingForm
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, Objective, ScopusAuthor, ScopusPublication, Subtype, Theme, User
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Objective, ScopusAuthor, ScopusPublication, Subtype, Theme, User
 from .. import blueprint
 from sqlalchemy import or_
 from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
