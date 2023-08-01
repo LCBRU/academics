@@ -99,6 +99,9 @@ def add_scopus_publications(els_author, scopus_author):
         publication.cited_by_count = int(p.get(u'citedby-count', '0'))
         publication.author_list = _get_author_list(p.get('author', []))
 
+        if publication.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
+            publication.validation_historic = True
+
         if scopus_author not in publication.scopus_authors:
             publication.scopus_authors.append(scopus_author)
 
