@@ -48,10 +48,6 @@ def _get_objective_choices():
     return [(o.id, o.name.title()) for o in Objective.query.order_by(Objective.name).all()]
 
 
-def _get_nihr_funded_open_access_choices():
-    return [(f.id, f.name.title()) for f in NihrFundedOpenAccess.query.order_by(NihrFundedOpenAccess.name).all()]
-
-
 def _get_nihr_acknowledgement_choices():
     return [(f.id, f.name.title()) for f in NihrAcknowledgement.query.order_by(NihrAcknowledgement.name).all()]
 
@@ -83,13 +79,11 @@ class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectField('Acknowledgement', default="-1")
-    nihr_funded_open_access_id = SelectField('NIHR Funded Open Access', default='-1')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unknown')] + _get_nihr_acknowledgement_choices()
-        self.nihr_funded_open_access_id.choices = [('0', ''), ('-1', 'Unknown')] + _get_nihr_funded_open_access_choices()
         self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
