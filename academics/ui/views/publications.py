@@ -313,10 +313,6 @@ def publication_full_annual_report_xlsx():
     publication_details = ({
         'Publication Reference': p.vancouverish,
         'DOI': p.doi,
-        'Theme': p.theme,
-        'NIHR Acknowledgement': p.nihr_acknowledgement_yesno,
-        'NIHR Not Acknowledged Detail': p.nihr_acknowledgement_detail,
-        'Open Access': p.is_open_access_yesno,
     } for p in q.all())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
