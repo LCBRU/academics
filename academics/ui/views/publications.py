@@ -1,19 +1,23 @@
-from flask import abort, jsonify, render_template, request, url_for, redirect, flash
+from dateutil.relativedelta import relativedelta
+from flask import (abort, flash, jsonify, redirect, render_template, request,
+                   url_for)
 from flask_login import current_user
 from flask_security import roles_accepted
-from lbrc_flask.forms import SearchForm, FlashingForm
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Objective, ScopusAuthor, ScopusPublication, Subtype, Theme, User
-from .. import blueprint
-from sqlalchemy import or_
-from wtforms import SelectField, MonthField, SelectMultipleField, HiddenField
-from lbrc_flask.export import excel_download, pdf_download
-from lbrc_flask.validators import parse_date_or_none
-from lbrc_flask.json import validate_json
-from dateutil.relativedelta import relativedelta
 from lbrc_flask.database import db
-from lbrc_flask.forms import MultiCheckboxField
+from lbrc_flask.export import excel_download, pdf_download
+from lbrc_flask.forms import FlashingForm, MultiCheckboxField, SearchForm
+from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id
+from lbrc_flask.validators import parse_date_or_none
+from sqlalchemy import or_
+from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
+
+from academics.model import (Academic, Folder, Journal, Keyword,
+                             NihrAcknowledgement, Objective, ScopusAuthor,
+                             ScopusPublication, Subtype, Theme, User)
 from academics.scopus.service import auto_validate
+
+from .. import blueprint
 
 
 def _get_author_choices():
