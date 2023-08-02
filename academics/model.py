@@ -148,10 +148,20 @@ class Subtype(db.Model):
 
 
 class Sponsor(db.Model):
+    NIHR_NAMES = [
+        'NIHR',
+        'National Institute of Health Research',
+        'National Institute of Health and Care Research',
+    ]
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
 
     publications = db.relationship("ScopusPublication", secondary=sponsors__scopus_publications, back_populates="sponsors", collection_class=set)
+
+    @property
+    def is_nihr(self):
+        return any([n in self.name for n in self.NIHR_NAMES])
 
 
 class FundingAcr(db.Model):
@@ -347,29 +357,13 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         themes = [a.theme.name for a in self.academics]
         return max(themes, key=themes.count)
 
-    NIHR_NAMES = [
-        'NIHR',
-        'National Institute of Health Research',
-        'National Institute of Health and Care Research',
-    ]
     @property
     def is_nihr_acknowledged(self):
-        for s in self.sponsors:
-            for n in self.NIHR_NAMES:
-                if n in s.name:
-                    return True
-        return False
+        return any([s.is_nihr for s in self.sponsors])
 
     @property
     def all_nihr_acknowledged(self):
-        if len(self.sponsors) < 1:
-            return False
-
-        for s in self.sponsors:
-            if all([n not in s.name for n in self.NIHR_NAMES]):
-                return False
-
-        return True
+        return len(self.sponsors) > 0 and all([s.is_nihr for s in self.sponsors])
 
 
 class Keyword(db.Model):
