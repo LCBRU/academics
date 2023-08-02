@@ -82,9 +82,12 @@ def report_image():
         )
         .join(Theme, Theme.id == publication_theme.c.theme_id)
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
+        .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
         .group_by(NihrAcknowledgement.name, Theme.name)
         .order_by(NihrAcknowledgement.name, Theme.name)
     )
+
+    print(q)
 
     results = db.session.execute(q).mappings().all()
 
