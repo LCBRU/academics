@@ -1,16 +1,12 @@
-from datetime import date, datetime
-from random import randint
-from tempfile import NamedTemporaryFile
-
-from flask import render_template, request, send_file
-from lbrc_flask.charting import BarChart, BarChartItem, grouped_bar_chart
+from flask import render_template, request
+from lbrc_flask.charting import BarChart, BarChartItem
 from lbrc_flask.database import db
 from lbrc_flask.forms import SearchForm
+from sqlalchemy import func, select
 from wtforms import MonthField, SelectField
-from sqlalchemy import func, select, and_
 
-from academics.model import Theme, ScopusPublication, ScopusAuthor, Academic
-from academics.ui.views.publications import _get_publication_query
+from academics.model import (Academic, NihrAcknowledgement, ScopusAuthor,
+                             ScopusPublication, Theme)
 
 from .. import blueprint
 
@@ -76,7 +72,8 @@ def report_image():
     q = (
         select(
             Theme.name.label('theme_name'),
-            func.count().label('publications')
+            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
+            func.count().label('publications'),
         )
         .join_from(
             ScopusPublication,
@@ -84,20 +81,21 @@ def report_image():
             publication_theme.c.scopus_publication_id == ScopusPublication.id
         )
         .join(Theme, Theme.id == publication_theme.c.theme_id)
-
-        .group_by(Theme.name)
+        .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
+        .group_by(NihrAcknowledgement.name, Theme.name)
+        .order_by(NihrAcknowledgement.name, Theme.name)
     )
 
     results = db.session.execute(q).mappings().all()
 
     items = [BarChartItem(
-        series='BRC',
+        series=p['acknowledgement_name'],
         bucket=p['theme_name'],
         count=p['publications']
     ) for p in results]
 
     bc: BarChart = BarChart(
-        title='Temp Name',
+        title='Theme publications by acknowledgement status',
         items=items,
     )
 
