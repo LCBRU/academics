@@ -84,15 +84,16 @@ def report_image():
             publication_theme.c.scopus_publication_id == ScopusPublication.id
         )
         .join(Theme, Theme.id == publication_theme.c.theme_id)
+
         .group_by(Theme.name)
     )
 
-    results = db.session.execute(q).all()
+    results = db.session.execute(q).mappings().all()
 
     items = [BarChartItem(
         series='BRC',
-        bucket=p[0],
-        count=p[1]
+        bucket=p['theme_name'],
+        count=p['publications']
     ) for p in results]
 
     bc: BarChart = BarChart(
