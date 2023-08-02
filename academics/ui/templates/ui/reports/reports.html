@@ -1,0 +1,29 @@
+{% extends "ui/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search %}
+
+{% block content %}
+<section>
+    <style>
+        img {
+            max-width: 100%!important;
+            height: auto!important;
+        }
+    </style>
+
+    <h1>Reports</h1>
+
+    {{ render_search(search_form, 'ui.reports') }}
+
+    {% set form_fields = dict() %}
+
+    {% for f in search_form | rejectattr("name", "eq", "page") | rejectattr("name", "eq", "csrf_token") | selectattr("data") %}
+        {% if form_fields.update({f.name: f.data}) %} {% endif %}
+    {% endfor %}
+
+    <div id="chart">
+        <img src='{{ url_for("ui.report_image", **form_fields) }}' />
+    </div>
+
+</section>
+
+{% endblock %}

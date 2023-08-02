@@ -3,4 +3,5 @@ __all__ = [
     "publications",
     "folders",
     "objectives",
+    "reports",
 ]
