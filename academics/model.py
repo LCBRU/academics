@@ -150,8 +150,8 @@ class Subtype(db.Model):
 class Sponsor(db.Model):
     NIHR_NAMES = [
         'NIHR',
-        'National Institute of Health Research',
-        'National Institute of Health and Care Research',
+        'National Institute for Health Research',
+        'National Institute for Health and Care Research',
     ]
 
     id = db.Column(db.Integer, primary_key=True)
