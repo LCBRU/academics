@@ -53,15 +53,12 @@ def items(search_form):
     print(search_form.theme_id.data)
 
     if search_form.has_value('theme_id'):
-        print('-'*100)
-        return brc_statuses()
-    else:
-        print('*'*100)
         return theme_statuses(search_form.theme_id.data)
+    else:
+        return brc_statuses()
 
 
 def brc_statuses():
-    print('A')
     q = (ScopusPublication.query
         .with_entities(
             ScopusPublication.id,
@@ -109,8 +106,6 @@ def brc_statuses():
     )
 
     results = db.session.execute(q).mappings().all()
-
-    print('B')
 
     return [BarChartItem(
         series=p['acknowledgement_name'],
