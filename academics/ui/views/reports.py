@@ -12,7 +12,6 @@ from .. import blueprint
 
 
 class PublicationSearchForm(SearchForm):
-    subtype_id = HiddenField()
     theme_id = SelectField('Theme')
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
@@ -20,7 +19,6 @@ class PublicationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
@@ -58,6 +56,7 @@ def report_image():
             func.row_number().over(partition_by=ScopusPublication.id).label('priority')
         ).join(ScopusPublication.scopus_authors)
         .join(ScopusAuthor.academic)
+        .where(ScopusPublication.subtype.in_(Subtype.get_validation_types()))
         .group_by(ScopusPublication.id, Academic.theme_id)
         .order_by(ScopusPublication.id, Academic.theme_id, func.count().desc())
     ).alias()
