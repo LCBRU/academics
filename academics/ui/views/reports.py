@@ -76,22 +76,21 @@ def get_report_defs(search_form):
 def report_image():
     search_form = get_search_form()
 
+    if search_form.has_value('academic_id'):
+        title = 'Author Publications by Acknowledgement Status'
+        publications = get_publication_by_main_academic(search_form.academic_id.data)
+    else:
+        title = 'Theme Publications by Acknowledgement Status'
+        publications = get_publication_by_main_theme()
+    
+    items = theme_statuses(publications) 
+
     bc: BarChart = BarChart(
-        title='Theme publications by acknowledgement status',
+        title=title,
         items=items(search_form),
     )
 
     return bc.send_as_attachment()
-
-
-def items(search_form):
-    if search_form.has_value('theme_id'):
-        publications = get_publication_by_main_academic(search_form.academic_id.data)
-    else:
-        publications = get_publication_by_main_theme()
-
-
-    return theme_statuses(publications)
 
 
 def get_publication_theme_query():
