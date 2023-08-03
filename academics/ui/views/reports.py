@@ -85,7 +85,7 @@ def get_publication_by_main_theme(search_form):
 def theme_statuses(publication_theme):
     q = (
         select(
-            publication_theme.theme_name,
+            publication_theme.c.theme_name,
             func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
             func.count().label('publications'),
         )
@@ -95,8 +95,8 @@ def theme_statuses(publication_theme):
             publication_theme.c.scopus_publication_id == ScopusPublication.id
         )
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
-        .group_by(NihrAcknowledgement.name, publication_theme.theme_name)
-        .order_by(NihrAcknowledgement.name, publication_theme.theme_name)
+        .group_by(NihrAcknowledgement.name, publication_theme.c.theme_name)
+        .order_by(NihrAcknowledgement.name, publication_theme.c.theme_name)
     )
 
     results = db.session.execute(q).mappings().all()
