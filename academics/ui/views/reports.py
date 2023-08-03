@@ -73,7 +73,6 @@ def report_image():
 
 
 def items(search_form):
-
     if search_form.has_value('theme_id'):
         publications = get_publication_by_main_academic(search_form.theme_id.data, search_form.academic_id.data)
     else:
@@ -83,11 +82,12 @@ def items(search_form):
     return theme_statuses(publications)
 
 
-def get_publication_by_main_theme():
+def get_publication_theme_query():
     q = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
-            Theme.name.label('bucket'),
+            Theme.id.label('theme_id'),
+            Theme.name.label('theme_name'),
             func.row_number().over(partition_by=ScopusPublication.id).label('priority')
         )
         .join(ScopusPublication.scopus_authors)
@@ -95,8 +95,8 @@ def get_publication_by_main_theme():
         .join(Theme, Theme.id == Academic.theme_id)
         .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
         .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
-        .group_by(ScopusPublication.id, Theme.name)
-        .order_by(ScopusPublication.id, Theme.name, func.count().desc())
+        .group_by(ScopusPublication.id, Theme.id, Theme.name)
+        .order_by(ScopusPublication.id, Theme.id, Theme.name, func.count().desc())
     )
 
     publication_themes = q.alias()
@@ -104,10 +104,24 @@ def get_publication_by_main_theme():
     return (
         select(
             publication_themes.c.scopus_publication_id,
-            publication_themes.c.bucket
+            publication_themes.c.theme_id,
+            publication_themes.c.theme_name,
         )
         .select_from(publication_themes)
         .where(publication_themes.c.priority == 1)
+    ).alias()
+
+
+
+def get_publication_by_main_theme():
+    q = get_publication_theme_query()
+
+    return (
+        select(
+            q.c.scopus_publication_id,
+            q.c.theme_name.label('bucket')
+        )
+        .select_from(q)
     ).alias()
 
 
