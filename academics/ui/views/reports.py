@@ -88,6 +88,14 @@ def get_publication_by_main_theme():
 
 
 def get_publication_by_main_academic(theme_id):
+    academic_publications = (
+        select(
+            ScopusAuthor.academic_id,
+            ScopusPublication.id.label('scopus_publication_id')
+        )
+        .join(ScopusPublication.scopus_authors)
+    ).alias()
+
     q = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
@@ -96,6 +104,7 @@ def get_publication_by_main_academic(theme_id):
         )
         .join(ScopusPublication.scopus_authors)
         .join(ScopusAuthor.academic)
+        .join(academic_publications, academic_publications.c.academic_id == Academic.id) 
         .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
         .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
         .where(Academic.theme_id == theme_id)
