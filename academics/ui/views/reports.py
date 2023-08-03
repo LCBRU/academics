@@ -58,7 +58,7 @@ def get_publication_by_main_theme(search_form):
     q = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
-            Theme.name.label('theme_name'),
+            Theme.name.label('bucket'),
             func.row_number().over(partition_by=ScopusPublication.id).label('priority')
         )
         .join(ScopusPublication.scopus_authors)
@@ -75,7 +75,7 @@ def get_publication_by_main_theme(search_form):
     return (
         select(
             publication_themes.c.scopus_publication_id,
-            publication_themes.c.theme_name
+            publication_themes.c.bucket
         )
         .select_from(publication_themes)
         .where(publication_themes.c.priority == 1)
@@ -85,7 +85,7 @@ def get_publication_by_main_theme(search_form):
 def theme_statuses(publication_theme):
     q = (
         select(
-            publication_theme.c.theme_name,
+            publication_theme.c.bucket,
             func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
             func.count().label('publications'),
         )
@@ -95,14 +95,14 @@ def theme_statuses(publication_theme):
             publication_theme.c.scopus_publication_id == ScopusPublication.id
         )
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
-        .group_by(NihrAcknowledgement.name, publication_theme.c.theme_name)
-        .order_by(NihrAcknowledgement.name, publication_theme.c.theme_name)
+        .group_by(NihrAcknowledgement.name, publication_theme.c.bucket)
+        .order_by(NihrAcknowledgement.name, publication_theme.c.bucket)
     )
 
     results = db.session.execute(q).mappings().all()
 
     return [BarChartItem(
         series=p['acknowledgement_name'],
-        bucket=p['theme_name'],
+        bucket=p['bucket'],
         count=p['publications']
     ) for p in results]
