@@ -140,7 +140,7 @@ def get_publication_by_main_academic(theme_id, academic_id):
 
     return (
         select(
-            publication_themes.c.scopus_publication_id,1
+            publication_themes.c.scopus_publication_id,
             publication_themes.c.bucket
         )
         .select_from(publication_themes)
