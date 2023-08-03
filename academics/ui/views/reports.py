@@ -3,15 +3,16 @@ from lbrc_flask.charting import BarChart, BarChartItem
 from lbrc_flask.database import db
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
-from wtforms import MonthField, SelectField
+from wtforms import MonthField, SelectField, HiddenField
 
 from academics.model import (Academic, NihrAcknowledgement, ScopusAuthor,
-                             ScopusPublication, Theme)
+                             ScopusPublication, Theme, Subtype)
 
 from .. import blueprint
 
 
 class PublicationSearchForm(SearchForm):
+    subtype_id = HiddenField()
     theme_id = SelectField('Theme')
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
@@ -19,6 +20,7 @@ class PublicationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
