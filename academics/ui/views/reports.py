@@ -99,7 +99,7 @@ def get_publication_theme_query():
             ScopusPublication.id.label('scopus_publication_id'),
             Theme.id.label('theme_id'),
             Theme.name.label('theme_name'),
-            func.row_number().over(partition_by=ScopusPublication.id).label('priority')
+            func.row_number().over(partition_by=ScopusPublication.id, order_by=[func.count().desc(), Theme.id]).label('priority')
         )
         .join(ScopusPublication.scopus_authors)
         .join(ScopusAuthor.academic)
@@ -141,7 +141,7 @@ def get_publication_author_query():
             publication_themes.c.theme_id,
             Academic.id.label('academic_id'),
             func.concat(Academic.first_name, ' ', Academic.last_name).label('academic_name'),
-            func.row_number().over(partition_by=publication_themes.c.scopus_publication_id).label('priority')
+            func.row_number().over(partition_by=publication_themes.c.scopus_publication_id, order_by=[func.count().desc(), Academic.id]).label('priority')
         )
         .select_from(publication_themes)
         .join(academic_publications, academic_publications.c.scopus_publication_id == publication_themes.c.scopus_publication_id)
