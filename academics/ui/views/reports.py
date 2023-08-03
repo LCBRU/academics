@@ -176,18 +176,20 @@ def get_publication_author_query():
 
 
 def get_publication_by_main_theme(theme_id=None):
-    q = get_publication_theme_query()
+    publication_themes = get_publication_theme_query()
+
+    q = (
+        select(
+            publication_themes.c.scopus_publication_id,
+            publication_themes.c.theme_name.label('bucket')
+        )
+        .select_from(publication_themes)
+    )
 
     if theme_id:
-        q = q.where(q.c.theme_id == theme_id)
+        q = q.where(publication_themes.c.theme_id == theme_id)
 
-    return (
-        select(
-            q.c.scopus_publication_id,
-            q.c.theme_name.label('bucket')
-        )
-        .select_from(q)
-    ).alias()
+    return q.alias()
 
 
 def get_publication_by_main_academic(academic_id):
