@@ -39,11 +39,22 @@ def reports():
 
 
 def get_report_defs(search_form):
-    report_defs = [{
-        'theme_id': search_form.theme_id.data,
-        'publication_date_start': search_form.publication_date_start.data,
-        'publication_date_end': search_form.publication_date_end.data,
-    }]
+    report_defs = []
+
+    if search_form.has_value('theme_id'):
+        for a in Academic.query.filter(Academic.theme_id == search_form.theme_id.data).all():
+            report_defs.append({
+                'theme_id': search_form.theme_id.data,
+                'academic_id': a.id,
+                'publication_date_start': search_form.publication_date_start.data,
+                'publication_date_end': search_form.publication_date_end.data,
+            })
+
+    else:
+        report_defs.append({
+            'publication_date_start': search_form.publication_date_start.data,
+            'publication_date_end': search_form.publication_date_end.data,
+        })
     
     return report_defs
 
