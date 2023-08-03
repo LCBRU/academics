@@ -35,7 +35,13 @@ def reports():
 
     print(search_form.data)
 
-    return render_template("ui/reports/reports.html", search_form=search_form)
+    report_defs = [{
+        'theme_id': search_form.theme_id.data,
+        'publication_start_date': search_form.publication_start_date.data,
+        'publication_end_date': search_form.publication_end_date.data,
+    }]
+
+    return render_template("ui/reports/reports.html", search_form=search_form, report_defs=report_defs)
 
 
 @blueprint.route("/reports/image")

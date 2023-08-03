@@ -9,7 +9,7 @@
             height: auto!important;
         }
     </style>
-
+ 
     <h1>Reports</h1>
 
     {{ render_search(search_form, 'ui.reports') }}
@@ -21,7 +21,10 @@
     {% endfor %}
 
     <div id="chart">
-        <img src='{{ url_for("ui.report_image", **form_fields) }}' />
+        {% for r in report_defs %}
+            <img src='{{ url_for("ui.report_image", **r) }}' />
+        {% endfor %}
+        
     </div>
 
 </section>
