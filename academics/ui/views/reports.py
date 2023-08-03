@@ -49,7 +49,7 @@ def report_image():
 
 
 def items(search_form):
-    publication_theme = get_publication_themes()
+    publication_theme = get_publication_themes(search_form)
 
     if search_form.has_value('theme_id'):
         return theme_statuses(publication_theme, search_form.theme_id.data)
@@ -57,8 +57,8 @@ def items(search_form):
         return brc_statuses(publication_theme)
 
 
-def get_publication_themes():
-    publication_themes = (
+def get_publication_themes(search_form):
+    q = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
             Academic.theme_id,
@@ -68,7 +68,9 @@ def get_publication_themes():
         .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
         .group_by(ScopusPublication.id, Academic.theme_id)
         .order_by(ScopusPublication.id, Academic.theme_id, func.count().desc())
-    ).alias()
+    )
+
+    publication_themes = q.alias()
 
     return (
         select(
