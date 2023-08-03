@@ -49,23 +49,15 @@ def report_image():
 
 
 def items(search_form):
-    print(search_form.has_value('theme_id'))
-    print(search_form.theme_id.data)
+    publication_theme = get_publication_themes()
 
     if search_form.has_value('theme_id'):
-        return theme_statuses(search_form.theme_id.data)
+        return theme_statuses(publication_theme, search_form.theme_id.data)
     else:
-        return brc_statuses()
+        return brc_statuses(publication_theme)
 
 
-def brc_statuses():
-    q = (ScopusPublication.query
-        .with_entities(
-            ScopusPublication.id,
-            func.row_number().over(partition_by=ScopusPublication.id)
-        )
-    )
-
+def get_publication_themes():
     publication_themes = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
@@ -78,7 +70,7 @@ def brc_statuses():
         .order_by(ScopusPublication.id, Academic.theme_id, func.count().desc())
     ).alias()
 
-    publication_theme = (
+    return (
         select(
             publication_themes.c.scopus_publication_id,
             publication_themes.c.theme_id
@@ -87,6 +79,8 @@ def brc_statuses():
         .where(publication_themes.c.priority == 1)
     ).alias()
 
+
+def brc_statuses(publication_theme):
     q = (
         select(
             Theme.name.label('theme_name'),
@@ -114,35 +108,7 @@ def brc_statuses():
     ) for p in results]
 
 
-def theme_statuses(theme_id):
-    q = (ScopusPublication.query
-        .with_entities(
-            ScopusPublication.id,
-            func.row_number().over(partition_by=ScopusPublication.id)
-        )
-    )
-
-    publication_themes = (
-        select(
-            ScopusPublication.id.label('scopus_publication_id'),
-            Academic.theme_id,
-            func.row_number().over(partition_by=ScopusPublication.id).label('priority')
-        ).join(ScopusPublication.scopus_authors)
-        .join(ScopusAuthor.academic)
-        .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
-        .group_by(ScopusPublication.id, Academic.theme_id)
-        .order_by(ScopusPublication.id, Academic.theme_id, func.count().desc())
-    ).alias()
-
-    publication_theme = (
-        select(
-            publication_themes.c.scopus_publication_id,
-            publication_themes.c.theme_id
-        )
-        .select_from(publication_themes)
-        .where(publication_themes.c.priority == 1)
-    ).alias()
-
+def theme_statuses(publication_theme, theme_id):
     q = (
         select(
             Theme.name.label('theme_name'),
