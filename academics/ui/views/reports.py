@@ -43,7 +43,18 @@ def get_report_defs(search_form):
     report_defs = []
 
     if search_form.has_value('theme_id'):
-        for a in Academic.query.filter(Academic.theme_id == search_form.theme_id.data).all():
+
+        publication_authors = get_publication_author_query()
+
+        q = (
+            select(
+                publication_authors.c.academic_id
+            )
+            .select_from(publication_authors)
+            .group_by(publication_authors.c.academic_id)
+        )
+
+        for a in db.session.execute(q).mappings().all():
             report_defs.append({
                 'theme_id': search_form.theme_id.data,
                 'academic_id': a.id,
