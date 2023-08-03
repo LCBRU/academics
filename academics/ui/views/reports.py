@@ -12,6 +12,7 @@ from .. import blueprint
 
 
 class PublicationSearchForm(SearchForm):
+    total = SelectField('Total', choices=[('Theme', 'Theme'), ('Author', 'Author')])
     theme_id = SelectField('Theme')
     academic_id = HiddenField()
     publication_date_start = MonthField('Publication Start Date')
@@ -42,28 +43,33 @@ def reports():
 def get_report_defs(search_form):
     report_defs = []
 
-    if search_form.has_value('theme_id'):
+    if search_form.total.data == 'Author':
 
         publication_authors = get_publication_author_query()
 
         q = (
-            select(
-                publication_authors.c.academic_id
-            )
+            select(publication_authors.c.academic_id)
             .select_from(publication_authors)
-            .where(publication_authors.c.theme_id == search_form.theme_id.data)
+            
             .group_by(publication_authors.c.academic_id)
             .order_by(publication_authors.c.academic_name)
         )
 
+        if search_form.has_value('theme_id'):
+            q = q.where(publication_authors.c.theme_id == search_form.theme_id.data)
+
         for a in db.session.execute(q).mappings().all():
             report_defs.append({
-                'theme_id': search_form.theme_id.data,
                 'academic_id': a['academic_id'],
                 'publication_date_start': search_form.publication_date_start.data,
                 'publication_date_end': search_form.publication_date_end.data,
             })
-
+    elif search_form.has_value('theme_id'):
+        report_defs.append({
+            'theme_id': search_form.theme_id.data,
+            'publication_date_start': search_form.publication_date_start.data,
+            'publication_date_end': search_form.publication_date_end.data,
+        })
     else:
         report_defs.append({
             'publication_date_start': search_form.publication_date_start.data,
@@ -80,11 +86,14 @@ def report_image():
     if search_form.has_value('academic_id'):
         title = 'Author Publications by Acknowledgement Status'
         publications = get_publication_by_main_academic(search_form.academic_id.data)
+    elif search_form.has_value('theme_id'):
+        title = 'Theme Publications by Acknowledgement Status'
+        publications = get_publication_by_main_theme(search_form.theme_id.data)
     else:
         title = 'Theme Publications by Acknowledgement Status'
         publications = get_publication_by_main_theme()
     
-    items = theme_statuses(publications) 
+    items = by_acknowledge_status(publications) 
 
     bc: BarChart = BarChart(
         title=title,
@@ -166,8 +175,11 @@ def get_publication_author_query():
     ).alias()
 
 
-def get_publication_by_main_theme():
+def get_publication_by_main_theme(theme_id=None):
     q = get_publication_theme_query()
+
+    if theme_id:
+        q = q.where(q.c.theme_id == theme_id)
 
     return (
         select(
@@ -191,7 +203,7 @@ def get_publication_by_main_academic(academic_id):
     ).alias()
 
 
-def theme_statuses(publications):
+def by_acknowledge_status(publications):
     q = (
         select(
             publications.c.bucket,
