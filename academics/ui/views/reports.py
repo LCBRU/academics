@@ -49,6 +49,9 @@ def report_image():
 
 
 def items(search_form):
+    print(search_form.has_value('theme_id'))
+    print(search_form.theme_id.data)
+
     if search_form.has_value('theme_id'):
         return brc_statuses()
     else:
