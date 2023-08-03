@@ -74,7 +74,7 @@ def report_image():
 
 def items(search_form):
     if search_form.has_value('theme_id'):
-        publications = get_publication_by_main_academic(search_form.theme_id.data, search_form.academic_id.data)
+        publications = get_publication_by_main_academic(search_form.academic_id.data)
     else:
         publications = get_publication_by_main_theme()
 
