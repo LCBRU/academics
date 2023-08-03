@@ -33,6 +33,8 @@ def get_search_form():
 def reports():
     search_form = get_search_form()
 
+    print(search_form.data)
+
     return render_template("ui/reports/reports.html", search_form=search_form)
 
 
