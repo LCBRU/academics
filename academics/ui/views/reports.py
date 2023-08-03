@@ -59,6 +59,7 @@ def items(search_form):
 
 
 def brc_statuses():
+    print('A')
     q = (ScopusPublication.query
         .with_entities(
             ScopusPublication.id,
@@ -106,6 +107,8 @@ def brc_statuses():
     )
 
     results = db.session.execute(q).mappings().all()
+
+    print('B')
 
     return [BarChartItem(
         series=p['acknowledgement_name'],
