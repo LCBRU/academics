@@ -53,8 +53,10 @@ def items(search_form):
     print(search_form.theme_id.data)
 
     if search_form.has_value('theme_id'):
+        print('-'*100)
         return brc_statuses()
     else:
+        print('*'*100)
         return theme_statuses(search_form.theme_id.data)
 
 
