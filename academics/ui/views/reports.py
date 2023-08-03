@@ -49,12 +49,17 @@ def report_image():
 
 
 def items(search_form):
-    publication_theme = get_publication_by_main_theme(search_form)
 
-    return theme_statuses(publication_theme)
+    if search_form.has_value('theme_id'):
+        publications = get_publication_by_main_theme()
+    else:
+        publications = get_publication_by_main_academic(search_form.theme_id.data)
 
 
-def get_publication_by_main_theme(search_form):
+    return theme_statuses(publications)
+
+
+def get_publication_by_main_theme():
     q = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
@@ -82,21 +87,49 @@ def get_publication_by_main_theme(search_form):
     ).alias()
 
 
-def theme_statuses(publication_theme):
+def get_publication_by_main_academic(theme_id):
     q = (
         select(
-            publication_theme.c.bucket,
+            ScopusPublication.id.label('scopus_publication_id'),
+            func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket'),
+            func.row_number().over(partition_by=ScopusPublication.id).label('priority')
+        )
+        .join(ScopusPublication.scopus_authors)
+        .join(ScopusAuthor.academic)
+        .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
+        .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
+        .where(Academic.theme_id == theme_id)
+        .group_by(ScopusPublication.id, func.concat(Academic.first_name, ' ', Academic.last_name))
+        .order_by(ScopusPublication.id, func.concat(Academic.first_name, ' ', Academic.last_name), func.count().desc())
+    )
+
+    publication_themes = q.alias()
+
+    return (
+        select(
+            publication_themes.c.scopus_publication_id,
+            publication_themes.c.bucket
+        )
+        .select_from(publication_themes)
+        .where(publication_themes.c.priority == 1)
+    ).alias()
+
+
+def theme_statuses(publications):
+    q = (
+        select(
+            publications.c.bucket,
             func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
             func.count().label('publications'),
         )
         .join_from(
             ScopusPublication,
-            publication_theme,
-            publication_theme.c.scopus_publication_id == ScopusPublication.id
+            publications,
+            publications.c.scopus_publication_id == ScopusPublication.id
         )
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
-        .group_by(NihrAcknowledgement.name, publication_theme.c.bucket)
-        .order_by(NihrAcknowledgement.name, publication_theme.c.bucket)
+        .group_by(NihrAcknowledgement.name, publications.c.bucket)
+        .order_by(NihrAcknowledgement.name, publications.c.bucket)
     )
 
     results = db.session.execute(q).mappings().all()
