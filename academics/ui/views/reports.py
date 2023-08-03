@@ -113,6 +113,44 @@ def get_publication_theme_query():
 
 
 
+def get_publication_author_query():
+    academic_publications = (
+        select(
+            ScopusAuthor.academic_id,
+            ScopusPublication.id.label('scopus_publication_id')
+        )
+        .join(ScopusPublication.scopus_authors)
+    ).alias()
+    
+    publication_themes = get_publication_theme_query()
+
+    q = (
+        select(
+            q.c.scopus_publication_id,
+            Academic.id.label('academic_id'),
+            func.concat(Academic.first_name, ' ', Academic.last_name).label('academic_name'),
+            func.row_number().over(partition_by=publication_themes.c.scopus_publication_id).label('priority')
+        )
+        .select_from(publication_themes)
+        .join(academic_publications, academic_publications.c.academic_id == Academic.id) 
+        .where(Academic.theme_id == publication_themes.c.theme_id)
+        .group_by(publication_themes.c.scopus_publication_id, Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name))
+        .order_by(publication_themes.c.scopus_publication_id, Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name), func.count().desc())
+    )
+
+    publication_themes = q.alias()
+
+    return (
+        select(
+            publication_themes.c.scopus_publication_id,
+            publication_themes.c.academic_id,
+            publication_themes.c.academic_name
+        )
+        .select_from(publication_themes)
+        .where(publication_themes.c.priority == 1)
+    ).alias()
+
+
 def get_publication_by_main_theme():
     q = get_publication_theme_query()
 
@@ -125,41 +163,16 @@ def get_publication_by_main_theme():
     ).alias()
 
 
-def get_publication_by_main_academic(theme_id, academic_id):
-    academic_publications = (
-        select(
-            ScopusAuthor.academic_id,
-            ScopusPublication.id.label('scopus_publication_id')
-        )
-        .join(ScopusPublication.scopus_authors)
-    ).alias()
-
-    q = (
-        select(
-            ScopusPublication.id.label('scopus_publication_id'),
-            func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket'),
-            func.row_number().over(partition_by=ScopusPublication.id).label('priority')
-        )
-        .join(ScopusPublication.scopus_authors)
-        .join(ScopusAuthor.academic)
-        .join(academic_publications, academic_publications.c.academic_id == Academic.id) 
-        .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
-        .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
-        .where(Academic.theme_id == theme_id)
-        .where(Academic.id == academic_id)
-        .group_by(ScopusPublication.id, func.concat(Academic.first_name, ' ', Academic.last_name))
-        .order_by(ScopusPublication.id, func.concat(Academic.first_name, ' ', Academic.last_name), func.count().desc())
-    )
-
-    publication_themes = q.alias()
+def get_publication_by_main_academic(academic_id):
+    q = get_publication_theme_query()
 
     return (
         select(
-            publication_themes.c.scopus_publication_id,
-            publication_themes.c.bucket
+            q.c.scopus_publication_id,
+            q.c.academic_name.label('bucket')
         )
-        .select_from(publication_themes)
-        .where(publication_themes.c.priority == 1)
+        .select_from(q)
+        .where(q.c.academic_id == academic_id)
     ).alias()
 
 
