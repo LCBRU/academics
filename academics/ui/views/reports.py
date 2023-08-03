@@ -87,7 +87,7 @@ def report_image():
 
     bc: BarChart = BarChart(
         title=title,
-        items=items(search_form),
+        items=items,
     )
 
     return bc.send_as_attachment()
