@@ -51,10 +51,7 @@ def report_image():
 def items(search_form):
     publication_theme = get_publication_themes(search_form)
 
-    if search_form.has_value('theme_id'):
-        return theme_statuses(publication_theme, search_form.theme_id.data)
-    else:
-        return brc_statuses(publication_theme)
+    return brc_statuses(publication_theme)
 
 
 def get_publication_themes(search_form):
@@ -69,6 +66,9 @@ def get_publication_themes(search_form):
         .group_by(ScopusPublication.id, Academic.theme_id)
         .order_by(ScopusPublication.id, Academic.theme_id, func.count().desc())
     )
+
+    if search_form.has_value('theme_id'):
+        q.where(Theme.id == search_form.theme_id.data)
 
     publication_themes = q.alias()
 
@@ -97,35 +97,6 @@ def brc_statuses(publication_theme):
         .join(Theme, Theme.id == publication_theme.c.theme_id)
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
         .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
-        .group_by(NihrAcknowledgement.name, Theme.name)
-        .order_by(NihrAcknowledgement.name, Theme.name)
-    )
-
-    results = db.session.execute(q).mappings().all()
-
-    return [BarChartItem(
-        series=p['acknowledgement_name'],
-        bucket=p['theme_name'],
-        count=p['publications']
-    ) for p in results]
-
-
-def theme_statuses(publication_theme, theme_id):
-    q = (
-        select(
-            Theme.name.label('theme_name'),
-            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
-            func.count().label('publications'),
-        )
-        .join_from(
-            ScopusPublication,
-            publication_theme,
-            publication_theme.c.scopus_publication_id == ScopusPublication.id
-        )
-        .join(Theme, Theme.id == publication_theme.c.theme_id)
-        .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
-        .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
-        .where(Theme.id == theme_id)
         .group_by(NihrAcknowledgement.name, Theme.name)
         .order_by(NihrAcknowledgement.name, Theme.name)
     )
