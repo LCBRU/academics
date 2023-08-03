@@ -164,7 +164,7 @@ def get_publication_by_main_theme():
 
 
 def get_publication_by_main_academic(academic_id):
-    q = get_publication_theme_query()
+    q = get_publication_author_query()
 
     return (
         select(
