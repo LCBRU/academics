@@ -56,7 +56,7 @@ def report_image():
             func.row_number().over(partition_by=ScopusPublication.id).label('priority')
         ).join(ScopusPublication.scopus_authors)
         .join(ScopusAuthor.academic)
-        .where(ScopusPublication.subtype.in_(Subtype.get_validation_types()))
+        .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
         .group_by(ScopusPublication.id, Academic.theme_id)
         .order_by(ScopusPublication.id, Academic.theme_id, func.count().desc())
     ).alias()
