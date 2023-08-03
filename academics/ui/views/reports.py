@@ -126,7 +126,7 @@ def get_publication_author_query():
 
     q = (
         select(
-            q.c.scopus_publication_id,
+            publication_themes.c.scopus_publication_id,
             Academic.id.label('academic_id'),
             func.concat(Academic.first_name, ' ', Academic.last_name).label('academic_name'),
             func.row_number().over(partition_by=publication_themes.c.scopus_publication_id).label('priority')
