@@ -53,6 +53,7 @@ def get_report_defs(search_form):
             .select_from(publication_authors)
             .where(publication_authors.c.theme_id == search_form.theme_id.data)
             .group_by(publication_authors.c.academic_id)
+            .order_by(publication_authors.c.academic_name)
         )
 
         for a in db.session.execute(q).mappings().all():
