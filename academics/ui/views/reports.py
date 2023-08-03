@@ -197,14 +197,11 @@ def theme_statuses(publications):
             func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
             func.count().label('publications'),
         )
-        .join_from(
-            ScopusPublication,
-            publications,
-            publications.c.scopus_publication_id == ScopusPublication.id
-        )
+        .select_from(ScopusPublication)
+        .join(publications, publications.c.scopus_publication_id == ScopusPublication.id)
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
-        .group_by(NihrAcknowledgement.name, publications.c.bucket)
-        .order_by(NihrAcknowledgement.name, publications.c.bucket)
+        .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
+        .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
     )
 
     results = db.session.execute(q).mappings().all()
