@@ -51,7 +51,7 @@ def report_image():
 def items(search_form):
     publication_theme = get_publication_themes(search_form)
 
-    return brc_statuses(publication_theme)
+    return theme_statuses(publication_theme)
 
 
 def get_publication_themes(search_form):
@@ -82,7 +82,7 @@ def get_publication_themes(search_form):
     ).alias()
 
 
-def brc_statuses(publication_theme):
+def theme_statuses(publication_theme):
     q = (
         select(
             Theme.name.label('theme_name'),
