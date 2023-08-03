@@ -40,8 +40,15 @@ def reports():
 def report_image():
     search_form = get_search_form()
 
-    
+    bc: BarChart = BarChart(
+        title='Theme publications by acknowledgement status',
+        items=items(search_form),
+    )
 
+    return bc.send_as_attachment()
+
+
+def items(search_form):
     q = (ScopusPublication.query
         .with_entities(
             ScopusPublication.id,
@@ -88,19 +95,10 @@ def report_image():
         .order_by(NihrAcknowledgement.name, Theme.name)
     )
 
-    print(q)
-
     results = db.session.execute(q).mappings().all()
 
-    items = [BarChartItem(
+    return [BarChartItem(
         series=p['acknowledgement_name'],
         bucket=p['theme_name'],
         count=p['publications']
     ) for p in results]
-
-    bc: BarChart = BarChart(
-        title='Theme publications by acknowledgement status',
-        items=items,
-    )
-
-    return bc.send_as_attachment()
