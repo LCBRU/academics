@@ -49,33 +49,33 @@ def report_image():
 
 
 def items(search_form):
-    publication_theme = get_publication_themes(search_form)
+    publication_theme = get_publication_by_main_theme(search_form)
 
     return theme_statuses(publication_theme)
 
 
-def get_publication_themes(search_form):
+def get_publication_by_main_theme(search_form):
     q = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
-            Academic.theme_id,
+            Theme.name.label('theme_name'),
             func.row_number().over(partition_by=ScopusPublication.id).label('priority')
-        ).join(ScopusPublication.scopus_authors)
+        )
+        .join(ScopusPublication.scopus_authors)
         .join(ScopusAuthor.academic)
+        .join(Theme, Theme.id == Academic.theme_id)
         .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
-        .group_by(ScopusPublication.id, Academic.theme_id)
-        .order_by(ScopusPublication.id, Academic.theme_id, func.count().desc())
+        .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
+        .group_by(ScopusPublication.id, Theme.name)
+        .order_by(ScopusPublication.id, Theme.name, func.count().desc())
     )
-
-    if search_form.has_value('theme_id'):
-        q = q.where(Academic.theme_id == search_form.theme_id.data)
 
     publication_themes = q.alias()
 
     return (
         select(
             publication_themes.c.scopus_publication_id,
-            publication_themes.c.theme_id
+            publication_themes.c.theme_name
         )
         .select_from(publication_themes)
         .where(publication_themes.c.priority == 1)
@@ -85,7 +85,7 @@ def get_publication_themes(search_form):
 def theme_statuses(publication_theme):
     q = (
         select(
-            Theme.name.label('theme_name'),
+            publication_theme.theme_name,
             func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
             func.count().label('publications'),
         )
@@ -94,11 +94,9 @@ def theme_statuses(publication_theme):
             publication_theme,
             publication_theme.c.scopus_publication_id == ScopusPublication.id
         )
-        .join(Theme, Theme.id == publication_theme.c.theme_id)
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
-        .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
-        .group_by(NihrAcknowledgement.name, Theme.name)
-        .order_by(NihrAcknowledgement.name, Theme.name)
+        .group_by(NihrAcknowledgement.name, publication_theme.theme_name)
+        .order_by(NihrAcknowledgement.name, publication_theme.theme_name)
     )
 
     results = db.session.execute(q).mappings().all()
