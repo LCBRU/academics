@@ -51,6 +51,7 @@ def get_report_defs(search_form):
                 publication_authors.c.academic_id
             )
             .select_from(publication_authors)
+            .where(publication_authors.c.theme_id == search_form.theme_id.data)
             .group_by(publication_authors.c.academic_id)
         )
 
@@ -138,6 +139,7 @@ def get_publication_author_query():
     q = (
         select(
             publication_themes.c.scopus_publication_id,
+            publication_themes.c.theme_id,
             Academic.id.label('academic_id'),
             func.concat(Academic.first_name, ' ', Academic.last_name).label('academic_name'),
             func.row_number().over(partition_by=publication_themes.c.scopus_publication_id).label('priority')
