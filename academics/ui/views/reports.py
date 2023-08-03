@@ -152,16 +152,17 @@ def get_publication_author_query():
         .order_by(publication_themes.c.scopus_publication_id, Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name), func.count().desc())
     )
 
-    publication_themes = q.alias()
+    publication_authors = q.alias()
 
     return (
         select(
-            publication_themes.c.scopus_publication_id,
-            publication_themes.c.academic_id,
-            publication_themes.c.academic_name
+            publication_authors.c.scopus_publication_id,
+            publication_authors.c.theme_id,
+            publication_authors.c.academic_id,
+            publication_authors.c.academic_name
         )
-        .select_from(publication_themes)
-        .where(publication_themes.c.priority == 1)
+        .select_from(publication_authors)
+        .where(publication_authors.c.priority == 1)
     ).alias()
 
 
