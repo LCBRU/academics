@@ -68,7 +68,7 @@ def get_publication_themes(search_form):
     )
 
     if search_form.has_value('theme_id'):
-        q = q.where(Theme.id == search_form.theme_id.data)
+        q = q.where(Academic.theme_id == search_form.theme_id.data)
 
     publication_themes = q.alias()
 
