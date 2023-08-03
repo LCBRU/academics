@@ -57,7 +57,7 @@ def get_report_defs(search_form):
         for a in db.session.execute(q).mappings().all():
             report_defs.append({
                 'theme_id': search_form.theme_id.data,
-                'academic_id': a.id,
+                'academic_id': a['academic_id'],
                 'publication_date_start': search_form.publication_date_start.data,
                 'publication_date_end': search_form.publication_date_end.data,
             })
