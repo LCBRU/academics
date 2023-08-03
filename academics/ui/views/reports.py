@@ -37,8 +37,8 @@ def reports():
 
     report_defs = [{
         'theme_id': search_form.theme_id.data,
-        'publication_start_date': search_form.publication_start_date.data,
-        'publication_end_date': search_form.publication_end_date.data,
+        'publication_date_start': search_form.publication_date_start.data,
+        'publication_date_end': search_form.publication_date_end.data,
     }]
 
     return render_template("ui/reports/reports.html", search_form=search_form, report_defs=report_defs)
