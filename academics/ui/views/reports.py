@@ -107,7 +107,7 @@ def get_publication_theme_query():
         .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
         .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
         .group_by(ScopusPublication.id, Theme.id, Theme.name)
-        .order_by(ScopusPublication.id, Theme.id, Theme.name, func.count().desc())
+        .order_by(ScopusPublication.id, func.count().desc(), Theme.id, Theme.name)
     )
 
     publication_themes = q.alias()
@@ -148,7 +148,7 @@ def get_publication_author_query():
         .join(Academic, Academic.id == academic_publications.c.academic_id)
         .where(Academic.theme_id == publication_themes.c.theme_id)
         .group_by(publication_themes.c.scopus_publication_id, Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name))
-        .order_by(publication_themes.c.scopus_publication_id, Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name), func.count().desc())
+        .order_by(publication_themes.c.scopus_publication_id, func.count().desc(), Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name))
     )
 
     publication_authors = q.alias()
