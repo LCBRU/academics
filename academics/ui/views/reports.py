@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from flask import render_template, request
 from lbrc_flask.charting import BarChart, BarChartItem
 from lbrc_flask.database import db
@@ -5,6 +6,7 @@ from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
 from sqlalchemy.sql.expression import literal
 from wtforms import MonthField, SelectField, HiddenField
+from lbrc_flask.validators import parse_date_or_none
 
 from academics.model import (Academic, NihrAcknowledgement, ScopusAuthor,
                              ScopusPublication, Theme, Subtype)
@@ -13,7 +15,7 @@ from .. import blueprint
 
 
 class PublicationSearchForm(SearchForm):
-    total = SelectField('Total', choices=[('Theme', 'Theme'), ('Author', 'Author')])
+    total = SelectField('Total', choices=[('BRC', 'BRC'), ('Theme', 'Theme'), ('Author', 'Author')])
     measure = SelectField('Measure', choices=[('Percentage', 'Percentage'), ('Publications', 'Publications')])
     theme_id = SelectField('Theme')
     academic_id = HiddenField()
@@ -37,17 +39,24 @@ def get_search_form():
 def reports():
     search_form = get_search_form()
 
-    print(search_form.data)
-
     return render_template("ui/reports/reports.html", search_form=search_form, report_defs=get_report_defs(search_form))
 
 
 def get_report_defs(search_form):
     report_defs = []
 
-    if search_form.total.data == 'Author':
+    date_end = date_start = None
 
-        publication_authors = get_publication_author_query()
+    if search_form.has_value('publication_date_start'):
+        date_start = search_form.publication_date_start.data.strftime('%Y-%m')
+    if search_form.has_value('publication_date_end'):
+        date_end = search_form.publication_date_end.data.strftime('%Y-%m')
+
+    if search_form.total.data == 'Author':
+        publication_authors = get_publication_author_query(
+            start_date=search_form.publication_date_start.data,
+            end_date=search_form.publication_date_end.data,
+        )
 
         q = (
             select(publication_authors.c.academic_id)
@@ -63,22 +72,25 @@ def get_report_defs(search_form):
         for a in db.session.execute(q).mappings().all():
             report_defs.append({
                 'academic_id': a['academic_id'],
-                'publication_date_start': search_form.publication_date_start.data,
-                'publication_date_end': search_form.publication_date_end.data,
+                'publication_date_start': date_start,
+                'publication_date_end': date_end,
                 'measure': search_form.measure.data,
+                'total': search_form.total.data,
             })
     elif search_form.has_value('theme_id'):
         report_defs.append({
             'theme_id': search_form.theme_id.data,
-            'publication_date_start': search_form.publication_date_start.data,
-            'publication_date_end': search_form.publication_date_end.data,
+            'publication_date_start': date_start,
+            'publication_date_end': date_end,
             'measure': search_form.measure.data,
+            'total': search_form.total.data,
         })
     else:
         report_defs.append({
-            'publication_date_start': search_form.publication_date_start.data,
-            'publication_date_end': search_form.publication_date_end.data,
+            'publication_date_start': date_start,
+            'publication_date_end': date_end,
             'measure': search_form.measure.data,
+            'total': search_form.total.data,
         })
     
     return report_defs
@@ -90,19 +102,38 @@ def report_image():
 
     if search_form.has_value('academic_id'):
         title = 'Author Publications by Acknowledgement Status'
-        publications = get_publication_by_main_academic(search_form.academic_id.data)
+        publications = get_publication_by_main_academic(
+            academic_id=search_form.academic_id.data,
+            start_date=search_form.publication_date_start.data,
+            end_date=search_form.publication_date_end.data,
+        )
     elif search_form.has_value('theme_id'):
         title = 'Theme Publications by Acknowledgement Status'
-        publications = get_publication_by_main_theme(search_form.theme_id.data)
+        publications = get_publication_by_main_theme(
+            theme_id=search_form.theme_id.data,
+            start_date=search_form.publication_date_start.data,
+            end_date=search_form.publication_date_end.data,
+        )
+    elif search_form.total.data == "BRC":
+        title = 'BRC Publications by Acknowledgement Status'
+        publications = get_publication_by_brc(
+            start_date=search_form.publication_date_start.data,
+            end_date=search_form.publication_date_end.data,
+        )
     else:
         title = 'Theme Publications by Acknowledgement Status'
-        publications = get_publication_by_main_theme()
+        publications = get_publication_by_main_theme(
+            start_date=search_form.publication_date_start.data,
+            end_date=search_form.publication_date_end.data,
+        )
     
     results = by_acknowledge_status(publications)
 
     if search_form.measure.data == 'Publications':
+        title += " Count"
         items = publication_count_value(results)
     else:
+        title += " Percentage"
         items = percentage_value(results)
 
     bc: BarChart = BarChart(
@@ -110,10 +141,13 @@ def report_image():
         items=items,
     )
 
+    if search_form.measure.data == 'Percentage':
+        bc.value_formatter = lambda x: f'{x}%'
+
     return bc.send_as_attachment()
 
 
-def get_publication_theme_query():
+def get_publication_theme_query(start_date, end_date):
     q = (
         select(
             ScopusPublication.id.label('scopus_publication_id'),
@@ -130,6 +164,14 @@ def get_publication_theme_query():
         .order_by(ScopusPublication.id, func.count().desc(), Theme.id, Theme.name)
     )
 
+    publication_start_date = parse_date_or_none(start_date)
+    if publication_start_date:
+        q = q.filter(ScopusPublication.publication_cover_date >= publication_start_date)
+
+    publication_end_date = parse_date_or_none(end_date)
+    if publication_end_date:
+        q = q.filter(ScopusPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
+
     publication_themes = q.alias()
 
     return (
@@ -144,7 +186,7 @@ def get_publication_theme_query():
 
 
 
-def get_publication_author_query():
+def get_publication_author_query(start_date, end_date):
     academic_publications = (
         select(
             ScopusAuthor.academic_id,
@@ -153,7 +195,7 @@ def get_publication_author_query():
         .join(ScopusPublication.scopus_authors)
     ).alias()
     
-    publication_themes = get_publication_theme_query()
+    publication_themes = get_publication_theme_query(start_date, end_date)
 
     q = (
         select(
@@ -185,8 +227,8 @@ def get_publication_author_query():
     ).alias()
 
 
-def get_publication_by_main_theme(theme_id=None):
-    publication_themes = get_publication_theme_query()
+def get_publication_by_main_theme(start_date, end_date, theme_id=None):
+    publication_themes = get_publication_theme_query(start_date, end_date)
 
     q = (
         select(
@@ -202,8 +244,8 @@ def get_publication_by_main_theme(theme_id=None):
     return q.alias()
 
 
-def get_publication_by_main_academic(academic_id):
-    q = get_publication_author_query()
+def get_publication_by_main_academic(academic_id, start_date, end_date):
+    q = get_publication_author_query(start_date, end_date)
 
     return (
         select(
@@ -212,6 +254,18 @@ def get_publication_by_main_academic(academic_id):
         )
         .select_from(q)
         .where(q.c.academic_id == academic_id)
+    ).alias()
+
+
+def get_publication_by_brc(start_date, end_date):
+    q = get_publication_author_query(start_date, end_date)
+
+    return (
+        select(
+            q.c.scopus_publication_id,
+            literal('brc').label('bucket')
+        )
+        .select_from(q)
     ).alias()
 
 
