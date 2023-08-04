@@ -160,7 +160,7 @@ def get_publication_author_query():
         .group_by(publication_themes.c.scopus_publication_id, Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name))
         .order_by(publication_themes.c.scopus_publication_id, func.count().desc(), Academic.id, func.concat(Academic.first_name, ' ', Academic.last_name))
     )
-
+ 
     publication_authors = q.alias()
 
     return (
@@ -211,6 +211,7 @@ def by_acknowledge_status(publications):
             publications.c.bucket,
             func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
             func.count().label('publications'),
+            func.count().over().label('total_count')
         )
         .select_from(ScopusPublication)
         .join(publications, publications.c.scopus_publication_id == ScopusPublication.id)
