@@ -14,6 +14,7 @@ from .. import blueprint
 
 class PublicationSearchForm(SearchForm):
     total = SelectField('Total', choices=[('Theme', 'Theme'), ('Author', 'Author')])
+    measure = SelectField('Measure', choices=[('Percentage', 'Percentage'), ('Publications', 'Publications')])
     theme_id = SelectField('Theme')
     academic_id = HiddenField()
     publication_date_start = MonthField('Publication Start Date')
@@ -64,17 +65,20 @@ def get_report_defs(search_form):
                 'academic_id': a['academic_id'],
                 'publication_date_start': search_form.publication_date_start.data,
                 'publication_date_end': search_form.publication_date_end.data,
+                'measure': search_form.measure.data,
             })
     elif search_form.has_value('theme_id'):
         report_defs.append({
             'theme_id': search_form.theme_id.data,
             'publication_date_start': search_form.publication_date_start.data,
             'publication_date_end': search_form.publication_date_end.data,
+            'measure': search_form.measure.data,
         })
     else:
         report_defs.append({
             'publication_date_start': search_form.publication_date_start.data,
             'publication_date_end': search_form.publication_date_end.data,
+            'measure': search_form.measure.data,
         })
     
     return report_defs
@@ -94,7 +98,12 @@ def report_image():
         title = 'Theme Publications by Acknowledgement Status'
         publications = get_publication_by_main_theme()
     
-    items = by_acknowledge_status(publications) 
+    results = by_acknowledge_status(publications)
+
+    if search_form.measure.data == 'Publications':
+        items = publication_count_value(results)
+    else:
+        items = percentage_value(results)
 
     bc: BarChart = BarChart(
         title=title,
@@ -234,8 +243,18 @@ def by_acknowledge_status(publications):
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
     )
 
-    results = db.session.execute(q).mappings().all()
+    return db.session.execute(q).mappings().all()
 
+
+def publication_count_value(results):
+    return [BarChartItem(
+        series=p['acknowledgement_name'],
+        bucket=p['bucket'],
+        count=p['publications']
+    ) for p in results]
+
+
+def percentage_value(results):
     return [BarChartItem(
         series=p['acknowledgement_name'],
         bucket=p['bucket'],
