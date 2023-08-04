@@ -3,6 +3,7 @@ from lbrc_flask.charting import BarChart, BarChartItem
 from lbrc_flask.database import db
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
+from sqlalchemy.sql.expression import literal
 from wtforms import MonthField, SelectField, HiddenField
 
 from academics.model import (Academic, NihrAcknowledgement, ScopusAuthor,
@@ -206,16 +207,29 @@ def get_publication_by_main_academic(academic_id):
 
 
 def by_acknowledge_status(publications):
+    q_count = select(func.count()).select_from(publications)
+    total_count = db.session.execute(q_count).scalar()
+
+    q_total = (
+        select(
+            publications.c.bucket,
+            func.count().label('total_count'),
+        )
+        .select_from(publications)
+        .group_by(publications.c.bucket)
+    ).alias()
+
     q = (
         select(
             publications.c.bucket,
             func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
             func.count().label('publications'),
-            func.count().over().label('total_count')
+            q_total.c.total_count
         )
         .select_from(ScopusPublication)
         .join(publications, publications.c.scopus_publication_id == ScopusPublication.id)
         .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
     )
@@ -225,5 +239,5 @@ def by_acknowledge_status(publications):
     return [BarChartItem(
         series=p['acknowledgement_name'],
         bucket=p['bucket'],
-        count=p['publications']
+        count=round(p['publications'] * 100 / p['total_count'])
     ) for p in results]
