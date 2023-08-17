@@ -101,7 +101,9 @@ def report_image():
     search_form = get_search_form()
 
     if search_form.has_value('academic_id'):
-        title = 'Author Publications by Acknowledgement Status'
+        a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
+
+        title = f'{a.full_name} Publications by Acknowledgement Status'
         publications = get_publication_by_main_academic(
             academic_id=search_form.academic_id.data,
             start_date=search_form.publication_date_start.data,
@@ -114,15 +116,15 @@ def report_image():
             start_date=search_form.publication_date_start.data,
             end_date=search_form.publication_date_end.data,
         )
-    elif search_form.total.data == "BRC":
-        title = 'BRC Publications by Acknowledgement Status'
-        publications = get_publication_by_brc(
+    elif search_form.total.data == "Theme":
+        title = 'Theme Publications by Acknowledgement Status'
+        publications = get_publication_by_main_theme(
             start_date=search_form.publication_date_start.data,
             end_date=search_form.publication_date_end.data,
         )
     else:
-        title = 'Theme Publications by Acknowledgement Status'
-        publications = get_publication_by_main_theme(
+        title = 'BRC Publications by Acknowledgement Status'
+        publications = get_publication_by_brc(
             start_date=search_form.publication_date_start.data,
             end_date=search_form.publication_date_end.data,
         )
@@ -132,13 +134,19 @@ def report_image():
     if search_form.measure.data == 'Publications':
         title += " Count"
         items = publication_count_value(results)
+        y_title = 'Publications'
+        show_total = True
     else:
         title += " Percentage"
         items = percentage_value(results)
+        y_title = 'Percentage'
+        show_total = False
 
     bc: BarChart = BarChart(
         title=title,
         items=items,
+        y_title=y_title,
+        show_total=show_total,
     )
 
     if search_form.measure.data == 'Percentage':
