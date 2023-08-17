@@ -84,7 +84,7 @@ class PublicationSearchForm(SearchForm):
 class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
     theme_id = SelectField('Theme')
-    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
+    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement', default="-1")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
