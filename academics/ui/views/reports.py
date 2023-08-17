@@ -5,7 +5,8 @@ from lbrc_flask.database import db
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
 from sqlalchemy.sql.expression import literal
-from wtforms import MonthField, SelectField, HiddenField
+from sqlalchemy import or_
+from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 from lbrc_flask.validators import parse_date_or_none
 
 from academics.model import (Academic, NihrAcknowledgement, ScopusAuthor,
@@ -13,11 +14,15 @@ from academics.model import (Academic, NihrAcknowledgement, ScopusAuthor,
 
 from .. import blueprint
 
+def _get_nihr_acknowledgement_choices():
+    return [(f.id, f.name.title()) for f in NihrAcknowledgement.query.order_by(NihrAcknowledgement.name).all()]
+
 
 class PublicationSearchForm(SearchForm):
     total = SelectField('Total', choices=[('BRC', 'BRC'), ('Theme', 'Theme'), ('Author', 'Author')])
     measure = SelectField('Measure', choices=[('Percentage', 'Percentage'), ('Publications', 'Publications')])
     theme_id = SelectField('Theme')
+    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
     academic_id = HiddenField()
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
@@ -26,6 +31,7 @@ class PublicationSearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unvalidated')] + _get_nihr_acknowledgement_choices()
 
 
 def get_search_form():
@@ -68,6 +74,15 @@ def get_report_defs(search_form):
 
         if search_form.has_value('theme_id'):
             q = q.where(publication_authors.c.theme_id == search_form.theme_id.data)
+
+        if search_form.has_value('nihr_acknowledgement_id'):
+            nihr_acknowledgement_id = search_form.nihr_acknowledgement_id.data
+
+            if nihr_acknowledgement_id == '-1':
+                nihr_acknowledgement_id = None
+
+            status_filter = (ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
+            q = q.filter(or_(*status_filter))
 
         for a in db.session.execute(q).mappings().all():
             report_defs.append({

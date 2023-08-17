@@ -87,7 +87,7 @@ class ValidationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unknown')] + _get_nihr_acknowledgement_choices()
+        self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unvalidated')] + _get_nihr_acknowledgement_choices()
         self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
