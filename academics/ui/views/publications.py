@@ -62,6 +62,7 @@ class PublicationSearchForm(SearchForm):
     publication_date_start = MonthField('Publication Start Date')
     publication_date_end = MonthField('Publication End Date')
     subtype_id = SelectMultipleField('Type')
+    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
     keywords = SelectMultipleField('Keywords')
     author_id = SelectField('Author')
     folder_id = SelectField('Folder')
@@ -77,12 +78,13 @@ class PublicationSearchForm(SearchForm):
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
         self.folder_id.choices = [('', '')] + _get_folder_choices()
         self.objective_id.choices = [('', '')] + _get_objective_choices()
+        self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unvalidated')] + _get_nihr_acknowledgement_choices()
 
 
 class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
     theme_id = SelectField('Theme')
-    nihr_acknowledgement_id = SelectField('Acknowledgement', default="-1")
+    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -224,17 +226,14 @@ def _get_publication_query(search_form, or_status=False, supress_validation_hist
     status_filter = tuple()
 
     if search_form.has_value('nihr_acknowledgement_id'):
-        nihr_acknowledgement_id = search_form.nihr_acknowledgement_id.data
+        status_filter = tuple()
 
-        if nihr_acknowledgement_id == '-1':
-            nihr_acknowledgement_id = None
+        for n in search_form.nihr_acknowledgement_id.data:
+            if n == '-1':
+                n = None
 
-        status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
-
-    if or_status:
+            status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == n)
         q = q.filter(or_(*status_filter))
-    else:
-        q = q.filter(*status_filter)
 
     if search_form.has_value('folder_id'):
         q = q.filter(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))

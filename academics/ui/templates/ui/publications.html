@@ -83,6 +83,9 @@
                         {% else %}
                             <dd class="col-auto"><i class="fas fa-question"></i></dd>
                         {% endif %}
+
+                        <dt class="col-auto">Acknowledgement</dt>
+                        <dd class="col-auto">{{ p.nihr_acknowledgement.name | default_if_none('Unknown') }}</dd>
                     </dl>
 
                     <dl>
