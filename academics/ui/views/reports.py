@@ -31,7 +31,7 @@ class PublicationSearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
-        self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unvalidated')] + _get_nihr_acknowledgement_choices()
+        self.nihr_acknowledgement_id.choices = [('-1', 'Unvalidated')] + _get_nihr_acknowledgement_choices()
 
 
 def get_search_form():
