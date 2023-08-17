@@ -79,12 +79,12 @@ def get_report_defs(search_form):
             status_filter = tuple()
 
             for n in search_form.nihr_acknowledgement_id.data:
-
                 if n == '-1':
                     n = None
 
                 status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == n)
 
+            q = q.join(ScopusPublication, ScopusPublication.id == publication_authors.c.scopus_publication_id)
             q = q.filter(or_(*status_filter))
 
         for a in db.session.execute(q).mappings().all():
@@ -301,8 +301,6 @@ def get_publication_by_brc(start_date, end_date):
 def by_acknowledge_status(publications, nihr_acknowledgement_ids):
     q_count = select(func.count()).select_from(publications)
     total_count = db.session.execute(q_count).scalar()
-
-    print(nihr_acknowledgement_ids)
 
     q_total = (
         select(
