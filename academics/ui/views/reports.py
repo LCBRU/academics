@@ -76,12 +76,15 @@ def get_report_defs(search_form):
             q = q.where(publication_authors.c.theme_id == search_form.theme_id.data)
 
         if search_form.has_value('nihr_acknowledgement_id'):
-            nihr_acknowledgement_id = search_form.nihr_acknowledgement_id.data
+            status_filter = tuple()
 
-            if nihr_acknowledgement_id == '-1':
-                nihr_acknowledgement_id = None
+            for n in search_form.nihr_acknowledgement_id.data:
 
-            status_filter = (ScopusPublication.nihr_acknowledgement_id == nihr_acknowledgement_id)
+                if n == '-1':
+                    n = None
+
+                status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == n)
+
             q = q.filter(or_(*status_filter))
 
         for a in db.session.execute(q).mappings().all():
@@ -91,6 +94,7 @@ def get_report_defs(search_form):
                 'publication_date_end': date_end,
                 'measure': search_form.measure.data,
                 'total': search_form.total.data,
+                'nihr_acknowledgement_id': search_form.nihr_acknowledgement_id.data,
             })
     elif search_form.has_value('theme_id'):
         report_defs.append({
@@ -99,6 +103,7 @@ def get_report_defs(search_form):
             'publication_date_end': date_end,
             'measure': search_form.measure.data,
             'total': search_form.total.data,
+            'nihr_acknowledgement_id': search_form.nihr_acknowledgement_id.data,
         })
     else:
         report_defs.append({
@@ -106,7 +111,8 @@ def get_report_defs(search_form):
             'publication_date_end': date_end,
             'measure': search_form.measure.data,
             'total': search_form.total.data,
-        })
+            'nihr_acknowledgement_id': search_form.nihr_acknowledgement_id.data,
+       })
     
     return report_defs
 
@@ -144,7 +150,7 @@ def report_image():
             end_date=search_form.publication_date_end.data,
         )
     
-    results = by_acknowledge_status(publications)
+    results = by_acknowledge_status(publications, search_form.nihr_acknowledgement_id.data)
 
     if search_form.measure.data == 'Publications':
         title += " Count"
@@ -292,9 +298,11 @@ def get_publication_by_brc(start_date, end_date):
     ).alias()
 
 
-def by_acknowledge_status(publications):
+def by_acknowledge_status(publications, nihr_acknowledgement_ids):
     q_count = select(func.count()).select_from(publications)
     total_count = db.session.execute(q_count).scalar()
+
+    print(nihr_acknowledgement_ids)
 
     q_total = (
         select(
@@ -319,6 +327,17 @@ def by_acknowledge_status(publications):
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
     )
+
+    if nihr_acknowledgement_ids:
+        status_filter = tuple()
+
+        for n in nihr_acknowledgement_ids:
+            if n == '-1':
+                n = None
+
+            status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == n)
+
+        q = q.filter(or_(*status_filter))
 
     return db.session.execute(q).mappings().all()
 
