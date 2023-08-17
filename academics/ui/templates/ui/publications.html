@@ -68,6 +68,9 @@
                             <dd class="col-auto"><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
                         {% endif %}
                         <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
+                    </dl>
+
+                    <dl class="row">
                         {% if p.subtype %}
                             <dt class="col-auto">Type</dt>
                             <dd class="col-auto">{{ p.subtype.description }}</dd>
