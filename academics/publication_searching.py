@@ -107,7 +107,12 @@ def publication_search_query(search_form):
         q = q.where(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
-        q = q.where(ScopusPublication.scopus_authors.any(ScopusAuthor.academic_id == search_form.academic_id.data))
+        attribution = publication_attribution_query().alias()
+        q = q.join(
+            attribution, attribution.c.scopus_publication_id == ScopusPublication.id
+        ).where(
+            attribution.c.academic_id == search_form.academic_id.data
+        )
 
     if search_form.has_value('theme_id'):
         pub_themes = publication_attribution_query().alias()
