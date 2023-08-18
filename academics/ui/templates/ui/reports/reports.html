@@ -14,17 +14,10 @@
 
     {{ render_search(search_form, 'ui.reports') }}
 
-    {% set form_fields = dict() %}
-
-    {% for f in search_form | rejectattr("name", "eq", "page") | rejectattr("name", "eq", "csrf_token") | selectattr("data") %}
-        {% if form_fields.update({f.name: f.data}) %} {% endif %}
-    {% endfor %}
-
     <div id="chart">
         {% for r in report_defs %}
-            <img src='{{ url_for("ui.report_image", **r) }}' />
+            <a href='{{ url_for("ui.publications", **r) }}''><img src='{{ url_for("ui.report_image", **r) }}' /></a>
         {% endfor %}
-        
     </div>
 
 </section>
