@@ -199,11 +199,11 @@ def publication_export_pdf():
         theme = db.get_or_404(Theme, search_form.theme_id.data)
         parameters.append(('Theme', theme.name))
 
-    publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
+    publication_start_date = parse_date_or_none(search_form.publication_start_month.data)
     if publication_start_date:
         parameters.append(('Start Publication Date', f'{publication_start_date:%b %Y}'))
 
-    publication_end_date = parse_date_or_none(search_form.publication_date_end.data)
+    publication_end_date = parse_date_or_none(search_form.publication_end_month.data)
     if publication_end_date:
         parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 

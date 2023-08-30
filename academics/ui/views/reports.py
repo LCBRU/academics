@@ -1,14 +1,12 @@
 from flask import render_template, request
-from lbrc_flask.charting import BarChart, BarChartItem
+from lbrc_flask.charting import BarChart
 from lbrc_flask.database import db
 from lbrc_flask.forms import SearchForm
-from sqlalchemy import distinct, func, select
-from sqlalchemy.sql.expression import literal
+from sqlalchemy import distinct, select
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 
-from academics.model import (Academic, NihrAcknowledgement, ScopusAuthor,
-                             ScopusPublication, Theme)
-from academics.publication_searching import publication_search_query, publication_attribution_query
+from academics.model import (Academic, NihrAcknowledgement, Theme)
+from academics.publication_searching import publication_search_query, publication_attribution_query, publication_summary
 
 from .. import blueprint
 
@@ -22,8 +20,8 @@ class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
     academic_id = HiddenField()
-    publication_date_start = MonthField('Publication Start Date')
-    publication_date_end = MonthField('Publication End Date')
+    publication_start_month = MonthField('Publication Start Month')
+    publication_end_date = MonthField('Publication End Month')
     supress_validation_historic = HiddenField('supress_validation_historic', default=True)
 
     def __init__(self, **kwargs):
@@ -69,33 +67,23 @@ def report_image():
         a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
 
         title = f'{a.full_name} Publications by Acknowledgement Status'
-        publications = get_publication_by_main_academic(search_form)
-    elif search_form.has_value('theme_id'):
+    elif search_form.has_value('theme_id') or search_form.total.data == "Theme":
         title = 'Theme Publications by Acknowledgement Status'
-        publications = get_publication_by_main_theme(search_form)
-    elif search_form.total.data == "Theme":
-        title = 'Theme Publications by Acknowledgement Status'
-        publications = get_publication_by_main_theme(search_form)
     else:
         title = 'BRC Publications by Acknowledgement Status'
-        publications = get_publication_by_brc(search_form)
-
-    results = by_acknowledge_status(publications)
 
     if search_form.measure.data == 'Publications':
         title += " Count"
-        items = publication_count_value(results)
         y_title = 'Publications'
         show_total = True
     else:
         title += " Percentage"
-        items = percentage_value(results)
         y_title = 'Percentage'
         show_total = False
 
     bc: BarChart = BarChart(
         title=title,
-        items=items,
+        items=publication_summary(search_form),
         y_title=y_title,
         show_total=show_total,
     )
@@ -104,89 +92,3 @@ def report_image():
         bc.value_formatter = lambda x: f'{x}%'
 
     return bc.send_as_attachment()
-
-
-def get_publication_by_main_theme(search_form):
-    publications = publication_search_query(search_form).alias()
-    attribution = publication_attribution_query().alias()
-
-    return select(
-        publications.c.id.label('scopus_publication_id'),
-        Theme.name.label('bucket')
-    ).join(
-        attribution, attribution.c.scopus_publication_id == publications.c.id
-    ).join(
-        Theme, Theme.id == attribution.c.theme_id
-    ).alias()
-
-
-def get_publication_by_main_academic(search_form):
-    publications = publication_search_query(search_form).alias()
-    attribution = publication_attribution_query().alias()
-
-    return select(
-        publications.c.id.label('scopus_publication_id'),
-        func.concat(Academic.first_name, Academic.last_name).label('bucket')
-    ).join(
-        attribution, attribution.c.scopus_publication_id == publications.c.id
-    ).join(
-        Academic, Academic.id == attribution.c.academic_id
-    ).order_by(
-        Academic.last_name,
-        Academic.first_name,
-    ).alias()
-
-
-def get_publication_by_brc(search_form):
-    publications = publication_search_query(search_form).alias()
-
-    return select(
-        publications.c.id.label('scopus_publication_id'),
-        literal('brc').label('bucket')
-    ).alias()
-
-
-def by_acknowledge_status(publications):
-    q_total = (
-        select(
-            publications.c.bucket,
-            func.count().label('total_count'),
-        )
-        .select_from(publications)
-        .group_by(publications.c.bucket)
-    ).alias()
-
-    q = (
-        select(
-            publications.c.bucket,
-            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
-            func.count().label('publications'),
-            q_total.c.total_count
-        )
-        .select_from(ScopusPublication)
-        .join(publications, publications.c.scopus_publication_id == ScopusPublication.id)
-        .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
-        .join(q_total, q_total.c.bucket == publications.c.bucket)
-        .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
-        .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
-    )
-
-    return db.session.execute(q).mappings().all()
-
-
-def publication_count_value(results):
-    return [BarChartItem(
-        series=p['acknowledgement_name'],
-        bucket=p['bucket'],
-        count=p['publications']
-    ) for p in results]
-
-
-def percentage_value(results):
-    return [BarChartItem(
-        series=p['acknowledgement_name'],
-        bucket=p['bucket'],
-        count=round(p['publications'] * 100 / p['total_count'])
-    ) for p in results]
-
-

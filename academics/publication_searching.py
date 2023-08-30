@@ -3,10 +3,12 @@ from flask import url_for
 from flask_login import current_user
 from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Objective, ScopusAuthor, ScopusPublication, Subtype, Theme
 from lbrc_flask.validators import parse_date_or_none
-from sqlalchemy import or_
+from sqlalchemy import literal, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
+from lbrc_flask.charting import BarChartItem
+from lbrc_flask.database import db
 
 
 def author_select_choices():
@@ -62,8 +64,8 @@ def nihr_acknowledgement_select_choices():
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
     journal_id = SelectMultipleField('Journal', coerce=int, )
-    publication_date_start = MonthField('Publication Start Date')
-    publication_date_end = MonthField('Publication End Date')
+    publication_start_month = MonthField('Publication Start Month')
+    publication_end_month = MonthField('Publication End Month')
     subtype_id = SelectMultipleField('Type')
     nihr_acknowledgement_ids = SelectMultipleField('Acknowledgement')
     keywords = SelectMultipleField('Keywords')
@@ -129,15 +131,27 @@ def publication_search_query(search_form):
         for k in search_form.keywords.data:
             q = q.where(ScopusPublication.keywords.any(Keyword.id == k))
 
-    if search_form.has_value('publication_date_start'):
-        publication_start_date = parse_date_or_none(search_form.publication_date_start.data)
-        if publication_start_date:
-            q = q.where(ScopusPublication.publication_cover_date >= publication_start_date)
+    publication_start_date = None
 
-    if search_form.has_value('publication_date_end'):
-        publication_end_date = parse_date_or_none(search_form.publication_date_end.data)
-        if publication_end_date:
-            q = q.where(ScopusPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
+    if search_form.has_value('publication_start_month'):
+        publication_start_date = parse_date_or_none(search_form.publication_start_month.data)
+
+    if search_form.has_value('publication_start_date'):
+        publication_start_date = parse_date_or_none(search_form.publication_start_date.data)
+
+    if publication_start_date:
+        q = q.where(ScopusPublication.publication_cover_date >= publication_start_date)
+
+    publication_end_date = None
+
+    if search_form.has_value('publication_end_month'):
+        publication_end_date = parse_date_or_none(search_form.publication_end_month.data)
+
+    if search_form.has_value('publication_end_date'):
+        publication_end_date = parse_date_or_none(search_form.publication_end_date.data)
+
+    if publication_end_date:
+        q = q.where(ScopusPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
 
     if search_form.has_value('search'):
         q = q.where(or_(
@@ -205,3 +219,105 @@ def publication_attribution_query():
         .select_from(publication_themes)
         .where(publication_themes.c.priority == 1)
     )
+
+
+def publication_summary(search_form):
+    if search_form.has_value('academic_id') or search_form.total.data == "Academic":
+        publications = get_publication_by_main_academic(search_form)
+    elif search_form.has_value('theme_id') or search_form.total.data == "Theme":
+        publications = get_publication_by_main_theme(search_form)
+    else:
+        publications = get_publication_by_brc(search_form)
+
+    results = by_acknowledge_status(publications)
+
+    if search_form.measure.data == 'Publications':
+        items = publication_count_value(results)
+    else:
+        items = percentage_value(results)
+
+    return items
+
+
+def get_publication_by_main_theme(search_form):
+    publications = publication_search_query(search_form).alias()
+    attribution = publication_attribution_query().alias()
+
+    return select(
+        publications.c.id.label('scopus_publication_id'),
+        Theme.name.label('bucket')
+    ).join(
+        attribution, attribution.c.scopus_publication_id == publications.c.id
+    ).join(
+        Theme, Theme.id == attribution.c.theme_id
+    ).alias()
+
+
+def get_publication_by_main_academic(search_form):
+    publications = publication_search_query(search_form).alias()
+    attribution = publication_attribution_query().alias()
+
+    return select(
+        publications.c.id.label('scopus_publication_id'),
+        func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
+    ).join(
+        attribution, attribution.c.scopus_publication_id == publications.c.id
+    ).join(
+        Academic, Academic.id == attribution.c.academic_id
+    ).order_by(
+        Academic.last_name,
+        Academic.first_name,
+    ).alias()
+
+
+def get_publication_by_brc(search_form):
+    publications = publication_search_query(search_form).alias()
+
+    return select(
+        publications.c.id.label('scopus_publication_id'),
+        literal('brc').label('bucket')
+    ).alias()
+
+
+def by_acknowledge_status(publications):
+    q_total = (
+        select(
+            publications.c.bucket,
+            func.count().label('total_count'),
+        )
+        .select_from(publications)
+        .group_by(publications.c.bucket)
+    ).alias()
+
+    q = (
+        select(
+            publications.c.bucket,
+            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
+            func.count().label('publications'),
+            q_total.c.total_count
+        )
+        .select_from(ScopusPublication)
+        .join(publications, publications.c.scopus_publication_id == ScopusPublication.id)
+        .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
+        .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
+        .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
+    )
+
+    return db.session.execute(q).mappings().all()
+
+
+def publication_count_value(results):
+    return [BarChartItem(
+        series=p['acknowledgement_name'],
+        bucket=p['bucket'],
+        count=p['publications']
+    ) for p in results]
+
+
+def percentage_value(results):
+    return [BarChartItem(
+        series=p['acknowledgement_name'],
+        bucket=p['bucket'],
+        count=round(p['publications'] * 100 / p['total_count'])
+    ) for p in results]
