@@ -3,6 +3,7 @@ from flask_admin.contrib.sqla import fields
 from lbrc_flask.database import db
 from lbrc_flask.security import Role
 from lbrc_flask.admin import AdminCustomView, init_admin as flask_init_admin
+from lbrc_flask.api import ApiKey
 from flask_login import current_user
 
 from academics.model import Theme, User
@@ -29,9 +30,10 @@ class ThemeView(AdminCustomView):
     column_list = ['name']
     form_columns = ["name"]
 
-    # def on_model_change(self, form, model, is_created):
-    #     model.last_updated_datetime = datetime.datetime.utcnow()
-    #     model.last_updated_by_user = current_user
+
+class ApiKeyView(AdminCustomView):
+    column_list = ['name', 'key']
+    form_columns = ["name"]
 
 
 def init_admin(app, title):
@@ -41,5 +43,6 @@ def init_admin(app, title):
         [
             UserView(User, db.session),
             ThemeView(Theme, db.session),
+            ApiKeyView(ApiKey, db.session),
         ]
     )

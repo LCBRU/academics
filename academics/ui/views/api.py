@@ -1,6 +1,6 @@
 from flask import request
-from lbrc_flask.database import db
 from lbrc_flask.forms import SearchForm
+from lbrc_flask.api import validate_api_key
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 
 from academics.model import (NihrAcknowledgement, Theme)
@@ -30,6 +30,7 @@ class PublicationSearchForm(SearchForm):
 
 
 @blueprint.route("/api/publications", methods=['GET', 'POST'])
+@validate_api_key()
 def api_publications():
     search_form = PublicationSearchForm(formdata=request.args)
 
