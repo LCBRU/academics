@@ -288,6 +288,12 @@ def update_academics():
     if not updating():
         for academic in Academic.query.all():
             logging.info(f'Setting academic {academic.full_name} to be updated')
+
+            for au in academic.scopus_authors:
+                au.error = False
+                db.session.add(au)
+
+            academic.error = False
             academic.updating = True
             db.session.add(academic)
 
