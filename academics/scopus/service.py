@@ -5,13 +5,12 @@ from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
-from sqlalchemy import and_, exists
+from sqlalchemy import and_, or_
 from academics.model import Academic, FundingAcr, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Sponsor, Subtype
 from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
 from datetime import datetime
-from sqlalchemy import or_, and_
 
 
 def _client():
@@ -19,7 +18,9 @@ def _client():
 
 
 def updating():
-    return Academic.query.filter(Academic.updating == True).count() > 0
+    result = Academic.query.filter(Academic.updating == True).count() > 0
+    logging.info(f'updating: {result}')
+    return result
 
 
 def author_search(search_string):
@@ -256,14 +257,18 @@ def _add_sponsors_to_publications(publication, sponsor_names):
 
 
 def update_academics():
+    logging.info('update_academics: started')
     if not updating():
         for academic in Academic.query.all():
+            logging.info(f'Updating academic {academic.id}')
             academic.updating = True
             db.session.add(academic)
 
         db.session.commit()
 
         _update_all_academics.delay()
+
+    logging.info('update_academics: ended')
 
 
 @celery.task()
@@ -306,7 +311,6 @@ def _update_academic(academic):
             continue
 
         try:
-
             els_author = get_els_author(sa.scopus_id)
             els_author.update_scopus_author(sa)
 
