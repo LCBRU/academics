@@ -11,6 +11,7 @@ from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
 from datetime import datetime
+from lbrc_flask.logging import log_exception
 
 
 def _client():
@@ -347,7 +348,8 @@ def _update_academic(academic):
             add_scopus_publications(els_author, sa)
 
             sa.last_fetched_datetime = datetime.utcnow()
-        except:
+        except Exception as e:
+            log_exception(e)
             logging.info(f'Setting Academic {academic.full_name} to be in error')
             sa.error = True
         finally:
