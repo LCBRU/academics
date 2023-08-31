@@ -52,15 +52,20 @@ def author_search(search_string):
 
 
 def get_els_author(scopus_id):
+    logging.info(f'Getting Scopus Author {scopus_id}')
     result = Author(scopus_id)
 
     if not result.read(_client()):
+        logging.info(f'Scopus Author not read from Scopus')
         return None
 
+    logging.info(f'Scopus Author details read from Scopus')
     return result
 
 
 def add_scopus_publications(els_author, scopus_author):
+    logging.info('add_scopus_publications: started')
+
     search_results = DocumentSearch(els_author)
     search_results.execute(_client(), get_all=True)
 
@@ -109,6 +114,8 @@ def add_scopus_publications(els_author, scopus_author):
         _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
 
         db.session.add(publication)
+
+    logging.info('add_scopus_publications: ended')
 
 
 def auto_validate():
@@ -282,8 +289,6 @@ def _update_all_academics():
             logging.info(f'No more academics to update')
             break
 
-        logging.info(f'Updating Academic {a.full_name}')
-
         try:
             _update_academic(a)
 
@@ -309,8 +314,11 @@ def _update_all_academics():
 
 
 def _update_academic(academic):
+    logging.info(f'Updating Academic {academic.full_name}')
+
     for sa in academic.scopus_authors:
         if sa.error:
+            logging.info(f'Scopus Author in ERROR')
             continue
 
         try:
@@ -321,6 +329,7 @@ def _update_academic(academic):
 
             sa.last_fetched_datetime = datetime.utcnow()
         except:
+            logging.info(f'Setting Academic {academic.full_name} to be in error')
             sa.error = True
         finally:
             db.session.add(sa)
