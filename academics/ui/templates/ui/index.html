@@ -97,7 +97,10 @@
                                                     data-name="{{ au.full_name }}"
                                                     title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
                                                     data-target="#deleteAuthorModal"
-                                                    href="#"><i class="fas fa-trash"></i></a>    
+                                                    href="#"><i class="fas fa-trash"></i></a>
+                                                {% if au.error and current_user.is_admin %}
+                                                    <i class="fas fa-bug"></i>
+                                                {% endif %}
                                                 <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
                                             </div>
                                         </td>
