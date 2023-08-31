@@ -260,7 +260,7 @@ def update_academics():
     logging.info('update_academics: started')
     if not updating():
         for academic in Academic.query.all():
-            logging.info(f'Updating academic {academic.id}')
+            logging.info(f'Setting academic {academic.full_name} to be updated')
             academic.updating = True
             db.session.add(academic)
 
@@ -279,7 +279,10 @@ def _update_all_academics():
         a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
 
         if not a:
+            logging.info(f'No more academics to update')
             break
+
+        logging.info(f'Updating Academic {a.full_name}')
 
         try:
             _update_academic(a)
