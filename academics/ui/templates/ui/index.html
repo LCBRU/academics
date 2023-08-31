@@ -1,6 +1,6 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary %}
-{% from "lbrc_flask/modal_macros.html" import render_delete_modal %}
+{% from "lbrc_flask/modal_macros.html" import render_delete_modal, render_confirmation_modal %}
 
 {% block content %}
 <section>
@@ -53,6 +53,17 @@
                                     data-target="#deleteAcademicModal"
                                     href="#"><i class="fas fa-trash"></i></a>
                             </div>
+                            {% if current_user.is_admin %}
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a class="academic_update"
+                                        data-toggle="modal"
+                                        data-id="{{ a.id }}"
+                                        data-name="{{ a.full_name }}"
+                                        title="Update academic {{ a.full_name }}"
+                                        data-target="#updateAcademicModal"
+                                        href="#"><i class="fas fa-redo"></i></a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -123,5 +134,6 @@
 
 {{ render_delete_modal('deleteAcademicModal', 'Delete Academic', url_for('ui.delete_academic', prev=request.full_path), confirm_form) }}
 {{ render_delete_modal('deleteAuthorModal', 'Delete Author', url_for('ui.delete_author', prev=request.full_path), confirm_form) }}
+{{ render_confirmation_modal('updateAcademicModal', 'Update Academic', url_for('ui.update_academic', prev=request.full_path), confirm_form, 'Please confirm that you want to update') }}
 
 {% endblock %}

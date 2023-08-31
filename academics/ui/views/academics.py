@@ -170,3 +170,25 @@ def delete_author():
         delete_orphan_publications()
 
     return redirect(url_for('ui.index'))
+
+
+@blueprint.route("/update_academic", methods=['POST'])
+def update_academic():
+    form = ConfirmForm()
+
+    if form.validate_on_submit():
+        academic = db.get_or_404(Academic, form.id.data)
+
+        for au in academic.scopus_authors:
+            au.error = False
+            db.session.add(au)
+        
+        academic.error = False
+        academic.updating = True
+
+        db.session.add(academic)
+
+        db.session.commit()
+
+    return redirect(url_for('ui.index'))
+
