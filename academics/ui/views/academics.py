@@ -3,7 +3,7 @@ from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField, StringField
 from wtforms import SelectField
-from academics.scopus.service import add_authors_to_academic, author_search, delete_orphan_publications, update_academics, updating
+from academics.scopus.service import add_authors_to_academic, author_search, delete_orphan_publications, update_academics, update_single_academic, updating
 from academics.model import Academic, ScopusAuthor, Theme
 from wtforms.validators import Length
 from .. import blueprint
@@ -179,16 +179,7 @@ def update_academic():
     if form.validate_on_submit():
         academic = db.get_or_404(Academic, form.id.data)
 
-        for au in academic.scopus_authors:
-            au.error = False
-            db.session.add(au)
-        
-        academic.error = False
-        academic.updating = True
-
-        db.session.add(academic)
-
-        db.session.commit()
+    update_single_academic(academic)
 
     return redirect(url_for('ui.index'))
 

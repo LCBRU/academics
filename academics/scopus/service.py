@@ -263,6 +263,25 @@ def _add_sponsors_to_publications(publication, sponsor_names):
         publication.sponsors.add(sponsor)
 
 
+def update_single_academic(academic):
+    logging.info('update_academic: started')
+
+    for au in academic.scopus_authors:
+        au.error = False
+        db.session.add(au)
+    
+    academic.error = False
+    academic.updating = True
+
+    db.session.add(academic)
+
+    db.session.commit()
+
+    _update_all_academics.delay()
+
+    logging.info('update_academic: ended')
+
+
 def update_academics():
     logging.info('update_academics: started')
     if not updating():
