@@ -28,6 +28,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
+    orcid = db.Column(db.String(255))
     updating = db.Column(db.Boolean, default=False)
     initialised = db.Column(db.Boolean, default=False)
     error = db.Column(db.Boolean, default=False)
