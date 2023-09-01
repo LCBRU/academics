@@ -31,6 +31,7 @@ class AddAuthorForm(FlashingForm):
 class AcademicEditForm(FlashingForm):
     first_name = StringField("First Name", validators=[Length(max=500)])
     last_name = StringField("Last Name", validators=[Length(max=500)])
+    orcid = StringField("ORCID", validators=[Length(max=255)])
     theme_id = SelectField('Theme', coerce=int)
 
     def __init__(self, **kwargs):
@@ -89,6 +90,7 @@ def academic_edit(id):
     if form.validate_on_submit():
         academic.first_name = form.first_name.data
         academic.last_name = form.last_name.data
+        academic.orcid = form.orcid.data
         academic.theme_id = form.theme_id.data
 
         db.session.add(academic)

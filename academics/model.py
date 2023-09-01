@@ -53,6 +53,11 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         self.first_name = top_author.first_name
         self.last_name = top_author.last_name
 
+    @property
+    def orcid_link(self):
+        if self.orcid:
+            return f'https://orcid.org/{self.orcid}'
+        
 
 class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 
@@ -101,6 +106,13 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
                 self.affiliation_country,
             ])
         )
+
+    @property
+    def orcid_mismatch(self):
+        if self.academic.orcid and self.orcid:
+            return self.academic.orcid != self.orcid
+        else:
+            return False
 
 
 class Journal(db.Model):
