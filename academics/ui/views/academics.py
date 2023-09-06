@@ -197,7 +197,7 @@ def academics_export_csv():
         'ordcid': None,
     }
 
-    q = select(Academic)
+    q = select(Academic).where(Academic.initialised == True)
 
 
     academic_details = ({
