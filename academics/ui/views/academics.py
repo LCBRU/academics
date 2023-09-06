@@ -7,6 +7,8 @@ from academics.scopus.service import add_authors_to_academic, author_search, del
 from academics.model import Academic, ScopusAuthor, Theme
 from wtforms.validators import Length
 from .. import blueprint
+from lbrc_flask.export import csv_download
+from sqlalchemy import select
 
 
 def _get_academic_choices():
@@ -185,3 +187,24 @@ def update_academic():
 
     return redirect(url_for('ui.index'))
 
+
+@blueprint.route("/academics/export/csv")
+def academics_export_csv():
+    headers = {
+        'first_name': None,
+        'last_name': None,
+        'theme': None,
+        'ordcid': None,
+    }
+
+    q = select(Academic)
+
+
+    academic_details = ({
+        'first_name': a.first_name,
+        'last_name': a.last_name,
+        'theme': a.theme.name,
+        'ordcid': a.orcid,
+    } for a in db.session.scalars(q).all())
+
+    return csv_download('Academics', headers.keys(), academic_details)
