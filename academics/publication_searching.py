@@ -6,7 +6,7 @@ from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgem
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
-from lbrc_flask.forms import SearchForm
+from lbrc_flask.forms import SearchForm, HiddenBooleanField
 from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem
 from lbrc_flask.database import db
@@ -75,7 +75,7 @@ class PublicationSearchForm(SearchForm):
     academic_id = SelectField('Academic')
     folder_id = SelectField('Folder')
     objective_id = SelectField('Objective')
-    supress_validation_historic = HiddenField('supress_validation_historic')
+    supress_validation_historic = HiddenBooleanField('supress_validation_historic')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -95,7 +95,7 @@ class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectField('Acknowledgement', default="-1")
-    supress_validation_historic = HiddenField('supress_validation_historic', default=True)
+    supress_validation_historic = HiddenBooleanField('supress_validation_historic', default=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -190,7 +190,7 @@ def publication_search_query(search_form):
     if search_form.has_value('objective_id'):
         q = q.where(ScopusPublication.objectives.any(Objective.id == search_form.objective_id.data))
 
-    if search_form.supress_validation_historic.data == True or search_form.supress_validation_historic.data.lower() == 'true':
+    if search_form.supress_validation_historic.data == True:
         logging.info(f'Supressing Historic Publications')
         q = q.where(or_(
             ScopusPublication.validation_historic == False,
