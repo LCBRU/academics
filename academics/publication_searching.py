@@ -1,3 +1,4 @@
+import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
@@ -9,6 +10,7 @@ from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem
 from lbrc_flask.database import db
+from lbrc_flask.logging import log_form
 
 
 def author_select_choices():
@@ -103,6 +105,10 @@ class ValidationSearchForm(SearchForm):
 
 
 def publication_search_query(search_form):
+    logging.info(f'publication_search_query started')
+
+    log_form(search_form)
+
     q = select(ScopusPublication)
 
     if search_form.has_value('author_id'):
@@ -184,11 +190,14 @@ def publication_search_query(search_form):
     if search_form.has_value('objective_id'):
         q = q.where(ScopusPublication.objectives.any(Objective.id == search_form.objective_id.data))
 
-    if search_form.supress_validation_historic.data == True:
+    if search_form.supress_validation_historic.data == True or search_form.supress_validation_historic.data.lower() == 'true':
+        logging.info(f'Supressing Historic Publications')
         q = q.where(or_(
             ScopusPublication.validation_historic == False,
             ScopusPublication.validation_historic == None,
         ))
+
+    logging.info(f'publication_search_query ended')
 
     return q
 
