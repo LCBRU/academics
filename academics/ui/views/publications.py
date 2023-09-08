@@ -238,7 +238,7 @@ def publication_nihr_acknowledgement():
         p.nihr_acknowledgement = None
         db.session.commit()
 
-        return jsonify({'status': 'Unknown'}), 200
+        return jsonify({'status': 'Unvalidated'}), 200
     else:
         n = db.get_or_404(NihrAcknowledgement, request.json.get('nihr_acknowledgement_id'))
 
