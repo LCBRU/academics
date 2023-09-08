@@ -87,7 +87,29 @@
                         {% endif %}
 
                         <dt class="col-auto">Acknowledgement</dt>
-                        <dd class="col-auto">{{ p.nihr_acknowledgement.name | default_if_none('Unvalidated') }}</dd>
+                        <dd class="col-auto">
+                            {% if current_user.has_role('validator') %}
+                                <div class="btn-toolbar float-right">
+                                    <div class="btn-group mr-1 mb-1" role="group">
+                                        {% set cls = 'btn-info' %}
+                                        {% if p.nihr_acknowledgement.name | default_if_none('Unvalidated') == 'Unvalidated' %}
+                                            {% set cls = 'btn-primary' %}
+                                        {% endif %}
+                                        <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn {{cls}} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            {{ p.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
+                                            <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{p.id}}" data-nihr_acknowledgement_id="-1">Unvalidated</a>
+                                            {% for n in nihr_acknowledgements %}
+                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{p.id}}" data-nihr_acknowledgement_id="{{ n.id }}">{{ n.name }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ p.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
+                            {% endif %}
+                        </dd>
                     </dl>
 
                     <dl>

@@ -61,6 +61,7 @@ def publications():
         publication_folder_form=PublicationFolderForm(),
         publications=publications,
         folders=folder_query.all(),
+        nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
 
 

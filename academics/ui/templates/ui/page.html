@@ -24,3 +24,33 @@
     {% endif %}
     {{ render_nav_link('ui.publication_auto_validate', 'Auto-validate', icon='far fa-check-circle') }}
 {% endblock %}
+
+{% block page_js %}
+
+<script>
+    async function nihr_acknowledgement() {
+        var button = $(window.event.target);
+
+        let response = await fetch("{{ url_for('ui.publication_nihr_acknowledgement') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                id: button.data('id'),
+                nihr_acknowledgement_id: button.data('nihr_acknowledgement_id'),
+            }),
+        })
+        let data = await response.json();
+        b = document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`)
+        b.innerHTML = data['status'];
+
+        if (data['status'] == 'Unknown') {
+            b.classList.remove("btn-info")
+            b.classList.add("btn-primary")
+        } else {
+            b.classList.remove("btn-primary")
+            b.classList.add("btn-info")
+        }
+    }
+
+</script>
+{% endblock %}
