@@ -1,6 +1,5 @@
 from flask import request
 from lbrc_flask.forms import SearchForm
-from lbrc_flask.api import validate_api_key
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 
 from academics.model import (NihrAcknowledgement, Theme)
@@ -29,8 +28,7 @@ class PublicationSearchForm(SearchForm):
         self.nihr_acknowledgement_id.choices = [('-1', 'Unvalidated')] + _get_nihr_acknowledgement_choices()
 
 
-@blueprint.route("/api/publications", methods=['GET', 'POST'])
-@validate_api_key()
+@blueprint.route("/publications", methods=['GET', 'POST'])
 def api_publications():
     search_form = PublicationSearchForm(formdata=request.args)
 

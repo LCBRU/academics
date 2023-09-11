@@ -2,6 +2,7 @@ from flask import Flask
 from academics.model import User
 
 from .ui import blueprint as ui_blueprint
+from .api import blueprint as api_blueprint
 from .config import Config
 from .admin import init_admin
 from lbrc_flask import init_lbrc_flask, ReverseProxied
@@ -24,5 +25,6 @@ def create_app(config=Config):
         init_celery(app, TITLE)
 
     app.register_blueprint(ui_blueprint)
+    app.register_blueprint(api_blueprint, url_prefix='/api')
 
     return app

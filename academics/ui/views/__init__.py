@@ -1,5 +1,4 @@
 __all__ = [
-    "api",
     "academics",
     "publications",
     "folders",
