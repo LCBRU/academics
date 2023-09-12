@@ -4,6 +4,8 @@ from lbrc_flask.database import db
 from lbrc_flask.security import User as BaseUser
 from itertools import chain
 
+from sqlalchemy import func, select
+
 
 class Theme(AuditMixin, CommonMixin, db.Model):
 
@@ -70,8 +72,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def document_count(self):
-        docs = {p.id for p in chain.from_iterable([a.scopus_publications for a in self.sources])}
-        return len(docs)
+        q =  (
+            select(func.count(ScopusPublication.id))
+            .where(ScopusPublication.sources.any(Source.academic_id == self.id))
+        )
+
+        return db.session.execute(q).scalar()
     
     @property
     def h_index(self):
@@ -116,6 +122,7 @@ class ScopusAuthor(Source):
     __tablename__ = "scopus_author"
 
     __mapper_args__ = {
+        "polymorphic_load": "inline",
         "polymorphic_identity": "scopus",
     }
 
