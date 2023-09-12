@@ -166,8 +166,6 @@
                                                     {% if au.orcid_mismatch %}
                                                         ORCID (<a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>) does not match parent academic
                                                     {% endif %}
-                                                </td>
-                                                <td>
                                                     {% if au.last_fetched_datetime %}
                                                         <div><span class="font-italic float-right">Last fetched from Scopus {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
                                                     {% endif %}
