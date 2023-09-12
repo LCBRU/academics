@@ -22,7 +22,6 @@
                 },
             ],
         ) }}
-
     </div>
 
     {{ pagination_summary(academics, 'academic') }}
@@ -37,12 +36,6 @@
                                 <h1>
                                     <span>{{a.full_name}}</span>
                                 </h1>
-                                <h2><strong>Theme: </strong>{{a.theme.name}}</h2>
-                                {% if a.orcid | blank_if_none | length > 0 %}
-                                    <h2><strong>ORCID: </strong><a href="{{a.orcid_link}}" target="_blank">{{a.orcid}}</a></h2>
-                                {% else %}
-                                    <a href="https://orcid.org/register" target="_blank">Register for ORCID</a>
-                                {% endif %}
                             </header>
                         </div>
                     </div>
@@ -88,7 +81,8 @@
                             </colgroup>
                             <thead>
                                 <tr>
-                                    <th>Author</th>
+                                    <th>ORCID</th>
+                                    <th>Theme</th>
                                     <th>Publications</th>
                                     <th>Citations</th>
                                     <th>h-index</th>
@@ -96,43 +90,94 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for au in a.scopus_authors %}
-                                    <tr>
-                                        <td>
-                                            <div>
-                                                <a class="author_delete"
+                                <tr>
+                                    <td>
+                                        {% if a.orcid | blank_if_none | length > 0 %}
+                                            <a href="{{a.orcid_link}}" target="_blank">{{a.orcid}}</a>
+                                        {% else %}
+                                            <a href="https://orcid.org/register" target="_blank">Register for ORCID</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{a.theme.name}}</td>
+                                    <td><a href="{{ url_for('ui.publications', academic_id=a.id ) }}">{{a.document_count}}</a></td>
+                                    <td>{{a.citation_count}}</td>
+                                    <td>{{a.h_index}}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h2>
+                            <a class="source collapsed" type="button" data-toggle="collapse" data-target="#sources_{{a.id}}" aria-expanded="false" aria-controls="sources_{{a.id}}">Sources</a>
+                        </h2>
+                          
+                        <div id="sources_{{a.id}}" class="collapse" aria-labelledby="headingOne">
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <colgroup>
+                                        <col style="width:5%">
+                                        <col style="width:30%">
+                                        <col style="width:10%">
+                                        <col style="width:10%">
+                                        <col style="width:10%">
+                                        <col style="width:10%">
+                                        <col style="width:20%">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Author</th>
+                                            <th>Source</th>
+                                            <th>Publications</th>
+                                            <th>Citations</th>
+                                            <th>h-index</th>
+                                            <th>Update Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for au in a.scopus_authors %}
+                                            <tr>
+                                                <td>
+                                                    <a class="author_delete"
                                                     data-toggle="modal"
                                                     data-id="{{ au.id }}"
                                                     data-name="{{ au.full_name }}"
                                                     title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
                                                     data-target="#deleteAuthorModal"
                                                     href="#"><i class="fas fa-trash"></i></a>
-                                                {% if au.error and current_user.is_admin %}
-                                                    <i class="fas fa-bug"></i>
-                                                {% endif %}
-                                                <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
-                                            </div>
-                                        </td>
-                                        <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
-                                        <td>{{au.citation_count}}</td>
-                                        <td>{{au.h_index}}</td>
-                                        <td>
-                                            {% if au.orcid_mismatch %}
-                                                ORCID (<a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>) does not match parent academic
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="5" class="small">
-                                            {% if au.last_fetched_datetime %}
-                                                <div><span class="font-italic float-right">Last fetched from Scopus {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
-                                            {% endif %}
-                                            <div><span class="text-muted">{{au.affiliation_name}}</span></div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                                    {% if au.error and current_user.is_admin %}
+                                                        <i class="fas fa-bug"></i>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
+                                                    </div>
+                                                    <div><span class="text-muted">{{au.affiliation_name}}</span></div>
+                                                </td>
+                                                <td>Scopus</td>
+                                                <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
+                                                <td>{{au.citation_count}}</td>
+                                                <td>{{au.h_index}}</td>
+                                                <td>
+                                                    {% if au.orcid_mismatch %}
+                                                        ORCID (<a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>) does not match parent academic
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if au.last_fetched_datetime %}
+                                                        <div><span class="font-italic float-right">Last fetched from Scopus {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </li>

@@ -1,8 +1,8 @@
-from multiprocessing.reduction import ACKNOWLEDGE
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 from lbrc_flask.security import User as BaseUser
+from itertools import chain
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):
@@ -57,7 +57,59 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def orcid_link(self):
         if self.orcid:
             return f'https://orcid.org/{self.orcid}'
-        
+
+    @property
+    def best_source(self):
+        if self._best_source:
+            return self._best_source
+        elif len(self.scopus_authors) == 0:
+            return None
+        else:
+            self._best_source = sorted(self.scopus_authors, lambda x: x.document_count)[0]
+            return self._best_source
+
+    @property
+    def document_count(self):
+        docs = {p.id for p in chain.from_iterable([a.scopus_publications for a in self.scopus_authors])}
+        return len(docs)
+    
+    @property
+    def h_index(self):
+        bs = self.best_source
+
+        if bs:
+            return bs.h_index
+
+    @property
+    def citation_count(self):
+        bs = self.best_source
+
+        if bs:
+            return bs.citation_count
+
+
+class Source(AuditMixin, CommonMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(100), nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "employee",
+        "polymorphic_on": "type",
+    }
+
+    academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
+    academic = db.relationship(Academic, backref=db.backref("sources", cascade="all,delete"))
+
+    source_id = db.Column(db.String(1000))
+    orcid = db.Column(db.String(255))
+
+    citation_count = db.Column(db.String(1000))
+    document_count = db.Column(db.String(1000))
+    h_index = db.Column(db.String(100))
+
+    last_fetched_datetime = db.Column(db.DateTime)
+    error = db.Column(db.Boolean, default=False)
+
 
 class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
 

@@ -1,0 +1,21 @@
+a.source {
+    background-color: transparent;
+    border: none;
+    color: var(--color-blue);
+    cursor: pointer;
+}
+
+a.source::after {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    content: "\f0d8";
+    margin-left: 1em;
+}
+
+a.source.collapsed::after {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    content: "\f0d7";
+    margin-left: 1em;
+}
+
