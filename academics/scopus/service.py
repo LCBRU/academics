@@ -109,8 +109,8 @@ def add_scopus_publications(els_author, scopus_author):
         if publication.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             publication.validation_historic = True
 
-        if scopus_author not in publication.scopus_authors:
-            publication.scopus_authors.append(scopus_author)
+        if scopus_author not in publication.sopurces:
+            publication.sources.append(scopus_author)
 
         _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
 
@@ -267,7 +267,7 @@ def _add_sponsors_to_publications(publication, sponsor_names):
 def update_single_academic(academic):
     logging.info('update_academic: started')
 
-    for au in academic.scopus_authors:
+    for au in academic.sources:
         au.error = False
         db.session.add(au)
     
@@ -289,7 +289,7 @@ def update_academics():
         for academic in Academic.query.all():
             logging.info(f'Setting academic {academic.full_name} to be updated')
 
-            for au in academic.scopus_authors:
+            for au in academic.sources:
                 au.error = False
                 db.session.add(au)
 
@@ -342,7 +342,7 @@ def _update_all_academics():
 def _update_academic(academic):
     logging.info(f'Updating Academic {academic.full_name}')
 
-    for sa in academic.scopus_authors:
+    for sa in academic.sources:
         if sa.error:
             logging.info(f'Scopus Author in ERROR')
             continue
@@ -414,6 +414,6 @@ def _add_authors_to_academic(scopus_ids, academic_id):
 
 
 def delete_orphan_publications():
-    for p in ScopusPublication.query.filter(~ScopusPublication.scopus_authors.any()):
+    for p in ScopusPublication.query.filter(~ScopusPublication.sources.any()):
         db.session.delete(p)
         db.session.commit()

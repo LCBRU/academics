@@ -2,7 +2,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Objective, ScopusAuthor, ScopusPublication, Subtype, Theme
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Objective, ScopusAuthor, ScopusPublication, Source, Subtype, Theme
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
@@ -112,7 +112,7 @@ def publication_search_query(search_form):
     q = select(ScopusPublication)
 
     if search_form.has_value('author_id'):
-        q = q.where(ScopusPublication.scopus_authors.any(ScopusAuthor.id == search_form.author_id.data))
+        q = q.where(ScopusPublication.sources.any(Source.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
         attribution = publication_attribution_query().alias()
@@ -210,7 +210,7 @@ def publication_attribution_query():
             Academic.id.label('academic_id'),
             func.row_number().over(partition_by=ScopusPublication.id, order_by=[func.count().desc(), Theme.id]).label('priority')
         )
-        .join(ScopusPublication.scopus_authors)
+        .join(ScopusPublication.sources)
         .join(ScopusAuthor.academic)
         .join(Theme, Theme.id == Academic.theme_id)
         .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))

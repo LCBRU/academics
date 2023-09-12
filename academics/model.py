@@ -45,10 +45,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         )
 
     def set_name(self):
-        if not self.scopus_authors:
+        if not self.sources:
             return
 
-        top_author = sorted(self.scopus_authors, key=lambda a: a.document_count, reverse=True)[0]
+        top_author = sorted(self.sources, key=lambda a: a.document_count, reverse=True)[0]
 
         self.first_name = top_author.first_name
         self.last_name = top_author.last_name
@@ -62,15 +62,15 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def best_source(self):
         if self._best_source:
             return self._best_source
-        elif len(self.scopus_authors) == 0:
+        elif len(self.sources) == 0:
             return None
         else:
-            self._best_source = sorted(self.scopus_authors, lambda x: x.document_count)[0]
+            self._best_source = sorted(self.sources, lambda x: x.document_count)[0]
             return self._best_source
 
     @property
     def document_count(self):
-        docs = {p.id for p in chain.from_iterable([a.scopus_publications for a in self.scopus_authors])}
+        docs = {p.id for p in chain.from_iterable([a.scopus_publications for a in self.sources])}
         return len(docs)
     
     @property
@@ -92,6 +92,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)
 
+    __tablename__ = "source"
     __mapper_args__ = {
         "polymorphic_identity": "source",
         "polymorphic_on": "type",
@@ -111,13 +112,14 @@ class Source(AuditMixin, CommonMixin, db.Model):
     error = db.Column(db.Boolean, default=False)
 
 
-class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
+class ScopusAuthor(Source):
+    __tablename__ = "scopus_author"
 
-    id = db.Column(db.Integer, primary_key=True)
-    academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
-    academic = db.relationship(Academic, backref=db.backref("scopus_authors", cascade="all,delete"))
+    __mapper_args__ = {
+        "polymorphic_identity": "scopus",
+    }
 
-    scopus_id = db.Column(db.String(1000))
+    id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
     eid = db.Column(db.String(1000))
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
@@ -126,13 +128,7 @@ class ScopusAuthor(AuditMixin, CommonMixin, db.Model):
     affiliation_address = db.Column(db.String(1000))
     affiliation_city = db.Column(db.String(1000))
     affiliation_country = db.Column(db.String(1000))
-    citation_count = db.Column(db.String(1000))
-    document_count = db.Column(db.String(1000))
-    h_index = db.Column(db.String(100))
     href = db.Column(db.String(1000))
-    orcid = db.Column(db.String(255))
-    error = db.Column(db.Boolean, default=False)
-    last_fetched_datetime = db.Column(db.DateTime)
 
     @property
     def full_name(self):
@@ -176,7 +172,7 @@ class Journal(db.Model):
 
 scopus_author__scopus_publication = db.Table(
     'scopus_author__scopus_publication',
-    db.Column('scopus_author_id', db.Integer(), db.ForeignKey('scopus_author.id'), primary_key=True),
+    db.Column('scopus_author_id', db.Integer(), db.ForeignKey('source.id'), primary_key=True),
     db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
 )
 
@@ -307,7 +303,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    scopus_authors = db.relationship("ScopusAuthor", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications"), lazy="joined")
+    sources = db.relationship("Source", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications"), lazy="joined")
 
     scopus_id = db.Column(db.String(1000))
     doi = db.Column(db.String(1000))
@@ -415,7 +411,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     @property
     def academics(self):
-        return {a.academic for a in self.scopus_authors}
+        return {a.academic for a in self.sources}
 
     @property
     def theme(self):

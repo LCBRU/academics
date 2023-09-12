@@ -166,7 +166,7 @@ def delete_author():
         db.session.delete(au)
         db.session.flush()
 
-        if not a.scopus_authors:
+        if not a.sources:
             db.session.delete(a)
 
         db.session.commit()

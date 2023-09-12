@@ -222,7 +222,7 @@ for p in [
         publication_cover_date=p['publication_cover_date'],
         subtype_id=1,
     )
-    sp.scopus_authors.append(ScopusAuthor.query.get(p['scopus_author_id']))
+    sp.sources.append(ScopusAuthor.query.get(p['scopus_author_id']))
     db.session.add(sp)
 
 db.session.commit()
