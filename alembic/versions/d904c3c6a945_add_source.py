@@ -29,6 +29,10 @@ def upgrade():
         sa.Column('h_index', sa.Unicode(1000)),
         sa.Column('last_fetched_datetime', sa.DateTime),
         sa.Column('error', sa.Boolean),
+        sa.Column('last_update_date', sa.DateTime),
+        sa.Column('last_update_by', sa.Unicode(200)),
+        sa.Column('created_date', sa.DateTime),
+        sa.Column('created_by', sa.Unicode(200)),
     )
 
 def downgrade():

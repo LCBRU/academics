@@ -93,7 +93,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     type = db.Column(db.String(100), nullable=False)
 
     __mapper_args__ = {
-        "polymorphic_identity": "employee",
+        "polymorphic_identity": "source",
         "polymorphic_on": "type",
     }
 
