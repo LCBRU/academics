@@ -14,7 +14,11 @@
     {% endif %}
 
     {{ render_nav_item('ui.folders', 'Folders', 'fas fa-folder') }}
-    {{ render_nav_item('ui.objectives', 'Objectives', 'fas fa-tasks') }}
+
+    {% if current_user.is_admin %}
+        {{ render_nav_item('ui.objectives', 'Objectives', 'fas fa-tasks') }}
+    {% endif %}
+
     {{ render_nav_item('ui.reports', 'Reports', 'fas fa-toilet-paper') }}
 
     {% if updating %}

@@ -2,11 +2,11 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Objective, ScopusAuthor, ScopusPublication, Source, Subtype, Theme
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, ScopusAuthor, ScopusPublication, Source, Subtype, Theme
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, or_
-from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField, BooleanField
-from lbrc_flask.forms import SearchForm, HiddenBooleanField
+from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
+from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem
 from lbrc_flask.database import db
@@ -58,10 +58,6 @@ def folder_select_choices():
     return [(f.id, f.name.title()) for f in Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all()]
 
 
-def objective_select_choices():
-    return [(o.id, o.name.title()) for o in Objective.query.order_by(Objective.name).all()]
-
-
 def nihr_acknowledgement_select_choices():
     return [(f.id, f.name.title()) for f in NihrAcknowledgement.query.order_by(NihrAcknowledgement.name).all()]
 
@@ -78,7 +74,6 @@ class PublicationSearchForm(SearchForm):
     academic_id = SelectField('Academic')
     main_academic_id = HiddenField('Main Academic ID')
     folder_id = SelectField('Folder')
-    objective_id = SelectField('Objective')
     supress_validation_historic = SelectField(
         'Suppress Historic',
         choices=[(True, 'Yes'), (False, 'No')],
@@ -95,7 +90,6 @@ class PublicationSearchForm(SearchForm):
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
         self.folder_id.choices = [('', '')] + folder_select_choices()
-        self.objective_id.choices = [('', '')] + objective_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
         self.academic_id.choices = academic_select_choices()
 
@@ -203,9 +197,6 @@ def publication_search_query(search_form):
 
     if search_form.has_value('folder_id'):
         q = q.where(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
-
-    if search_form.has_value('objective_id'):
-        q = q.where(ScopusPublication.objectives.any(Objective.id == search_form.objective_id.data))
 
     if search_form.supress_validation_historic.data == True:
         logging.info(f'Supressing Historic Publications')
