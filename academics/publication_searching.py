@@ -128,29 +128,26 @@ class ValidationSearchForm(SearchForm):
         self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
-def publication_search_query(search_form):
+def publication_search_query(search_form, attribution_cte=None):
     logging.info(f'publication_search_query started')
 
+    if attribution_cte is None:
+        attribution_cte = publication_attribution_query().cte()
+
     q = select(ScopusPublication)
+    q = q.join(attribution_cte, attribution_cte.c.scopus_publication_id == ScopusPublication.id)
 
     if search_form.has_value('author_id'):
         q = q.where(ScopusPublication.sources.any(Source.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
         if search_form.data['main_academic']:
-            attribution = publication_attribution_query().alias()
-            q = q.join(
-                attribution, attribution.c.scopus_publication_id == ScopusPublication.id
-            ).where(
-                attribution.c.academic_id == search_form.academic_id.data
-            )
+            q = q.where(attribution_cte.c.academic_id == search_form.academic_id.data)
         else:
             q = q.where(ScopusPublication.sources.any(Source.academic_id == search_form.academic_id.data))
 
     if search_form.has_value('theme_id'):
-        pub_themes = publication_attribution_query().alias()
-        q = q.join(pub_themes, pub_themes.c.scopus_publication_id == ScopusPublication.id)
-        q = q.where(pub_themes.c.theme_id == search_form.theme_id.data)
+        q = q.where(attribution_cte.c.theme_id == search_form.theme_id.data)
 
     if  search_form.has_value('journal_id'):
         q = q.where(ScopusPublication.journal_id.in_(search_form.journal_id.data))
@@ -269,34 +266,34 @@ def publication_summary(search_form):
 
 
 def get_publication_by_main_theme(search_form):
-    publications = publication_search_query(search_form).alias()
-    attribution = publication_attribution_query().alias()
+    attribution_cte = publication_attribution_query().cte()
+    publications = publication_search_query(search_form, attribution_cte=attribution_cte).alias()
 
     return select(
         publications.c.id.label('scopus_publication_id'),
         Theme.name.label('bucket')
     ).join(
-        attribution, attribution.c.scopus_publication_id == publications.c.id
+        attribution_cte, attribution_cte.c.scopus_publication_id == publications.c.id
     ).join(
-        Theme, Theme.id == attribution.c.theme_id
-    ).alias()
+        Theme, Theme.id == attribution_cte.c.theme_id
+    ).cte()
 
 
 def get_publication_by_main_academic(search_form):
-    publications = publication_search_query(search_form).alias()
-    attribution = publication_attribution_query().alias()
+    attribution_cte = publication_attribution_query().cte()
+    publications = publication_search_query(search_form, attribution_cte=attribution_cte).alias()
 
     return select(
         publications.c.id.label('scopus_publication_id'),
         func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
     ).join(
-        attribution, attribution.c.scopus_publication_id == publications.c.id
+        attribution_cte, attribution_cte.c.scopus_publication_id == publications.c.id
     ).join(
-        Academic, Academic.id == attribution.c.academic_id
+        Academic, Academic.id == attribution_cte.c.academic_id
     ).order_by(
         Academic.last_name,
         Academic.first_name,
-    ).alias()
+    ).cte()
 
 
 def get_publication_by_brc(search_form):
@@ -305,7 +302,7 @@ def get_publication_by_brc(search_form):
     return select(
         publications.c.id.label('scopus_publication_id'),
         literal('brc').label('bucket')
-    ).alias()
+    ).cte()
 
 
 def by_acknowledge_status(publications):

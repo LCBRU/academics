@@ -36,27 +36,21 @@ class PublicationSearchForm(SearchForm):
 
 @blueprint.route("/reports", methods=['GET', 'POST'])
 def reports():
-    print('A'*100)
     search_form = PublicationSearchForm(formdata=request.args)
 
     return render_template("ui/reports/reports.html", search_form=search_form, report_defs=get_report_defs(search_form))
 
 
 def get_report_defs(search_form):
-    print('B'*100)
     report_defs = []
 
     if search_form.total.data == 'Academic':
-        print('B1'*100)
         publications = publication_search_query(search_form).alias()
-        print('B2'*100)
         attribution = publication_attribution_query()
-        print('B3'*100)
 
         q = select(distinct(attribution.c.academic_id).label('academic_id')).join(
             publications, publications.c.id == attribution.c.scopus_publication_id
         )
-        print('B4'*100)
 
         for a in db.session.execute(q).mappings().all():
             x = search_form.raw_data_as_dict()
@@ -64,21 +58,17 @@ def get_report_defs(search_form):
             x['main_academic'] = 'True'
             x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
-        print('B-'*100)
     else:
         x = search_form.raw_data_as_dict()
         x['supress_validation_historic'] = search_form.supress_validation_historic.data
         report_defs.append(x)
-        print('B*'*100)
 
     return report_defs
 
 
 @blueprint.route("/reports/image")
 def report_image():
-    print('C'*100)
     search_form = PublicationSearchForm(formdata=request.args)
-    print('D'*100)
 
     if search_form.has_value('academic_id'):
         a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
