@@ -62,38 +62,24 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def best_source(self):
-        if self._best_source:
+        if hasattr(self, "_best_source"):
             return self._best_source
         elif len(self.sources) == 0:
             return None
         else:
-            self._best_source = sorted(self.sources, lambda x: x.document_count)[0]
+            self._best_source = sorted(self.sources, key=lambda x: x.document_count)[0]
             return self._best_source
 
     @property
-    def document_count(self):
+    def publication_count(self):
         q =  (
             select(func.count(ScopusPublication.id))
             .where(ScopusPublication.sources.any(Source.academic_id == self.id))
         )
 
         return db.session.execute(q).scalar()
+
     
-    @property
-    def h_index(self):
-        bs = self.best_source
-
-        if bs:
-            return bs.h_index
-
-    @property
-    def citation_count(self):
-        bs = self.best_source
-
-        if bs:
-            return bs.citation_count
-
-
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)

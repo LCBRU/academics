@@ -34,7 +34,7 @@
                         <div>
                             <header>
                                 <h1>
-                                    <span>{{a.full_name}}</span>
+                                    <span>{{a.full_name}} ({{a.theme.name}})</span>
                                 </h1>
                             </header>
                         </div>
@@ -69,12 +69,13 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col">
                         <table class="table table-sm">
                             <colgroup>
-                                <col style="width:35%">
-                                <col style="width:20%">
+                                <col style="width:30%">
+                                <col style="width:15%">
                                 <col style="width:15%">
                                 <col style="width:15%">
                                 <col style="width:15%">
@@ -82,11 +83,10 @@
                             <thead>
                                 <tr>
                                     <th>ORCID</th>
-                                    <th>Theme</th>
                                     <th>Publications</th>
+                                    <th>Document Count</th>
                                     <th>Citations</th>
-                                    <th>h-index</th>
-                                    <th></th>
+                                    <th>H-Index</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -98,16 +98,16 @@
                                             <a href="https://orcid.org/register" target="_blank">Register for ORCID</a>
                                         {% endif %}
                                     </td>
-                                    <td>{{a.theme.name}}</td>
-                                    <td><a href="{{ url_for('ui.publications', academic_id=a.id ) }}">{{a.document_count}}</a></td>
-                                    <td>{{a.citation_count}}</td>
-                                    <td>{{a.h_index}}</td>
-                                    <td></td>
+                                    <td><a href="{{ url_for('ui.publications', academic_id=a.id ) }}">{{a.publication_count}}</a></td>
+                                    <td>{{a.best_source.document_count}}</td>
+                                    <td>{{a.best_source.citation_count}}</td>
+                                    <td>{{a.best_source.h_index}}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col">
                         <h2>
