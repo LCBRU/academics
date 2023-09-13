@@ -72,7 +72,12 @@ class PublicationSearchForm(SearchForm):
     keywords = SelectMultipleField('Keywords')
     author_id = HiddenField('Author')
     academic_id = SelectField('Academic')
-    main_academic_id = HiddenField('Main Academic ID')
+    main_academic = SelectField(
+        'Main Academic',
+        choices=[(True, 'Yes'), (False, 'No')],
+        coerce=lambda x: x == 'True',
+        default='False',
+    )
     folder_id = SelectField('Folder')
     supress_validation_historic = SelectField(
         'Suppress Historic',
@@ -123,15 +128,15 @@ def publication_search_query(search_form):
         q = q.where(ScopusPublication.sources.any(Source.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
-        q = q.where(ScopusPublication.sources.any(Source.academic_id == search_form.academic_id.data))
-
-    if search_form.has_value('main_academic_id'):
-        attribution = publication_attribution_query().alias()
-        q = q.join(
-            attribution, attribution.c.scopus_publication_id == ScopusPublication.id
-        ).where(
-            attribution.c.academic_id == search_form.main_academic_id.data
-        )
+        if search_form.data['main_academic']:
+            attribution = publication_attribution_query().alias()
+            q = q.join(
+                attribution, attribution.c.scopus_publication_id == ScopusPublication.id
+            ).where(
+                attribution.c.academic_id == search_form.academic_id.data
+            )
+        else:
+            q = q.where(ScopusPublication.sources.any(Source.academic_id == search_form.academic_id.data))
 
     if search_form.has_value('theme_id'):
         pub_themes = publication_attribution_query().alias()

@@ -19,7 +19,8 @@ class PublicationSearchForm(SearchForm):
     measure = SelectField('Measure', choices=[('Percentage', 'Percentage'), ('Publications', 'Publications')])
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
-    main_academic_id = HiddenField()
+    academic_id = HiddenField()
+    main_academic = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_date = MonthField('Publication End Month')
     supress_validation_historic = SelectField(
@@ -56,7 +57,8 @@ def get_report_defs(search_form):
 
         for a in db.session.execute(q).mappings().all():
             x = search_form.raw_data_as_dict()
-            x['main_academic_id'] = a['academic_id']
+            x['academic_id'] = a['academic_id']
+            x['main_academic'] = 'True'
             x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
     else:
@@ -71,8 +73,8 @@ def get_report_defs(search_form):
 def report_image():
     search_form = PublicationSearchForm(formdata=request.args)
 
-    if search_form.has_value('main_academic_id'):
-        a : Academic = Academic.query.get_or_404(search_form.main_academic_id.data)
+    if search_form.has_value('academic_id'):
+        a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
 
         title = f'{a.full_name} Publications by Acknowledgement Status'
     elif search_form.has_value('theme_id') or search_form.total.data == "Theme":

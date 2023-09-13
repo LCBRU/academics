@@ -50,11 +50,6 @@ def publications():
 
     folder_query = Folder.query
 
-    if search_form.has_value("main_academic_id"):
-        main_academic = db.session.get(Academic, search_form.data['main_academic_id'])
-    else:
-        main_academic = None
-
     folder_query = folder_query.filter(or_(
         Folder.owner_id == current_user_id(),
         Folder.shared_users.any(User.id == current_user_id()),
@@ -67,7 +62,6 @@ def publications():
         publications=publications,
         folders=folder_query.all(),
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
-        main_academic=main_academic,
     )
 
 

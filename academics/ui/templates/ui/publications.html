@@ -35,10 +35,6 @@
 
     {{ pagination_summary(publications, 'publication') }}
 
-    {% if main_academic %}
-        <h2>Publications with {{ main_academic.full_name }} as the 'main' academic</h2>
-    {% endif %}
-
     <ul class="list-group">
         {% for p in publications.items %}
             <li class="list-group-item summary_details">
