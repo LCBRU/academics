@@ -213,11 +213,11 @@ def publication_attribution_query():
         .join(ScopusPublication.sources)
         .join(ScopusAuthor.academic)
         .join(Theme, Theme.id == Academic.theme_id)
-        .where(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
-        .where(func.coalesce(ScopusPublication.validation_historic, False) == False)
         .group_by(ScopusPublication.id, Theme.id, Theme.name)
         .order_by(ScopusPublication.id, func.count().desc(), Theme.id, Theme.name)
     ).alias()
+
+    print(publication_themes)
 
     return (
         select(
