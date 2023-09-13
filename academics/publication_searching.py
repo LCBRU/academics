@@ -10,9 +10,15 @@ from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem
 from lbrc_flask.database import db
-from lbrc_flask.logging import log_form
+from cachetools import cached, TTLCache
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=60))
+def theme_select_choices():
+    return [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
+
+
+@cached(cache=TTLCache(maxsize=1, ttl=60))
 def author_select_choices():
     return [('', '')] + [
         (a.id, f'{a.full_name} ({a.affiliation_name})')
@@ -22,6 +28,7 @@ def author_select_choices():
         ).all()]
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=60))
 def academic_select_choices():
     q = (
         select(Academic)
@@ -34,6 +41,7 @@ def academic_select_choices():
         for a in db.session.execute(q).scalars()]
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=60))
 def keyword_select_choices(search_string):
     q = Keyword.query.order_by(Keyword.keyword)
 
@@ -44,6 +52,7 @@ def keyword_select_choices(search_string):
     return [(k.id, k.keyword.title()) for k in q.all()]
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=60))
 def journal_select_choices(search_string):
     q = Journal.query.order_by(Journal.name)
 
@@ -54,10 +63,12 @@ def journal_select_choices(search_string):
     return [(j.id, j.name.title()) for j in q.all() if j.name]
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=60))
 def folder_select_choices():
     return [(f.id, f.name.title()) for f in Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all()]
 
 
+@cached(cache=TTLCache(maxsize=1, ttl=60))
 def nihr_acknowledgement_select_choices():
     return [(f.id, f.name.title()) for f in NihrAcknowledgement.query.order_by(NihrAcknowledgement.name).all()]
 
@@ -119,8 +130,6 @@ class ValidationSearchForm(SearchForm):
 
 def publication_search_query(search_form):
     logging.info(f'publication_search_query started')
-
-    log_form(search_form)
 
     q = select(ScopusPublication)
 
@@ -229,8 +238,6 @@ def publication_attribution_query():
         .group_by(ScopusPublication.id, Theme.id, Theme.name)
         .order_by(ScopusPublication.id, func.count().desc(), Theme.id, Theme.name)
     ).alias()
-
-    print(publication_themes)
 
     return (
         select(

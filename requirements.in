@@ -12,3 +12,4 @@ Flask-WeasyPrint
 alembic
 flask-security-too[fsqla,common]
 pyalex
+cachetools
