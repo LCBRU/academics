@@ -2,7 +2,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, ScopusAuthor, ScopusPublication, Source, Subtype, Theme
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, ScopusPublication, Source, Subtype, Theme
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
@@ -16,16 +16,6 @@ from cachetools import cached, TTLCache
 @cached(cache=TTLCache(maxsize=1, ttl=60))
 def theme_select_choices():
     return [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
-
-
-@cached(cache=TTLCache(maxsize=1, ttl=60))
-def author_select_choices():
-    return [('', '')] + [
-        (a.id, f'{a.full_name} ({a.affiliation_name})')
-        for a in ScopusAuthor.query.order_by(
-            ScopusAuthor.last_name,
-            ScopusAuthor.first_name
-        ).all()]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
@@ -101,7 +91,6 @@ class PublicationSearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
-        self.author_id.choices = author_select_choices()
         self.subtype_id.choices = [('', '')] + [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
@@ -230,7 +219,7 @@ def publication_attribution_query():
             func.row_number().over(partition_by=ScopusPublication.id, order_by=[func.count().desc(), Theme.id]).label('priority')
         )
         .join(ScopusPublication.sources)
-        .join(ScopusAuthor.academic)
+        .join(Source.academic)
         .join(Theme, Theme.id == Academic.theme_id)
         .group_by(ScopusPublication.id, Theme.id, Theme.name)
         .order_by(ScopusPublication.id, func.count().desc(), Theme.id, Theme.name)
