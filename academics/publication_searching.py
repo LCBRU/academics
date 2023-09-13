@@ -5,7 +5,7 @@ from flask_login import current_user
 from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Objective, ScopusAuthor, ScopusPublication, Source, Subtype, Theme
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, or_
-from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
+from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField, BooleanField
 from lbrc_flask.forms import SearchForm, HiddenBooleanField
 from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem
@@ -75,7 +75,12 @@ class PublicationSearchForm(SearchForm):
     academic_id = SelectField('Academic')
     folder_id = SelectField('Folder')
     objective_id = SelectField('Objective')
-    supress_validation_historic = HiddenBooleanField('supress_validation_historic')
+    supress_validation_historic = SelectField(
+        'Suppress Historic',
+        choices=[(True, 'Yes'), (False, 'No')],
+        coerce=lambda x: x == 'True',
+        default='False',
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -95,7 +100,12 @@ class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectField('Acknowledgement', default="-1")
-    supress_validation_historic = HiddenBooleanField('supress_validation_historic', default=True)
+    supress_validation_historic = SelectField(
+        'Suppress Historic',
+        choices=[(True, 'Yes'), (False, 'No')],
+        coerce=lambda x: x == 'True',
+        default='True',
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

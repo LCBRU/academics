@@ -22,7 +22,12 @@ class PublicationSearchForm(SearchForm):
     academic_id = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_date = MonthField('Publication End Month')
-    supress_validation_historic = HiddenField('supress_validation_historic', default=True)
+    supress_validation_historic = SelectField(
+        'Suppress Historic',
+        choices=[(True, 'Yes'), (False, 'No')],
+        coerce=lambda x: x == 'True',
+        default='True',
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -50,11 +55,14 @@ def get_report_defs(search_form):
         )
 
         for a in db.session.execute(q).mappings().all():
-            x = search_form.as_dict()
+            x = search_form.raw_data_as_dict()
             x['academic_id'] = a['academic_id']
+            x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
     else:
-        report_defs.append(search_form.as_dict())
+        x = search_form.raw_data_as_dict()
+        x['supress_validation_historic'] = search_form.supress_validation_historic.data
+        report_defs.append(x)
 
     return report_defs
 

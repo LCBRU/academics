@@ -38,6 +38,8 @@ def publications():
 
     q = q.order_by(ScopusPublication.publication_cover_date.desc())
 
+    print(search_form.data)
+
     publications = db.paginate(
         select=q,
         page=search_form.page.data,
