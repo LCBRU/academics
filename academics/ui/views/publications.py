@@ -11,7 +11,7 @@ from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import or_
 from wtforms import HiddenField
 
-from academics.model import (Folder, Journal, Keyword,
+from academics.model import (Academic, Folder, Journal, Keyword,
                              NihrAcknowledgement, ScopusAuthor,
                              ScopusPublication, Subtype, Theme, User)
 from academics.scopus.service import auto_validate
@@ -38,8 +38,6 @@ def publications():
 
     q = q.order_by(ScopusPublication.publication_cover_date.desc())
 
-    print(search_form.data)
-
     publications = db.paginate(
         select=q,
         page=search_form.page.data,
@@ -51,6 +49,11 @@ def publications():
     search_form.journal_id.choices = [(j.id, j.name.title()) for j in Journal.query.filter(Journal.id.in_(search_form.journal_id.data)).all()]
 
     folder_query = Folder.query
+
+    if search_form.has_value("main_academic_id"):
+        main_academic = db.session.get(Academic, search_form.data['main_academic_id'])
+    else:
+        main_academic = None
 
     folder_query = folder_query.filter(or_(
         Folder.owner_id == current_user_id(),
@@ -64,6 +67,7 @@ def publications():
         publications=publications,
         folders=folder_query.all(),
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
+        main_academic=main_academic,
     )
 
 

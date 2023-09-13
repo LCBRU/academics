@@ -73,6 +73,7 @@ class PublicationSearchForm(SearchForm):
     keywords = SelectMultipleField('Keywords')
     author_id = HiddenField('Author')
     academic_id = SelectField('Academic')
+    main_academic_id = HiddenField('Main Academic ID')
     folder_id = SelectField('Folder')
     objective_id = SelectField('Objective')
     supress_validation_historic = SelectField(
@@ -125,11 +126,14 @@ def publication_search_query(search_form):
         q = q.where(ScopusPublication.sources.any(Source.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
+        q = q.where(ScopusPublication.sources.any(Source.academic_id == search_form.academic_id.data))
+
+    if search_form.has_value('main_academic_id'):
         attribution = publication_attribution_query().alias()
         q = q.join(
             attribution, attribution.c.scopus_publication_id == ScopusPublication.id
         ).where(
-            attribution.c.academic_id == search_form.academic_id.data
+            attribution.c.academic_id == search_form.main_academic_id.data
         )
 
     if search_form.has_value('theme_id'):
