@@ -23,12 +23,15 @@ def author_select_choices():
 
 
 def academic_select_choices():
+    q = (
+        select(Academic)
+        .where(Academic.initialised == True)
+        .order_by(Academic.last_name, Academic.first_name)
+    )
+
     return [('', '')] + [
         (a.id, f'{a.full_name}')
-        for a in Academic.query.order_by(
-            Academic.last_name,
-            Academic.first_name
-        ).all()]
+        for a in db.session.execute(q).scalars()]
 
 
 def keyword_select_choices(search_string):
