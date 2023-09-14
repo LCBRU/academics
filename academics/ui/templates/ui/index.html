@@ -178,7 +178,7 @@
                                                 <td>{{au.h_index}}</td>
                                                 <td>
                                                     {% if au.error %}
-                                                        
+                                                        Error&nbsp;<i class="fas fa-exclamation-triangle"></i>
                                                     {% elif au.last_fetched_datetime %}
                                                         <i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
                                                     {% endif %}
