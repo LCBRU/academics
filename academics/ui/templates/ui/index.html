@@ -119,22 +119,24 @@
                                 <table class="table table-sm">
                                     <colgroup>
                                         <col style="width:5%">
-                                        <col style="width:30%">
-                                        <col style="width:10%">
-                                        <col style="width:10%">
-                                        <col style="width:10%">
-                                        <col style="width:10%">
+                                        <col style="width:25%">
                                         <col style="width:20%">
+                                        <col style="width:5%;">
+                                        <col style="width:5%;">
+                                        <col style="width:5%;">
+                                        <col style="width:5%;">
+                                        <col style="width:20%;">
                                     </colgroup>
                                     <thead>
                                         <tr>
                                             <th></th>
                                             <th>Author</th>
-                                            <th>Source</th>
-                                            <th>Publications</th>
-                                            <th>Citations</th>
+                                            <th>ORCID</th>
+                                            <th>Pubs</th>
+                                            <th>Docs</th>
+                                            <th>Cit.</th>
                                             <th>h-index</th>
-                                            <th>Update Status</th>
+                                            <th>Last Update</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -148,26 +150,34 @@
                                                     title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
                                                     data-target="#deleteAuthorModal"
                                                     href="#"><i class="fas fa-trash"></i></a>
-                                                    {% if au.error and current_user.is_admin %}
-                                                        <i class="fas fa-bug"></i>
-                                                    {% endif %}
                                                 </td>
                                                 <td>
                                                     <div>
-                                                        <a href="{{ au.href }}" target="_blank">{{au.full_name}}</a>
+                                                        <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.type | title}})</a>
                                                     </div>
-                                                    <div><span class="text-muted">{{au.affiliation_name}}</span></div>
+                                                    <div>
+                                                        {% if au.affiliation_name %}
+                                                            <span class="text-muted">{{au.affiliation_name}}</span>
+                                                        {% endif %}
+                                                    </div>
                                                 </td>
-                                                <td>Scopus</td>
-                                                <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.document_count}}</a></td>
+                                                <td>
+                                                    {% if au.orcid %}
+                                                        <a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>
+                                                        {% if au.orcid_mismatch %}
+                                                            &nbsp;<i class="fas fa-exclamation-triangle"></i>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                                <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.publication_count}}</a></td>
+                                                <td>{{au.document_count}}</td>
                                                 <td>{{au.citation_count}}</td>
                                                 <td>{{au.h_index}}</td>
                                                 <td>
-                                                    {% if au.orcid_mismatch %}
-                                                        ORCID (<a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>) does not match parent academic
-                                                    {% endif %}
-                                                    {% if au.last_fetched_datetime %}
-                                                        <div><span class="font-italic float-right">Last fetched from Scopus {{ au.last_fetched_datetime | datetime_humanize }}</span></div>
+                                                    {% if au.error %}
+                                                        
+                                                    {% elif au.last_fetched_datetime %}
+                                                        <i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
                                                     {% endif %}
                                                 </td>
                                             </tr>

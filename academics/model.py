@@ -103,6 +103,15 @@ class Source(AuditMixin, CommonMixin, db.Model):
     last_fetched_datetime = db.Column(db.DateTime)
     error = db.Column(db.Boolean, default=False)
 
+    @property
+    def publication_count(self):
+        q =  (
+            select(func.count(ScopusPublication.id))
+            .where(ScopusPublication.sources.any(Source.id == self.id))
+        )
+
+        return db.session.execute(q).scalar()
+
 
 class ScopusAuthor(Source):
     __tablename__ = "scopus_author"
@@ -114,6 +123,7 @@ class ScopusAuthor(Source):
 
     id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
     eid = db.Column(db.String(1000))
+    orcid = db.Column(db.String(255))
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     affiliation_id = db.Column(db.String(255))
@@ -150,9 +160,13 @@ class ScopusAuthor(Source):
 
     @property
     def orcid_mismatch(self):
+        print('A'*100)
+        print(self.orcid)
         if self.academic.orcid and self.orcid:
+            print('B'*100)
             return self.academic.orcid != self.orcid
         else:
+            print('C'*100)
             return False
 
 
