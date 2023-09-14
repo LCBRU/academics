@@ -102,9 +102,9 @@
                                         {% endif %}
                                     </td>
                                     <td><a href="{{ url_for('ui.publications', academic_id=a.id ) }}">{{a.publication_count}}</a></td>
-                                    <td>{{a.best_source.document_count}}</td>
-                                    <td>{{a.best_source.citation_count}}</td>
-                                    <td>{{a.best_source.h_index}}</td>
+                                    <td>{{a.best_source.document_count | blank_if_none}}</td>
+                                    <td>{{a.best_source.citation_count | blank_if_none}}</td>
+                                    <td>{{a.best_source.h_index | blank_if_none}}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -178,9 +178,9 @@
                                                     {% endif %}
                                                 </td>
                                                 <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.publication_count}}</a></td>
-                                                <td>{{au.document_count}}</td>
-                                                <td>{{au.citation_count}}</td>
-                                                <td>{{au.h_index}}</td>
+                                                <td>{{au.document_count | blank_if_none}}</td>
+                                                <td>{{au.citation_count | blank_if_none}}</td>
+                                                <td>{{au.h_index | blank_if_none}}</td>
                                                 <td>
                                                     {% if au.error %}
                                                         <i class="fas fa-exclamation-triangle"></i>&nbsp;Error
