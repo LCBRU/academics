@@ -79,7 +79,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
         return db.session.execute(q).scalar()
 
-    
+    @property
+    def orcid_mismatch(self):
+        return any([s.orcid_mismatch for s in self.sources])
+
+
+
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)
@@ -112,6 +117,18 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
         return db.session.execute(q).scalar()
 
+    @property
+    def orcid_mismatch(self):
+        if self.academic.orcid and self.orcid:
+            return self.academic.orcid != self.orcid
+        else:
+            return False
+
+    @property
+    def orcid_link(self):
+        if self.orcid:
+            return f'https://orcid.org/{self.orcid}'
+
 
 class ScopusAuthor(Source):
     __tablename__ = "scopus_author"
@@ -123,7 +140,6 @@ class ScopusAuthor(Source):
 
     id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
     eid = db.Column(db.String(1000))
-    orcid = db.Column(db.String(255))
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     affiliation_id = db.Column(db.String(255))
@@ -143,11 +159,6 @@ class ScopusAuthor(Source):
         )
 
     @property
-    def orcid_link(self):
-        if self.orcid:
-            return f'https://orcid.org/{self.orcid}'
-
-    @property
     def affiliation_full_address(self):
         return ', '.join(
             filter(len, [
@@ -157,17 +168,6 @@ class ScopusAuthor(Source):
                 self.affiliation_country,
             ])
         )
-
-    @property
-    def orcid_mismatch(self):
-        print('A'*100)
-        print(self.orcid)
-        if self.academic.orcid and self.orcid:
-            print('B'*100)
-            return self.academic.orcid != self.orcid
-        else:
-            print('C'*100)
-            return False
 
 
 class Journal(db.Model):

@@ -94,6 +94,9 @@
                                     <td>
                                         {% if a.orcid | blank_if_none | length > 0 %}
                                             <a href="{{a.orcid_link}}" target="_blank">{{a.orcid}}</a>
+                                            {% if a.orcid_mismatch %}
+                                                &nbsp;<i class="fas fa-exclamation-triangle" title="ORCID Mismatch with Sources"></i>
+                                            {% endif %}
                                         {% else %}
                                             <a href="https://orcid.org/register" target="_blank">Register for ORCID</a>
                                         {% endif %}
@@ -165,7 +168,7 @@
                                                     {% if au.orcid %}
                                                         <a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>
                                                         {% if au.orcid_mismatch %}
-                                                            &nbsp;<i class="fas fa-exclamation-triangle"></i>
+                                                            &nbsp;<i class="fas fa-exclamation-triangle" title="ORCID Mismatch"></i>
                                                         {% endif %}
                                                     {% endif %}
                                                 </td>
