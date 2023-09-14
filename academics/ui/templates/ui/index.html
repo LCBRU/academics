@@ -114,7 +114,12 @@
                 <div class="row">
                     <div class="col">
                         <h2>
-                            <a class="source collapsed" type="button" data-toggle="collapse" data-target="#sources_{{a.id}}" aria-expanded="false" aria-controls="sources_{{a.id}}">Sources</a>
+                            <a class="source collapsed" type="button" data-toggle="collapse" data-target="#sources_{{a.id}}" aria-expanded="false" aria-controls="sources_{{a.id}}">
+                                Sources
+                                {% if a.source_errors %}
+                                    &nbsp;<i class="fas fa-exclamation-triangle" title="Sources in Error"></i>
+                                {% endif %}
+                            </a>
                         </h2>
                           
                         <div id="sources_{{a.id}}" class="collapse" aria-labelledby="headingOne">
@@ -160,7 +165,7 @@
                                                     </div>
                                                     <div>
                                                         {% if au.affiliation_name %}
-                                                            <span class="text-muted">{{au.affiliation_name}}</span>
+                                                            <span class="text-muted>{{au.affiliation_name}}</span>
                                                         {% endif %}
                                                     </div>
                                                 </td>
@@ -178,7 +183,7 @@
                                                 <td>{{au.h_index}}</td>
                                                 <td>
                                                     {% if au.error %}
-                                                        Error&nbsp;<i class="fas fa-exclamation-triangle"></i>
+                                                        <i class="fas fa-exclamation-triangle"></i>&nbsp;Error
                                                     {% elif au.last_fetched_datetime %}
                                                         <i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
                                                     {% endif %}

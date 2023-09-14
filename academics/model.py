@@ -83,6 +83,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def orcid_mismatch(self):
         return any([s.orcid_mismatch for s in self.sources])
 
+    @property
+    def source_errors(self):
+        return any([s.error for s in self.sources])
+
 
 
 class Source(AuditMixin, CommonMixin, db.Model):
