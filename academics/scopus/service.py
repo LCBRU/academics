@@ -333,8 +333,8 @@ def _update_all_academics():
 
             sleep(30)
 
-    delete_orphan_publications()
-    auto_validate()
+    # delete_orphan_publications()
+    # auto_validate()
 
     logging.info('_update_all_academics: Ended')
 
