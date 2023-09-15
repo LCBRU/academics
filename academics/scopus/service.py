@@ -109,7 +109,7 @@ def add_scopus_publications(els_author, scopus_author):
         if publication.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             publication.validation_historic = True
 
-        if scopus_author not in publication.sopurces:
+        if scopus_author not in publication.sources:
             publication.sources.append(scopus_author)
 
         _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
