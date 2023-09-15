@@ -365,9 +365,10 @@ def _update_academic(academic):
 
 
 def _find_new_scopus_sources(academic):
-    ball_deoderant = author_search(academic.last_name)
+    logging.info(f'Finding new sources for {academic.full_name}')
 
-    print(ball_deoderant)
+    for a in author_search(academic.last_name):
+        logging.info(f'Found new source: {a.scopus_id}')
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
@@ -414,9 +415,6 @@ def _add_authors_to_academic(scopus_ids, academic_id):
 
     db.session.add(academic)
     db.session.commit()
-
-    delete_orphan_publications()
-    auto_validate()
 
     logging.info('_add_authors_to_academic: ended')
 
