@@ -370,6 +370,8 @@ def _update_academic(academic):
         finally:
             db.session.add(sa)
 
+        logging.info(f'H')
+
 
 def _find_new_scopus_sources(academic):
     logging.info(f'Finding new sources for {academic.full_name}')
