@@ -47,19 +47,13 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         )
 
     def set_name(self):
-        logging.info('1')
         if not self.sources:
-            logging.info('2')
             return
 
-        logging.info('3')
         top_author = sorted(self.sources, key=lambda a: int(a.document_count), reverse=True)[0]
 
-        logging.info('4')
         self.first_name = top_author.first_name
-        logging.info('5')
         self.last_name = top_author.last_name
-        logging.info('6')
 
     @property
     def orcid_link(self):

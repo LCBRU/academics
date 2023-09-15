@@ -318,34 +318,23 @@ def _update_all_academics():
         try:
             _update_academic(a)
 
-            logging.info('A-1-1-1-1-1-')
             a.set_name()
-            logging.info('B')
             a.updating = False
-            logging.info('C')
             db.session.add(a)
-            logging.info('D')
 
             db.session.commit()
-            logging.info('E')
         except Exception as e:
-            logging.info('F')
             logging.error(e)
-            logging.info('G')
 
             a.error = True
-            logging.info('H')
             db.session.add(a)
-            logging.info('I')
 
             db.session.commit()
-            logging.info('J')
 
             sleep(30)
-            logging.info('K')
 
-    # delete_orphan_publications()
-    # auto_validate()
+    delete_orphan_publications()
+    auto_validate()
 
     logging.info('_update_all_academics: Ended')
 
@@ -380,7 +369,7 @@ def _find_new_scopus_sources(academic):
     logging.info(f'Finding new sources for {academic.full_name}')
 
     for a in author_search(academic.last_name):
-        logging.info(f'Found new source: {a}')
+        logging.info(f'Found new source: {a.scopus_id}')
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
