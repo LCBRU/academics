@@ -365,7 +365,9 @@ def _update_academic(academic):
 
 
 def _find_new_scopus_sources(academic):
-    return
+    ball_deoderant = author_search(academic.last_name)
+
+    print(ball_deoderant)
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
