@@ -368,7 +368,7 @@ def _find_new_scopus_sources(academic):
     logging.info(f'Finding new sources for {academic.full_name}')
 
     for a in author_search(academic.last_name):
-        logging.info(f'Found new source: {a.scopus_id}')
+        logging.info(f'Found new source: {a}')
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
