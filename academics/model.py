@@ -88,7 +88,6 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         return any([s.error for s in self.sources])
 
 
-
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)
@@ -102,7 +101,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
     academic = db.relationship(Academic, backref=db.backref("sources", cascade="all,delete"))
 
-    source_id = db.Column(db.String(1000))
+    source_identifier = db.Column(db.String(1000))
     orcid = db.Column(db.String(255))
 
     citation_count = db.Column(db.String(1000))
@@ -132,6 +131,15 @@ class Source(AuditMixin, CommonMixin, db.Model):
     def orcid_link(self):
         if self.orcid:
             return f'https://orcid.org/{self.orcid}'
+
+
+class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
+    academic = db.relationship(Academic, backref=db.backref("potential_sources", cascade="all,delete"))
+    source_id = db.Column(db.Integer, db.ForeignKey(Source.id))
+    source = db.relationship(Source, backref=db.backref("potential_authors", cascade="all,delete"))
+    not_match = db.Column(db.Boolean, default=False)
 
 
 class ScopusAuthor(Source):

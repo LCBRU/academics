@@ -342,6 +342,8 @@ def _update_all_academics():
 def _update_academic(academic):
     logging.info(f'Updating Academic {academic.full_name}')
 
+    _find_new_scopus_sources(academic)
+
     for sa in academic.sources:
         if sa.error:
             logging.info(f'Scopus Author in ERROR')
@@ -360,6 +362,10 @@ def _update_academic(academic):
             sa.error = True
         finally:
             db.session.add(sa)
+
+
+def _find_new_scopus_sources(academic):
+    return
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
