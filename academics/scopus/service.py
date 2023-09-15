@@ -350,7 +350,7 @@ def _update_academic(academic):
             continue
 
         try:
-            els_author = get_els_author(sa.source_id)
+            els_author = get_els_author(sa.source_identifier)
             els_author.update_scopus_author(sa)
 
             add_scopus_publications(els_author, sa)
