@@ -345,18 +345,25 @@ def _update_academic(academic):
     _find_new_scopus_sources(academic)
 
     for sa in academic.sources:
+        logging.info(f'A')
         if sa.error:
             logging.info(f'Scopus Author in ERROR')
             continue
 
         try:
+            logging.info(f'B')
             els_author = get_els_author(sa.source_identifier)
+            logging.info(f'C')
             els_author.update_scopus_author(sa)
 
+            logging.info(f'D')
             add_scopus_publications(els_author, sa)
 
+            logging.info(f'E')
             sa.last_fetched_datetime = datetime.utcnow()
+            logging.info(f'F')
         except Exception as e:
+            logging.info(f'G')
             log_exception(e)
             logging.info(f'Setting Academic {academic.full_name} to be in error')
             sa.error = True
