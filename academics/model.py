@@ -53,7 +53,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             return
 
         logging.info('3')
-        top_author = sorted(self.sources, key=lambda a: a.document_count, reverse=True)[0]
+        top_author = sorted(self.sources, key=lambda a: int(a.document_count), reverse=True)[0]
 
         logging.info('4')
         self.first_name = top_author.first_name
