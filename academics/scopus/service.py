@@ -342,8 +342,6 @@ def _update_all_academics():
 def _update_academic(academic):
     logging.info(f'Updating Academic {academic.full_name}')
 
-    _find_new_scopus_sources(academic)
-
     for sa in academic.sources:
         logging.info(f'A')
         if sa.error:
@@ -371,6 +369,8 @@ def _update_academic(academic):
             db.session.add(sa)
 
         logging.info(f'H')
+
+    _find_new_scopus_sources(academic)
 
 
 def _find_new_scopus_sources(academic):
