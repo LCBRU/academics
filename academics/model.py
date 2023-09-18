@@ -500,7 +500,7 @@ class Evidence(db.Model, AuditMixin):
 
 
 class EvidencePublication(Evidence):
-    publication_id = db.Column(db.Integer, db.ForeignKey(ScopusPublication.id))
+    scopus_publication_id = db.Column(db.Integer, db.ForeignKey(ScopusPublication.id))
     publication = db.relationship(ScopusPublication, backref=db.backref("evidences", cascade="all,delete"))
 
     __mapper_args__ = {
