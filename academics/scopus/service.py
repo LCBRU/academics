@@ -42,10 +42,10 @@ def author_search(search_string):
     for r in auth_srch.results:
         a = AuthorSearch(r)
 
-        if len(a.scopus_id) == 0:
+        if len(a.source_identifier) == 0:
             continue
 
-        a.existing = a.scopus_id in existing_scopus_ids
+        a.existing = a.source_identifier in existing_scopus_ids
 
         result.append(a)
 

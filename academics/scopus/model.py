@@ -10,7 +10,7 @@ from elsapy.elsdoc import AbsDoc
 @dataclass
 class AuthorSearch():
 
-    scopus_id: str
+    source_identifier: str
     eid: str
     first_name: str
     last_name: str
@@ -21,7 +21,7 @@ class AuthorSearch():
     existing : bool = False
     
     def __init__(self, data):
-        self.scopus_id = data.get(u'dc:identifier', ':').split(':')[1]
+        self.source_identifier = data.get(u'dc:identifier', ':').split(':')[1]
         self.eid = data.get(u'eid', '')
         self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
         self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
@@ -51,9 +51,9 @@ class AuthorSearch():
 
 
 class Author(ElsAuthor):
-    def __init__(self, scopus_id):
-        self.scopus_id = scopus_id
-        super().__init__(author_id=self.scopus_id)
+    def __init__(self, source_identifier):
+        self.source_identifier = source_identifier
+        super().__init__(author_id=self.source_identifier)
 
     @property
     def href(self):
@@ -101,7 +101,7 @@ class Author(ElsAuthor):
         return result
 
     def update_scopus_author(self, scopus_author):
-        scopus_author.scopus_id = self.scopus_id
+        scopus_author.source_identifier = self.source_identifier
         scopus_author.eid = self.eid
         scopus_author.orcid = self.orcid
         scopus_author.first_name = self.first_name
@@ -197,5 +197,5 @@ class Abstract(AbsDoc):
 
 class DocumentSearch(ElsSearch):
     def __init__(self, author):
-        super().__init__(query=f'au-id({author.scopus_id})', index='scopus')
+        super().__init__(query=f'au-id({author.source_identifier})', index='scopus')
         self._uri += '&view=complete'
