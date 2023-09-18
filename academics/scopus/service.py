@@ -35,7 +35,7 @@ def author_search(search_string):
     auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
     auth_srch.execute(_client())
 
-    existing_scopus_ids = [id for id, in ScopusAuthor.query.with_entities(ScopusAuthor.source_identifier).all()]
+    existing_source_identifiers = [id for id, in ScopusAuthor.query.with_entities(ScopusAuthor.source_identifier).all()]
 
     result = []
 
@@ -45,16 +45,16 @@ def author_search(search_string):
         if len(a.source_identifier) == 0:
             continue
 
-        a.existing = a.source_identifier in existing_scopus_ids
+        a.existing = a.source_identifier in existing_source_identifiers
 
         result.append(a)
 
     return result
 
 
-def get_els_author(scopus_id):
-    logging.info(f'Getting Scopus Author {scopus_id}')
-    result = Author(scopus_id)
+def get_els_author(source_identifier):
+    logging.info(f'Getting Scopus Author {source_identifier}')
+    result = Author(source_identifier)
 
     if not result.read(_client()):
         logging.info(f'Scopus Author not read from Scopus')
@@ -368,19 +368,19 @@ def _update_academic(academic):
 def _find_new_scopus_sources(academic):
     logging.info(f'Finding new sources for {academic.full_name}')
 
-    new_scopus_ids = {a.scopus_id for a in author_search(academic.last_name)}
+    new_source_identifiers = {a.source_identifier for a in author_search(academic.last_name)}
 
-    logging.info(f'Found new sources: {new_scopus_ids}')
+    logging.info(f'Found new sources: {new_source_identifiers}')
 
-    existing_ids = set(db.session.execute(
+    existing_identifiers = set(db.session.execute(
         select(ScopusAuthor.source_identifier)
-        .where(ScopusAuthor.source_identifier.in_(new_scopus_ids))
+        .where(ScopusAuthor.source_identifier.in_(new_source_identifiers))
     ).scalars())
 
-    logging.info(f'Existing sources: {existing_ids}')
+    logging.info(f'Existing sources: {existing_identifiers}')
 
-    for scopus_id in (new_scopus_ids - existing_ids):
-        els_author = get_els_author(scopus_id)
+    for identifiers in (new_source_identifiers - existing_identifiers):
+        els_author = get_els_author(identifiers)
         sa = els_author.get_scopus_author()
 
         aps = AcademicPotentialSource(
@@ -394,7 +394,7 @@ def _find_new_scopus_sources(academic):
     db.session.commit()
 
 
-def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
+def add_authors_to_academic(source_identifiers, academic_id=None, theme_id=None):
     academic = None
 
     if academic_id:
@@ -413,17 +413,17 @@ def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
     db.session.add(academic)
     db.session.commit()
 
-    _add_authors_to_academic.delay(scopus_ids, academic_id=academic.id)
+    _add_authors_to_academic.delay(source_identifiers, academic_id=academic.id)
 
 
 @celery.task()
-def _add_authors_to_academic(scopus_ids, academic_id):
+def _add_authors_to_academic(source_identifiers, academic_id):
     logging.info('_add_authors_to_academic: started')
 
     academic = db.sessio.get(Academic, academic_id)
 
-    for scopus_id in scopus_ids:
-        els_author = get_els_author(scopus_id)
+    for source_identifier in source_identifiers:
+        els_author = get_els_author(source_identifier)
         sa = els_author.get_scopus_author()
         sa.academic = academic
 

@@ -19,7 +19,7 @@ def _get_academic_choices():
 
 
 class AddAuthorForm(FlashingForm):
-    scopus_id = HiddenField()
+    source_identifier = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
     theme_id = SelectField('Theme', coerce=int)
 
@@ -134,7 +134,7 @@ def add_author():
     form = AddAuthorForm()
 
     add_authors_to_academic(
-        request.form.getlist('scopus_id'),
+        request.form.getlist('source_identifier'),
         form.academic_id.data,
         form.theme_id.data,
     )

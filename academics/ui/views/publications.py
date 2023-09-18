@@ -117,7 +117,7 @@ def publication_folders():
 def publication_full_export_xlsx():
     # Use of dictionary instead of set to maintain order of headers
     headers = {
-        'scopus_id': None,
+        'source_identifier': None,
         'doi': None,
         'pubmed_id': None,
         'journal': None,
