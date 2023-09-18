@@ -384,8 +384,8 @@ def _find_new_scopus_sources(academic):
         sa = els_author.get_scopus_author()
 
         aps = AcademicPotentialSource(
-            academic_id=academic.id,
-            source_id=sa.id,
+            academic=academic,
+            source=sa,
         )
 
         db.session.add(sa)
