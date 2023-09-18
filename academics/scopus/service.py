@@ -37,7 +37,7 @@ def author_search(search_string):
 
     existing_source_identifiers = set(db.session.execute(
         select(ScopusAuthor.source_identifier)
-        .where(ScopusAuthor.academic_id == None)
+        .where(ScopusAuthor.academic_id != None)
     ).scalars())
 
     result = []
