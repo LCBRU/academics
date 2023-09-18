@@ -372,10 +372,10 @@ def _find_new_scopus_sources(academic):
 
     logging.info(f'Found new sources: {scopus_ids}')
 
-    existing_ids = {db.session.execute(
+    existing_ids = set(db.session.execute(
         select(ScopusAuthor.source_identifier)
         .where(ScopusAuthor.source_identifier.in_(scopus_ids))
-    ).scalars()}
+    ).scalars())
 
     logging.info(f'Existing sources: {existing_ids}')
 
