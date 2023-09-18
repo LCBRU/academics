@@ -423,7 +423,7 @@ def add_authors_to_academic(source_identifiers, academic_id=None, theme_id=None)
 def _add_authors_to_academic(source_identifiers, academic_id):
     logging.info('_add_authors_to_academic: started')
 
-    academic = db.sessio.get(Academic, academic_id)
+    academic = db.session.get(Academic, academic_id)
 
     for source_identifier in source_identifiers:
         els_author = get_els_author(source_identifier)
