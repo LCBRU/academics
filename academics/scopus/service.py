@@ -5,7 +5,7 @@ from flask import current_app
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, select
 from academics.model import Academic, FundingAcr, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Sponsor, Subtype
 from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
@@ -371,6 +371,13 @@ def _find_new_scopus_sources(academic):
     scopus_ids = [a.scopus_id for a in author_search(academic.last_name)]
 
     logging.info(f'Found new sources: {scopus_ids}')
+
+    existing_ids = {db.session.execute(
+        select(ScopusAuthor.source_id)
+        .where(ScopusAuthor.source_id.in_(scopus_ids))
+    ).scalars()}
+
+    logging.info(f'Existing sources: {existing_ids}')
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
