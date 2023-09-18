@@ -6,7 +6,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from sqlalchemy import and_, or_, select
-from academics.model import Academic, FundingAcr, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Sponsor, Subtype
+from academics.model import Academic, AcademicPotentialSource, FundingAcr, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Sponsor, Subtype
 from lbrc_flask.celery import celery
 from .model import Abstract, AuthorSearch, Author, DocumentSearch
 from lbrc_flask.database import db
@@ -368,16 +368,30 @@ def _update_academic(academic):
 def _find_new_scopus_sources(academic):
     logging.info(f'Finding new sources for {academic.full_name}')
 
-    scopus_ids = [a.scopus_id for a in author_search(academic.last_name)]
+    new_scopus_ids = {a.scopus_id for a in author_search(academic.last_name)}
 
-    logging.info(f'Found new sources: {scopus_ids}')
+    logging.info(f'Found new sources: {new_scopus_ids}')
 
     existing_ids = set(db.session.execute(
         select(ScopusAuthor.source_identifier)
-        .where(ScopusAuthor.source_identifier.in_(scopus_ids))
+        .where(ScopusAuthor.source_identifier.in_(new_scopus_ids))
     ).scalars())
 
     logging.info(f'Existing sources: {existing_ids}')
+
+    for scopus_id in (new_scopus_ids - existing_ids):
+        els_author = get_els_author(scopus_id)
+        sa = els_author.get_scopus_author()
+
+        aps = AcademicPotentialSource(
+            academic=academic,
+            source=sa,
+        )
+
+        db.session.add(sa)
+        db.session.add(aps)
+    
+    db.session.commit()
 
 
 def add_authors_to_academic(scopus_ids, academic_id=None, theme_id=None):
