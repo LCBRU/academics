@@ -35,7 +35,10 @@ def author_search(search_string):
     auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
     auth_srch.execute(_client())
 
-    existing_source_identifiers = [id for id, in ScopusAuthor.query.with_entities(ScopusAuthor.source_identifier).all()]
+    existing_source_identifiers = set(db.session.execute(
+        select(ScopusAuthor.source_identifier)
+        .where(ScopusAuthor.academic_id == None)
+    ).scalars())
 
     result = []
 
