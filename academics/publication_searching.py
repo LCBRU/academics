@@ -73,12 +73,6 @@ class PublicationSearchForm(SearchForm):
     keywords = SelectMultipleField('Keywords')
     author_id = HiddenField('Author')
     academic_id = SelectField('Academic')
-    main_academic = SelectField(
-        'Main Academic',
-        choices=[(True, 'Yes'), (False, 'No')],
-        coerce=lambda x: x == 'True',
-        default='False',
-    )
     folder_id = SelectField('Folder')
     supress_validation_historic = SelectField(
         'Suppress Historic',
@@ -117,26 +111,25 @@ class ValidationSearchForm(SearchForm):
         self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
-def publication_search_query(search_form, attribution_cte=None):
+def publication_search_query(search_form):
     logging.info(f'publication_search_query started')
 
-    if attribution_cte is None:
-        attribution_cte = publication_attribution_query().cte()
-
     q = select(ScopusPublication)
-    q = q.join(attribution_cte, attribution_cte.c.scopus_publication_id == ScopusPublication.id)
 
     if search_form.has_value('author_id'):
         q = q.where(ScopusPublication.sources.any(Source.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
-        if search_form.data['main_academic']:
-            q = q.where(attribution_cte.c.academic_id == search_form.academic_id.data)
-        else:
-            q = q.where(ScopusPublication.sources.any(Source.academic_id == search_form.academic_id.data))
+        q = q.where(ScopusPublication.sources.any(Source.academic_id == search_form.academic_id.data))
 
     if search_form.has_value('theme_id'):
-        q = q.where(attribution_cte.c.theme_id == search_form.theme_id.data)
+        q = q.where(ScopusPublication.sources.any(
+            Source.academic_id.in_(
+                select(Academic.id)
+                .where(Academic.theme_id == search_form.theme_id.data)
+                )
+            )
+        )
 
     if  search_form.has_value('journal_id'):
         q = q.where(ScopusPublication.journal_id.in_(search_form.journal_id.data))
@@ -210,37 +203,17 @@ def publication_search_query(search_form, attribution_cte=None):
     return q
 
 
-def publication_attribution_query():
-    publication_themes = (
-        select(
-            ScopusPublication.id.label('scopus_publication_id'),
-            Theme.id.label('theme_id'),
-            Academic.id.label('academic_id'),
-            func.row_number().over(partition_by=ScopusPublication.id, order_by=[func.count().desc(), Theme.id]).label('priority')
-        )
-        .join(ScopusPublication.sources)
-        .join(Source.academic)
-        .join(Theme, Theme.id == Academic.theme_id)
-        .group_by(ScopusPublication.id, Theme.id, Theme.name)
-        .order_by(ScopusPublication.id, func.count().desc(), Theme.id, Theme.name)
-    ).alias()
-
-    return (
-        select(
-            publication_themes.c.scopus_publication_id,
-            publication_themes.c.theme_id,
-            publication_themes.c.academic_id,
-        )
-        .select_from(publication_themes)
-        .where(publication_themes.c.priority == 1)
-    )
+def publication_count(search_form):
+    pubs = publication_search_query(search_form).alias()
+    q = select(func.count()).select_from(pubs)
+    return db.session.execute(q).scalar()
 
 
 def publication_summary(search_form):
     if search_form.has_value('academic_id') or search_form.total.data == "Academic":
-        publications = get_publication_by_main_academic(search_form)
+        publications = get_publication_by_academic(search_form)
     elif search_form.has_value('theme_id') or search_form.total.data == "Theme":
-        publications = get_publication_by_main_theme(search_form)
+        publications = get_publication_by_theme(search_form)
     else:
         publications = get_publication_by_brc(search_form)
 
@@ -254,35 +227,49 @@ def publication_summary(search_form):
     return items
 
 
-def get_publication_by_main_theme(search_form):
-    attribution_cte = publication_attribution_query().cte()
-    publications = publication_search_query(search_form, attribution_cte=attribution_cte).alias()
+def get_publication_by_theme(search_form):
+    publications = publication_search_query(search_form).alias()
 
-    return select(
+    q = select(
         publications.c.id.label('scopus_publication_id'),
         Theme.name.label('bucket')
     ).join(
-        attribution_cte, attribution_cte.c.scopus_publication_id == publications.c.id
+        ScopusPublication, ScopusPublication.id == publications.c.id
     ).join(
-        Theme, Theme.id == attribution_cte.c.theme_id
-    ).cte()
+        ScopusPublication.sources
+    ).join(
+        Source.academic
+    ).join(
+        Academic.theme
+    ).distinct()
+    
+    if search_form.has_value('theme_id'):
+        q = q.where(Theme.id == search_form.theme_id.data)
+
+    return q.cte()
 
 
-def get_publication_by_main_academic(search_form):
-    attribution_cte = publication_attribution_query().cte()
-    publications = publication_search_query(search_form, attribution_cte=attribution_cte).alias()
+def get_publication_by_academic(search_form):
+    publications = publication_search_query(search_form).alias()
 
-    return select(
+    q = select(
         publications.c.id.label('scopus_publication_id'),
         func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
     ).join(
-        attribution_cte, attribution_cte.c.scopus_publication_id == publications.c.id
+        ScopusPublication, ScopusPublication.id == publications.c.id
     ).join(
-        Academic, Academic.id == attribution_cte.c.academic_id
+        ScopusPublication.sources
+    ).join(
+        Source.academic
     ).order_by(
         Academic.last_name,
         Academic.first_name,
-    ).cte()
+    )
+
+    if search_form.has_value('academic_id'):
+        q = q.where(Academic.id == search_form.academic_id.data)
+    
+    return q.cte()
 
 
 def get_publication_by_brc(search_form):

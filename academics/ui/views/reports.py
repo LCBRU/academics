@@ -5,8 +5,8 @@ from lbrc_flask.forms import SearchForm
 from sqlalchemy import distinct, select
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 
-from academics.model import (Academic, Theme)
-from academics.publication_searching import nihr_acknowledgement_select_choices, publication_search_query, publication_attribution_query, publication_summary, theme_select_choices
+from academics.model import Academic, ScopusPublication, Source
+from academics.publication_searching import nihr_acknowledgement_select_choices, publication_count, publication_search_query, publication_summary, theme_select_choices
 
 from .. import blueprint
 
@@ -17,7 +17,6 @@ class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
     academic_id = HiddenField()
-    main_academic = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_date = MonthField('Publication End Month')
     supress_validation_historic = SelectField(
@@ -46,16 +45,23 @@ def get_report_defs(search_form):
 
     if search_form.total.data == 'Academic':
         publications = publication_search_query(search_form).alias()
-        attribution = publication_attribution_query()
 
-        q = select(distinct(attribution.c.academic_id).label('academic_id')).join(
-            publications, publications.c.id == attribution.c.scopus_publication_id
+        q = (
+            select(distinct(Academic.id).label('academic_id'))
+            .select_from(
+                publications
+            ).join(
+                ScopusPublication, ScopusPublication.id == publications.c.id
+            ).join(
+                ScopusPublication.sources
+            ).join(
+                Source.academic
+            )
         )
 
         for a in db.session.execute(q).mappings().all():
             x = search_form.raw_data_as_dict()
             x['academic_id'] = a['academic_id']
-            x['main_academic'] = 'True'
             x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
     else:
@@ -69,13 +75,16 @@ def get_report_defs(search_form):
 @blueprint.route("/reports/image")
 def report_image():
     search_form = PublicationSearchForm(formdata=request.args)
+    count_dups = ''
 
     if search_form.has_value('academic_id'):
         a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
 
         title = f'{a.full_name} Publications by Acknowledgement Status'
+        count_dups = ' (NB: publications may be associated with multiple academics)'
     elif search_form.has_value('theme_id') or search_form.total.data == "Theme":
         title = 'Theme Publications by Acknowledgement Status'
+        count_dups = ' (NB: publications may be associated with multiple themes)'
     else:
         title = 'BRC Publications by Acknowledgement Status'
 
@@ -87,12 +96,14 @@ def report_image():
         title += " Percentage"
         y_title = 'Percentage'
         show_total = False
+    
+    c = publication_count(search_form)
 
     bc: BarChart = BarChart(
         title=title,
         items=publication_summary(search_form),
         y_title=y_title,
-        show_total=show_total,
+        x_title=f'Publication Count = {c}{count_dups}'
     )
 
     if search_form.measure.data == 'Percentage':
