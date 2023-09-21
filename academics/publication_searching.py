@@ -4,7 +4,7 @@ from flask import url_for
 from flask_login import current_user
 from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, ScopusPublication, Source, Subtype, Theme
 from lbrc_flask.validators import parse_date_or_none
-from sqlalchemy import literal, or_
+from sqlalchemy import literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
@@ -230,7 +230,7 @@ def publication_summary(search_form):
 def get_publication_by_theme(search_form):
     publications = publication_search_query(search_form).alias()
 
-    q = select(
+    pub_themes = select(
         publications.c.id.label('scopus_publication_id'),
         Theme.name.label('bucket')
     ).join(
@@ -242,11 +242,22 @@ def get_publication_by_theme(search_form):
     ).join(
         Academic.theme
     ).distinct()
-    
-    if search_form.has_value('theme_id'):
-        q = q.where(Theme.id == search_form.theme_id.data)
 
-    return q.cte()
+    if search_form.has_value('theme_id'):
+        pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
+
+    pub_themes = pub_themes.cte('pubs')
+
+    multi_theme = select(
+        pub_themes.c.scopus_publication_id,
+        func.group_concat(pub_themes.c.bucket.distinct().op('ORDER BY pubs.bucket SEPARATOR')(literal_column('" / "'))).label("bucket")
+    ).group_by(
+        pub_themes.c.scopus_publication_id
+    ).having(func.count() > 1)
+
+    return multi_theme.union_all(
+        select(pub_themes)
+    ).cte()
 
 
 def get_publication_by_academic(search_form):
