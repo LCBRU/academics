@@ -1,0 +1,45 @@
+<table class="table table-sm">
+    <colgroup>
+        <col style="width:50%">
+        <col style="width:20%">
+        <col style="width:30%">
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Author</th>
+            <th>Source</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ps in academic.potential_sources %}
+            <tr>
+                <td>
+                    <div>
+                        <a href="{{ ps.source.href }}" target="_blank">{{ps.source.full_name}}</a>
+                    </div>
+                    <div>
+                        {% if ps.source.affiliation_name %}
+                            <span class="text-muted">{{ps.source.affiliation_name}}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>{{ ps.source.type | title }}</td>
+                <td>
+                    <div class="btn-toolbar float-right">
+                        <div class="btn-group mr-1 mb-1" role="group">
+                            <button id="btnPotentialSource_{{ps.id}}" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{ ps.status }}
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="btnPotentialSource_{{ps.id}}">
+                                <a class="dropdown-item" href="Javascript://" onclick="amend_potential_source_assignment()" data-id="{{ps.id}}" data-academic-id="{{academic.id}}" data-status="Unassigned">Unassigned</a>
+                                <a class="dropdown-item" href="Javascript://" onclick="amend_potential_source_assignment()" data-id="{{ps.id}}" data-academic-id="{{academic.id}}" data-status="No Match">No Match</a>
+                                <a class="dropdown-item" href="Javascript://" onclick="amend_potential_source_assignment()" data-id="{{ps.id}}" data-academic-id="{{academic.id}}" data-status="Match">Match</a>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
