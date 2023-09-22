@@ -416,6 +416,7 @@ def _ensure_all_academic_authors_are_proposed(academic):
     missing_sources = db.session.execute(
         select(ScopusAuthor)
         .where(~ScopusAuthor.potential_academics.any())
+        .where(ScopusAuthor.academic == academic)
     ).scalars()
 
     logging.info(f'Missing sources found: {missing_sources}')
