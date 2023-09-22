@@ -379,7 +379,7 @@ def _find_new_scopus_sources(academic):
         if db.session.execute(
             select(db.func.count(AcademicPotentialSource.id))
             .where(AcademicPotentialSource.academic == academic)
-            .where(AcademicPotentialSource.source.any(Source.source_identifier == identifier))
+            .where(AcademicPotentialSource.source.has(Source.source_identifier == identifier))
         ).scalar() > 0:
             continue
 
