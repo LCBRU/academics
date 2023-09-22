@@ -352,11 +352,15 @@ def _update_academic(academic):
 
         try:
             els_author = get_els_author(sa.source_identifier)
-            els_author.update_scopus_author(sa)
 
-            add_scopus_publications(els_author, sa)
+            if els_author:
+                els_author.update_scopus_author(sa)
 
-            sa.last_fetched_datetime = datetime.utcnow()
+                add_scopus_publications(els_author, sa)
+
+                sa.last_fetched_datetime = datetime.utcnow()
+            else:
+                sa.error = True
         except Exception as e:
             log_exception(e)
             logging.info(f'Setting Academic {academic.full_name} to be in error')
@@ -389,15 +393,18 @@ def _find_new_scopus_sources(academic):
 
         if not sa:
             els_author = get_els_author(identifier)
-            sa = els_author.get_scopus_author()
 
-        aps = AcademicPotentialSource(
-            academic=academic,
-            source=sa,
-        )
+            if els_author
+                sa = els_author.get_scopus_author()
 
-        db.session.add(sa)
-        db.session.add(aps)
+        if sa:
+            aps = AcademicPotentialSource(
+                academic=academic,
+                source=sa,
+            )
+
+            db.session.add(sa)
+            db.session.add(aps)
     
     db.session.commit()
 
@@ -432,13 +439,15 @@ def _add_authors_to_academic(source_identifiers, academic_id):
 
     for source_identifier in source_identifiers:
         els_author = get_els_author(source_identifier)
-        sa = els_author.get_scopus_author()
-        sa.academic = academic
 
-        add_scopus_publications(els_author, sa)
+        if els_author:
+            sa = els_author.get_scopus_author()
+            sa.academic = academic
 
-        sa.last_fetched_datetime = datetime.utcnow()
-        db.session.add(sa)
+            add_scopus_publications(els_author, sa)
+
+            sa.last_fetched_datetime = datetime.utcnow()
+            db.session.add(sa)
 
     academic.set_name()
     academic.initialised = True
