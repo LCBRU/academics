@@ -394,7 +394,7 @@ def _find_new_scopus_sources(academic):
         if not sa:
             els_author = get_els_author(identifier)
 
-            if els_author
+            if els_author:
                 sa = els_author.get_scopus_author()
 
         if sa:
