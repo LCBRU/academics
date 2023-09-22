@@ -90,7 +90,7 @@ class Author(ElsAuthor):
             result = super().read(client)
             super().read_metrics(client)
         except Exception:
-            pass
+            return None
 
         if self.affiliation_id:
             self.affiliation = Affiliation(affiliation_id=self.affiliation_id)
