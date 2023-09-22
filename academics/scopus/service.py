@@ -370,6 +370,7 @@ def _update_academic(academic):
 
 
     _find_new_scopus_sources(academic)
+    _ensure_all_academic_authors_are_proposed(academic)
 
 
 def _find_new_scopus_sources(academic):
@@ -405,6 +406,27 @@ def _find_new_scopus_sources(academic):
 
             db.session.add(sa)
             db.session.add(aps)
+    
+    db.session.commit()
+
+
+def _ensure_all_academic_authors_are_proposed(academic):
+    logging.info(f'Ensuring existing authors are proposed for {academic.full_name}')
+
+    missing_sources = db.session.execute(
+        select(ScopusAuthor)
+        .where(~ScopusAuthor.potential_academics.any())
+    ).scalars()
+
+    logging.info(f'Missing sources found: {missing_sources}')
+
+    for source in missing_sources:
+        aps = AcademicPotentialSource(
+            academic=academic,
+            source=source,
+        )
+
+        db.session.add(aps)
     
     db.session.commit()
 
