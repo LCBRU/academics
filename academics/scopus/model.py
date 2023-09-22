@@ -90,6 +90,11 @@ class Author(ElsAuthor):
             result = super().read(client)
             super().read_metrics(client)
         except Exception:
+            logging.error('Error reading Scopus data')
+            return None
+        
+        if self.data is None:
+            logging.error('No error reading Scopus data, but data is still None')
             return None
 
         if self.affiliation_id:
