@@ -87,6 +87,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def source_errors(self):
         return any([s.error for s in self.sources])
 
+    @property
+    def has_new_potential_sources(self):
+        return any(p for p in self.potential_sources if not p.not_match and p.source.academic is None)
+
 
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -138,8 +142,19 @@ class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
     academic = db.relationship(Academic, backref=db.backref("potential_sources", cascade="all,delete"))
     source_id = db.Column(db.Integer, db.ForeignKey(Source.id))
-    source = db.relationship(Source, backref=db.backref("potential_authors", cascade="all,delete"))
+    source = db.relationship(Source, backref=db.backref("potential_academics", cascade="all,delete"))
     not_match = db.Column(db.Boolean, default=False)
+
+    @property
+    def status(self):
+        if self.not_match:
+            return "No Match"
+        elif self.source.academic is None:
+            return "Unassigned"
+        elif self.source.academic == self.academic:
+            return "Match"
+        else:
+            return f"Assigned to {self.source.academic.full_name}"
 
 
 class ScopusAuthor(Source):

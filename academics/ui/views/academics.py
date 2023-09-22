@@ -1,14 +1,15 @@
-from flask import render_template, request, redirect, url_for
+from flask import abort, jsonify, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField, StringField
 from wtforms import SelectField
 from academics.scopus.service import add_authors_to_academic, author_search, delete_orphan_publications, update_academics, update_single_academic, updating
-from academics.model import Academic, ScopusAuthor, Theme
+from academics.model import Academic, AcademicPotentialSource, ScopusAuthor, Theme
 from wtforms.validators import Length
 from .. import blueprint
 from lbrc_flask.export import csv_download
 from sqlalchemy import select
+from lbrc_flask.json import validate_json
 
 
 def _get_academic_choices():
@@ -199,7 +200,6 @@ def academics_export_csv():
 
     q = select(Academic).where(Academic.initialised == True)
 
-
     academic_details = ({
         'first_name': a.first_name,
         'last_name': a.last_name,
@@ -208,3 +208,64 @@ def academics_export_csv():
     } for a in db.session.scalars(q).all())
 
     return csv_download('Academics', headers.keys(), academic_details)
+
+
+@blueprint.route("/academics/<int:id>/potential_sources")
+def academics_potential_sources(id):
+    a = db.session.get(Academic, id)
+
+    print(a)
+
+    if not a:
+        abort(404)
+
+    return render_template(
+        "ui/potential_sources.html",
+        academic=a,
+    )
+
+
+@blueprint.route("/academics/amend_potential_sources", methods=['POST'])
+@validate_json({
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'integer'},
+        'academic_id': {'type': 'integer'},
+        'status': {'type': 'string'},
+    },
+    "required": ["id", "academic_id", "status"]
+})
+def academics_amend_potential_sources():
+    ps : AcademicPotentialSource = db.get_or_404(AcademicPotentialSource, request.json.get('id'))
+    a : Academic = db.get_or_404(Academic, request.json.get('academic_id'))
+    status = request.json.get('status').lower()
+
+    UNASSIGNED = 'unassigned'
+    NO_MATCH = 'no match'
+    MATCH = 'match'
+
+    ALL_STATUSES = {UNASSIGNED, NO_MATCH, MATCH}
+
+    if status not in ALL_STATUSES:
+        abort(406, f"Status not recognised should be {ALL_STATUSES}, but is {status}")
+
+    if ps.source.academic and ps.source.academic != a:
+        abort(406, f"Academic does not match source academic of {ps.source.academic.full_name}, but is {a.full_name}")
+
+    match request.json.get('status').lower():
+        case 'unassigned':
+            ps.source.academic = None
+            ps.not_match = False
+        case 'no match':
+            ps.source.academic = None
+            ps.not_match = True
+        case 'match':
+            ps.source.academic = a
+            ps.not_match = False
+    
+    db.session.add(ps)
+    db.session.commit()
+
+    return jsonify({'status': request.json.get('status')}), 200
+
+
