@@ -89,8 +89,6 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def has_new_potential_sources(self):
-        print("Hello")
-        print(any(p for p in self.potential_sources if not p.not_match and p.source.academic is None))
         return any(p for p in self.potential_sources if not p.not_match and p.source.academic is None)
 
 

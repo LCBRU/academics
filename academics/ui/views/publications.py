@@ -157,7 +157,7 @@ def publication_full_export_xlsx():
         'open access': p.is_open_access,
         'citations': p.cited_by_count,
         'sponsor': '; '.join([s.name for s in p.sponsors]),
-    } for p in q.all())
+    } for p in db.session.execute(q).unique().scalars())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
@@ -179,7 +179,7 @@ def publication_full_annual_report_xlsx():
     publication_details = ({
         'Publication Reference': p.vancouverish,
         'DOI': p.doi,
-    } for p in q.all())
+    } for p in b.session.execute(q).unique().scalars())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
@@ -208,10 +208,10 @@ def publication_export_pdf():
     if publication_end_date:
         parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 
-    if q.count() > 100:
-        abort(413)
+    publications = list(db.session.execute(q.order_by(ScopusPublication.publication_cover_date.desc())).unique().scalars())
 
-    publications = q.order_by(ScopusPublication.publication_cover_date.desc()).all()
+    if len(publications) > 100:
+        abort(413)
 
     return pdf_download(
         'ui/publications_pdf.html',
