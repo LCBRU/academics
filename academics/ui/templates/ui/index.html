@@ -45,6 +45,11 @@
 
 
                             <div class="btn-group mr-1 mb-1" role="group">
+                                {% set cls = 'fa-user-cog' %}
+                                {% if a.has_new_potential_sources %}
+                                    {% set cls = 'fa-user-plus text-danger' %}
+                                {% endif %}
+
                                 <a
                                     data-toggle="modal"
                                     data-id="{{ a.id }}"
@@ -53,7 +58,7 @@
                                     title="Edit Sources for {{ a.full_name }}"
                                     data-title="Potential Sources for {{ a.full_name }}"
                                     data-target="#potentialSources"
-                                    href="#"><i class="fas fa-user-cog"></i></a>
+                                    href="#"><i class="fas {{cls}}"></i></a>
                             </div>
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a class="academic_edit"
@@ -109,7 +114,7 @@
                                         {% if a.orcid | blank_if_none | length > 0 %}
                                             <a href="{{a.orcid_link}}" target="_blank">{{a.orcid}}</a>
                                             {% if a.orcid_mismatch %}
-                                                &nbsp;<i class="fas fa-exclamation-triangle" title="ORCID Mismatch with Sources"></i>
+                                                &nbsp;<i class="fas fa-exclamation-triangle text-danger" title="ORCID Mismatch with Sources"></i>
                                             {% endif %}
                                         {% else %}
                                             <a href="https://orcid.org/register" target="_blank">Register for ORCID</a>
@@ -131,7 +136,7 @@
                             <a class="source collapsed" type="button" data-toggle="collapse" data-target="#sources_{{a.id}}" aria-expanded="false" aria-controls="sources_{{a.id}}">
                                 Sources
                                 {% if a.source_errors %}
-                                    &nbsp;<i class="fas fa-exclamation-triangle" title="Sources in Error"></i>
+                                    &nbsp;<i class="fas fa-exclamation-triangle text-danger" title="Sources in Error"></i>
                                 {% endif %}
                             </a>
                         </h2>
@@ -187,7 +192,7 @@
                                                     {% if au.orcid %}
                                                         <a href="{{au.orcid_link}}" target="_blank">{{au.orcid}}</a>
                                                         {% if au.orcid_mismatch %}
-                                                            &nbsp;<i class="fas fa-exclamation-triangle" title="ORCID Mismatch"></i>
+                                                            &nbsp;<i class="fas fa-exclamation-triangle text-danger title="ORCID Mismatch"></i>
                                                         {% endif %}
                                                     {% endif %}
                                                 </td>
@@ -197,7 +202,7 @@
                                                 <td>{{au.h_index | blank_if_none}}</td>
                                                 <td>
                                                     {% if au.error %}
-                                                        <i class="fas fa-exclamation-triangle"></i>&nbsp;Error
+                                                        <i class="fas fa-exclamation-triangle text-danger"></i>&nbsp;Error
                                                     {% elif au.last_fetched_datetime %}
                                                         <i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
                                                     {% endif %}
