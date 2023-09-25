@@ -376,6 +376,9 @@ def _update_academic(academic):
 def _find_new_scopus_sources(academic):
     logging.info(f'Finding new sources for {academic.full_name}')
 
+    if len(academic.last_name.strip()) < 1:
+        return
+
     new_source_identifiers = {a.source_identifier for a in author_search(academic.last_name)}
 
     logging.info(f'Found new sources: {new_source_identifiers}')
