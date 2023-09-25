@@ -1,4 +1,3 @@
-import logging
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
@@ -36,6 +35,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     error = db.Column(db.Boolean, default=False)
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme)
+    has_left_brc = db.Column(db.Boolean, default=False)
 
     @property
     def full_name(self):
@@ -461,6 +461,10 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     @property
     def all_nihr_acknowledged(self):
         return len(self.sponsors) > 0 and all([s.is_nihr for s in self.sponsors])
+
+    @property
+    def all_academics_left_brc(self):
+        return all(a.has_left_brc for a in self.academics)
 
 
 class Keyword(db.Model):

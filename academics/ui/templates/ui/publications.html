@@ -60,7 +60,12 @@
                     </div>
                 </div>
                 <div>
-                    <h4>{{p.author_list | blank_if_none}}</h4>
+                    <h4>
+                        <div>{{p.author_list | blank_if_none}}</div>
+                        {% if p.all_academics_left_brc %}
+                            <div class="text-danger">All authors have left the BRC</div>
+                        {% endif %}
+                    </h4>
                     <dl class="row">
                         {% if p.journal %}
                             <dt class="col-auto">Journal</dt>

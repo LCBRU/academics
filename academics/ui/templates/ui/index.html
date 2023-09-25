@@ -34,16 +34,17 @@
                         <div>
                             <header>
                                 <h1>
-                                    <span>{{a.full_name}} ({{a.theme.name}})</span>
+                                    {% if a.has_left_brc %}
+                                        <del>{{a.full_name}} ({{a.theme.name}})</del>
+                                    {% else %}
+                                        <span>{{a.full_name}} ({{a.theme.name}})</span>
+                                    {% endif %}
                                 </h1>
                             </header>
                         </div>
                     </div>
                     <div class="col-5">
                         <div class="btn-toolbar float-right" role="toolbar">
-
-
-
                             <div class="btn-group mr-1 mb-1" role="group">
                                 {% set cls = 'fa-user-cog' %}
                                 {% if a.has_new_potential_sources %}

@@ -1,7 +1,7 @@
 from flask import abort, jsonify, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
-from wtforms.fields.simple import HiddenField, StringField
+from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField
 from academics.scopus.service import add_authors_to_academic, author_search, delete_orphan_publications, update_academics, update_single_academic, updating
 from academics.model import Academic, AcademicPotentialSource, ScopusAuthor, Theme
@@ -36,6 +36,7 @@ class AcademicEditForm(FlashingForm):
     last_name = StringField("Last Name", validators=[Length(max=500)])
     orcid = StringField("ORCID", validators=[Length(max=255)])
     theme_id = SelectField('Theme', coerce=int)
+    has_left_brc = BooleanField('Has Left BRC', default=False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -95,6 +96,7 @@ def academic_edit(id):
         academic.last_name = form.last_name.data
         academic.orcid = form.orcid.data
         academic.theme_id = form.theme_id.data
+        academic.has_left_brc = form.has_left_brc.data
 
         db.session.add(academic)
         db.session.commit()
