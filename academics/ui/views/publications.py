@@ -11,7 +11,7 @@ from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import or_
 from wtforms import HiddenField
 
-from academics.model import (Academic, Folder, Journal, Keyword,
+from academics.model import (Folder, Journal, Keyword,
                              NihrAcknowledgement, ScopusAuthor,
                              ScopusPublication, Subtype, Theme, User)
 from academics.scopus.service import auto_validate

@@ -2,8 +2,7 @@ from dataclasses import dataclass
 import logging
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import ScopusAuthor, ScopusPublication
-from lbrc_flask.validators import parse_date
+from academics.model import ScopusAuthor
 from elsapy.elsdoc import AbsDoc
 
 

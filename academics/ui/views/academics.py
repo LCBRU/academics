@@ -4,7 +4,7 @@ from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField
 from academics.scopus.service import add_authors_to_academic, author_search, delete_orphan_publications, update_academics, update_single_academic, updating
-from academics.model import Academic, AcademicPotentialSource, ScopusAuthor, Theme
+from academics.model import Academic, AcademicPotentialSource, Source, Theme
 from wtforms.validators import Length
 from .. import blueprint
 from lbrc_flask.export import csv_download
@@ -61,8 +61,7 @@ def index():
     q = q.filter(Academic.initialised == True)
 
     if search_form.search.data:
-        subquery = ScopusAuthor.query.with_entities(ScopusAuthor.academic_id).filter((ScopusAuthor.first_name + ' ' + ScopusAuthor.last_name).like("%{}%".format(search_form.search.data)))
-        q = q.filter(Academic.id.in_(subquery))
+        q = q.filter((Academic.first_name + ' ' + Academic.last_name).like("%{}%".format(search_form.search.data)))
 
     if search_form.theme_id.data:
         if search_form.theme_id.data == -1:
@@ -164,14 +163,8 @@ def delete_author():
     form = ConfirmForm()
 
     if form.validate_on_submit():
-        au = db.get_or_404(ScopusAuthor, form.id.data)
-        a = au.academic
-        db.session.delete(au)
-        db.session.flush()
-
-        if not a.sources:
-            db.session.delete(a)
-
+        s = db.get_or_404(Source, form.id.data)
+        db.session.delete(s)
         db.session.commit()
 
         delete_orphan_publications()
