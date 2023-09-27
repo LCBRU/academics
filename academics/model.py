@@ -148,14 +148,9 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
 
 class ScopusAuthor(Source):
-    # __tablename__ = "scopus_author"
-
     __mapper_args__ = {
-        # "polymorphic_load": "inline",
         "polymorphic_identity": "scopus",
     }
-
-    # id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
 
 
 class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
@@ -187,7 +182,7 @@ class Journal(db.Model):
 
 scopus_author__scopus_publication = db.Table(
     'scopus_author__scopus_publication',
-    db.Column('scopus_author_id', db.Integer(), db.ForeignKey('source.id'), primary_key=True),
+    db.Column('source_id', db.Integer(), db.ForeignKey('source.id'), primary_key=True),
     db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
 )
 
