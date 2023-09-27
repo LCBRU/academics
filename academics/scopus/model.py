@@ -15,8 +15,6 @@ class AuthorSearch():
     last_name: str
     affiliation_id: str
     affiliation_name: str
-    affiliation_city: str
-    affiliation_country: str
     existing : bool = False
     
     def __init__(self, data):
@@ -26,8 +24,6 @@ class AuthorSearch():
         self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
         self.affiliation_id = data.get(u'affiliation-current', {}).get(u'affiliation-id', '')
         self.affiliation_name = data.get(u'affiliation-current', {}).get(u'affiliation-name', '')
-        self.affiliation_city = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
-        self.affiliation_country = data.get(u'affiliation-current', {}).get(u'affiliation-country', '')
 
     @property
     def full_name(self):
@@ -35,16 +31,6 @@ class AuthorSearch():
             filter(len, [
                 self.first_name,
                 self.last_name,
-            ])
-        )
-
-    @property
-    def affiliation_full_name(self):
-        return ', '.join(
-            filter(len, [
-                self.affiliation_name or '',
-                self.affiliation_city or '',
-                self.affiliation_country or '',
             ])
         )
 
@@ -113,11 +99,7 @@ class Author(ElsAuthor):
         scopus_author.display_name = self.first_name + ' ' + self.last_name
 
         if self.affiliation:
-            scopus_author.affiliation_id = self.affiliation_id
             scopus_author.affiliation_name = self.affiliation.name
-            scopus_author.affiliation_address = self.affiliation.address
-            scopus_author.affiliation_city = self.affiliation.city
-            scopus_author.affiliation_country = self.affiliation.country
 
         scopus_author.citation_count = self.citation_count
         scopus_author.document_count = self.document_count
