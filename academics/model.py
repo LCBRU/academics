@@ -140,6 +140,10 @@ class Source(AuditMixin, CommonMixin, db.Model):
         if self.orcid:
             return f'https://orcid.org/{self.orcid}'
 
+    @property
+    def full_name(self):
+        return self.display_name
+
 
 class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
