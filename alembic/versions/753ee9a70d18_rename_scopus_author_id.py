@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('scopus_author__scopus_publication', sa.Column('source_id', sa.Integer(), nullable=False))
+    # op.add_column('scopus_author__scopus_publication', sa.Column('source_id', sa.Integer(), nullable=False))
     # op.drop_constraint('scopus_author__scopus_publication_ibfk_3', 'scopus_author__scopus_publication', type_='foreignkey')
 
     conn = op.get_bind()
@@ -41,4 +41,4 @@ def downgrade() -> None:
     )
 
     # op.create_foreign_key('scopus_author__scopus_publication_ibfk_3', 'scopus_author__scopus_publication', 'source', ['scopus_author_id'], ['id'])
-    op.drop_column('scopus_author__scopus_publication', 'source_id')
+    # op.drop_column('scopus_author__scopus_publication', 'source_id')
