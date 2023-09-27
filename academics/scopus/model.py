@@ -110,6 +110,7 @@ class Author(ElsAuthor):
         scopus_author.orcid = self.orcid
         scopus_author.first_name = self.first_name
         scopus_author.last_name = self.last_name
+        scopus_author.display_name = self.first_name + ' ' + self.last_name
 
         if self.affiliation:
             scopus_author.affiliation_id = self.affiliation_id

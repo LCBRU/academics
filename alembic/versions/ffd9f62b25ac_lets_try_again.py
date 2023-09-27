@@ -17,13 +17,14 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.drop_column('scopus_author', 'academic_id')
-    op.drop_column('scopus_author', 'last_fetched_datetime')
-    op.drop_column('scopus_author', 'document_count')
-    op.drop_column('scopus_author', 'scopus_id')
-    op.drop_column('scopus_author', 'orcid')
-    op.drop_column('scopus_author', 'h_index')
-    op.drop_column('scopus_author', 'citation_count')
+    # op.drop_column('scopus_author', 'academic_id')
+    # op.drop_column('scopus_author', 'last_fetched_datetime')
+    # op.drop_column('scopus_author', 'document_count')
+    # op.drop_column('scopus_author', 'scopus_id')
+    # op.drop_column('scopus_author', 'orcid')
+    # op.drop_column('scopus_author', 'h_index')
+    # op.drop_column('scopus_author', 'citation_count')
+    pass
 
 def downgrade() -> None:
     pass

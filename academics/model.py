@@ -171,23 +171,12 @@ class ScopusAuthor(Source):
 
     id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
     eid = db.Column(db.String(1000))
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
     affiliation_id = db.Column(db.String(255))
     affiliation_name = db.Column(db.String(1000))
     affiliation_address = db.Column(db.String(1000))
     affiliation_city = db.Column(db.String(1000))
     affiliation_country = db.Column(db.String(1000))
     href = db.Column(db.String(1000))
-
-    @property
-    def full_name(self):
-        return ' '.join(
-            filter(len, [
-                self.first_name,
-                self.last_name,
-            ])
-        )
 
     @property
     def affiliation_full_address(self):
