@@ -10,7 +10,6 @@ from elsapy.elsdoc import AbsDoc
 class AuthorSearch():
 
     source_identifier: str
-    eid: str
     first_name: str
     last_name: str
     affiliation_id: str
@@ -19,7 +18,6 @@ class AuthorSearch():
     
     def __init__(self, data):
         self.source_identifier = data.get(u'dc:identifier', ':').split(':')[1]
-        self.eid = data.get(u'eid', '')
         self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
         self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
         self.affiliation_id = data.get(u'affiliation-current', {}).get(u'affiliation-id', '')
@@ -49,10 +47,6 @@ class Author(ElsAuthor):
     @property
     def orcid(self):
         return self.data.get(u'coredata', {}).get(u'orcid', '')
-
-    @property
-    def eid(self):
-        return self.data.get(u'coredata', {}).get(u'eid', '')
 
     @property
     def citation_count(self):
@@ -92,7 +86,6 @@ class Author(ElsAuthor):
 
     def update_scopus_author(self, scopus_author):
         scopus_author.source_identifier = self.source_identifier
-        scopus_author.eid = self.eid
         scopus_author.orcid = self.orcid
         scopus_author.first_name = self.first_name
         scopus_author.last_name = self.last_name
