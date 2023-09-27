@@ -180,8 +180,8 @@ class Journal(db.Model):
     name = db.Column(db.String(255))
 
 
-scopus_author__scopus_publication = db.Table(
-    'scopus_author__scopus_publication',
+sources__publications = db.Table(
+    'sources__publications',
     db.Column('source_id', db.Integer(), db.ForeignKey('source.id'), primary_key=True),
     db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
 )
@@ -313,7 +313,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    sources = db.relationship("Source", secondary=scopus_author__scopus_publication, backref=db.backref("scopus_publications"), lazy="joined")
+    sources = db.relationship("Source", secondary=sources__publications, backref=db.backref("scopus_publications"), lazy="joined")
 
     scopus_id = db.Column(db.String(1000))
     doi = db.Column(db.String(1000))
