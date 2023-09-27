@@ -35,7 +35,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     error = db.Column(db.Boolean, default=False)
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme)
-    has_left_brc = db.Column(db.Boolean, default=False)
+    has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
 
     @property
     def full_name(self):
@@ -105,6 +105,10 @@ class Source(AuditMixin, CommonMixin, db.Model):
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
     academic = db.relationship(Academic, backref=db.backref("sources", cascade="all,delete"))
 
+    first_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
+    display_name = db.Column(db.String(255))
+
     source_identifier = db.Column(db.String(1000))
     orcid = db.Column(db.String(255))
 
@@ -139,9 +143,9 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
 class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
+    academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id), nullable=False)
     academic = db.relationship(Academic, backref=db.backref("potential_sources", cascade="all,delete"))
-    source_id = db.Column(db.Integer, db.ForeignKey(Source.id))
+    source_id = db.Column(db.Integer, db.ForeignKey(Source.id), nullable=False)
     source = db.relationship(Source, backref=db.backref("potential_academics", cascade="all,delete"))
     not_match = db.Column(db.Boolean, default=False)
 
@@ -502,26 +506,3 @@ class Objective(db.Model, AuditMixin):
 
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme, backref=db.backref("objectives", cascade="all,delete"))
-
-
-class Evidence(db.Model, AuditMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(100), nullable=False)
-    notes = db.Column(db.UnicodeText)
-
-    objective_id = db.Column(db.Integer, db.ForeignKey(Objective.id))
-    objective = db.relationship(Objective, backref=db.backref("evidences", cascade="all,delete"))
-
-    __mapper_args__ = {
-        "polymorphic_identity": "evidence",
-        "polymorphic_on": "type",
-    }
-
-
-class EvidencePublication(Evidence):
-    scopus_publication_id = db.Column(db.Integer, db.ForeignKey(ScopusPublication.id))
-    publication = db.relationship(ScopusPublication, backref=db.backref("evidences", cascade="all,delete"))
-
-    __mapper_args__ = {
-        "polymorphic_identity": "publication",
-    } 

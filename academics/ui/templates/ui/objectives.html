@@ -41,14 +41,6 @@
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a
                                     data-toggle="modal"
-                                    data-objective_id="{{ o.id }}"
-                                    title="Edit evidence {{ o.name }}"
-                                    data-target="#editEvidenceModal"
-                                    href="#"><i class="fas fa-plus"></i></a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a
-                                    data-toggle="modal"
                                     data-id="{{ o.id }}"
                                     data-name="{{ o.name }}"
                                     title="Edit obejctive {{ o.name }}"
@@ -68,37 +60,6 @@
                         </div>
                     </div>
                 </div>
-                {% for e in o.evidences %}
-                    <div class="row">
-                        <div class="col-2">
-                            <div class="btn-toolbar float-right">
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <a
-                                        data-toggle="modal"
-                                        data-id="{{ e.id }}"
-                                        data-notes="{{ e.notes }}"
-                                        title="Edit evidence"
-                                        data-target="#editEvidenceModal"
-                                        data-objective_id="{{e.objective_id}}"
-                                        href="#"><i class="fas fa-edit"></i></a>
-                                </div>
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <a
-                                        data-toggle="modal"
-                                        data-id="{{ e.id }}"
-                                        data-name="{{ e.notes }}"
-                                        title="Delete evidence"
-                                        data-target="#deleteEvidenceModal"
-                                        href="#"><i class="fas fa-trash"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-10">
-                            <h3>{{e.type | title}}: {{e.notes}}</h3>
-                            <h4>{{ e.created_date | date_format }}</h4>
-                        </div>
-                    </div>
-                {% endfor %}
             </li>
         {% endfor %}
     </ul>
@@ -107,9 +68,7 @@
 {{ render_pagination(objectives, 'ui.objectives', form=search_form) }}
 
 {{ render_edit_modal('editObjectiveModal', 'Objective Details', url_for('ui.objective_save', prev=request.full_path), edit_objective_form) }}
-{{ render_edit_modal('editEvidenceModal', 'Evidence Details', url_for('ui.evidence_save', prev=request.full_path), edit_evidence_form) }}
 {{ render_delete_modal('deleteObjectiveModal', 'Delete Objective', url_for('ui.objective_delete', prev=request.full_path), confirm_form) }}
-{{ render_delete_modal('deleteEvidenceModal', 'Delete Objective', url_for('ui.evidence_delete', prev=request.full_path), confirm_form) }}
 
 {% endblock %}
 

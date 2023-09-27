@@ -1,7 +1,7 @@
 from os import abort
 from flask import jsonify, redirect, render_template, request
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from academics.model import Evidence, Objective, ScopusPublication, User, Theme
+from academics.model import Objective, User, Theme
 from .. import blueprint
 from wtforms import HiddenField, StringField, TextAreaField
 from lbrc_flask.database import db
@@ -39,15 +39,6 @@ class ObjectiveEditForm(FlashingForm):
         super().__init__(**kwargs)
 
 
-class EvidenceEditForm(FlashingForm):
-    id = HiddenField('id')
-    notes = TextAreaField('Notes', validators=[DataRequired()])
-    objective_id = HiddenField('Objective', validators=[DataRequired()])
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
 @blueprint.route("/objectives/")
 def objectives():
     search_form = ObjectiveSearchForm(formdata=request.args)
@@ -68,7 +59,6 @@ def objectives():
         objectives=objectives,
         users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
         edit_objective_form=ObjectiveEditForm(),
-        edit_evidence_form=EvidenceEditForm(),
         confirm_form=ConfirmForm(),
     )
 
@@ -112,38 +102,6 @@ def objective_delete():
         objective = db.get_or_404(Objective, form.id.data)
 
         db.session.delete(objective)
-        db.session.commit()
-
-    return redirect(request.referrer)
-
-
-@blueprint.route("/evidence/save", methods=['POST'])
-def evidence_save():
-    form = EvidenceEditForm()
-
-    if form.validate_on_submit():
-        id = form.id.data
-
-        if id:
-            e = db.get_or_404(Evidence, id)
-        else:
-            e = Evidence()
-
-        e.notes = form.notes.data
-        e.objective_id = form.objective_id.data
-
-        db.session.add(e)
-        db.session.commit()
-
-    return redirect(request.referrer)
-
-
-@blueprint.route("/evidence/delete", methods=['POST'])
-def evidence_delete():
-    form = ConfirmForm()
-
-    if form.validate_on_submit():
-        db.session.delete(db.get_or_404(Evidence, form.id.data))
         db.session.commit()
 
     return redirect(request.referrer)
