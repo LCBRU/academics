@@ -110,6 +110,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     display_name = db.Column(db.String(255))
     affiliation_name = db.Column(db.String(1000))
 
+    href = db.Column(db.String(1000))
     source_identifier = db.Column(db.String(1000))
     orcid = db.Column(db.String(255))
 
