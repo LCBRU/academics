@@ -108,6 +108,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     display_name = db.Column(db.String(255))
+    affiliation_name = db.Column(db.String(1000))
 
     source_identifier = db.Column(db.String(1000))
     orcid = db.Column(db.String(255))
@@ -145,6 +146,20 @@ class Source(AuditMixin, CommonMixin, db.Model):
         return self.display_name
 
 
+class ScopusAuthor(Source):
+    __tablename__ = "scopus_author"
+
+    __mapper_args__ = {
+        "polymorphic_load": "inline",
+        "polymorphic_identity": "scopus",
+    }
+
+    id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
+    eid = db.Column(db.String(1000))
+    affiliation_name = db.Column(db.String(1000))
+    href = db.Column(db.String(1000))
+
+
 class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id), nullable=False)
@@ -163,20 +178,6 @@ class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
             return "Match"
         else:
             return f"Assigned to {self.source.academic.full_name}"
-
-
-class ScopusAuthor(Source):
-    __tablename__ = "scopus_author"
-
-    __mapper_args__ = {
-        "polymorphic_load": "inline",
-        "polymorphic_identity": "scopus",
-    }
-
-    id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
-    eid = db.Column(db.String(1000))
-    affiliation_name = db.Column(db.String(1000))
-    href = db.Column(db.String(1000))
 
 
 class Journal(db.Model):
