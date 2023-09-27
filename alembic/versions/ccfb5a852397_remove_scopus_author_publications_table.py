@@ -17,8 +17,8 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.drop_table('scopus_author__scopus_publication')
-
+    # op.drop_table('scopus_author__scopus_publication')
+    pass
 
 def downgrade() -> None:
     pass

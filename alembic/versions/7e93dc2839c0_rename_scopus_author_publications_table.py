@@ -17,25 +17,26 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.create_table('sources__publications',
-    sa.Column('source_id', sa.Integer(), nullable=False),
-    sa.Column('scopus_publication_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['scopus_publication_id'], ['scopus_publication.id'], ),
-    sa.ForeignKeyConstraint(['source_id'], ['source.id'], ),
-    sa.PrimaryKeyConstraint('source_id', 'scopus_publication_id')
-    )
+    # op.create_table('sources__publications',
+    # sa.Column('source_id', sa.Integer(), nullable=False),
+    # sa.Column('scopus_publication_id', sa.Integer(), nullable=False),
+    # sa.ForeignKeyConstraint(['scopus_publication_id'], ['scopus_publication.id'], ),
+    # sa.ForeignKeyConstraint(['source_id'], ['source.id'], ),
+    # sa.PrimaryKeyConstraint('source_id', 'scopus_publication_id')
+    # )
 
-    conn = op.get_bind()
-    meta = sa.MetaData()
-    meta.reflect(conn)
+    # conn = op.get_bind()
+    # meta = sa.MetaData()
+    # meta.reflect(conn)
 
-    orig = sa.Table('scopus_author__scopus_publication', meta, autoload_with=conn)
-    new = sa.Table('sources__publications', meta, autoload_with=conn)
+    # orig = sa.Table('scopus_author__scopus_publication', meta, autoload_with=conn)
+    # new = sa.Table('sources__publications', meta, autoload_with=conn)
 
-    sel = sa.select(orig.c.scopus_publication_id, orig.c.source_id)
-    ins = new.insert().from_select(['scopus_publication_id', 'source_id'], sel)
+    # sel = sa.select(orig.c.scopus_publication_id, orig.c.source_id)
+    # ins = new.insert().from_select(['scopus_publication_id', 'source_id'], sel)
 
-    conn.execute(ins)
+    # conn.execute(ins)
+    pass
 
 
 def downgrade() -> None:
