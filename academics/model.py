@@ -156,7 +156,6 @@ class ScopusAuthor(Source):
 
     id: db.Mapped[int] = db.mapped_column(db.ForeignKey("source.id"), primary_key=True)
     eid = db.Column(db.String(1000))
-    affiliation_name = db.Column(db.String(1000))
     href = db.Column(db.String(1000))
 
 
