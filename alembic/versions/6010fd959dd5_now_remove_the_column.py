@@ -17,10 +17,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.drop_column('scopus_author__scopus_publication', 'scopus_author_id')
+    # op.drop_column('scopus_author__scopus_publication', 'scopus_author_id')
     pass
 
 
 def downgrade() -> None:
-    op.add_column('scopus_author__scopus_publication', sa.Column('scopus_author_id', mysql.INTEGER(display_width=11), autoincrement=False, nullable=False))
+    # op.add_column('scopus_author__scopus_publication', sa.Column('scopus_author_id', mysql.INTEGER(display_width=11), autoincrement=False, nullable=False))
     pass
