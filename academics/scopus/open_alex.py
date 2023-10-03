@@ -14,6 +14,9 @@ def get_open_alex():
 
     for a in chain(*q.paginate(per_page=200)):
         print(a['id'], a["display_name"])
+        if a['last_known_institution']:
+            print(a['last_known_institution'].keys())
+            print(a['last_known_institution'])
         # if a:
         #     if a.get('last_known_institution', None):
         #         if 'leicester' in a.get('last_known_institution', {}).get('display_name', '').lower():

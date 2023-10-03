@@ -180,6 +180,14 @@ class Journal(db.Model):
     name = db.Column(db.String(255))
 
 
+class Affiliation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    catalog = db.Column(db.String(100), index=True)
+    name = db.Column(db.String(1000))
+    address = db.Column(db.String(1000))
+    country = db.Column(db.String(100))
+
+
 sources__publications = db.Table(
     'sources__publications',
     db.Column('source_id', db.Integer(), db.ForeignKey('source.id'), primary_key=True),
