@@ -183,6 +183,7 @@ class Journal(db.Model):
 class Affiliation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     catalog = db.Column(db.String(100), index=True)
+    catalog_identifier = db.Column(db.String(1000), index=True)
     name = db.Column(db.String(1000))
     address = db.Column(db.String(1000))
     country = db.Column(db.String(100))
