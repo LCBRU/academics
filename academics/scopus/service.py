@@ -6,9 +6,9 @@ from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 from lbrc_flask.validators import parse_date
 from sqlalchemy import and_, or_, select
-from academics.model import Academic, AcademicPotentialSource, FundingAcr, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Sponsor, Subtype
+from academics.model import Academic, AcademicPotentialSource, Affiliation, FundingAcr, Journal, Keyword, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Sponsor, Subtype
 from lbrc_flask.celery import celery
-from .model import Abstract, AuthorSearch, Author, DocumentSearch
+from .model import Abstract, AuthorSearch, Author, DocumentSearch, get_affiliation
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
@@ -358,6 +358,8 @@ def _update_academic(academic):
 
                 add_scopus_publications(els_author, sa)
 
+                sa.affiliation = _get_affiliation(els_author.affiliation_id)
+
                 sa.last_fetched_datetime = datetime.utcnow()
             else:
                 sa.error = True
@@ -371,6 +373,15 @@ def _update_academic(academic):
 
     _find_new_scopus_sources(academic)
     _ensure_all_academic_authors_are_proposed(academic)
+
+
+def _get_affiliation(affiliation_id):
+    existing = db.session.execute(select(Affiliation).where(Affiliation.catalog_identifier == affiliation_id)).scalar()
+
+    if existing:
+        return existing
+    
+    return get_affiliation(affiliation_id, _client)
 
 
 def _find_new_scopus_sources(academic):

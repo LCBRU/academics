@@ -92,6 +92,15 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         return any(p for p in self.potential_sources if not p.not_match and p.source.academic is None)
 
 
+class Affiliation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    catalog = db.Column(db.String(100), index=True)
+    catalog_identifier = db.Column(db.String(1000), index=True)
+    name = db.Column(db.String(1000))
+    address = db.Column(db.String(1000))
+    country = db.Column(db.String(100))
+
+
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)
@@ -104,6 +113,9 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
     academic = db.relationship(Academic, backref=db.backref("sources", cascade="all,delete"))
+
+    affiliation_id = db.Column(db.Integer, db.ForeignKey(Affiliation.id))
+    affiliation = db.relationship(Affiliation, backref=db.backref("sources", cascade="all,delete"))
 
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
@@ -178,15 +190,6 @@ class Journal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # MariaDB backends need a VARChar variable, added 255 to set a max length
     name = db.Column(db.String(255))
-
-
-class Affiliation(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    catalog = db.Column(db.String(100), index=True)
-    catalog_identifier = db.Column(db.String(1000), index=True)
-    name = db.Column(db.String(1000))
-    address = db.Column(db.String(1000))
-    country = db.Column(db.String(100))
 
 
 sources__publications = db.Table(

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import logging
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import ScopusAuthor
+from academics.model import ScopusAuthor, Affiliation as AcaAffil
 from elsapy.elsdoc import AbsDoc
 
 
@@ -105,6 +105,14 @@ class Author(ElsAuthor):
         return result
 
 
+def get_affiliation(affiliation_id, client):
+    result = AcaAffil(affiliation_id=affiliation_id)
+    if result.read(client):
+        return result
+    else:
+        return None
+
+
 class Affiliation(ElsAffil):
     def __init__(self, affiliation_id):
         self.affiliation_id = affiliation_id
@@ -116,15 +124,20 @@ class Affiliation(ElsAffil):
 
     @property
     def address(self):
-        return self.data.get(u'address', '')
-
-    @property
-    def city(self):
-        return self.data.get(u'city', '')
+        return ', '.join(filter([self.data.get(u'address', ''), self.data.get(u'city', '')]))
 
     @property
     def country(self):
         return self.data.get(u'country', '')
+    
+    def get_academic_affiliation(self):
+        return AcaAffil(
+            catalog='scopus',
+            catalog_identifier=self.affiliation_id,
+            name=self.name,
+            address=self.address,
+            country=self.country,
+        )
 
 
 class Abstract(AbsDoc):
