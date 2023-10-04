@@ -102,7 +102,7 @@ class Affiliation(db.Model):
 
     @property
     def summary(self):
-        return ', '.join(filter(None, [self.name, self.address, self.country]))
+        return ', '.join(filter(None, [self.name, self.address]))
 
 
 class Source(AuditMixin, CommonMixin, db.Model):
@@ -124,7 +124,6 @@ class Source(AuditMixin, CommonMixin, db.Model):
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     display_name = db.Column(db.String(255))
-    affiliation_name = db.Column(db.String(1000))
 
     href = db.Column(db.String(1000))
     source_identifier = db.Column(db.String(1000))

@@ -91,9 +91,6 @@ class Author(ElsAuthor):
         scopus_author.last_name = self.last_name
         scopus_author.display_name = self.first_name + ' ' + self.last_name
 
-        if self.affiliation:
-            scopus_author.affiliation_name = self.affiliation.name
-
         scopus_author.citation_count = self.citation_count
         scopus_author.document_count = self.document_count
         scopus_author.h_index = self.h_index
