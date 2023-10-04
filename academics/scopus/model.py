@@ -106,7 +106,7 @@ class Author(ElsAuthor):
 
 
 def get_affiliation(affiliation_id, client):
-    result = AcaAffil(affiliation_id=affiliation_id)
+    result = Affiliation(affiliation_id=affiliation_id)
     if result.read(client):
         return result
     else:
