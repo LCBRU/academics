@@ -124,7 +124,7 @@ class Affiliation(ElsAffil):
 
     @property
     def address(self):
-        return ', '.join(filter([self.data.get(u'address', ''), self.data.get(u'city', '')]))
+        return ', '.join(filter(None, [self.data.get(u'address', ''), self.data.get(u'city', '')]))
 
     @property
     def country(self):
