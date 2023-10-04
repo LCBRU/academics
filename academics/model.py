@@ -104,6 +104,10 @@ class Affiliation(db.Model):
     def summary(self):
         return ', '.join(filter(None, [self.name, self.address]))
 
+    @property
+    def is_leicester(self):
+        return 'leicester' in self.summary.lower()
+
 
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

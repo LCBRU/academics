@@ -413,7 +413,10 @@ def _find_new_scopus_sources(academic):
             els_author = get_els_author(identifier)
 
             if els_author:
-                sa = els_author.get_scopus_author()
+                af = _get_affiliation(els_author.affiliation_id)
+                if af.is_leicester:
+                    sa = els_author.get_scopus_author()
+                    sa.affiliation = af
 
         if sa:
             aps = AcademicPotentialSource(
