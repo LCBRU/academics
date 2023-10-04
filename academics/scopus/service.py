@@ -381,7 +381,10 @@ def _get_affiliation(affiliation_id):
     if existing:
         return existing
     
-    return get_affiliation(affiliation_id, _client())
+    new = get_affiliation(affiliation_id, _client())
+
+    if new:
+        return new.get_academic_affiliation()
 
 
 def _find_new_scopus_sources(academic):
