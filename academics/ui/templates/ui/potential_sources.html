@@ -19,8 +19,8 @@
                         <a href="{{ ps.source.href }}" target="_blank">{{ps.source.full_name}}</a>
                     </div>
                     <div>
-                        {% if ps.source.affiliation_name %}
-                            <span class="text-muted">{{ps.source.affiliation_name}}</span>
+                        {% if ps.source.affiliation %}
+                            <span class="text-muted">{{ps.source.affiliation.summary}}</span>
                         {% endif %}
                     </div>
                 </td>
