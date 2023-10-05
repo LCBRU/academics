@@ -89,7 +89,7 @@ class Author(ElsAuthor):
         scopus_author.orcid = self.orcid
         scopus_author.first_name = self.first_name
         scopus_author.last_name = self.last_name
-        scopus_author.display_name = self.first_name + ' ' + self.last_name
+        scopus_author.display_name = ' '.join(filter(self.first_name, self.last_name))
 
         scopus_author.citation_count = self.citation_count
         scopus_author.document_count = self.document_count

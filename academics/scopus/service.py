@@ -376,6 +376,8 @@ def _update_academic(academic):
 
 
 def _get_affiliation(affiliation_id):
+    logging.info('Starting _get_affiliation')
+
     existing = db.session.execute(select(Affiliation).where(Affiliation.catalog_identifier == affiliation_id)).scalar()
 
     if existing:
