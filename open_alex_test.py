@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 # Load environment variables from '.env' file.
 load_dotenv()
 
-from academics.scopus.open_alex import get_open_alex
+from academics.catalogs.open_alex import get_open_alex
 
 
 get_open_alex()

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from academics import create_app
-from academics.scopus.service import update_academics
+from academics.catalogs.service import update_academics
 
 application = create_app()
 application.app_context().push()

@@ -14,7 +14,7 @@ from wtforms import HiddenField
 from academics.model import (Folder, Journal, Keyword,
                              NihrAcknowledgement, ScopusAuthor,
                              ScopusPublication, Subtype, Theme, User)
-from academics.scopus.service import auto_validate
+from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
 
 from .. import blueprint

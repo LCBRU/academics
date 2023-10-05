@@ -8,7 +8,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from academics.model import db
-import academics.scopus.model
+import academics.catalogs.scopus
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
