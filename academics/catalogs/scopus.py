@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 import logging
 import re
 from elsapy.elssearch import ElsSearch
@@ -18,47 +19,72 @@ def _client():
     return ElsClient(current_app.config['SCOPUS_API_KEY'])
 
 
-def add_scopus_publications(els_author, scopus_author):
-    logging.info('add_scopus_publications: started')
+def _get_scopus_publication_link(p):
+    for h in p.get(u'link', ''):
+        if h['@ref'] == 'scopus':
+            return h['@href']
+
+
+def get_scopus_publications(els_author):
+    logging.info('get_scopus_publications: started')
 
     search_results = DocumentSearch(els_author)
     search_results.execute(_client(), get_all=True)
 
-    for p in search_results.results:
-        scopus_id = p.get(u'dc:identifier', ':').split(':')[1]
+    return [
+        PublicationData(
+            catalog_identifier=p.get(u'dc:identifier', ':').split(':')[1],
+            href=_get_scopus_publication_link(p),
+            doi=p.get(u'prism:doi', ''),
+            title=p.get(u'dc:title', ''),
+            journal_name=p.get(u'prism:publicationName', ''),
+            publication_cover_date=parse_date(p.get(u'prism:coverDate', '')),
+            abstract_text=p.get(u'dc:description', ''),
+            volume=p.get(u'prism:volume', ''),
+            issue=p.get(u'prism:issueIdentifier', ''),
+            pages=p.get(u'prism:pageRange', ''),
+            is_open_access=p.get(u'openaccess', '0') == "1",
+            subtype_code=p.get(u'subtype', ''),
+            subtype_description=p.get(u'subtypeDescription', ''),
+            sponsor_name=p.get(u'fund-sponsor', ''),
+            funding_acronym=p.get(u'fund-acr', ''),
+            cited_by_count=int(p.get(u'citedby-count', '0')),
+            author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
+            keywords=p.get(u'authkeywords', ''),
+        ) for p in search_results.results
+    ]
 
-        publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == scopus_id).one_or_none()
+
+def add_scopus_publications(els_author, scopus_author):
+    logging.info('add_scopus_publications: started')
+
+    for p in get_scopus_publications(els_author):
+        publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
 
         if not publication:
-            publication = ScopusPublication(scopus_id=scopus_id)
+            publication = ScopusPublication(scopus_id=p.catalog_identifier)
 
-            abstract = Abstract(scopus_id)
+            abstract = Abstract(p.catalog_identifier)
 
             if abstract.read(_client()):
                 publication.funding_text = abstract.funding_text
                 _add_sponsors_to_publications(publication=publication, sponsor_names=abstract.funding_list)
 
-        href = None
-
-        for h in p.get(u'link', ''):
-            if h['@ref'] == 'scopus':
-                href = h['@href']
-
-        publication.doi = p.get(u'prism:doi', '')
-        publication.title = p.get(u'dc:title', '')
-        publication.journal = _get_journal(p.get(u'prism:publicationName', ''))
-        publication.publication_cover_date = parse_date(p.get(u'prism:coverDate', ''))
-        publication.href = href
-        publication.abstract = p.get(u'dc:description', '')
-        publication.volume = p.get(u'prism:volume', '')
-        publication.issue = p.get(u'prism:issueIdentifier', '')
-        publication.pages = p.get(u'prism:pageRange', '')
-        publication.is_open_access = p.get(u'openaccess', '0') == "1"
-        publication.subtype = _get_subtype(p)
-        publication.sponsor = _get_sponsor(p)
-        publication.funding_acr = _get_funding_acr(p)
-        publication.cited_by_count = int(p.get(u'citedby-count', '0'))
-        publication.author_list = _get_author_list(p.get('author', []))
+        publication.doi = p.doi
+        publication.title = p.title
+        publication.journal = _get_journal(p.journal_name)
+        publication.publication_cover_date = p.publication_cover_date
+        publication.href = p.href
+        publication.abstract = p.abstract_text
+        publication.volume = p.volume
+        publication.issue = p.issue
+        publication.pages = p.pages
+        publication.is_open_access = p.is_open_access
+        publication.subtype = _get_subtype(p.subtype_code, p.subtype_description)
+        publication.sponsor = _get_sponsor(p.sponsor_name)
+        publication.funding_acr = _get_funding_acr(p.funding_acronym)
+        publication.cited_by_count = p.cited_by_count
+        publication.author_list = p.author_list
 
         if publication.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             publication.validation_historic = True
@@ -66,7 +92,7 @@ def add_scopus_publications(els_author, scopus_author):
         if scopus_author not in publication.sources:
             publication.sources.append(scopus_author)
 
-        _add_keywords_to_publications(publication=publication, keyword_list=p.get(u'authkeywords', ''))
+        _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
 
         db.session.add(publication)
 
@@ -305,3 +331,25 @@ class AuthorSearch():
                 self.last_name,
             ])
         )
+
+
+@dataclass
+class PublicationData():
+    catalog_identifier: str
+    href: str
+    doi: str
+    title: str
+    journal_name: str
+    publication_cover_date: date
+    abstract_text: str
+    volume: str
+    issue: str
+    pages: str
+    is_open_access : bool = False
+    subtype_code: str
+    subtype_description: str
+    sponsor_name: str
+    funding_acronym: str
+    cited_by_count: int
+    author_list: str
+    keywords: str

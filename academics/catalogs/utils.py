@@ -17,10 +17,7 @@ def _get_journal(journal_name):
     return result
 
 
-def _get_subtype(p):
-    code = p.get(u'subtype', '')
-    description = p.get(u'subtypeDescription', '')
-
+def _get_subtype(code, description):
     if not code:
         return None
 
@@ -33,9 +30,7 @@ def _get_subtype(p):
     return result
 
 
-def _get_sponsor(p):
-    name = p.get(u'fund-sponsor', '')
-
+def _get_sponsor(name):
     if not name:
         return None
 
@@ -48,9 +43,7 @@ def _get_sponsor(p):
     return result
 
 
-def _get_funding_acr(p):
-    name = p.get(u'fund-acr', '')
-
+def _get_funding_acr(name):
     if not name:
         return None
 
@@ -95,5 +88,3 @@ def _add_sponsors_to_publications(publication, sponsor_names):
             db.session.add(sponsor)
         
         publication.sponsors.add(sponsor)
-
-
