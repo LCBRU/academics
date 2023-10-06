@@ -154,7 +154,7 @@ def _update_academic(academic):
             if els_author:
                 els_author.update_scopus_author(sa)
 
-                add_publications(els_author, sa)
+                add_publications(get_scopus_publications(els_author), sa)
 
                 sa.affiliation = _get_affiliation(els_author.affiliation_id)
 
@@ -287,7 +287,7 @@ def _add_authors_to_academic(source_identifiers, academic_id):
             sa = els_author.get_scopus_author()
             sa.academic = academic
 
-            add_publications(els_author, sa)
+            add_publications(get_scopus_publications(els_author), sa)
 
             sa.last_fetched_datetime = datetime.utcnow()
             db.session.add(sa)
@@ -308,10 +308,8 @@ def delete_orphan_publications():
         db.session.commit()
 
 
-def add_publications(els_author, source):
+def add_publications(publication_datas, source):
     logging.info('add_publications: started')
-
-    publication_datas = get_scopus_publications(els_author)
 
     for p in publication_datas:
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
