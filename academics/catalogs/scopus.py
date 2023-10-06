@@ -43,7 +43,6 @@ def get_scopus_publications(els_author):
             volume=p.get(u'prism:volume', ''),
             issue=p.get(u'prism:issueIdentifier', ''),
             pages=p.get(u'prism:pageRange', ''),
-            is_open_access=p.get(u'openaccess', '0') == "1",
             subtype_code=p.get(u'subtype', ''),
             subtype_description=p.get(u'subtypeDescription', ''),
             sponsor_name=p.get(u'fund-sponsor', ''),
@@ -51,6 +50,7 @@ def get_scopus_publications(els_author):
             cited_by_count=int(p.get(u'citedby-count', '0')),
             author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
             keywords=p.get(u'authkeywords', ''),
+            is_open_access=p.get(u'openaccess', '0') == "1",
         ) for p in search_results.results
     ]
 
@@ -345,7 +345,6 @@ class PublicationData():
     volume: str
     issue: str
     pages: str
-    is_open_access : bool = False
     subtype_code: str
     subtype_description: str
     sponsor_name: str
@@ -353,3 +352,4 @@ class PublicationData():
     cited_by_count: int
     author_list: str
     keywords: str
+    is_open_access : bool = False
