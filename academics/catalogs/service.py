@@ -157,7 +157,6 @@ def _update_academic(academic):
                 add_publications(get_scopus_publications(els_author), sa)
 
                 sa.affiliation = _get_affiliation(els_author.affiliation_id)
-
                 sa.last_fetched_datetime = datetime.utcnow()
             else:
                 sa.error = True
@@ -288,6 +287,7 @@ def _add_authors_to_academic(source_identifiers, academic_id):
             sa.academic = academic
 
             add_publications(get_scopus_publications(els_author), sa)
+            sa.affiliation = _get_affiliation(els_author.affiliation_id)
 
             sa.last_fetched_datetime = datetime.utcnow()
             db.session.add(sa)
@@ -315,6 +315,7 @@ def add_publications(publication_datas, source):
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
 
         if not publication:
+            publication = ScopusPublication(scopus_id=p.catalog_identifier)
             publication.funding_text = p.abstract.funding_text
             _add_sponsors_to_publications(
                 publication=publication,
