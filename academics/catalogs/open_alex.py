@@ -8,8 +8,7 @@ def get_open_alex():
     config = Config()
     pyalex.config.email = config.OPEN_ALEX_EMAIL
 
-    print(Authors().search_filter(display_name="gerry mccann").count())
-    q = Authors().search_filter(display_name="gerry mccann")
+    q = Authors().search_filter(display_name="mccann")
     # # # works = Works().filter(**{"author.id": author['id']}).filter(publication_year="2022").get()
 
     for a in chain(*q.paginate(per_page=200)):

@@ -154,7 +154,7 @@ def _update_academic(academic):
             if els_author:
                 els_author.update_scopus_author(sa)
 
-                add_scopus_publications(els_author, sa)
+                add_publications(els_author, sa)
 
                 sa.affiliation = _get_affiliation(els_author.affiliation_id)
 
@@ -287,7 +287,7 @@ def _add_authors_to_academic(source_identifiers, academic_id):
             sa = els_author.get_scopus_author()
             sa.academic = academic
 
-            add_scopus_publications(els_author, sa)
+            add_publications(els_author, sa)
 
             sa.last_fetched_datetime = datetime.utcnow()
             db.session.add(sa)
@@ -308,10 +308,12 @@ def delete_orphan_publications():
         db.session.commit()
 
 
-def add_scopus_publications(els_author, scopus_author):
-    logging.info('add_scopus_publications: started')
+def add_publications(els_author, source):
+    logging.info('add_publications: started')
 
-    for p in get_scopus_publications(els_author):
+    publication_datas = get_scopus_publications(els_author)
+
+    for p in publication_datas:
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
 
         if not publication:
@@ -342,9 +344,9 @@ def add_scopus_publications(els_author, scopus_author):
         if publication.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             publication.validation_historic = True
 
-        if scopus_author not in publication.sources:
-            publication.sources.append(scopus_author)
+        if source not in publication.sources:
+            publication.sources.append(source)
 
         _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
 
-    logging.info('add_scopus_publications: ended')
+    logging.info('add_publications: ended')
