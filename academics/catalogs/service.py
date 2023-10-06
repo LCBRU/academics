@@ -79,7 +79,7 @@ def update_single_academic(academic):
 
     db.session.commit()
 
-    _update_all_academics.delay()
+    _process_academics_who_need_an_update.delay()
 
     logging.info('update_academic: ended')
 
@@ -100,76 +100,78 @@ def update_academics():
 
         db.session.commit()
 
-        _update_all_academics.delay()
+        _process_academics_who_need_an_update.delay()
 
     logging.info('update_academics: ended')
 
 
 @celery.task()
-def _update_all_academics():
-    logging.info('_update_all_academics: started')
+def _process_academics_who_need_an_update():
+    logging.info('_process_academics_who_need_an_update: started')
 
     while True:
         a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
 
         if not a:
-            logging.info(f'No more academics to update')
+            logging.info(f'_process_academics_who_need_an_update: No more academics to update')
             break
 
-        try:
-            _update_academic(a)
+        _update_academic(a)
 
-            a.set_name()
-            a.updating = False
-            db.session.add(a)
+        db.session.commit()
 
-            db.session.commit()
-        except Exception as e:
-            logging.error(e)
-
-            a.error = True
-            db.session.add(a)
-
-            db.session.commit()
-
-            sleep(30)
+        sleep(30)
 
     delete_orphan_publications()
     auto_validate()
 
-    logging.info('_update_all_academics: Ended')
+    logging.info('_process_academics_who_need_an_update: Ended')
 
 
-def _update_academic(academic):
+def _update_academic(academic: Academic):
     logging.info(f'Updating Academic {academic.full_name}')
 
-    for sa in academic.sources:
-        if sa.error:
-            logging.info(f'Scopus Author in ERROR')
-            continue
+    try:
+        for sa in academic.sources:
+            if sa.error:
+                logging.info(f'Scopus Author in ERROR')
+            else:
+                _update_source_from_catalog(sa)
 
-        try:
-            els_author = get_els_author(sa.source_identifier)
+        _find_new_scopus_sources(academic)
+        _ensure_all_academic_authors_are_proposed(academic)
 
-            if els_author:
-                els_author.update_scopus_author(sa)
+        academic.ensure_initialisation()
+        academic.updating = False
 
+    except Exception as e:
+        logging.error(e)
+        academic.error = True
+
+    finally:
+        db.session.add(academic)
+
+
+def _update_source_from_catalog(sa: ScopusAuthor):
+    try:
+        els_author = get_els_author(sa.source_identifier)
+
+        if els_author:
+            els_author.update_scopus_author(sa)
+
+            if sa.academic:
                 add_publications(get_scopus_publications(els_author), sa)
 
-                sa.affiliation = _get_affiliation(els_author.affiliation_id)
-                sa.last_fetched_datetime = datetime.utcnow()
-            else:
-                sa.error = True
-        except Exception as e:
-            log_exception(e)
-            logging.info(f'Setting Academic {academic.full_name} to be in error')
+            sa.affiliation = _get_affiliation(els_author.affiliation_id)
+            sa.last_fetched_datetime = datetime.utcnow()
+        else:
             sa.error = True
-        finally:
-            db.session.add(sa)
-
-
-    _find_new_scopus_sources(academic)
-    _ensure_all_academic_authors_are_proposed(academic)
+    except Exception as e:
+        log_exception(e)
+        logging.info(f'Setting Source {sa.full_name} to be in error')
+        sa.error = True
+    finally:
+        db.session.add(sa)
 
 
 def _get_affiliation(affiliation_id):
@@ -214,10 +216,13 @@ def _find_new_scopus_sources(academic):
             if els_author:
                 af = _get_affiliation(els_author.affiliation_id)
                 if af.is_leicester:
-                    sa = els_author.get_scopus_author()
-                    sa.affiliation = af
+                    sa = ScopusAuthor(
+                        source_identifier=identifier
+                    )
 
         if sa:
+            _update_source_from_catalog(sa)
+
             aps = AcademicPotentialSource(
                 academic=academic,
                 source=sa,
@@ -259,47 +264,22 @@ def add_authors_to_academic(source_identifiers, academic_id=None, theme_id=None)
 
     if not academic:
         academic = Academic(
-            first_name='',
-            last_name='',
-            initialised=False,
             theme_id=theme_id,
+            updating=True,
         )
 
-    academic.updating = True
-
     db.session.add(academic)
-    db.session.commit()
-
-    _add_authors_to_academic.delay(source_identifiers, academic_id=academic.id)
-
-
-@celery.task()
-def _add_authors_to_academic(source_identifiers, academic_id):
-    logging.info('_add_authors_to_academic: started')
-
-    academic = db.session.get(Academic, academic_id)
 
     for source_identifier in source_identifiers:
-        els_author = get_els_author(source_identifier)
+        sa = ScopusAuthor(
+            source_identifier=source_identifier,
+            academic=academic,
+        )
+        db.session.add(sa)
 
-        if els_author:
-            sa = els_author.get_scopus_author()
-            sa.academic = academic
-
-            add_publications(get_scopus_publications(els_author), sa)
-            sa.affiliation = _get_affiliation(els_author.affiliation_id)
-
-            sa.last_fetched_datetime = datetime.utcnow()
-            db.session.add(sa)
-
-    academic.set_name()
-    academic.initialised = True
-    academic.updating = False
-
-    db.session.add(academic)
     db.session.commit()
 
-    logging.info('_add_authors_to_academic: ended')
+    _process_academics_who_need_an_update.delay()
 
 
 def delete_orphan_publications():

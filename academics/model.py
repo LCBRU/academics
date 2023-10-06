@@ -44,8 +44,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     # MariaDB backends need a VARChar variable, added 255 to set a max length
 
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
+    first_name = db.Column(db.String(255), default='')
+    last_name = db.Column(db.String(255), default='')
     orcid = db.Column(db.String(255))
     updating = db.Column(db.Boolean, default=False)
     initialised = db.Column(db.Boolean, default=False)
@@ -63,7 +63,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             ])
         )
 
-    def set_name(self):
+    def ensure_initialisation(self):
+        if self.initialised:
+            return
+
+        self.initialised = True
+
         if not self.sources:
             return
 

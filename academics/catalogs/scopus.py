@@ -161,11 +161,6 @@ class Author(ElsAuthor):
         scopus_author.h_index = self.h_index
         scopus_author.href = self.href
 
-    def get_scopus_author(self):
-        result = ScopusAuthor()
-        self.update_scopus_author(result)
-        return result
-
 
 def get_affiliation(affiliation_id):
     result = Affiliation(affiliation_id=affiliation_id)
