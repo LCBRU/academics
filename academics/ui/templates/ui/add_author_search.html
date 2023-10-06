@@ -25,13 +25,13 @@
                 <div class='row'>
                     <div class='col-1'>
                         {% if not a.existing %}
-                            <input type="checkbox" data-source_identifier="{{ a.source_identifier }}" data-author-name="{{ a.display_name }}" class="check_author" name="check_author_{{ a.source_identifier }}"/>
+                            <input type="checkbox" data-source_identifier="{{ a.source_identifier }}" data-author-name="{{ a.full_name }}" class="check_author" name="check_author_{{ a.source_identifier }}"/>
                         {% endif %}
                     </div>
                     <div class='col'>
                         <header>
                             <h1>
-                                <a href="https://www.scopus.com/authid/detail.uri?authorId={{a.source_identifier}}" target="_blank">{{a.display_name}} <i class="fas fa-external-link-alt fa-xs"></i></a>
+                                <a href="https://www.scopus.com/authid/detail.uri?authorId={{a.source_identifier}}" target="_blank">{{a.full_name}} <i class="fas fa-external-link-alt fa-xs"></i></a>
                                 {% if a.existing %}
                                     <span class="badge badge-secondary">Already Imported</span>
                                 {% endif %}

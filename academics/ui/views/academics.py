@@ -16,7 +16,7 @@ def _get_academic_choices():
     academics = Academic.query.all()
     academics = sorted(academics, key=lambda a: ' '.join([a.last_name, a.first_name]))
 
-    return [(0, 'New Academic')] + [(a.id, a.display_name) for a in academics]
+    return [(0, 'New Academic')] + [(a.id, a.full_name) for a in academics]
 
 
 class AddAuthorForm(FlashingForm):
@@ -245,7 +245,7 @@ def academics_amend_potential_sources():
         abort(406, f"Status not recognised should be {ALL_STATUSES}, but is {status}")
 
     if ps.source.academic and ps.source.academic != a:
-        abort(406, f"Academic does not match source academic of {ps.source.academic.display_name}, but is {a.display_name}")
+        abort(406, f"Academic does not match source academic of {ps.source.academic.full_name}, but is {a.full_name}")
 
     match request.json.get('status').lower():
         case 'unassigned':

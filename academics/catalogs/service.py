@@ -88,7 +88,7 @@ def update_academics():
     logging.info('update_academics: started')
     if not updating():
         for academic in Academic.query.all():
-            logging.info(f'Setting academic {academic.display_name} to be updated')
+            logging.info(f'Setting academic {academic.full_name} to be updated')
 
             for au in academic.sources:
                 au.error = False
@@ -141,7 +141,7 @@ def _update_all_academics():
 
 
 def _update_academic(academic):
-    logging.info(f'Updating Academic {academic.display_name}')
+    logging.info(f'Updating Academic {academic.full_name}')
 
     for sa in academic.sources:
         if sa.error:
@@ -163,7 +163,7 @@ def _update_academic(academic):
                 sa.error = True
         except Exception as e:
             log_exception(e)
-            logging.info(f'Setting Academic {academic.display_name} to be in error')
+            logging.info(f'Setting Academic {academic.full_name} to be in error')
             sa.error = True
         finally:
             db.session.add(sa)
@@ -188,7 +188,7 @@ def _get_affiliation(affiliation_id):
 
 
 def _find_new_scopus_sources(academic):
-    logging.info(f'Finding new sources for {academic.display_name}')
+    logging.info(f'Finding new sources for {academic.full_name}')
 
     if len(academic.last_name.strip()) < 1:
         return
@@ -231,7 +231,7 @@ def _find_new_scopus_sources(academic):
 
 
 def _ensure_all_academic_authors_are_proposed(academic):
-    logging.info(f'Ensuring existing authors are proposed for {academic.display_name}')
+    logging.info(f'Ensuring existing authors are proposed for {academic.full_name}')
 
     missing_sources = db.session.execute(
         select(ScopusAuthor)

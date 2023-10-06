@@ -35,9 +35,9 @@
                             <header>
                                 <h1>
                                     {% if a.has_left_brc %}
-                                        <del>{{a.display_name}} ({{a.theme.name}})</del>
+                                        <del>{{a.full_name}} ({{a.theme.name}})</del>
                                     {% else %}
-                                        <span>{{a.display_name}} ({{a.theme.name}})</span>
+                                        <span>{{a.full_name}} ({{a.theme.name}})</span>
                                     {% endif %}
                                 </h1>
                             </header>
@@ -54,24 +54,24 @@
                                 <a
                                     data-toggle="modal"
                                     data-id="{{ a.id }}"
-                                    data-name="{{ a.display_name }}"
+                                    data-name="{{ a.full_name }}"
                                     data-modal-content-url="{{ url_for('ui.academics_potential_sources', id=a.id) }}",
-                                    title="Edit Sources for {{ a.display_name }}"
-                                    data-title="Potential Sources for {{ a.display_name }}"
+                                    title="Edit Sources for {{ a.full_name }}"
+                                    data-title="Potential Sources for {{ a.full_name }}"
                                     data-target="#potentialSources"
                                     href="#"><i class="fas {{cls}}"></i></a>
                             </div>
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a class="academic_edit"
-                                    title="Edit academic {{ a.display_name }}"
+                                    title="Edit academic {{ a.full_name }}"
                                     href="{{ url_for('ui.academic_edit', id=a.id) }}"><i class="fas fa-edit"></i></a>
                             </div>
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a class="academic_delete"
                                     data-toggle="modal"
                                     data-id="{{ a.id }}"
-                                    data-name="{{ a.display_name }}"
-                                    title="Delete academic {{ a.display_name }}"
+                                    data-name="{{ a.full_name }}"
+                                    title="Delete academic {{ a.full_name }}"
                                     data-target="#deleteAcademicModal"
                                     href="#"><i class="fas fa-trash"></i></a>
                             </div>
@@ -80,8 +80,8 @@
                                     <a class="academic_update"
                                         data-toggle="modal"
                                         data-id="{{ a.id }}"
-                                        data-name="{{ a.display_name }}"
-                                        title="Update academic {{ a.display_name }}"
+                                        data-name="{{ a.full_name }}"
+                                        title="Update academic {{ a.full_name }}"
                                         data-target="#updateAcademicModal"
                                         href="#"><i class="fas fa-redo"></i></a>
                                 </div>
@@ -174,14 +174,14 @@
                                                     <a class="author_delete"
                                                     data-toggle="modal"
                                                     data-id="{{ au.id }}"
-                                                    data-name="{{ au.display_name }}"
-                                                    title="Delete author {{ au.display_name }} from academic {{ a.display_name }}"
+                                                    data-name="{{ au.full_name }}"
+                                                    title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
                                                     data-target="#deleteAuthorModal"
                                                     href="#"><i class="fas fa-trash"></i></a>
                                                 </td>
                                                 <td>
                                                     <div>
-                                                        <a href="{{ au.href }}" target="_blank">{{au.display_name}} ({{au.type | title}})</a>
+                                                        <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.type | title}})</a>
                                                     </div>
                                                     <div>
                                                         {% if au.affiliation %}

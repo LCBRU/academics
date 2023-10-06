@@ -273,7 +273,7 @@ class AuthorSearch():
         self.affiliation_name = data.get(u'affiliation-current', {}).get(u'affiliation-name', '')
 
     @property
-    def display_name(self):
+    def full_name(self):
         return ', '.join(
             filter(len, [
                 self.first_name,
