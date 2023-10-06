@@ -346,7 +346,7 @@ class PublicationData():
     cited_by_count: int
     author_list: str
     keywords: str
-    _abstract: Abstract
+    _abstract: Abstract = None
     is_open_access : bool = False
 
     @property
