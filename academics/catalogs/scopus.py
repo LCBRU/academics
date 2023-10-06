@@ -63,13 +63,11 @@ def add_scopus_publications(els_author, scopus_author):
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
 
         if not publication:
-            publication = ScopusPublication(scopus_id=p.catalog_identifier)
-
-            abstract = Abstract(p.catalog_identifier)
-
-            if abstract.read(_client()):
-                publication.funding_text = abstract.funding_text
-                _add_sponsors_to_publications(publication=publication, sponsor_names=abstract.funding_list)
+            publication.funding_text = p.abstract.funding_text
+            _add_sponsors_to_publications(
+                publication=publication,
+                sponsor_names=p.abstract.funding_list,
+            )
 
         db.session.add(publication)
 
@@ -141,12 +139,6 @@ def scopus_author_search(search_string):
         result.append(a)
 
     return result
-
-
-def _get_author_list(authors):
-    author_names = [a['authname'] for a in authors]
-    unique_author_names = list(dict.fromkeys(filter(len, author_names)))
-    return ', '.join(unique_author_names)
 
 
 class Author(ElsAuthor):
@@ -355,3 +347,12 @@ class PublicationData():
     author_list: str
     keywords: str
     is_open_access : bool = False
+    _abstract: Abstract
+
+    @property
+    def abstract(self):
+        if not self._abstract:
+            self._abstract = Abstract(self.catalog_identifier)
+            self._abstract.read(_client())
+
+        return self._abstract
