@@ -33,6 +33,7 @@ def get_scopus_publications(els_author):
 
     return [
         PublicationData(
+            catalog='scopus',
             catalog_identifier=p.get(u'dc:identifier', ':').split(':')[1],
             href=_get_scopus_publication_link(p),
             doi=p.get(u'prism:doi', ''),
@@ -335,6 +336,7 @@ class AuthorSearch():
 
 @dataclass
 class PublicationData():
+    catalog: str
     catalog_identifier: str
     href: str
     doi: str
