@@ -23,6 +23,23 @@ class User(BaseUser):
     theme = db.relationship(Theme)
 
 
+class Affiliation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    catalog = db.Column(db.String(100), index=True)
+    catalog_identifier = db.Column(db.String(1000), index=True)
+    name = db.Column(db.String(1000))
+    address = db.Column(db.String(1000))
+    country = db.Column(db.String(100))
+
+    @property
+    def summary(self):
+        return ', '.join(filter(None, [self.name, self.address]))
+
+    @property
+    def is_leicester(self):
+        return 'leicester' in self.summary.lower()
+
+
 class Academic(AuditMixin, CommonMixin, db.Model):
     # MariaDB backends need a VARChar variable, added 255 to set a max length
 
@@ -90,23 +107,6 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     @property
     def has_new_potential_sources(self):
         return any(p for p in self.potential_sources if not p.not_match and p.source.academic is None)
-
-
-class Affiliation(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    catalog = db.Column(db.String(100), index=True)
-    catalog_identifier = db.Column(db.String(1000), index=True)
-    name = db.Column(db.String(1000))
-    address = db.Column(db.String(1000))
-    country = db.Column(db.String(100))
-
-    @property
-    def summary(self):
-        return ', '.join(filter(None, [self.name, self.address]))
-
-    @property
-    def is_leicester(self):
-        return 'leicester' in self.summary.lower()
 
 
 class Source(AuditMixin, CommonMixin, db.Model):

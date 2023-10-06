@@ -27,7 +27,7 @@ def academic_select_choices():
     )
 
     return [('', '')] + [
-        (a.id, f'{a.full_name}')
+        (a.id, f'{a.display_name}')
         for a in db.session.execute(q).scalars()]
 
 

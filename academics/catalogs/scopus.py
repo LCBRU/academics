@@ -258,7 +258,6 @@ class DocumentSearch(ElsSearch):
 
 @dataclass
 class AuthorSearch():
-
     source_identifier: str
     first_name: str
     last_name: str
@@ -274,7 +273,7 @@ class AuthorSearch():
         self.affiliation_name = data.get(u'affiliation-current', {}).get(u'affiliation-name', '')
 
     @property
-    def full_name(self):
+    def display_name(self):
         return ', '.join(
             filter(len, [
                 self.first_name,
