@@ -69,8 +69,11 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
         top_author = sorted(self.sources, key=lambda a: int(a.document_count), reverse=True)[0]
 
-        self.first_name = top_author.first_name
-        self.last_name = top_author.last_name
+        if top_author.last_name:
+            self.first_name = top_author.first_name
+            self.last_name = top_author.last_name
+        else:
+            self.first_name, self.last_name = top_author.display_name.strip().rsplit(maxsplit=1)
 
     @property
     def orcid_link(self):
