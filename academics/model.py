@@ -55,7 +55,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
 
     @property
-    def full_name(self):
+    def display_name(self):
         return ' '.join(
             filter(len, [
                 self.first_name,
@@ -162,7 +162,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
             return f'https://orcid.org/{self.orcid}'
 
     @property
-    def full_name(self):
+    def display_name(self):
         return self.display_name
 
 
@@ -189,7 +189,7 @@ class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
         elif self.source.academic == self.academic:
             return "Match"
         else:
-            return f"Assigned to {self.source.academic.full_name}"
+            return f"Assigned to {self.source.academic.display_name}"
 
 
 class Journal(db.Model):

@@ -80,7 +80,7 @@ def report_image():
     if search_form.has_value('academic_id'):
         a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
 
-        title = f'{a.full_name} Publications by Acknowledgement Status'
+        title = f'{a.display_name} Publications by Acknowledgement Status'
         count_dups = ' (NB: publications may be associated with multiple academics)'
     elif search_form.has_value('theme_id') or search_form.total.data == "Theme":
         title = 'Theme Publications by Acknowledgement Status'
