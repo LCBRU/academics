@@ -70,6 +70,8 @@ def add_scopus_publications(els_author, scopus_author):
                 publication.funding_text = abstract.funding_text
                 _add_sponsors_to_publications(publication=publication, sponsor_names=abstract.funding_list)
 
+        db.session.add(publication)
+
         publication.doi = p.doi
         publication.title = p.title
         publication.journal = _get_journal(p.journal_name)
@@ -93,8 +95,6 @@ def add_scopus_publications(els_author, scopus_author):
             publication.sources.append(scopus_author)
 
         _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
-
-        db.session.add(publication)
 
     logging.info('add_scopus_publications: ended')
 
