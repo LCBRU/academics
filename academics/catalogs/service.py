@@ -1,9 +1,11 @@
 import logging
 from time import sleep
+from flask import current_app
 from sqlalchemy import and_, or_, select
+from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
 from academics.model import Academic, AcademicPotentialSource, Affiliation, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Subtype
 from lbrc_flask.celery import celery
-from .scopus import add_scopus_publications, get_affiliation, get_els_author, scopus_author_search
+from .scopus import get_affiliation, get_els_author, get_scopus_publications, scopus_author_search
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
@@ -304,3 +306,45 @@ def delete_orphan_publications():
     for p in ScopusPublication.query.filter(~ScopusPublication.sources.any()):
         db.session.delete(p)
         db.session.commit()
+
+
+def add_scopus_publications(els_author, scopus_author):
+    logging.info('add_scopus_publications: started')
+
+    for p in get_scopus_publications(els_author):
+        publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
+
+        if not publication:
+            publication.funding_text = p.abstract.funding_text
+            _add_sponsors_to_publications(
+                publication=publication,
+                sponsor_names=p.abstract.funding_list,
+            )
+
+        db.session.add(publication)
+
+        publication.doi = p.doi
+        publication.title = p.title
+        publication.journal = _get_journal(p.journal_name)
+        publication.publication_cover_date = p.publication_cover_date
+        publication.href = p.href
+        publication.abstract = p.abstract_text
+        publication.volume = p.volume
+        publication.issue = p.issue
+        publication.pages = p.pages
+        publication.is_open_access = p.is_open_access
+        publication.subtype = _get_subtype(p.subtype_code, p.subtype_description)
+        publication.sponsor = _get_sponsor(p.sponsor_name)
+        publication.funding_acr = _get_funding_acr(p.funding_acronym)
+        publication.cited_by_count = p.cited_by_count
+        publication.author_list = p.author_list
+
+        if publication.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
+            publication.validation_historic = True
+
+        if scopus_author not in publication.sources:
+            publication.sources.append(scopus_author)
+
+        _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
+
+    logging.info('add_scopus_publications: ended')
