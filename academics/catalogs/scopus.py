@@ -13,6 +13,7 @@ from elsapy.elsclient import ElsClient
 from flask import current_app
 from sqlalchemy import select
 from lbrc_flask.database import db
+from lbrc_flask.logging import log_exception
 from academics.model import Affiliation, ScopusAuthor
 from lbrc_flask.validators import parse_date
 from elsapy import version
@@ -209,7 +210,8 @@ class Author(ElsAuthor):
         try:
             result = super().read(client)
             super().read_metrics(client)
-        except Exception:
+        except Exception as e:
+            log_exception(e)
             logging.info('Error reading Scopus data')
             return None
         
