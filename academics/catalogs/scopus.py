@@ -26,6 +26,7 @@ def _get_scopus_publication_link(p):
 
 def get_affiliation(affiliation_id):
     if not current_app.config['SCOPUS_ENABLED']:
+        print(current_app.config['SCOPUS_ENABLED'])
         logging.info('SCOPUS Not Enabled')
         return None
 
@@ -40,6 +41,7 @@ def get_scopus_publications(els_author):
     logging.info('get_scopus_publications: started')
 
     if not current_app.config['SCOPUS_ENABLED']:
+        print(current_app.config['SCOPUS_ENABLED'])
         logging.info('SCOPUS Not Enabled')
         return []
 
@@ -75,6 +77,7 @@ def get_els_author(source_identifier):
     logging.info(f'Getting Scopus Author {source_identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
+        print(current_app.config['SCOPUS_ENABLED'])
         logging.info('SCOPUS Not Enabled')
         return None
 
@@ -90,6 +93,7 @@ def get_els_author(source_identifier):
 
 def scopus_author_search(search_string):
     if not current_app.config['SCOPUS_ENABLED']:
+        print(current_app.config['SCOPUS_ENABLED'])
         logging.info('SCOPUS Not Enabled')
         return []
 
