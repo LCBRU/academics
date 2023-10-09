@@ -24,8 +24,24 @@ def _get_scopus_publication_link(p):
             return h['@href']
 
 
+def get_affiliation(affiliation_id):
+    if not current_app.config['SCOPUS_ENABLED']:
+        logging.info('SCOPUS Not Enabled')
+        return None
+
+    result = Affiliation(affiliation_id=affiliation_id)
+    if result.read(_client()):
+        return result
+    else:
+        return None
+
+
 def get_scopus_publications(els_author):
     logging.info('get_scopus_publications: started')
+
+    if not current_app.config['SCOPUS_ENABLED']:
+        logging.info('SCOPUS Not Enabled')
+        return []
 
     search_results = DocumentSearch(els_author)
     search_results.execute(_client(), get_all=True)
@@ -57,6 +73,11 @@ def get_scopus_publications(els_author):
 
 def get_els_author(source_identifier):
     logging.info(f'Getting Scopus Author {source_identifier}')
+
+    if not current_app.config['SCOPUS_ENABLED']:
+        logging.info('SCOPUS Not Enabled')
+        return None
+
     result = Author(source_identifier)
 
     if not result.read(_client()):
@@ -68,6 +89,10 @@ def get_els_author(source_identifier):
 
 
 def scopus_author_search(search_string):
+    if not current_app.config['SCOPUS_ENABLED']:
+        logging.info('SCOPUS Not Enabled')
+        return []
+
     re_orcid = re.compile(r'\d{4}-\d{4}-\d{4}-\d{4}$')
 
     if re_orcid.match(search_string):
@@ -160,14 +185,6 @@ class Author(ElsAuthor):
         scopus_author.document_count = self.document_count
         scopus_author.h_index = self.h_index
         scopus_author.href = self.href
-
-
-def get_affiliation(affiliation_id):
-    result = Affiliation(affiliation_id=affiliation_id)
-    if result.read(_client()):
-        return result
-    else:
-        return None
 
 
 class Affiliation(ElsAffil):

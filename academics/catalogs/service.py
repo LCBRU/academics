@@ -122,11 +122,14 @@ def _update_academic(academic: Academic):
     logging.info(f'Updating Academic {academic.full_name}')
 
     try:
-        for sa in academic.sources:
-            if sa.error:
-                logging.info(f'Scopus Author in ERROR')
+        s: Source
+
+        for s in academic.sources:
+            if s.error:
+                logging.info(f'Source in ERROR')
             else:
-                _update_source_from_catalog(sa)
+                if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
+                    _update_scopus_source(s)
 
         _find_new_scopus_sources(academic)
         _ensure_all_academic_authors_are_proposed(academic)
@@ -142,7 +145,7 @@ def _update_academic(academic: Academic):
         db.session.add(academic)
 
 
-def _update_source_from_catalog(sa: ScopusAuthor):
+def _update_scopus_source(sa: ScopusAuthor):
     try:
         els_author = get_els_author(sa.source_identifier)
 
@@ -213,7 +216,7 @@ def _find_new_scopus_sources(academic):
                 db.session.add(sa)
 
         if sa:
-            _update_source_from_catalog(sa)
+            _update_scopus_source(sa)
 
             db.session.add(AcademicPotentialSource(
                 academic=academic,

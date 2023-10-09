@@ -5,6 +5,7 @@ from lbrc_flask.validators import parse_date
 
 class Config(BaseConfig):
     SCOPUS_API_KEY = os.environ["SCOPUS_API_KEY"]
+    SCOPUS_ENABLED = os.environ.get("SCOPUS_API_KEY", 'True').lower() == 'true'
     OPEN_ALEX_EMAIL = os.environ["OPEN_ALEX_EMAIL"]
     HISTORIC_PUBLICATION_CUTOFF = parse_date(os.environ["HISTORIC_PUBLICATION_CUTOFF"])
 
