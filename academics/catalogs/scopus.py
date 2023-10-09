@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from datetime import date
 import logging
+import requests
+import time
 import re
+import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.model import ScopusAuthor, Affiliation as AcaAffil
@@ -15,7 +18,41 @@ from lbrc_flask.validators import parse_date
 
 
 class ScopusClient(ElsClient):
-    pass
+    __min_req_interval = 5
+
+    def exec_request(self, URL):
+        """Sends the actual request; returns response."""
+
+        ## Throttle request, if need be
+        interval = time.time() - self.__ts_last_req
+        if (interval < self.__min_req_interval):
+            time.sleep( self.__min_req_interval - interval )
+        
+        ## Construct and execute request
+        headers = {
+            "X-ELS-APIKey"  : self.api_key,
+            "User-Agent"    : self.__user_agent,
+            "Accept"        : 'application/json'
+            }
+        if self.inst_token:
+            headers["X-ELS-Insttoken"] = self.inst_token
+        logging.info('Sending GET request to ' + URL)
+        r = requests.get(
+            URL,
+            headers = headers
+            )
+        self.__ts_last_req = time.time()
+        self._status_code=r.status_code
+        if r.status_code == 200:
+            self._status_msg='data retrieved'
+            return json.loads(r.text)
+        elif r.status_code == 429:
+            logging.warn(f'QUOTA EXCEEDED: Next Request Allowed {r.headers.get("X-RateLimit-Reset")}')
+            self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
+            raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + "\nand using headers " + str(headers) + ":\n" + r.text)
+        else:
+            self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
+            raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + "\nand using headers " + str(headers) + ":\n" + r.text)
 
 
 def _client():
