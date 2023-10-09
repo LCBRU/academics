@@ -53,7 +53,7 @@ class ScopusClient(ElsClient):
             self._status_msg='data retrieved'
             return json.loads(r.text)
         elif r.status_code == 429:
-            next_allowed = datetime.fromtimestamp(r.headers.get("X-RateLimit-Reset"))
+            next_allowed = datetime.fromtimestamp(int(r.headers.get("X-RateLimit-Reset", 0)))
             logging.warn(f'QUOTA EXCEEDED: Next Request Allowed {next_allowed}')
             self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
             raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + "\nand using headers " + str(headers) + ":\n" + r.text)
