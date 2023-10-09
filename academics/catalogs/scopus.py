@@ -15,10 +15,15 @@ from sqlalchemy import select
 from lbrc_flask.database import db
 from academics.model import Affiliation, ScopusAuthor
 from lbrc_flask.validators import parse_date
-
+from elsapy import version
 
 class ScopusClient(ElsClient):
-    __min_req_interval = 5
+    # class variables
+    __url_base = "https://api.elsevier.com/"    ## Base URL for later use
+    __user_agent = "elsapy-v%s" % version       ## Helps track library use
+    __min_req_interval = 5                      ## Min. request interval in sec
+    __ts_last_req = time.time()                 ## Tracker for throttling
+ 
 
     def exec_request(self, URL):
         """Sends the actual request; returns response."""
