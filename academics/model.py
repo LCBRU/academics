@@ -116,6 +116,13 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def has_new_potential_sources(self):
         return any(p for p in self.potential_sources if not p.not_match and p.source.academic is None)
 
+    def mark_for_update(self):
+        for au in self.sources:
+            au.error = False
+        
+        self.error = False
+        self.updating = True        
+
 
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

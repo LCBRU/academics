@@ -166,7 +166,8 @@ def publication_search_query(search_form):
     if search_form.has_value('search'):
         q = q.where(or_(
             ScopusPublication.title.like(f'%{search_form.search.data}%'),
-            ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%'))
+            ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%')),
+            ScopusPublication.doi.like(f'%{search_form.search.data}%'),
         ))
 
     acknowledgements = []

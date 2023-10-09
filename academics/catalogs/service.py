@@ -65,18 +65,12 @@ def _get_nihr_funded_open_access(pub):
         return NihrFundedOpenAccess.get_instance_by_name(NihrFundedOpenAccess.NIHR_FUNDED)
 
 
-def update_single_academic(academic):
+def update_single_academic(academic: Academic):
     logging.info('update_academic: started')
 
-    for au in academic.sources:
-        au.error = False
-        db.session.add(au)
-    
-    academic.error = False
-    academic.updating = True
+    academic.mark_for_update()
 
     db.session.add(academic)
-
     db.session.commit()
 
     _process_academics_who_need_an_update.delay()
@@ -90,12 +84,8 @@ def update_academics():
         for academic in Academic.query.all():
             logging.info(f'Setting academic {academic.full_name} to be updated')
 
-            for au in academic.sources:
-                au.error = False
-                db.session.add(au)
+            academic.mark_for_update()
 
-            academic.error = False
-            academic.updating = True
             db.session.add(academic)
 
         db.session.commit()
@@ -120,7 +110,7 @@ def _process_academics_who_need_an_update():
 
         db.session.commit()
 
-        sleep(30)
+        sleep(10)
 
     delete_orphan_publications()
     auto_validate()
@@ -220,16 +210,15 @@ def _find_new_scopus_sources(academic):
                         source_identifier=identifier
                     )
 
+                db.session.add(sa)
+
         if sa:
             _update_source_from_catalog(sa)
 
-            aps = AcademicPotentialSource(
+            db.session.add(AcademicPotentialSource(
                 academic=academic,
                 source=sa,
-            )
-
-            db.session.add(sa)
-            db.session.add(aps)
+            ))
     
     db.session.commit()
 
