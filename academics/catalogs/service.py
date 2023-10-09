@@ -132,7 +132,7 @@ def _update_academic(academic: Academic):
                     _update_scopus_source(s)
 
         _find_new_scopus_sources(academic)
-        _ensure_all_academic_authors_are_proposed(academic)
+        _ensure_all_academic_sources_are_proposed(academic)
 
         academic.ensure_initialisation()
         academic.updating = False
@@ -226,18 +226,18 @@ def _find_new_scopus_sources(academic):
     db.session.commit()
 
 
-def _ensure_all_academic_authors_are_proposed(academic):
-    logging.info(f'Ensuring existing authors are proposed for {academic.full_name}')
+def _ensure_all_academic_sources_are_proposed(academic):
+    logging.info(f'Ensuring existing sources are proposed for {academic.full_name}')
 
-    missing_sources = list(db.session.execute(
-        select(ScopusAuthor)
-        .where(~ScopusAuthor.potential_academics.any())
-        .where(ScopusAuthor.academic == academic)
+    missing_proposed_sources = list(db.session.execute(
+        select(Source)
+        .where(~Source.potential_academics.any())
+        .where(Source.academic == academic)
     ).scalars())
 
-    logging.info(f'Missing sources found: {missing_sources}')
+    logging.info(f'Missing proposed sources found: {missing_proposed_sources}')
 
-    for source in missing_sources:
+    for source in missing_proposed_sources:
         aps = AcademicPotentialSource(
             academic=academic,
             source=source,
@@ -248,7 +248,7 @@ def _ensure_all_academic_authors_are_proposed(academic):
     db.session.commit()
 
 
-def add_authors_to_academic(source_identifiers, academic_id=None, theme_id=None):
+def add_sources_to_academic(source_identifiers, academic_id=None, theme_id=None):
     academic = None
 
     if academic_id:

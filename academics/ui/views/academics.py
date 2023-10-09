@@ -3,7 +3,7 @@ from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField
-from academics.catalogs.service import add_authors_to_academic, author_search, delete_orphan_publications, update_academics, update_single_academic, updating
+from academics.catalogs.service import add_sources_to_academic, author_search, delete_orphan_publications, update_academics, update_single_academic, updating
 from academics.model import Academic, AcademicPotentialSource, Source, Theme
 from wtforms.validators import Length
 from .. import blueprint
@@ -135,7 +135,7 @@ def add_author_search():
 def add_author():
     form = AddAuthorForm()
 
-    add_authors_to_academic(
+    add_sources_to_academic(
         request.form.getlist('source_identifier'),
         form.academic_id.data,
         form.theme_id.data,
