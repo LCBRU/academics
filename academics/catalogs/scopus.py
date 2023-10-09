@@ -14,8 +14,12 @@ from academics.model import Affiliation, ScopusAuthor
 from lbrc_flask.validators import parse_date
 
 
+class ScopusClient(ElsClient):
+    pass
+
+
 def _client():
-    return ElsClient(current_app.config['SCOPUS_API_KEY'])
+    return ScopusClient(current_app.config['SCOPUS_API_KEY'])
 
 
 def _get_scopus_publication_link(p):
