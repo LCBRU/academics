@@ -50,6 +50,15 @@ class ScopusClient(ElsClient):
         self.__ts_last_req = time.time()
         self._status_code=r.status_code
         if r.status_code == 200:
+            next_allowed = datetime.fromtimestamp(int(r.headers.get("X-RateLimit-Reset", 0)))
+            rate_limit = r.headers.get("X-RateLimit-Limit", '')
+            rate_limit_remaining = r.headers.get("X-RateLimit-Remaining", '')
+
+            logging.info(f'Request Successful')
+            logging.info(f'X-RateLimit-Limit: {rate_limit}')
+            logging.info(f'X-RateLimit-Remaining: {rate_limit_remaining}')
+            logging.info(f'X-RateLimit-Reset: {next_allowed}')
+
             self._status_msg='data retrieved'
             return json.loads(r.text)
         elif r.status_code == 429:
