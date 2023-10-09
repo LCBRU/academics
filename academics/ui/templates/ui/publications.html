@@ -67,6 +67,10 @@
                         {% endif %}
                     </h4>
                     <dl class="row">
+                        {% if p.doi %}
+                            <dt class="col-auto">DOI</dt>
+                            <dd class="col-auto"><a href="http://doi.org/{{ p.doi }}">{{p.doi | blank_if_none}}</a></dd>
+                        {% endif %}
                         {% if p.journal %}
                             <dt class="col-auto">Journal</dt>
                             <dd class="col-auto"><a href="{{ url_for('ui.publications', journal_id=p.journal_id ) }}">{{p.journal.name | blank_if_none | title_case}}</a></dd>
