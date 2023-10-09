@@ -229,11 +229,11 @@ def _find_new_scopus_sources(academic):
 def _ensure_all_academic_authors_are_proposed(academic):
     logging.info(f'Ensuring existing authors are proposed for {academic.full_name}')
 
-    missing_sources = db.session.execute(
+    missing_sources = list(db.session.execute(
         select(ScopusAuthor)
         .where(~ScopusAuthor.potential_academics.any())
         .where(ScopusAuthor.academic == academic)
-    ).scalars()
+    ).scalars())
 
     logging.info(f'Missing sources found: {missing_sources}')
 
