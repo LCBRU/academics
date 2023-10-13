@@ -192,6 +192,8 @@ def _find_new_scopus_sources(academic):
     logging.info(f'Found new sources: {new_source_identifiers}')
 
     for identifier in new_source_identifiers:
+        logging.info(f'Adding new potential source {identifier}')
+
         if db.session.execute(
             select(db.func.count(AcademicPotentialSource.id))
             .where(AcademicPotentialSource.academic == academic)
@@ -204,18 +206,23 @@ def _find_new_scopus_sources(academic):
         ).scalar()
 
         if not sa:
+            logging.info(f'New potential source {identifier} is not currently known')
             els_author = get_els_author(identifier)
 
             if els_author:
+                logging.info(f'Getting new potential source {identifier} affiliation {els_author.affiliation_id}')
+
                 af = _get_affiliation(els_author.affiliation_id)
-                if af.is_leicester:
+                if af and af.is_leicester:
+                    logging.info(f'Affiliation is leicester so create the new ScopusAuthor')
                     sa = ScopusAuthor(
                         source_identifier=identifier
                     )
 
-                db.session.add(sa)
+                    db.session.add(sa)
 
         if sa:
+            logging.info(f'Updating Scopus author for potential source')
             _update_scopus_source(sa)
 
             db.session.add(AcademicPotentialSource(

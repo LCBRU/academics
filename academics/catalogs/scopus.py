@@ -226,12 +226,6 @@ class Author(ElsAuthor):
             logging.info('No error reading Scopus data, but data is still None')
             return None
 
-        if self.affiliation_id:
-            self.affiliation = Affiliation(affiliation_id=self.affiliation_id)
-            self.affiliation.read(client)
-        else:
-            self.affiliation = None
-
         return result
 
     def update_scopus_author(self, scopus_author):
