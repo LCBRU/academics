@@ -329,8 +329,6 @@ class DocumentSearch(ElsSearch):
     def __init__(self, author):
         q = f'au-id({author.source_identifier})'
 
-        print(current_app.config['LOAD_OLD_PUBLICATIONS'])
-
         if not current_app.config['LOAD_OLD_PUBLICATIONS']:
             q = f'{q} AND PUBYEAR > {date.today().year - 1}'
 

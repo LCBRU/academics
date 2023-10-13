@@ -1,0 +1,139 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Academic Publications</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: x-small;
+        }
+
+        h1, h2 {
+            margin: 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-style: italic;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #777;
+            font-size: 1.5em;
+        }
+
+        h3 {
+            font-size: 1.2em;
+            margin: 0;
+            margin-bottom: 4px;
+        }
+
+        h4 {
+            color: #777;
+            font-size: 1em;
+            margin: 0;
+            margin-bottom: 4px;
+            font-weight: 100;
+        }
+
+        h5 {
+            color: #222;
+            font-style: italic;
+            font-size: 0.7em;
+            margin: 0;
+            font-weight: 100;
+        }
+
+        span.param_head {
+            font-weight: bold;
+        }
+
+        .publications {
+            padding: 20px;
+            border: 1px solid #ddd;
+            page-break-inside: avoid;
+        }
+
+        .publications:nth-child(even){
+            background-color: #f2f2f2;
+        }
+
+        dt {
+            float: left;
+            clear: left;
+            width: 110px;
+            font-weight: bold;
+        }
+
+        dt::after {
+            content: ":";
+        }
+  
+        dd {
+            margin: 0 0 0 110px;
+            padding: 0 0 0.5em 0;
+        }
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" crossorigin="anonymous">
+</head>
+
+<body>
+
+	<h1>Academics</h1>
+	<h2>Publications</h2>
+
+    <p>
+        The following new publications have been created in the last month
+    </p>
+
+    <div>
+        {% for p in publications %}
+            <div class="publications">
+                <div>
+                    <header>
+                        <div>
+                            <h3>{{p.title}}</h3>
+                            <h4>{{p.author_list}}</h4>
+                        </div>
+                    </header>
+                    <dl>
+                        {% if p.journal %}
+                            <dt>Journal</dt>
+                            <dd>{{p.journal.name | blank_if_none | title_case}} ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
+                        {% endif %}
+                        {% if p.subtype %}
+                            <dt>Type</dt>
+                            <dd>{{ p.subtype.description }}</dd>
+                        {% endif %}
+                        {% if p.cited_by_count is not none %}
+                            <dt>Citations</dt>
+                            <dd>{{ p.cited_by_count }}</dd>
+                        {% endif %}
+                        {% if p.sponsor %}
+                            <dt>Funding Sponsor</dt>
+                            <dd>{{ p.sponsor.name }}</dd>
+                        {% endif %}
+                        {% if p.funding_acr %}
+                            <dt>Funding Acronym</dt>
+                            <dd>{{ p.funding_acr.name }}</dd>
+                        {% endif %}
+                        {% if p.is_open_access %}
+                            <dt>Open Access</dt>
+                            <dd><i class="fas fa-check"></i></dd>
+                        {% endif %}
+                    </dl>
+
+                    <p>{{p.abstract | blank_if_none}}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
