@@ -30,12 +30,10 @@ q = (
 
 publications = list(db.session.execute(q).unique().scalars())
 
-recipients = get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT)
-
 email(
     subject='New Publications this Month',
     message=render_template('email/new_publications.txt', publications=publications),
-    recipients=[],
+    recipients=get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT),
     html_template='email/new_publications.html',
     publications=publications,
 )
