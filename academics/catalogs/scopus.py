@@ -88,10 +88,7 @@ def get_affiliation(affiliation_id):
         return None
 
     result = Affiliation(affiliation_id=affiliation_id)
-    if result.read(_client()):
-        return result
-    else:
-        return None
+    return result.read(_client())
 
 
 def get_scopus_publications(els_author):
@@ -256,15 +253,24 @@ class Affiliation(ElsAffil):
 
     @property
     def name(self):
-        return self.data.get(u'affiliation-name', '')
+        if self.data:
+            return self.data.get(u'affiliation-name', '')
+        else:
+            return ''
 
     @property
     def address(self):
-        return ', '.join(filter(None, [self.data.get(u'address', ''), self.data.get(u'city', '')]))
+        if self.data:
+            return ', '.join(filter(None, [self.data.get(u'address', ''), self.data.get(u'city', '')]))
+        else:
+            return ''
 
     @property
     def country(self):
-        return self.data.get(u'country', '')
+        if self.data:
+            return self.data.get(u'country', '')
+        else:
+            return ''
     
     def get_academic_affiliation(self):
         return AcaAffil(
