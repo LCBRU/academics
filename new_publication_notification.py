@@ -25,18 +25,17 @@ last_month_start = this_month_start - relativedelta(months=1)
 q = (
     select(ScopusPublication)
     .where(ScopusPublication.created_date.between(last_month_start, this_month_start))
+    .order_by(ScopusPublication.created_date.asc)
 )
 
 publications = list(db.session.execute(q).unique().scalars())
 
 recipients = get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT)
 
-print(len(publications))
-
-# email(
-#     subject='New Publications this Month',
-#     message=render_template('email/new_publications.txt', publications=publications),
-#     recipients=[],
-#     html_template='email/new_publications.html',
-#     publications=publications,
-# )
+email(
+    subject='New Publications this Month',
+    message=render_template('email/new_publications.txt', publications=publications),
+    recipients=[],
+    html_template='email/new_publications.html',
+    publications=publications,
+)
