@@ -88,7 +88,8 @@ def get_affiliation(affiliation_id):
         return None
 
     result = Affiliation(affiliation_id=affiliation_id)
-    return result.read(_client())
+    result.read(_client())
+    return result
 
 
 def get_scopus_publications(els_author):
