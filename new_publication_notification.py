@@ -24,7 +24,7 @@ last_month_start = this_month_start - relativedelta(months=1)
 
 q = (
     select(ScopusPublication)
-    .where(ScopusPublication.created_date.between(this_month_start, last_month_start))
+    .where(ScopusPublication.created_date.between(last_month_start, this_month_start))
 )
 
 publications = list(db.session.execute(q).unique().scalars())
