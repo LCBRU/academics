@@ -332,7 +332,7 @@ class DocumentSearch(ElsSearch):
         print(current_app.config['LOAD_OLD_PUBLICATIONS'])
 
         if not current_app.config['LOAD_OLD_PUBLICATIONS']:
-            q = f'{q} AND PUBYEAR > {datetime.date.today().year - 1}'
+            q = f'{q} AND PUBYEAR > {date.today().year - 1}'
 
         super().__init__(query=q, index='scopus')
         self._uri += '&view=complete'
