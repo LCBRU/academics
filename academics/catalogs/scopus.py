@@ -326,7 +326,12 @@ class Abstract(AbsDoc):
 
 class DocumentSearch(ElsSearch):
     def __init__(self, author):
-        super().__init__(query=f'au-id({author.source_identifier})', index='scopus')
+        q = f'au-id({author.source_identifier})'
+
+        if not current_app.config['LOAD_OLD_PUBLICATIONS']:
+            q = f'{q} AND PUBYEAR > {datetime.date.today().year - 1}'
+
+        super().__init__(query=q, index='scopus')
         self._uri += '&view=complete'
 
 
