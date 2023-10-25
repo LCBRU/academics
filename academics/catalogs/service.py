@@ -128,10 +128,10 @@ def _update_academic(academic: Academic):
             if s.error:
                 logging.info(f'Source in ERROR')
             else:
-                if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
-                    _update_scopus_source(s)
+                update_source(s)
 
         _find_new_scopus_sources(academic)
+
         _ensure_all_academic_sources_are_proposed(academic)
 
         academic.ensure_initialisation()
@@ -145,40 +145,45 @@ def _update_academic(academic: Academic):
         db.session.add(academic)
 
 
-def _update_scopus_source(sa: ScopusAuthor):
+def update_source(s):
     try:
-        els_author = get_els_author(sa.source_identifier)
+        if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
+            _update_scopus_source(s)
 
-        if els_author:
-            els_author.update_scopus_author(sa)
-
-            if sa.academic:
-                add_publications(get_scopus_publications(els_author), sa)
-
-            sa.affiliation = _get_affiliation(els_author.affiliation_id)
-            sa.last_fetched_datetime = datetime.utcnow()
-        else:
-            sa.error = True
+        s.last_fetched_datetime = datetime.utcnow()
     except Exception as e:
         log_exception(e)
-        logging.info(f'Setting Source {sa.full_name} to be in error')
-        sa.error = True
+        logging.info(f'Setting Source {s.full_name} to be in error')
+        s.error = True
     finally:
-        db.session.add(sa)
+        db.session.add(s)
+
+
+def _update_scopus_source(sa: ScopusAuthor):
+    els_author = get_els_author(sa.source_identifier)
+
+    if els_author:
+        els_author.update_scopus_author(sa)
+
+        if sa.academic:
+            add_publications(get_scopus_publications(sa.source_identifier), sa)
+
+        sa.affiliation = _get_affiliation(els_author.affiliation_id)
+    else:
+        sa.error = True
 
 
 def _get_affiliation(affiliation_id):
     logging.info('Starting _get_affiliation')
 
-    existing = db.session.execute(select(Affiliation).where(Affiliation.catalog_identifier == affiliation_id)).scalar()
+    existing = db.session.execute(
+        select(Affiliation).where(Affiliation.catalog_identifier == affiliation_id)
+    ).scalar()
 
     if existing:
         return existing
-    
-    new = get_affiliation(affiliation_id)
-
-    if new:
-        return new.get_academic_affiliation()
+    else:
+        return get_affiliation(affiliation_id)
 
 
 def _find_new_scopus_sources(academic):

@@ -14,9 +14,9 @@ from flask import current_app
 from sqlalchemy import select
 from lbrc_flask.database import db
 from lbrc_flask.logging import log_exception
-from academics.model import Affiliation, ScopusAuthor
 from lbrc_flask.validators import parse_date
 from elsapy import version
+
 
 class ScopusClient(ElsClient):
     # class variables
@@ -87,20 +87,24 @@ def get_affiliation(affiliation_id):
         logging.info('SCOPUS Not Enabled')
         return None
 
-    result = Affiliation(affiliation_id=affiliation_id)
+    result = ScopusAffiliation(affiliation_id=affiliation_id)
     result.read(_client())
-    return result
+
+    if result:
+        return result.get_academic_affiliation()
+    else:
+        return None
 
 
-def get_scopus_publications(els_author):
+def get_scopus_publications(identifier):
     logging.info('get_scopus_publications: started')
 
     if not current_app.config['SCOPUS_ENABLED']:
         print(current_app.config['SCOPUS_ENABLED'])
         logging.info('SCOPUS Not Enabled')
         return []
-
-    search_results = DocumentSearch(els_author)
+    
+    search_results = DocumentSearch(identifier)
     search_results.execute(_client(), get_all=True)
 
     return [
@@ -241,7 +245,7 @@ class Author(ElsAuthor):
         scopus_author.href = self.href
 
 
-class Affiliation(ElsAffil):
+class ScopusAffiliation(ElsAffil):
     def __init__(self, affiliation_id):
         self.affiliation_id = affiliation_id
         super().__init__(affil_id=affiliation_id)
@@ -326,8 +330,8 @@ class Abstract(AbsDoc):
 
 
 class DocumentSearch(ElsSearch):
-    def __init__(self, author):
-        q = f'au-id({author.source_identifier})'
+    def __init__(self, identifier):
+        q = f'au-id({identifier})'
 
         if not current_app.config['LOAD_OLD_PUBLICATIONS']:
             q = f'{q} AND PUBYEAR > {date.today().year - 1}'

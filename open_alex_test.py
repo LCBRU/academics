@@ -7,6 +7,5 @@ load_dotenv()
 
 from academics.catalogs.open_alex import get_open_alex
 
-
 get_open_alex()
 
