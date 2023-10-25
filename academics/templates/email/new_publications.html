@@ -84,13 +84,7 @@
 </head>
 
 <body>
-
-	<h1>Academics</h1>
-	<h2>Publications</h2>
-
-    <p>
-        The following new publications have been created in the last month
-    </p>
+	<h1>The following new publications have been created in the last month...</h1>
 
     <div>
         {% for p in publications %}
@@ -111,25 +105,10 @@
                             <dt>Type</dt>
                             <dd>{{ p.subtype.description }}</dd>
                         {% endif %}
-                        {% if p.cited_by_count is not none %}
-                            <dt>Citations</dt>
-                            <dd>{{ p.cited_by_count }}</dd>
-                        {% endif %}
-                        {% if p.sponsor %}
-                            <dt>Funding Sponsor</dt>
-                            <dd>{{ p.sponsor.name }}</dd>
-                        {% endif %}
-                        {% if p.funding_acr %}
-                            <dt>Funding Acronym</dt>
-                            <dd>{{ p.funding_acr.name }}</dd>
-                        {% endif %}
-                        {% if p.is_open_access %}
-                            <dt>Open Access</dt>
-                            <dd><i class="fas fa-check"></i></dd>
-                        {% endif %}
                     </dl>
 
-                    <p>{{p.abstract | blank_if_none}}</p>
+                    {{ p.abstract | blank_if_none | paragraphs }}
+
                 </div>
             </div>
         {% endfor %}
