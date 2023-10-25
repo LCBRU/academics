@@ -9,7 +9,6 @@
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: x-small;
         }
 
         h1, h2 {
@@ -20,11 +19,6 @@
         h1 {
             font-style: italic;
             font-size: 2em;
-        }
-
-        h2 {
-            color: #777;
-            font-size: 1.5em;
         }
 
         h3 {
@@ -41,26 +35,10 @@
             font-weight: 100;
         }
 
-        h5 {
-            color: #222;
-            font-style: italic;
-            font-size: 0.7em;
-            margin: 0;
-            font-weight: 100;
-        }
-
-        span.param_head {
-            font-weight: bold;
-        }
-
         .publications {
             padding: 20px;
-            border: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
             page-break-inside: avoid;
-        }
-
-        .publications:nth-child(even){
-            background-color: #f2f2f2;
         }
 
         dt {
@@ -88,11 +66,11 @@
 
     <div>
         {% for p in publications %}
-            <div class="publications">
+            <a class="publications" href="http://doi.org/{{ p.doi }}">
                 <div>
                     <header>
                         <div>
-                            <h3>{{p.title}}</h3>
+                            <h3><a href="http://doi.org/{{ p.doi }}">{{p.title}}</a></h3>
                             <h4>{{p.author_list}}</h4>
                         </div>
                     </header>
@@ -106,9 +84,7 @@
                             <dd>{{ p.subtype.description }}</dd>
                         {% endif %}
                     </dl>
-
                     {{ p.abstract | blank_if_none | paragraphs }}
-
                 </div>
             </div>
         {% endfor %}
