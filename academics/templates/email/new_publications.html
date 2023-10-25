@@ -19,7 +19,6 @@
         h3 {
             font-size: 1.2em;
             margin: 0;
-            margin-bottom: 4px;
         }
 
         h4 {
@@ -79,8 +78,10 @@
                             <dd>{{ p.subtype.description }}</dd>
                         {% endif %}
                     </dl>
-                    <h3>Abstract</h3>
-                    {{ p.abstract | blank_if_none | paragraphs }}
+                    {% if p.abstract | length > 0 %}
+                        <h3>Abstract</h3>
+                        {{ p.abstract | blank_if_none | paragraphs }}
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
