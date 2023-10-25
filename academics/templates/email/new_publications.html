@@ -11,14 +11,9 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        h1, h2 {
-            margin: 0;
-            text-align: center;
-        }
-
         h1 {
             font-style: italic;
-            font-size: 2em;
+            font-size: 1.2em;
         }
 
         h3 {
@@ -66,7 +61,7 @@
 
     <div>
         {% for p in publications %}
-            <a class="publications" href="http://doi.org/{{ p.doi }}">
+            <div class="publications">
                 <div>
                     <header>
                         <div>
@@ -84,6 +79,7 @@
                             <dd>{{ p.subtype.description }}</dd>
                         {% endif %}
                     </dl>
+                    <h3>Abstract</h3>
                     {{ p.abstract | blank_if_none | paragraphs }}
                 </div>
             </div>
