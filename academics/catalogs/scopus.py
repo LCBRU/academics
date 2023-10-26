@@ -161,7 +161,7 @@ def scopus_author_search(search_string):
     result = []
 
     for r in auth_srch.results:
-        a = AuthorSearch(r)
+        a = AuthorData(r.data)
 
         if len(a.source_identifier) == 0:
             continue
@@ -177,12 +177,6 @@ class Author(ElsAuthor):
     def __init__(self, source_identifier):
         self.source_identifier = source_identifier
         super().__init__(author_id=self.source_identifier)
-
-    @property
-    def href(self):
-        for h in  self.data.get(u'coredata', {}).get(u'link', ''):
-            if h['@rel'] == 'scopus-author':
-                return h['@href']
 
     @property
     def orcid(self):
@@ -219,7 +213,6 @@ class Author(ElsAuthor):
     def read(self, client):
         try:
             result = super().read(client)
-            super().read_metrics(client)
         except Exception as e:
             log_exception(e)
             logging.info('Error reading Scopus data')
@@ -231,23 +224,22 @@ class Author(ElsAuthor):
 
         return result
 
+    def read_metrics(self, client):
+        try:
+            result = super().read_metrics(client)
+        except Exception as e:
+            log_exception(e)
+            logging.info('Error reading Scopus metrics')
+            return None
+        
+        if self.data is None:
+            logging.info('No error reading Scopus metrics, but data is still None')
+            return None
+
+        return result
+
     def get_data(self):
-        return AuthorData(
-            catalog='scopus',
-            catalog_identifier=self.source_identifier,
-            orcid=self.orcid,
-            first_name=self.first_name,
-            last_name=self.last_name,
-            display_name=' '.join(filter(None, [self.first_name, self.last_name])),
-            citation_count=self.citation_count,
-            document_count=self.document_count,
-            h_index=self.h_index,
-            href=self.href,
-            affiliation_identifier=self.affiliation_id,
-            affiliation_name=self.affiliation_name,
-            affiliation_address=self.affiliation_city,
-            affiliation_country=self.affiliation_country,
-        )
+        return AuthorData(self.data)
 
 
 class ScopusAffiliation(ElsAffil):
@@ -337,43 +329,6 @@ class DocumentSearch(ElsSearch):
 
 
 @dataclass
-class AuthorSearch():
-    source_identifier: str
-    first_name: str
-    last_name: str
-    affiliation_id: str
-    affiliation_name: str
-    affiliation_address: str
-    affiliation_city: str
-    affiliation_country: str
-    existing : bool = False
-    
-    def __init__(self, data):
-        self.source_identifier = data.get(u'dc:identifier', ':').split(':')[1]
-        self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
-        self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
-        self.affiliation_id = data.get(u'affiliation-current', {}).get(u'affiliation-id', '')
-        self.affiliation_name = data.get(u'affiliation-current', {}).get(u'affiliation-name', '')
-        self.affiliation_city = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
-        self.affiliation_address = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
-        self.affiliation_country = data.get(u'affiliation-current', {}).get(u'affiliation-country', '')
-
-    @property
-    def full_name(self):
-        return ', '.join(
-            filter(len, [
-                self.first_name,
-                self.last_name,
-            ])
-        )
-
-    @property
-    def is_leicester(self):
-        summary = ', '.join(filter(None, [self.affiliation_name, self.affiliation_address]))
-        return 'leicester' in summary
-
-
-@dataclass
 class PublicationData():
     catalog: str
     catalog_identifier: str
@@ -405,22 +360,26 @@ class PublicationData():
         return self._abstract
 
 
-@dataclass
 class AuthorData():
-    catalog: str
-    catalog_identifier: str
-    orcid: str
-    first_name: str
-    last_name: str
-    display_name: str
-    citation_count: int
-    document_count: int
-    h_index: int
-    href: str
-    affiliation_identifier: str
-    affiliation_name: str
-    affiliation_address: str
-    affiliation_country: str
+    def __init__(self, data):
+
+        href = ''
+        for h in  self.data.get(u'coredata', {}).get(u'link', ''):
+            if h['@rel'] == 'scopus-author':
+                href = h['@href']
+
+        self.catalog = 'scopus'
+        self.catalog_identifier = data.get(u'dc:identifier', ':').split(':')[1]
+        self.href = href
+        self.orcid = self.data.get(u'coredata', {}).get(u'orcid', '')
+        self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
+        self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
+        self.display_name = ' '.join(filter(None, [self.first_name, self.last_name]))
+        self.affiliation_identifier = data.get(u'affiliation-current', {}).get(u'affiliation-id', '')
+        self.affiliation_name = data.get(u'affiliation-current', {}).get(u'affiliation-name', '')
+        self.affiliation_city = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
+        self.affiliation_address = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
+        self.affiliation_country = data.get(u'affiliation-current', {}).get(u'affiliation-country', '')
 
     @property
     def is_leicester(self):
@@ -433,10 +392,18 @@ class AuthorData():
         source.first_name = self.first_name
         source.last_name = self.last_name
         source.display_name = self.display_name
-        source.citation_count = self.citation_count
-        source.document_count = self.document_count
-        source.h_index = self.h_index
         source.href = self.href            
+
+        logging.info(f'Initialising Metrics')
+        metrics = Author(self.catalog_identifier)
+
+        logging.info(f'Reading Scopus Metrics')
+        if not metrics.read(_client()):
+            logging.info(f'Scopus Metrics not read from Scopus')
+        else:
+            source.citation_count = metrics.citation_count
+            source.document_count = metrics.document_count
+            source.h_index = metrics.h_index
 
         aff = db.session.execute(
             select(AcaAffil).where(
