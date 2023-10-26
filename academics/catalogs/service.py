@@ -3,9 +3,9 @@ from time import sleep
 from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, Affiliation, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Subtype
+from academics.model import Academic, AcademicPotentialSource, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Subtype
 from lbrc_flask.celery import celery
-from .scopus import get_affiliation, get_els_author, get_scopus_publications, scopus_author_search
+from .scopus import get_author_data, get_scopus_publications, scopus_author_search
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
@@ -147,8 +147,21 @@ def _update_academic(academic: Academic):
 
 def update_source(s):
     try:
+        author_data = None
+
         if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
-            _update_scopus_source(s)
+            author_data = get_author_data(s.source_identifier)
+
+        if author_data:
+            author_data.update_source(s)
+
+        if s.academic:
+            publications = []
+
+            if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
+                publications = get_scopus_publications(s.source_identifier)
+            
+            add_publications(publications, s)
 
         s.last_fetched_datetime = datetime.utcnow()
     except Exception as e:
@@ -157,33 +170,6 @@ def update_source(s):
         s.error = True
     finally:
         db.session.add(s)
-
-
-def _update_scopus_source(sa: ScopusAuthor):
-    els_author = get_els_author(sa.source_identifier)
-
-    if els_author:
-        els_author.update_scopus_author(sa)
-
-        if sa.academic:
-            add_publications(get_scopus_publications(sa.source_identifier), sa)
-
-        sa.affiliation = _get_affiliation(els_author.affiliation_id)
-    else:
-        sa.error = True
-
-
-def _get_affiliation(affiliation_id):
-    logging.info('Starting _get_affiliation')
-
-    existing = db.session.execute(
-        select(Affiliation).where(Affiliation.catalog_identifier == affiliation_id)
-    ).scalar()
-
-    if existing:
-        return existing
-    else:
-        return get_affiliation(affiliation_id)
 
 
 def _find_new_scopus_sources(academic):
@@ -212,24 +198,16 @@ def _find_new_scopus_sources(academic):
 
         if not sa:
             logging.info(f'New potential source {identifier} is not currently known')
-            els_author = get_els_author(identifier)
+            author_data = get_author_data(identifier)
 
-            if els_author:
-                logging.info(f'Getting new potential source {identifier} affiliation {els_author.affiliation_id}')
+            if author_data and author_data.is_leicester:
+                logging.info(f'Affiliation is leicester so create the new ScopusAuthor')
 
-                af = _get_affiliation(els_author.affiliation_id)
-                if af and af.is_leicester:
-                    logging.info(f'Affiliation is leicester so create the new ScopusAuthor')
-                    sa = ScopusAuthor(
-                        source_identifier=identifier
-                    )
-
-                    db.session.add(sa)
+                sa = ScopusAuthor()
+                author_data.update_source(sa)
+                db.session.add(sa)
 
         if sa:
-            logging.info(f'Updating Scopus author for potential source')
-            _update_scopus_source(sa)
-
             db.session.add(AcademicPotentialSource(
                 academic=academic,
                 source=sa,
