@@ -346,6 +346,7 @@ class AuthorSearch():
     existing : bool = False
     
     def __init__(self, data):
+        print(data)
         self.source_identifier = data.get(u'dc:identifier', ':').split(':')[1]
         self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
         self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
