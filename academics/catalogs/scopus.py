@@ -161,7 +161,22 @@ def scopus_author_search(search_string):
     result = []
 
     for r in auth_srch.results:
-        a = AuthorData(r)
+        print(r)
+
+        href = ''
+        for h in r.get(u'coredata', {}).get(u'link', ''):
+            if h['@rel'] == 'scopus-author':
+                href = h['@href']
+
+        a = AuthorData(
+            catalog='scopus',
+            catalog_identifier=r.get(u'dc:identifier', ':').split(':')[1],
+            orcid=r.get(u'coredata', {}).get(u'orcid', ''),
+            first_name=r.get(u'preferred-name', {}).get(u'given-name', ''),
+            last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
+            href=href,
+            affiliation_identifier=r.get(u'affiliation-current', {}).get(u'affiliation-id', ''),
+        )
 
         if len(a.catalog_identifier) == 0:
             continue
@@ -239,7 +254,19 @@ class Author(ElsAuthor):
         return result
 
     def get_data(self):
-        return AuthorData(self.data)
+        return AuthorData(
+            catalog='scopus',
+            catalog_identifier=self.source_identifier,
+            orcid=self.orcid,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            display_name=' '.join(filter(None, [self.first_name, self.last_name])),
+            href=self.href,
+            affiliation_identifier=self.affiliation_id,
+            affiliation_name=self.affiliation_name,
+            affiliation_address=self.affiliation_city,
+            affiliation_country=self.affiliation_country,
+        )
 
 
 class ScopusAffiliation(ElsAffil):
@@ -404,6 +431,58 @@ class AuthorData():
             source.citation_count = metrics.citation_count
             source.document_count = metrics.document_count
             source.h_index = metrics.h_index
+
+        aff = db.session.execute(
+            select(AcaAffil).where(
+                AcaAffil.catalog_identifier == self.affiliation_identifier
+            ).where(
+                AcaAffil.catalog == self.catalog
+            )
+        ).scalar()
+
+        if not aff:
+            aff = AcaAffil(catalog_identifier=self.affiliation_identifier)
+        
+        aff.catalog = self.catalog
+        aff.name = self.affiliation_name
+        aff.address = self.affiliation_address
+        aff.country = self.affiliation_country
+
+        source.affiliation = aff
+
+
+@dataclass
+class AuthorData():
+    catalog: str
+    catalog_identifier: str
+    orcid: str
+    first_name: str
+    last_name: str
+    display_name: str
+    citation_count: int
+    document_count: int
+    h_index: int
+    href: str
+    affiliation_identifier: str
+    affiliation_name: str
+    affiliation_address: str
+    affiliation_country: str
+
+    @property
+    def is_leicester(self):
+        summary = ', '.join(filter(None, [self.affiliation_name, self.affiliation_address]))
+        return 'leicester' in summary
+
+    def update_source(self, source):
+        source.source_identifier = self.catalog_identifier
+        source.orcid = self.orcid
+        source.first_name = self.first_name
+        source.last_name = self.last_name
+        source.display_name = self.display_name
+        source.citation_count = self.citation_count
+        source.document_count = self.document_count
+        source.h_index = self.h_index
+        source.href = self.href            
 
         aff = db.session.execute(
             select(AcaAffil).where(
