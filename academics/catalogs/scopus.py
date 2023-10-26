@@ -371,7 +371,7 @@ class AuthorData():
         self.catalog = 'scopus'
         self.catalog_identifier = data.get(u'dc:identifier', ':').split(':')[1]
         self.href = href
-        self.orcid = self.data.get(u'coredata', {}).get(u'orcid', '')
+        self.orcid = data.get(u'coredata', {}).get(u'orcid', '')
         self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
         self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
         self.display_name = ' '.join(filter(None, [self.first_name, self.last_name]))
