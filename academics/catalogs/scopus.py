@@ -233,7 +233,7 @@ class Author(ElsAuthor):
         return AuthorData(
             catalog='scopus',
             catalog_identifier=self.source_identifier,
-            orcid_id=self.orcid,
+            orcid=self.orcid,
             first_name=self.first_name,
             last_name=self.last_name,
             display_name=' '.join(filter(None, [self.first_name, self.last_name])),
@@ -396,7 +396,7 @@ class PublicationData():
 class AuthorData():
     catalog: str
     catalog_identifier: str
-    orcid_id: str
+    orcid: str
     first_name: str
     last_name: str
     display_name: str
@@ -415,7 +415,7 @@ class AuthorData():
         return 'leicester' in summary
 
     def update_source(self, source):
-        source.source_identifier = self.source_identifier
+        source.source_identifier = self.catalog_identifier
         source.orcid = self.orcid
         source.first_name = self.first_name
         source.last_name = self.last_name
