@@ -25,13 +25,13 @@
                 <div class='row'>
                     <div class='col-1'>
                         {% if not a.existing %}
-                            <input type="checkbox" data-source_identifier="{{ a.source_identifier }}" data-author-name="{{ a.full_name }}" class="check_author" name="check_author_{{ a.source_identifier }}"/>
+                            <input type="checkbox" data-catalog_identifier="{{ a.catalog_identifier }}" data-author-name="{{ a.full_name }}" class="check_author" name="check_author_{{ a.catalog_identifier }}"/>
                         {% endif %}
                     </div>
                     <div class='col'>
                         <header>
                             <h1>
-                                <a href="https://www.scopus.com/authid/detail.uri?authorId={{a.source_identifier}}" target="_blank">{{a.full_name}} <i class="fas fa-external-link-alt fa-xs"></i></a>
+                                <a href="https://www.scopus.com/authid/detail.uri?authorId={{a.catalog_identifier}}" target="_blank">{{a.display_name}} <i class="fas fa-external-link-alt fa-xs"></i></a>
                                 {% if a.existing %}
                                     <span class="badge badge-secondary">Already Imported</span>
                                 {% endif %}
@@ -110,7 +110,7 @@
             var modal = $(this);
             modal.find('#author_name').text(name);
 
-            document.querySelectorAll('#add_author_fieldset input[name^="source_identifier"]').forEach((e) => {
+            document.querySelectorAll('#add_author_fieldset input[name^="catalog_identifier"]').forEach((e) => {
                 e.remove();
             });
             document.querySelectorAll('#author_names li').forEach((e) => {
@@ -118,13 +118,13 @@
             });
 
             $('.check_author:checked').each(function() {
-                var source_identifier = $(this).data('source_identifier');
+                var catalog_identifier = $(this).data('catalog_identifier');
                 var author_name = $(this).data('author-name');
 
                 var hidden_id = document.createElement("input");
                 hidden_id.setAttribute("type", "hidden");
-                hidden_id.name = `source_identifier`;
-                hidden_id.value = source_identifier;
+                hidden_id.name = `catalog_identifier`;
+                hidden_id.value = catalog_identifier;
                 document.getElementById("add_author_fieldset").appendChild(hidden_id);
 
                 var author_name_span = document.createElement("li");
