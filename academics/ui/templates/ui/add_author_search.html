@@ -25,7 +25,7 @@
                 <div class='row'>
                     <div class='col-1'>
                         {% if not a.existing %}
-                            <input type="checkbox" data-catalog_identifier="{{ a.catalog_identifier }}" data-author-name="{{ a.full_name }}" class="check_author" name="check_author_{{ a.catalog_identifier }}"/>
+                            <input type="checkbox" data-catalog_identifier="{{ a.catalog_identifier }}" data-author-name="{{ a.display_name }}" class="check_author" name="check_author_{{ a.catalog_identifier }}"/>
                         {% endif %}
                     </div>
                     <div class='col'>
@@ -60,6 +60,7 @@
         <form id="add_author" action="{{ url_for('ui.add_author') }}" class="list-group-item" method="POST" enctype="multipart/form-data">
             <fieldset id="add_author_fieldset">
                 {{ add_author_form.csrf_token() }}
+                {{ add_author_form.catalog_identifier() }}
 
                 {{ render_field(add_author_form.academic_id) }}
                 {{ render_field(add_author_form.theme_id) }}
