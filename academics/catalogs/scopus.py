@@ -457,7 +457,6 @@ class AuthorData():
     orcid: str
     first_name: str
     last_name: str
-    display_name: str
     citation_count: int
     document_count: int
     h_index: int
