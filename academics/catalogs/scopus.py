@@ -176,9 +176,9 @@ def scopus_author_search(search_string):
             last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
             href=href,
             affiliation_identifier=r.get(u'affiliation-current', {}).get(u'affiliation-id', ''),
-            affiliation_name=r.get(u'affiliation-current', {}).get(u'affiliation-affiliation_name', ''),
-            affiliation_address=r.get(u'affiliation-current', {}).get(u'affiliation-affiliation-city', ''),
-            affiliation_country=r.get(u'affiliation-current', {}).get(u'affiliation-affiliation_country', ''),
+            affiliation_name=r.get(u'affiliation-current', {}).get(u'affiliation-name', ''),
+            affiliation_address=r.get(u'affiliation-current', {}).get(u'affiliation-city', ''),
+            affiliation_country=r.get(u'affiliation-current', {}).get(u'affiliation-country', ''),
         )
 
         if len(a.catalog_identifier) == 0:
@@ -199,6 +199,12 @@ class Author(ElsAuthor):
     @property
     def orcid(self):
         return self.data.get(u'coredata', {}).get(u'orcid', '')
+
+    @property
+    def href(self):
+        for h in  self.data.get(u'coredata', {}).get(u'link', ''):
+            if h['@rel'] == 'scopus-author':
+                return h['@href']
 
     @property
     def citation_count(self):
