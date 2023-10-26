@@ -161,8 +161,6 @@ def scopus_author_search(search_string):
     result = []
 
     for r in auth_srch.results:
-        print(r)
-
         href = ''
         for h in r.get(u'coredata', {}).get(u'link', ''):
             if h['@rel'] == 'scopus-author':
