@@ -364,7 +364,7 @@ class AuthorData():
     def __init__(self, data):
 
         href = ''
-        for h in  self.data.get(u'coredata', {}).get(u'link', ''):
+        for h in data.get(u'coredata', {}).get(u'link', ''):
             if h['@rel'] == 'scopus-author':
                 href = h['@href']
 
