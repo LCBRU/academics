@@ -423,10 +423,13 @@ class AuthorData():
         source.first_name = self.first_name
         source.last_name = self.last_name
         source.display_name = self.display_name
-        source.citation_count = self.citation_count
-        source.document_count = self.document_count
-        source.h_index = self.h_index
         source.href = self.href            
+
+        metrics = Author(self.catalog_identifier)
+        if metrics.read_metrics(_client):
+            source.citation_count = metrics.citation_count
+            source.document_count = metrics.document_count
+            source.h_index = metrics.h_index
 
         aff = db.session.execute(
             select(AcaAffil).where(
