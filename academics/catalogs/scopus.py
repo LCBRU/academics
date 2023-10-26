@@ -176,6 +176,9 @@ def scopus_author_search(search_string):
             last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
             href=href,
             affiliation_identifier=r.get(u'affiliation-current', {}).get(u'affiliation-id', ''),
+            affiliation_name=r.get(u'affiliation-current', {}).get(u'affiliation-affiliation_name', ''),
+            affiliation_address=r.get(u'affiliation-current', {}).get(u'affiliation-affiliation-city', ''),
+            affiliation_country=r.get(u'affiliation-current', {}).get(u'affiliation-affiliation_country', ''),
         )
 
         if len(a.catalog_identifier) == 0:
@@ -393,9 +396,6 @@ class AuthorData():
     orcid: str
     first_name: str
     last_name: str
-    citation_count: int
-    document_count: int
-    h_index: int
     href: str
     affiliation_identifier: str
     affiliation_name: str
