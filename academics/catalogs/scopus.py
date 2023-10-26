@@ -125,8 +125,10 @@ def get_author_data(identifier):
         logging.info('SCOPUS Not Enabled')
         return None
 
+    logging.info(f'Initialising Scopus Author')
     result = Author(identifier)
 
+    logging.info(f'Reading Scopus Author')
     if not result.read(_client()):
         logging.info(f'Scopus Author not read from Scopus')
         return None
