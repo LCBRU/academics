@@ -248,8 +248,9 @@ def add_sources_to_academic(source_identifiers, academic_id=None, theme_id=None)
     if not academic:
         academic = Academic(
             theme_id=theme_id,
-            updating=True,
         )
+    
+    academic.updating = True
 
     db.session.add(academic)
 
