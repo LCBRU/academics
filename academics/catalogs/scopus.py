@@ -426,7 +426,7 @@ class AuthorData():
         source.href = self.href            
 
         metrics = Author(self.catalog_identifier)
-        if metrics.read_metrics(_client):
+        if metrics.read_metrics(_client()):
             source.citation_count = metrics.citation_count
             source.document_count = metrics.document_count
             source.h_index = metrics.h_index
