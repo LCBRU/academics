@@ -161,7 +161,7 @@ def scopus_author_search(search_string):
     result = []
 
     for r in auth_srch.results:
-        a = AuthorData(r.data)
+        a = AuthorData(r)
 
         if len(a.source_identifier) == 0:
             continue
