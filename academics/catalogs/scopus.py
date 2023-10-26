@@ -343,15 +343,20 @@ class AuthorSearch():
     last_name: str
     affiliation_id: str
     affiliation_name: str
+    affiliation_address: str
+    affiliation_city: str
+    affiliation_country: str
     existing : bool = False
     
     def __init__(self, data):
-        print(data)
         self.source_identifier = data.get(u'dc:identifier', ':').split(':')[1]
         self.first_name = data.get(u'preferred-name', {}).get(u'given-name', '')
         self.last_name = data.get(u'preferred-name', {}).get(u'surname', '')
         self.affiliation_id = data.get(u'affiliation-current', {}).get(u'affiliation-id', '')
         self.affiliation_name = data.get(u'affiliation-current', {}).get(u'affiliation-name', '')
+        self.affiliation_city = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
+        self.affiliation_address = data.get(u'affiliation-current', {}).get(u'affiliation-city', '')
+        self.affiliation_country = data.get(u'affiliation-current', {}).get(u'affiliation-country', '')
 
     @property
     def full_name(self):
@@ -361,6 +366,11 @@ class AuthorSearch():
                 self.last_name,
             ])
         )
+
+    @property
+    def is_leicester(self):
+        summary = ', '.join(filter(None, [self.affiliation_name, self.affiliation_address]))
+        return 'leicester' in summary
 
 
 @dataclass

@@ -178,7 +178,7 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    new_source_identifiers = {a.source_identifier for a in author_search(academic.last_name)}
+    new_source_identifiers = {a.source_identifier for a in author_search(academic.last_name) if a.is_leicester}
 
     logging.info(f'Found new sources: {new_source_identifiers}')
 
@@ -200,8 +200,8 @@ def _find_new_scopus_sources(academic):
             logging.info(f'New potential source {identifier} is not currently known')
             author_data = get_author_data(identifier)
 
-            if author_data and author_data.is_leicester:
-                logging.info(f'Affiliation is leicester so create the new ScopusAuthor')
+            if author_data:
+                logging.info(f'Create the new ScopusAuthor')
 
                 sa = ScopusAuthor()
                 author_data.update_source(sa)
