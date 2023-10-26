@@ -260,7 +260,6 @@ class Author(ElsAuthor):
             orcid=self.orcid,
             first_name=self.first_name,
             last_name=self.last_name,
-            display_name=' '.join(filter(None, [self.first_name, self.last_name])),
             href=self.href,
             affiliation_identifier=self.affiliation_id,
             affiliation_name=self.affiliation_name,
@@ -467,6 +466,10 @@ class AuthorData():
     affiliation_name: str
     affiliation_address: str
     affiliation_country: str
+
+    @property
+    def display_name(self):
+        return ' '.join(filter(None, [self.first_name, self.last_name]))
 
     @property
     def is_leicester(self):
