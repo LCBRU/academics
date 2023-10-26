@@ -60,7 +60,6 @@
         <form id="add_author" action="{{ url_for('ui.add_author') }}" class="list-group-item" method="POST" enctype="multipart/form-data">
             <fieldset id="add_author_fieldset">
                 {{ add_author_form.csrf_token() }}
-                {{ add_author_form.catalog_identifier() }}
 
                 {{ render_field(add_author_form.academic_id) }}
                 {{ render_field(add_author_form.theme_id) }}
@@ -119,6 +118,7 @@
             });
 
             $('.check_author:checked').each(function() {
+                consol.log('Hello')
                 var catalog_identifier = $(this).data('catalog_identifier');
                 var author_name = $(this).data('author-name');
 
