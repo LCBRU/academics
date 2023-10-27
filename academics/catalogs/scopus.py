@@ -270,7 +270,7 @@ class Author(ElsAuthor):
 
     def get_data(self):
         sa = ScopusAffiliation(self.affiliation_id)
-        sa.read()
+        sa.read(_client())
 
         return AuthorData(
             catalog=SCOPUS_CATALOG,
