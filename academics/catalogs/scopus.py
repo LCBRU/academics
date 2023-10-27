@@ -171,8 +171,7 @@ def scopus_author_search(search_string):
         
         affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
 
-        sa = ScopusAffiliation(affiliation_identifier)
-        sa.read(_client())
+        sa = ScopusAffiliation(affiliation_identifier).get_affiliation()
 
         a = AuthorData(
             catalog=SCOPUS_CATALOG,
@@ -269,8 +268,7 @@ class Author(ElsAuthor):
         return result
 
     def get_data(self):
-        sa = ScopusAffiliation(self.affiliation_id)
-        sa.read(_client())
+        sa = ScopusAffiliation(self.affiliation_id).get_affiliation()
 
         return AuthorData(
             catalog=SCOPUS_CATALOG,
@@ -322,13 +320,15 @@ class ScopusAffiliation(ElsAffil):
         ).scalar()
 
         if not result:
+            self.read(_client())
+
             result = AcaAffil(catalog_identifier=self.affiliation_id)
         
-        result.name = self.name
-        result.address = self.address
-        result.country = self.country
+            result.name = self.name
+            result.address = self.address
+            result.country = self.country
 
-        result.catalog = SCOPUS_CATALOG
+            result.catalog = SCOPUS_CATALOG
 
         return result
 
@@ -469,6 +469,4 @@ class AuthorData():
             source.h_index = metrics.h_index
         
         sa = ScopusAffiliation(self.affiliation_identifier)
-        sa.read(_client())
-
         source.affiliation = sa.get_affiliation()
