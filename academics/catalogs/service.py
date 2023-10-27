@@ -178,7 +178,7 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    new_sources = {a for a in author_search(academic.last_name) if a.is_leicester}
+    new_sources = [a for a in author_search(academic.last_name) if a.is_leicester]
 
     for new_source in new_sources:
         logging.info(f'Adding new potential source {new_source.catalog_identifier}')
