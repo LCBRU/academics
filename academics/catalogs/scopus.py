@@ -280,9 +280,9 @@ class Author(ElsAuthor):
             last_name=self.last_name,
             href=self.href,
             affiliation_identifier=self.affiliation_id,
-            affiliation_name=sa.affiliation_name,
-            affiliation_address=sa.affiliation_city,
-            affiliation_country=sa.affiliation_country,
+            affiliation_name=sa.name,
+            affiliation_address=sa.address,
+            affiliation_country=sa.country,
         )
 
 
