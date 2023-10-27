@@ -18,6 +18,9 @@ from lbrc_flask.validators import parse_date
 from elsapy import version
 
 
+SCOPUS_CATALOG = 'scopus'
+
+
 class ScopusClient(ElsClient):
     # class variables
     __url_base = "https://api.elsevier.com/"    ## Base URL for later use
@@ -165,18 +168,23 @@ def scopus_author_search(search_string):
         for h in r.get(u'coredata', {}).get(u'link', ''):
             if h['@rel'] == 'scopus-author':
                 href = h['@href']
+        
+        affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
+
+        sa = ScopusAffiliation(affiliation_identifier)
+        sa.read()
 
         a = AuthorData(
-            catalog='scopus',
+            catalog=SCOPUS_CATALOG,
             catalog_identifier=r.get(u'dc:identifier', ':').split(':')[1],
             orcid=r.get(u'coredata', {}).get(u'orcid', ''),
             first_name=r.get(u'preferred-name', {}).get(u'given-name', ''),
             last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
             href=href,
-            affiliation_identifier=r.get(u'affiliation-current', {}).get(u'affiliation-id', ''),
-            affiliation_name=r.get(u'affiliation-current', {}).get(u'affiliation-name', ''),
-            affiliation_address=r.get(u'affiliation-current', {}).get(u'affiliation-city', ''),
-            affiliation_country=r.get(u'affiliation-current', {}).get(u'affiliation-country', ''),
+            affiliation_identifier=affiliation_identifier,
+            affiliation_name=sa.name,
+            affiliation_address=sa.address,
+            affiliation_country=sa.country,
         )
 
         if len(a.catalog_identifier) == 0:
@@ -261,17 +269,20 @@ class Author(ElsAuthor):
         return result
 
     def get_data(self):
+        sa = ScopusAffiliation(self.affiliation_identifier)
+        sa.read()
+
         return AuthorData(
-            catalog='scopus',
+            catalog=SCOPUS_CATALOG,
             catalog_identifier=self.source_identifier,
             orcid=self.orcid,
             first_name=self.first_name,
             last_name=self.last_name,
             href=self.href,
-            affiliation_identifier=self.affiliation_id,
-            affiliation_name=self.affiliation_name,
-            affiliation_address=self.affiliation_city,
-            affiliation_country=self.affiliation_country,
+            affiliation_identifier=self.affiliation_identifier,
+            affiliation_name=sa.affiliation_name,
+            affiliation_address=sa.affiliation_city,
+            affiliation_country=sa.affiliation_country,
         )
 
 
@@ -300,6 +311,26 @@ class ScopusAffiliation(ElsAffil):
             return self.data.get(u'country', '')
         else:
             return ''
+
+    def get_affiliation(self):
+        result = db.session.execute(
+            select(AcaAffil).where(
+                AcaAffil.catalog_identifier == self.affiliation_identifier
+            ).where(
+                AcaAffil.catalog == SCOPUS_CATALOG
+            )
+        ).scalar()
+
+        if not result:
+            result = AcaAffil(catalog_identifier=self.affiliation_identifier)
+        
+        result.name = self.affiliation_name
+        result.address = self.affiliation_address
+        result.country = self.affiliation_country
+
+        result.catalog = SCOPUS_CATALOG
+
+        return result
 
 
 class Abstract(AbsDoc):
@@ -428,21 +459,8 @@ class AuthorData():
             source.citation_count = metrics.citation_count
             source.document_count = metrics.document_count
             source.h_index = metrics.h_index
-
-        aff = db.session.execute(
-            select(AcaAffil).where(
-                AcaAffil.catalog_identifier == self.affiliation_identifier
-            ).where(
-                AcaAffil.catalog == self.catalog
-            )
-        ).scalar()
-
-        if not aff:
-            aff = AcaAffil(catalog_identifier=self.affiliation_identifier)
         
-        aff.catalog = self.catalog
-        aff.name = self.affiliation_name
-        aff.address = self.affiliation_address
-        aff.country = self.affiliation_country
+        sa = ScopusAffiliation(self.affiliation_identifier)
+        sa.read()
 
-        source.affiliation = aff
+        source.affiliation = sa.get_affiliation()
