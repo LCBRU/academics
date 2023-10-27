@@ -36,7 +36,12 @@
                                     <span class="badge badge-secondary">Already Imported</span>
                                 {% endif %}
                             </h1>
-                            <h2><a href="https://www.scopus.com/affil/profile.uri?afid={{a.affiliation_id}}" target="_blank">{{a.affiliation_summary}} <i class="fas fa-external-link-alt fa-xs"></i></a></h2>
+                            <h2>
+                                <a href="https://www.scopus.com/affil/profile.uri?afid={{a.affiliation_id}}" target="_blank">{{a.affiliation_summary}} <i class="fas fa-external-link-alt fa-xs"></i></a>
+                                {% if a.is_leicester %}
+                                    <span class="badge badge-info">Leicester</span>
+                                {% endif %}
+                            </h2>
                         </header>
                     </div>
                 </div>
