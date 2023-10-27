@@ -446,6 +446,10 @@ class AuthorData():
         summary = ', '.join(filter(None, [self.affiliation_name, self.affiliation_address]))
         return 'leicester' in summary
 
+    @property
+    def affiliation_summary(self):
+        return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
+
     def update_source(self, source):
         source.source_identifier = self.catalog_identifier
         source.orcid = self.orcid
