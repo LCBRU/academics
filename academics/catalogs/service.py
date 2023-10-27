@@ -200,8 +200,7 @@ def _find_new_scopus_sources(academic):
         if not s:
             logging.info(f'New potential source {new_source.catalog_identifier} is not currently known')
 
-            s = ScopusAuthor()
-            new_source.update_source(s)
+            s = new_source.get_new_source(s)
             db.session.add(s)
 
         db.session.add(AcademicPotentialSource(

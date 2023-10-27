@@ -449,6 +449,11 @@ class AuthorData():
     def affiliation_summary(self):
         return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
 
+    def get_new_source(self):
+        result = ScopusAuthor()
+        self.update_source(result)
+        return result
+
     def update_source(self, source):
         source.source_identifier = self.catalog_identifier
         source.orcid = self.orcid
