@@ -191,28 +191,23 @@ def _find_new_scopus_sources(academic):
         ).scalar() > 0:
             continue
 
-        sa = db.session.execute(
-            select(ScopusAuthor)
+        s = db.session.execute(
+            select(Source)
             .where(Source.source_identifier == new_source.catalog_identifier)
             .where(Source.source == new_source.source)
         ).scalar()
 
-        if not sa:
+        if not s:
             logging.info(f'New potential source {new_source.catalog_identifier} is not currently known')
-            author_data = get_author_data(new_source.catalog_identifier)
 
-            if author_data:
-                logging.info(f'Create the new ScopusAuthor')
+            s = ScopusAuthor()
+            new_source.update_source(s)
+            db.session.add(s)
 
-                sa = ScopusAuthor()
-                author_data.update_source(sa)
-                db.session.add(sa)
-
-        if sa:
-            db.session.add(AcademicPotentialSource(
-                academic=academic,
-                source=sa,
-            ))
+        db.session.add(AcademicPotentialSource(
+            academic=academic,
+            source=s,
+        ))
     
     db.session.commit()
 
