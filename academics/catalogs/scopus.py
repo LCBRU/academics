@@ -324,9 +324,9 @@ class ScopusAffiliation(ElsAffil):
         if not result:
             result = AcaAffil(catalog_identifier=self.affiliation_identifier)
         
-        result.name = self.affiliation_name
-        result.address = self.affiliation_address
-        result.country = self.affiliation_country
+        result.name = self.name
+        result.address = self.address
+        result.country = self.country
 
         result.catalog = SCOPUS_CATALOG
 
