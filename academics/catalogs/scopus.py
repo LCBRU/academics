@@ -7,7 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import ScopusAuthor, Affiliation as AcaAffil
+from academics.model import Academic, ScopusAuthor, Affiliation as AcaAffil
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
 from flask import current_app
@@ -120,7 +120,7 @@ def get_scopus_publications(identifier):
     ]
 
 
-def get_author_data(identifier):
+def get_scopus_author_data(identifier):
     logging.info(f'Getting Scopus Author Data {identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
@@ -138,6 +138,10 @@ def get_author_data(identifier):
 
     logging.info(f'Scopus Author details read from Scopus')
     return result.get_data()
+
+
+def scopus_similar_authors(academic: Academic):
+    return scopus_author_search(academic.last_name)
 
 
 def scopus_author_search(search_string):

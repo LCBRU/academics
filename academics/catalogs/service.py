@@ -5,7 +5,7 @@ from sqlalchemy import and_, or_, select
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
 from academics.model import Academic, AcademicPotentialSource, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Subtype
 from lbrc_flask.celery import celery
-from .scopus import get_author_data, get_scopus_publications, scopus_author_search
+from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
@@ -17,8 +17,8 @@ def updating():
     return result
 
 
-def author_search(search_string):
-    return scopus_author_search(search_string)
+def author_search(academic: Academic):
+    return scopus_similar_authors(academic)
 
 
 def auto_validate():
@@ -150,7 +150,7 @@ def update_source(s):
         author_data = None
 
         if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
-            author_data = get_author_data(s.source_identifier)
+            author_data = get_scopus_author_data(s.source_identifier)
 
         if author_data:
             author_data.update_source(s)
@@ -178,7 +178,7 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    new_sources = [a for a in author_search(academic.last_name) if a.is_leicester]
+    new_sources = [a for a in author_search(academic) if a.is_leicester]
 
     for new_source in new_sources:
         logging.info(f'Adding new potential source {new_source.catalog_identifier}')
