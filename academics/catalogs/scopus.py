@@ -269,7 +269,7 @@ class Author(ElsAuthor):
         return result
 
     def get_data(self):
-        sa = ScopusAffiliation(self.affiliation_identifier)
+        sa = ScopusAffiliation(self.affiliation_id)
         sa.read()
 
         return AuthorData(
@@ -279,7 +279,7 @@ class Author(ElsAuthor):
             first_name=self.first_name,
             last_name=self.last_name,
             href=self.href,
-            affiliation_identifier=self.affiliation_identifier,
+            affiliation_identifier=self.affiliation_id,
             affiliation_name=sa.affiliation_name,
             affiliation_address=sa.affiliation_city,
             affiliation_country=sa.affiliation_country,
