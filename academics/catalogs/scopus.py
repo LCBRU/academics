@@ -315,14 +315,14 @@ class ScopusAffiliation(ElsAffil):
     def get_affiliation(self):
         result = db.session.execute(
             select(AcaAffil).where(
-                AcaAffil.catalog_identifier == self.affiliation_identifier
+                AcaAffil.catalog_identifier == self.affiliation_id
             ).where(
                 AcaAffil.catalog == SCOPUS_CATALOG
             )
         ).scalar()
 
         if not result:
-            result = AcaAffil(catalog_identifier=self.affiliation_identifier)
+            result = AcaAffil(catalog_identifier=self.affiliation_id)
         
         result.name = self.name
         result.address = self.address
