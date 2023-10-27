@@ -443,7 +443,7 @@ class AuthorData():
 
     @property
     def is_leicester(self):
-        return 'leicester' in self.affiliation_summary().lower()
+        return 'leicester' in self.affiliation_summary.lower()
 
     @property
     def affiliation_summary(self):
