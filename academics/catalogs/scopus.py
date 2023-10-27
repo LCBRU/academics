@@ -443,8 +443,7 @@ class AuthorData():
 
     @property
     def is_leicester(self):
-        summary = ', '.join(filter(None, [self.affiliation_name, self.affiliation_address]))
-        return 'leicester' in summary
+        return 'leicester' in self.affiliation_summary().lower()
 
     @property
     def affiliation_summary(self):
