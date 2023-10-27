@@ -172,7 +172,7 @@ def scopus_author_search(search_string):
         affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
 
         sa = ScopusAffiliation(affiliation_identifier)
-        sa.read()
+        sa.read(_client())
 
         a = AuthorData(
             catalog=SCOPUS_CATALOG,
@@ -461,6 +461,6 @@ class AuthorData():
             source.h_index = metrics.h_index
         
         sa = ScopusAffiliation(self.affiliation_identifier)
-        sa.read()
+        sa.read(_client())
 
         source.affiliation = sa.get_affiliation()
