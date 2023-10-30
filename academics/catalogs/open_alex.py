@@ -49,6 +49,8 @@ def open_alex_similar_authors(academic: Academic):
 
     print(authors)
 
+    return []
+
 def _get_for_orcid(orcid):
     q = Authors().filter(scopus=orcid)
     return chain(*q.paginate(per_page=200))
