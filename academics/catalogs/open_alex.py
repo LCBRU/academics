@@ -117,6 +117,16 @@ class AuthorData:
     def affiliation_summary(self):
         return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
 
+    @property
+    def last_name(self):
+        _, result = self.display_name.rsplit(maxsplit=1)
+        return result
+
+    @property
+    def first_name(self):
+        result, _ = self.display_name.split(maxsplit=1)
+        return result
+
     def get_new_source(self):
         result = OpenAlexAuthor()
         self.update_source(result)
