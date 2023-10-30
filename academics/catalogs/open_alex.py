@@ -56,13 +56,11 @@ def open_alex_similar_authors(academic: Academic):
 
     authors = {}
 
-    print('A')
     for o in academic.all_orcids():
         authors.update({
             _get_open_alex_id_from_href(a.get('id', '')): a
             for a in _get_for_orcid(o)
         })
-    print('B')
     for s in academic.all_scopus_ids():
         authors.update({
             _get_open_alex_id_from_href(a.get('id', '')): a
@@ -71,11 +69,13 @@ def open_alex_similar_authors(academic: Academic):
 
     result = []
 
-    print('C')
     for a in [a for a in authors if _get_open_alex_id_from_href(a.get('id', '')) not in existing]:
+        print('D')
         institution_id = _get_open_alex_id_from_href(a.get('last_known_institution', {}).get('id', ''))
+        print('E')
         i = Institutions()[institution_id]
 
+        print('F')
         result.append(
             AuthorData(
                 catalog=OPEN_ALEX_CATALOG,
