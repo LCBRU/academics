@@ -65,6 +65,8 @@ def open_alex_similar_authors(academic: Academic):
         institution_id = _get_open_alex_id_from_href(a.get('last_known_institution', {}).get('id', ''))
         i = Institutions()[institution_id]
 
+        print(i)
+
         result.append(
             AuthorData(
                 catalog=OPEN_ALEX_CATALOG,
