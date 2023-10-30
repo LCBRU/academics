@@ -1,11 +1,15 @@
+from dataclasses import dataclass
 import pyalex
 import logging
+
+from sqlalchemy import select
 from academics.config import Config
-from pyalex import Authors, Works
+from pyalex import Authors, Works, Institutions
 from itertools import chain
 from flask import current_app
+from lbrc_flask.database import db
 
-from academics.model import Academic
+from academics.model import Academic, OpenAlexAuthor, Affiliation
 
 
 OPEN_ALEX_CATALOG = 'open alex'
@@ -30,6 +34,10 @@ def get_open_alex():
         if a['last_known_institution']:
             print(a['last_known_institution'].keys())
             print(a['last_known_institution'])
+        
+        i = Institutions()[a['last_known_institution']['id']]
+        print(i['geo'])
+
         # if a:
         #     if a.get('last_known_institution', None):
         #         if 'leicester' in a.get('last_known_institution', {}).get('display_name', '').lower():
@@ -44,56 +52,106 @@ def open_alex_similar_authors(academic: Academic):
 
     authors = []
 
+    existing = set(db.session.execute(
+        select(OpenAlexAuthor.source_identifier)
+    ).scalars())
+
     if academic.orcid:
         authors.extend(_get_for_orcid(academic.orcid))
 
-    print(authors)
+    result = []
 
-    return []
+    for a in [a for a in authors if _get_open_alex_id_from_href(a.get('id', '')) not in existing]:
+        institution_id = _get_open_alex_id_from_href(a.get('last_known_institution', {}).get('id', ''))
+        i = Institutions()[institution_id]
+
+        result.append(
+            AuthorData(
+                catalog=OPEN_ALEX_CATALOG,
+                catalog_identifier=_get_open_alex_id_from_href(a.get('id', '')),
+                orcid=a.get('orcid', None),
+                display_name=a.get('display_name', ''),
+                href=a.get('id', ''),
+                affiliation_identifier=institution_id,
+                affiliation_name=i.get('display_name', ''),
+                affiliation_address=i.get('geo', {}).get('city', ''),
+                affiliation_country=i.get('geo', {}).get('country', ''),
+                citation_count=a.get('cited_by_count', None),
+                document_count=a.get('works_count', None),
+                h_index=a.get('works_count', {}).get('h_index', None),
+            )
+        )
+
+    print(result)
+    return result
+
+def _get_open_alex_id_from_href(href):
+    _, result = href.rstrip('/', 1)
+    return result
 
 def _get_for_orcid(orcid):
     q = Authors().filter(orcid=orcid)
     return chain(*q.paginate(per_page=200))
 
 
-    # auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
-    # auth_srch.execute(_client())
+@dataclass
+class AuthorData:
+    catalog: str
+    catalog_identifier: str
+    orcid: str
+    display_name: str
+    href: str
+    affiliation_identifier: str
+    affiliation_name: str
+    affiliation_address: str
+    affiliation_country: str
+    citation_count: int
+    document_count: int
+    h_index: float
 
-    # existing_source_identifiers = set(db.session.execute(
-    #     select(ScopusAuthor.source_identifier)
-    #     .where(ScopusAuthor.academic_id != None)
-    # ).scalars())
+    @property
+    def is_leicester(self):
+        return 'leicester' in self.affiliation_summary.lower()
 
-    # result = []
+    @property
+    def affiliation_summary(self):
+        return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
 
-    # for r in auth_srch.results:
-    #     href = ''
-    #     for h in r.get(u'coredata', {}).get(u'link', ''):
-    #         if h['@rel'] == 'scopus-author':
-    #             href = h['@href']
+    def get_new_source(self):
+        result = OpenAlexAuthor()
+        self.update_source(result)
+        return result
+
+    def update_source(self, source):
+        source.source_identifier = self.catalog_identifier
+        source.orcid = self.orcid
+        source.first_name = self.first_name
+        source.last_name = self.last_name
+        source.display_name = self.display_name
+        source.href = self.href            
+        source.citation_count = self.citation_count
+        source.document_count = self.document_count
+        source.h_index = self.h_index
+
+        source.affiliation =self.get_affiliation()
+
+
+    def get_affiliation(self):
+        result = db.session.execute(
+            select(Affiliation).where(
+                Affiliation.catalog_identifier == self.affiliation_identifier
+            ).where(
+                Affiliation.catalog == OPEN_ALEX_CATALOG
+            )
+        ).scalar()
+
+        if not result:
+            result = Affiliation(catalog_identifier=self.affiliation_identifier)
         
-    #     affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
+            result.name = self.affiliation_name
+            result.address = self.affiliation_address
+            result.country = self.affiliation_country
 
-    #     sa = ScopusAffiliation(affiliation_identifier).get_affiliation()
+            result.catalog = OPEN_ALEX_CATALOG
 
-    #     a = AuthorData(
-    #         catalog=SCOPUS_CATALOG,
-    #         catalog_identifier=r.get(u'dc:identifier', ':').split(':')[1],
-    #         orcid=r.get(u'coredata', {}).get(u'orcid', ''),
-    #         first_name=r.get(u'preferred-name', {}).get(u'given-name', ''),
-    #         last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
-    #         href=href,
-    #         affiliation_identifier=affiliation_identifier,
-    #         affiliation_name=sa.name,
-    #         affiliation_address=sa.address,
-    #         affiliation_country=sa.country,
-    #     )
-
-    #     if len(a.catalog_identifier) == 0:
-    #         continue
-
-    #     a.existing = a.catalog_identifier in existing_source_identifiers
-
-    #     result.append(a)
-
-    # return result
+        return result
