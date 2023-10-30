@@ -67,7 +67,7 @@ def open_alex_similar_authors(academic: Academic):
             for a in _get_for_scopus_id(s)
         })
 
-    print(authors)
+    print(authors.keys())
 
     result = []
 
