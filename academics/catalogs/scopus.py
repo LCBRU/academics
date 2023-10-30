@@ -34,8 +34,12 @@ class ScopusClient(ElsClient):
 
         ## Throttle request, if need be
         interval = time.time() - self.__ts_last_req
+
+        logging.info(f'Checking throttle - Time: {time.time()}; Last Request: {self.__ts_last_req}; Interval: {interval}')
         if (interval < self.__min_req_interval):
+            logging.info(f'Throttle Start: {time.time()}')
             time.sleep( self.__min_req_interval - interval )
+            logging.info(f'Throttle End: {time.time()}')
         
         ## Construct and execute request
         headers = {

@@ -179,6 +179,12 @@ class ScopusAuthor(Source):
     }
 
 
+class OpenAlexAuthor(Source):
+    __mapper_args__ = {
+        "polymorphic_identity": "open alex",
+    }
+
+
 class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id), nullable=False)

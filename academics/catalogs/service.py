@@ -2,6 +2,7 @@ import logging
 from time import sleep
 from flask import current_app
 from sqlalchemy import and_, or_, select
+from academics.catalogs.open_alex import open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
 from academics.model import Academic, AcademicPotentialSource, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Subtype
 from lbrc_flask.celery import celery
@@ -15,10 +16,6 @@ def updating():
     result = Academic.query.filter(Academic.updating == True).count() > 0
     logging.info(f'updating: {result}')
     return result
-
-
-def author_search(academic: Academic):
-    return scopus_similar_authors(academic)
 
 
 def auto_validate():
@@ -153,6 +150,7 @@ def update_source(s):
             author_data = get_scopus_author_data(s.source_identifier)
 
         if author_data:
+            sleep(1)
             author_data.update_source(s)
 
         if s.academic:
@@ -178,7 +176,8 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    new_sources = [a for a in author_search(academic) if a.is_leicester]
+    new_sources = [a for a in scopus_similar_authors(academic) if a.is_leicester]
+    new_sources.extend([a for a in open_alex_similar_authors(academic) if a.is_leicester])
 
     for new_source in new_sources:
         logging.info(f'Adding new potential source {new_source.catalog_identifier}')
@@ -200,6 +199,7 @@ def _find_new_scopus_sources(academic):
         if not s:
             logging.info(f'New potential source {new_source.catalog_identifier} is not currently known')
 
+            sleep(1)
             s = new_source.get_new_source()
             db.session.add(s)
 

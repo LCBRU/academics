@@ -5,6 +5,8 @@ from pyalex import Authors, Works
 from itertools import chain
 from flask import current_app
 
+from academics.model import Academic
+
 
 OPEN_ALEX_CATALOG = 'open alex'
 
@@ -13,12 +15,18 @@ def get_open_alex():
     config = Config()
     pyalex.config.email = config.OPEN_ALEX_EMAIL
 
-    q = Authors().search_filter(display_name="mccann")
+    # q = Authors().search_filter(display_name="mccann")
+    # q = Authors().filter(orcid="0000-0002-5542-8448")
+    q = Authors().filter(scopus="7005783434")
     # # # works = Works().filter(**{"author.id": author['id']}).filter(publication_year="2022").get()
 
     for a in chain(*q.paginate(per_page=200)):
         print(a['id'], a["display_name"])
         print(a["display_name"].strip().rsplit(maxsplit=1))
+        print(a.keys())
+        if a['summary_stats']:
+            print(a['summary_stats'].keys())
+            print(a['summary_stats'])
         if a['last_known_institution']:
             print(a['last_known_institution'].keys())
             print(a['last_known_institution'])
@@ -28,19 +36,23 @@ def get_open_alex():
         #             print(a['id'], a["display_name"], a['last_known_institution']['display_name'])
 
 
-def open_author_search(search_string):
-    pass
-    # if not current_app.config['SCOPUS_ENABLED']:
-    #     print(current_app.config['SCOPUS_ENABLED'])
-    #     logging.info('SCOPUS Not Enabled')
-    #     return []
+def open_alex_similar_authors(academic: Academic):
+    if not current_app.config['OPEN_ALEX_ENABLED']:
+        print(current_app.config['OPEN_ALEX_ENABLED'])
+        logging.info('OpenAlex Not Enabled')
+        return []
 
-    # re_orcid = re.compile(r'\d{4}-\d{4}-\d{4}-\d{4}$')
+    authors = []
 
-    # if re_orcid.match(search_string):
-    #     q = f'ORCID({search_string})'
-    # else:
-    #     q = f'authlast({search_string})'
+    if academic.orcid:
+        authors.extend(_get_for_orcid(academic.orcid))
+
+    print(authors)
+
+def _get_for_orcid(orcid):
+    q = Authors().filter(scopus=orcid)
+    return chain(*q.paginate(per_page=200))
+
 
     # auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
     # auth_srch.execute(_client())
