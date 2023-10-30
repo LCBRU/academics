@@ -86,7 +86,7 @@ def open_alex_similar_authors(academic: Academic):
     return result
 
 def _get_open_alex_id_from_href(href):
-    _, result = href.rstrip('/', 1)
+    _, result = href.rsplit('/', 1)
     return result
 
 def _get_for_orcid(orcid):
