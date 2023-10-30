@@ -66,18 +66,19 @@ def open_alex_similar_authors(academic: Academic):
             _get_open_alex_id_from_href(a.get('id', '')): a
             for a in _get_for_scopus_id(s)
         })
+    authors.update({
+        _get_open_alex_id_from_href(a.get('id', '')): a
+        for a in _get_for_surname(academic.last_name)
+    })
 
     print(authors.keys())
 
     result = []
 
     for a in [a for a in authors.values() if _get_open_alex_id_from_href(a.get('id', '')) not in existing]:
-        print('D')
         institution_id = _get_open_alex_id_from_href(a.get('last_known_institution', {}).get('id', ''))
-        print('E')
         i = Institutions()[institution_id]
 
-        print('F')
         result.append(
             AuthorData(
                 catalog=OPEN_ALEX_CATALOG,
@@ -111,6 +112,11 @@ def _get_for_orcid(orcid):
 
 def _get_for_scopus_id(scopus_id):
     q = Authors().filter(scopus=scopus_id)
+    return chain(*q.paginate(per_page=200))
+
+
+def _get_for_surname(surname):
+    q = Authors().filter(display_name=surname)
     return chain(*q.paginate(per_page=200))
 
 
