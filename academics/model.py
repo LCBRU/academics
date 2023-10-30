@@ -115,6 +115,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         self.error = False
         self.updating = True        
 
+    def all_orcids(self):
+        return {self.orcid} + {s.orcid for s in self.sources if s.orcid}
+
+    def all_scopus_ids(self):
+        return {s.source_identifier for s in self.sources if s.source_identifier and s.type == 'scopus'}
+
 
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
