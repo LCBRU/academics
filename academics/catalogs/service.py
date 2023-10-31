@@ -135,7 +135,7 @@ def _update_academic(academic: Academic):
         academic.updating = False
 
     except Exception as e:
-        logging.error(e)
+        log_exception(e)
         academic.error = True
 
     finally:
