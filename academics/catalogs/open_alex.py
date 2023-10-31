@@ -77,7 +77,11 @@ def open_alex_similar_authors(academic: Academic):
 
     for a in [a for a in authors.values() if _get_open_alex_id_from_href(a.get('id', '')) not in existing]:
         institution_id = _get_open_alex_id_from_href((a.get('last_known_institution') or {}).get('id', ''))
-        i = Institutions()[institution_id]
+
+        if institution_id:
+            i = Institutions()[institution_id]
+        else:
+            i = {}
 
         result.append(
             AuthorData(
