@@ -101,6 +101,9 @@ def open_alex_similar_authors(academic: Academic):
 
 
 def _get_open_alex_id_from_href(href):
+    if not '/' in href:
+        return href
+    
     _, result = href.rsplit('/', 1)
     return result
 
