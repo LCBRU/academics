@@ -71,7 +71,7 @@ def open_alex_similar_authors(academic: Academic):
         for a in _get_for_surname(academic.last_name)
     })
 
-    print(authors.keys())
+    print(authors.values())
 
     result = []
 
