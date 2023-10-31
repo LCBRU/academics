@@ -71,8 +71,6 @@ def open_alex_similar_authors(academic: Academic):
         for a in _get_for_surname(academic.last_name)
     })
 
-    print(authors.values())
-
     result = []
 
     for a in [a for a in authors.values() if _get_open_alex_id_from_href(a.get('id', '')) not in existing]:
@@ -100,7 +98,6 @@ def open_alex_similar_authors(academic: Academic):
             )
         )
 
-    print(result)
     return result
 
 
