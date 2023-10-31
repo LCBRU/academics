@@ -1,9 +1,11 @@
 from flask import request
 from lbrc_flask.forms import SearchForm
+from sqlalchemy import select
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 
-from academics.model import (NihrAcknowledgement, Theme)
+from academics.model import (Academic, NihrAcknowledgement, Theme)
 from academics.publication_searching import publication_summary
+from lbrc_flask.database import db
 
 from .. import blueprint
 
@@ -33,3 +35,17 @@ def api_publications():
     search_form = PublicationSearchForm(formdata=request.args)
 
     return publication_summary(search_form)
+
+
+@blueprint.route("/academics", methods=['GET', 'POST'])
+def api_academics():
+
+    q = select(Academic).where(Academic.initialised == True)
+    
+    return [{
+        'first_name': a.first_name,
+        'last_name': a.last_name,
+        'theme': a.theme.name,
+        'orcid': a.orcid,
+        'scopus_ids': list(a.all_scopus_ids()),
+    } for a in db.session.scalars(q).all()]
