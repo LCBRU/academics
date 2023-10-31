@@ -237,8 +237,6 @@ def publication_nihr_acknowledgement():
     if request.json.get('nihr_acknowledgement_id') == -1:
         p.nihr_acknowledgement = None
         db.session.commit()
-
-        return jsonify({'status': 'Unvalidated'}), 200
     else:
         n = db.get_or_404(NihrAcknowledgement, request.json.get('nihr_acknowledgement_id'))
 
@@ -246,7 +244,7 @@ def publication_nihr_acknowledgement():
 
         db.session.commit()
 
-        return jsonify({'status': n.name}), 200
+    return jsonify({'status': 'reload'}), 205
 
 
 @blueprint.route("/publication/keywords/options")

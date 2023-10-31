@@ -46,18 +46,7 @@
                 id: button.data('id'),
                 nihr_acknowledgement_id: button.data('nihr_acknowledgement_id'),
             }),
-        })
-        let data = await response.json();
-        b = document.getElementById(`btnGroupAcknowledgement_${button.data('id')}`)
-        b.innerHTML = data['status'];
-
-        if (data['status'] == 'Unvalidated') {
-            b.classList.remove("btn-info")
-            b.classList.add("btn-primary")
-        } else {
-            b.classList.remove("btn-primary")
-            b.classList.add("btn-info")
-        }
+        }).then(standard_status_actions)
     }
 
 </script>
