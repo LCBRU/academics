@@ -56,22 +56,20 @@ def open_alex_similar_authors(academic: Academic):
 
     authors = {}
 
-    # for o in academic.all_orcids():
-    #     authors.update({
-    #         _get_open_alex_id_from_href(a.get('id', '')): a
-    #         for a in _get_for_orcid(o)
-    #     })
-    # for s in academic.all_scopus_ids():
-    #     authors.update({
-    #         _get_open_alex_id_from_href(a.get('id', '')): a
-    #         for a in _get_for_scopus_id(s)
-    #     })
+    for o in academic.all_orcids():
+        authors.update({
+            _get_open_alex_id_from_href(a.get('id', '')): a
+            for a in _get_for_orcid(o)
+        })
+    for s in academic.all_scopus_ids():
+        authors.update({
+            _get_open_alex_id_from_href(a.get('id', '')): a
+            for a in _get_for_scopus_id(s)
+        })
     authors.update({
         _get_open_alex_id_from_href(a.get('id', '')): a
         for a in _get_for_surname(academic.last_name)
     })
-
-    print(authors)
 
     result = []
 
