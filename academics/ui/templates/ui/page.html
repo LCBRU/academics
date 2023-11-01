@@ -1,6 +1,6 @@
 {% extends "lbrc_flask/page.html" %}
 {% from "lbrc_flask/nav_macros.html" import render_nav_item with context %}
-{% from "lbrc_flask/nav_macros.html" import render_nav_link %}
+{% from "lbrc_flask/nav_macros.html" import render_nav_link, render_dropdown_item %}
 
 {% block base_css %}
     <link href="{{ url_for('static', filename='css/app.css', ver=1) }}" rel="stylesheet">
@@ -19,7 +19,13 @@
         {{ render_nav_item('ui.objectives', 'Objectives', 'fas fa-tasks') }}
     {% endif %}
 
-    {{ render_nav_item('ui.reports', 'Reports', 'fas fa-toilet-paper') }}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-download"></i> Downloads</a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            {{ render_dropdown_item('ui.academics_export_csv', 'Academic Contact List', icon='fas fa-user-graduate') }}
+            {{ render_dropdown_item('ui.reports', 'Reports', icon='fas fa-toilet-paper') }}
+        </div>
+    </li>
 
     {% if updating %}
         <div class="badge rounded-pill bg-warning text-dark fixed-top">Fetching data from Scopus <span class="inline_loader"></span></div>
@@ -28,9 +34,9 @@
 
 {% block adminlinks %}
     {% if not updating %}
-        {{ render_nav_link('ui.update_all_academics', 'Update All', icon='fas fa-recycle') }}
+        {{ render_dropdown_item('ui.update_all_academics', 'Update All', icon='fas fa-recycle') }}
     {% endif %}
-    {{ render_nav_link('ui.publication_auto_validate', 'Auto-validate', icon='far fa-check-circle') }}
+    {{ render_dropdown_item('ui.publication_auto_validate', 'Auto-validate', icon='far fa-check-circle') }}
 {% endblock %}
 
 {% block page_js %}

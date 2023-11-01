@@ -8,8 +8,6 @@ from academics.catalogs.service import add_sources_to_academic, delete_orphan_pu
 from academics.model import Academic, AcademicPotentialSource, Source, Theme
 from wtforms.validators import Length
 from .. import blueprint
-from lbrc_flask.export import csv_download
-from sqlalchemy import select
 from lbrc_flask.json import validate_json
 
 
@@ -183,27 +181,6 @@ def update_academic():
     update_single_academic(academic)
 
     return redirect(url_for('ui.index'))
-
-
-@blueprint.route("/academics/export/csv")
-def academics_export_csv():
-    headers = {
-        'first_name': None,
-        'last_name': None,
-        'theme': None,
-        'ordcid': None,
-    }
-
-    q = select(Academic).where(Academic.initialised == True)
-
-    academic_details = ({
-        'first_name': a.first_name,
-        'last_name': a.last_name,
-        'theme': a.theme.name,
-        'ordcid': a.orcid,
-    } for a in db.session.scalars(q).all())
-
-    return csv_download('Academics', headers.keys(), academic_details)
 
 
 @blueprint.route("/academics/<int:id>/potential_sources")

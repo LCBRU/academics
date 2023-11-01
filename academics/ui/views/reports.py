@@ -4,6 +4,8 @@ from lbrc_flask.database import db
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import distinct, select
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
+from lbrc_flask.export import csv_download
+from sqlalchemy import select
 
 from academics.model import Academic, ScopusPublication, Source
 from academics.publication_searching import nihr_acknowledgement_select_choices, publication_count, publication_search_query, publication_summary, theme_select_choices
@@ -110,3 +112,24 @@ def report_image():
         bc.value_formatter = lambda x: f'{x}%'
 
     return bc.send_as_attachment()
+
+
+@blueprint.route("/academics/export/csv")
+def academics_export_csv():
+    headers = {
+        'first_name': None,
+        'last_name': None,
+        'theme': None,
+        'ordcid': None,
+    }
+
+    q = select(Academic).where(Academic.initialised == True)
+
+    academic_details = ({
+        'first_name': a.first_name,
+        'last_name': a.last_name,
+        'theme': a.theme.name,
+        'ordcid': a.orcid,
+    } for a in db.session.scalars(q).all())
+
+    return csv_download('Academics', headers.keys(), academic_details)
