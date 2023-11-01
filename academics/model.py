@@ -31,6 +31,10 @@ class Affiliation(db.Model):
     address = db.Column(db.String(1000))
     country = db.Column(db.String(100))
 
+    @property
+    def summary(self):
+        return ', '.join(filter(None, [self.name, self.address, self.country]))
+
 
 class Academic(AuditMixin, CommonMixin, db.Model):
     # MariaDB backends need a VARChar variable, added 255 to set a max length
