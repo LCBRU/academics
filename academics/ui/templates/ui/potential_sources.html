@@ -18,11 +18,6 @@
                     <div>
                         <a href="{{ ps.source.href }}" target="_blank">{{ps.source.full_name}}</a>
                     </div>
-                    {% if ps.source.affiliation %}
-                        <address>
-                            {{ps.source.affiliation.summary | br}}
-                        </address>
-                    {% endif %}
                 </td>
                 <td>{{ ps.source.type | title }}</td>
                 <td>
@@ -38,6 +33,15 @@
                             </div>
                         </div>
                     </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    {% if ps.source.affiliation %}
+                        <address>
+                            {{ps.source.affiliation.summary | br}}
+                        </address>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
