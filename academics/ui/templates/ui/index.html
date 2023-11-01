@@ -184,8 +184,10 @@
                                                         <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.type | title}})</a>
                                                     </div>
                                                     <div>
-                                                        {% if au.affiliation %}
-                                                            <span class="text-muted">{{au.affiliation.summary}}</span>
+                                                        {% if ps.source.affiliation %}
+                                                            <address>
+                                                                {{ps.source.affiliation.summary | br}}
+                                                            </address>
                                                         {% endif %}
                                                     </div>
                                                 </td>

@@ -32,8 +32,12 @@ class Affiliation(db.Model):
     country = db.Column(db.String(100))
 
     @property
-    def summary(self):
+    def line_summary(self):
         return ', '.join(filter(None, [self.name, self.address, self.country]))
+
+    @property
+    def summary(self):
+        return '\n'.join(filter(None, [self.name, self.address, self.country]))
 
 
 class Academic(AuditMixin, CommonMixin, db.Model):
