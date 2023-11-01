@@ -120,10 +120,27 @@ def get_scopus_publications(identifier):
             funding_acronym=p.get(u'fund-acr', ''),
             cited_by_count=int(p.get(u'citedby-count', '0')),
             author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
+            authors=[_translate_publication_author(a) for a in p.get('author', [])],
             keywords=p.get(u'authkeywords', ''),
             is_open_access=p.get(u'openaccess', '0') == "1",
         ) for p in search_results.results
     ]
+
+
+def _translate_publication_author(author_dict):
+    return AuthorData(
+        catalog=SCOPUS_CATALOG,
+        catalog_identifier=author_dict.get('authid', None),
+        orcid=author_dict.get('orcid', None),
+        first_name=author_dict.get('given-name', None),
+        last_name=author_dict.get('surname', None),
+        display_name=author_dict.get('authname', None),
+        href=author_dict.get('author-url', None),
+        affiliation_identifier=author_dict.get('afid', None),
+        affiliation_name='',
+        affiliation_address='',
+        affiliation_country='',
+    )
 
 
 def get_scopus_author_data(identifier):
@@ -421,6 +438,7 @@ class PublicationData():
     funding_acronym: str
     cited_by_count: int
     author_list: str
+    authors: list
     keywords: str
     _abstract: Abstract = None
     is_open_access : bool = False
@@ -446,10 +464,14 @@ class AuthorData():
     affiliation_name: str
     affiliation_address: str
     affiliation_country: str
+    display_name: str = None
 
     @property
     def display_name(self):
-        return ' '.join(filter(None, [self.first_name, self.last_name]))
+        if self.display_name:
+            return self.display_name
+        else:
+            return ' '.join(filter(None, [self.first_name, self.last_name]))
 
     @property
     def is_leicester(self):

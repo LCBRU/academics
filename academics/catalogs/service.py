@@ -158,7 +158,7 @@ def update_source(s):
 
             if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
                 publications = get_scopus_publications(s.source_identifier)
-            
+
             add_publications(publications, s)
 
         s.last_fetched_datetime = datetime.utcnow()
@@ -270,6 +270,8 @@ def add_publications(publication_datas, source):
     logging.info('add_publications: started')
 
     for p in publication_datas:
+        print(p.get('authors', None))
+        
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
 
         if not publication:

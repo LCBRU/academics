@@ -70,7 +70,7 @@ def open_alex_similar_authors(academic: Academic):
         })
     authors.update({
         _get_open_alex_id_from_href(a.get('id', '')): a
-        for a in _get_for_surname(academic.last_name)
+        for a in _get_for_name(academic.full_name)
     })
 
     result = []
@@ -125,10 +125,10 @@ def _get_for_scopus_id(scopus_id):
     return chain(*q.paginate(per_page=200))
 
 
-def _get_for_surname(surname):
-    logging.info(f'Getting OpenAlex authors for surname: {surname}')
+def _get_for_name(name):
+    logging.info(f'Getting OpenAlex authors for name: {name}')
 
-    q = Authors().search_filter(display_name=surname)
+    q = Authors().search_filter(display_name=name)
     return chain(*q.paginate(per_page=200))
 
 
