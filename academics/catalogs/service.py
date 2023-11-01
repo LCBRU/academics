@@ -197,7 +197,7 @@ def _find_new_scopus_sources(academic):
         ).scalar()
 
         if not s:
-            logging.info(f'New potential source {new_source.catalog_identifier} is not currently known')
+            logging.info(f'New potential source {new_source.catalog_identifier} from catalog {new_source.catalog} is not currently known')
 
             sleep(1)
             s = new_source.get_new_source()

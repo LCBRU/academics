@@ -50,6 +50,8 @@ def open_alex_similar_authors(academic: Academic):
         logging.info('OpenAlex Not Enabled')
         return []
 
+    logging.info(f'Getting OpenAlex data for {academic.full_name}')
+
     existing = set(db.session.execute(
         select(OpenAlexAuthor.source_identifier)
     ).scalars())
@@ -110,16 +112,22 @@ def _get_open_alex_id_from_href(href):
 
 
 def _get_for_orcid(orcid):
+    logging.info(f'Getting OpenAlex authors for ORCID: {orcid}')
+
     q = Authors().filter(orcid=orcid)
     return chain(*q.paginate(per_page=200))
 
 
 def _get_for_scopus_id(scopus_id):
+    logging.info(f'Getting OpenAlex authors for SCOPUS ID: {scopus_id}')
+
     q = Authors().filter(scopus=scopus_id)
     return chain(*q.paginate(per_page=200))
 
 
 def _get_for_surname(surname):
+    logging.info(f'Getting OpenAlex authors for surname: {surname}')
+
     q = Authors().search_filter(display_name=surname)
     return chain(*q.paginate(per_page=200))
 
