@@ -19,9 +19,9 @@ def get_open_alex():
     config = Config()
     pyalex.config.email = config.OPEN_ALEX_EMAIL
 
-    # q = Authors().search_filter(display_name="mccann")
+    q = Authors().search_filter(display_name="samani")
     # q = Authors().filter(orcid="0000-0002-5542-8448")
-    q = Authors().filter(scopus="7005783434")
+    # q = Authors().filter(scopus="7005783434")
     # # # works = Works().filter(**{"author.id": author['id']}).filter(publication_year="2022").get()
 
     for a in chain(*q.paginate(per_page=200)):
@@ -56,20 +56,22 @@ def open_alex_similar_authors(academic: Academic):
 
     authors = {}
 
-    for o in academic.all_orcids():
-        authors.update({
-            _get_open_alex_id_from_href(a.get('id', '')): a
-            for a in _get_for_orcid(o)
-        })
-    for s in academic.all_scopus_ids():
-        authors.update({
-            _get_open_alex_id_from_href(a.get('id', '')): a
-            for a in _get_for_scopus_id(s)
-        })
+    # for o in academic.all_orcids():
+    #     authors.update({
+    #         _get_open_alex_id_from_href(a.get('id', '')): a
+    #         for a in _get_for_orcid(o)
+    #     })
+    # for s in academic.all_scopus_ids():
+    #     authors.update({
+    #         _get_open_alex_id_from_href(a.get('id', '')): a
+    #         for a in _get_for_scopus_id(s)
+    #     })
     authors.update({
         _get_open_alex_id_from_href(a.get('id', '')): a
         for a in _get_for_surname(academic.last_name)
     })
+
+    print(authors)
 
     result = []
 
@@ -120,6 +122,7 @@ def _get_for_scopus_id(scopus_id):
 
 
 def _get_for_surname(surname):
+    print(surname)
     q = Authors().filter(display_name=surname)
     return chain(*q.paginate(per_page=200))
 
