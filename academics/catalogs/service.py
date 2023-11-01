@@ -151,7 +151,7 @@ def update_source(s):
 
         if author_data:
             sleep(1)
-            author_data.update_source(s)
+            author_data.update_source(s, True)
 
         if s.academic:
             publications = []

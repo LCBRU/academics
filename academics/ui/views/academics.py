@@ -235,6 +235,7 @@ def academics_amend_potential_sources():
         case 'match':
             ps.source.academic = a
             ps.not_match = False
+            update_single_academic(a)
     
     db.session.add(ps)
     db.session.commit()
