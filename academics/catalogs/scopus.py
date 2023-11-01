@@ -16,6 +16,7 @@ from lbrc_flask.database import db
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
 from elsapy import version
+from functools import cache
 
 
 SCOPUS_CATALOG = 'scopus'
@@ -25,7 +26,7 @@ class ScopusClient(ElsClient):
     # class variables
     __url_base = "https://api.elsevier.com/"    ## Base URL for later use
     __user_agent = "elsapy-v%s" % version       ## Helps track library use
-    __min_req_interval = 15                     ## Min. request interval in sec
+    __min_req_interval = 2                      ## Min. request interval in sec
     __ts_last_req = time.time()                 ## Tracker for throttling
  
 
@@ -78,6 +79,7 @@ class ScopusClient(ElsClient):
             raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + "\nand using headers " + str(headers) + ":\n" + r.text)
 
 
+@cache
 def _client():
     return ScopusClient(current_app.config['SCOPUS_API_KEY'])
 
