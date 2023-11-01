@@ -134,7 +134,7 @@ def _translate_publication_author(author_dict):
         orcid=author_dict.get('orcid', None),
         first_name=author_dict.get('given-name', None),
         last_name=author_dict.get('surname', None),
-        display_name=author_dict.get('authname', None),
+        author_name=author_dict.get('authname', None),
         href=author_dict.get('author-url', None),
         affiliation_identifier=author_dict.get('afid', None),
         affiliation_name='',
@@ -464,11 +464,11 @@ class AuthorData():
     affiliation_name: str
     affiliation_address: str
     affiliation_country: str
-    display_name: str = None
+    author_name: str = None
 
     @property
     def display_name(self):
-        if self.display_name:
+        if self.author_name:
             return self.display_name
         else:
             return ' '.join(filter(None, [self.first_name, self.last_name]))
