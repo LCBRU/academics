@@ -184,9 +184,9 @@
                                                         <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.type | title}})</a>
                                                     </div>
                                                     <div>
-                                                        {% if ps.source.affiliation %}
+                                                        {% if au.affiliation %}
                                                             <address>
-                                                                {{ps.source.affiliation.summary | br}}
+                                                                {{au.affiliation.summary | br}}
                                                             </address>
                                                         {% endif %}
                                                     </div>
