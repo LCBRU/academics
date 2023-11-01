@@ -25,18 +25,18 @@ def get_open_alex():
     # # # works = Works().filter(**{"author.id": author['id']}).filter(publication_year="2022").get()
 
     for a in chain(*q.paginate(per_page=200)):
-        print(a['id'], a["display_name"])
+        # print(a['id'], a["display_name"])
         print(a["display_name"].strip().rsplit(maxsplit=1))
-        print(a.keys())
-        if a['summary_stats']:
-            print(a['summary_stats'].keys())
-            print(a['summary_stats'])
+        # print(a.keys())
+        # if a['summary_stats']:
+        #     print(a['summary_stats'].keys())
+        #     print(a['summary_stats'])
         if a['last_known_institution']:
-            print(a['last_known_institution'].keys())
+            # print(a['last_known_institution'].keys())
             print(a['last_known_institution'])
         
-        i = Institutions()[a['last_known_institution']['id']]
-        print(i['geo'])
+        # i = Institutions()[a['last_known_institution']['id']]
+        # print(i['geo'])
 
         # if a:
         #     if a.get('last_known_institution', None):
@@ -122,9 +122,10 @@ def _get_for_scopus_id(scopus_id):
 
 
 def _get_for_surname(surname):
-    print(surname)
     q = Authors().filter(display_name=surname)
-    return chain(*q.paginate(per_page=200))
+    result = list(chain(*q.paginate(per_page=200)))
+    print(list)
+    return list
 
 
 @dataclass
