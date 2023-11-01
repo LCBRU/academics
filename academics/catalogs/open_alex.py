@@ -124,8 +124,8 @@ def _get_for_scopus_id(scopus_id):
 def _get_for_surname(surname):
     q = Authors().filter(display_name=surname)
     result = list(chain(*q.paginate(per_page=200)))
-    print(list)
-    return list
+    print(result)
+    return result
 
 
 @dataclass
