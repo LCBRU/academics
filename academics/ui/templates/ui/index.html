@@ -180,7 +180,16 @@
                                                     href="#"><i class="fas fa-trash"></i></a>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.type | title}})</a>
+                                                    <div>
+                                                        <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.type | title}})</a>
+                                                    </div>
+                                                    <div>
+                                                        {% if au.affiliation %}
+                                                            <address>
+                                                                {{au.affiliation.summary | br}}
+                                                            </address>
+                                                        {% endif %}
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     {% if au.orcid %}
@@ -199,16 +208,6 @@
                                                         <i class="fas fa-exclamation-triangle text-danger"></i>&nbsp;Error
                                                     {% elif au.last_fetched_datetime %}
                                                         <i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td></td>
-                                                <td colspan="6">
-                                                    {% if au.affiliation %}
-                                                        <address>
-                                                            {{au.affiliation.summary | br}}
-                                                        </address>
                                                     {% endif %}
                                                 </td>
                                             </tr>
