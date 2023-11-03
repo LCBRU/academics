@@ -312,7 +312,7 @@ def add_publications(publication_datas, source):
             for a in p.authors
         ]
 
-        db.session.add_all(new_publications)
+        # db.session.add_all(new_publications)
 
         publication.publication_sources = new_publications
 
