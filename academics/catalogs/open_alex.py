@@ -89,6 +89,7 @@ def open_alex_similar_authors(academic: Academic):
                 catalog_identifier=_get_open_alex_id_from_href(a.get('id', '')),
                 orcid=a.get('orcid', None),
                 display_name=a.get('display_name', ''),
+                initials='',
                 href=a.get('id', ''),
                 affiliation_identifier=institution_id,
                 affiliation_name=i.get('display_name', ''),
@@ -138,6 +139,7 @@ class AuthorData:
     catalog_identifier: str
     orcid: str
     display_name: str
+    initials: str
     href: str
     affiliation_identifier: str
     affiliation_name: str

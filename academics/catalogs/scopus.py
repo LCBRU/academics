@@ -137,6 +137,7 @@ def _translate_publication_author(author_dict):
         orcid=author_dict.get('orcid', None),
         first_name=author_dict.get('given-name', None),
         last_name=author_dict.get('surname', None),
+        initials=author_dict.get('initials', None),
         author_name=author_dict.get('authname', None),
         href=author_dict.get('author-url', None),
         affiliation_identifier=author_dict.get('afid', None),
@@ -209,6 +210,7 @@ def scopus_author_search(search_string):
             orcid=r.get(u'coredata', {}).get(u'orcid', ''),
             first_name=r.get(u'preferred-name', {}).get(u'given-name', ''),
             last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
+            initials=r.get(u'preferred-name', {}).get('initials', None),
             href=href,
             affiliation_identifier=affiliation_identifier,
             affiliation_name=sa.name,
@@ -240,6 +242,10 @@ class Author(ElsAuthor):
         for h in  self.data.get(u'coredata', {}).get(u'link', ''):
             if h['@rel'] == 'scopus-author':
                 return h['@href']
+
+    @property
+    def initials(self):
+        return self.data.get(u'author-profile', {}).get(u'preferred-name').get(u'initials', '')
 
     @property
     def citation_count(self):
@@ -306,6 +312,7 @@ class Author(ElsAuthor):
             orcid=self.orcid,
             first_name=self.first_name,
             last_name=self.last_name,
+            initials=self.initials,
             href=self.href,
             affiliation_identifier=self.affiliation_id,
             affiliation_name=sa.name,
@@ -463,6 +470,7 @@ class AuthorData():
     orcid: str
     first_name: str
     last_name: str
+    initials: str
     href: str
     affiliation_identifier: str
     affiliation_name: str
