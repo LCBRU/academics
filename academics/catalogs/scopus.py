@@ -101,30 +101,39 @@ def get_scopus_publications(identifier):
     search_results = DocumentSearch(identifier)
     search_results.execute(_client(), get_all=True)
 
-    return [
-        PublicationData(
-            catalog='scopus',
-            catalog_identifier=p.get(u'dc:identifier', ':').split(':')[1],
-            href=_get_scopus_publication_link(p),
-            doi=p.get(u'prism:doi', ''),
-            title=p.get(u'dc:title', ''),
-            journal_name=p.get(u'prism:publicationName', ''),
-            publication_cover_date=parse_date(p.get(u'prism:coverDate', '')),
-            abstract_text=p.get(u'dc:description', ''),
-            volume=p.get(u'prism:volume', ''),
-            issue=p.get(u'prism:issueIdentifier', ''),
-            pages=p.get(u'prism:pageRange', ''),
-            subtype_code=p.get(u'subtype', ''),
-            subtype_description=p.get(u'subtypeDescription', ''),
-            sponsor_name=p.get(u'fund-sponsor', ''),
-            funding_acronym=p.get(u'fund-acr', ''),
-            cited_by_count=int(p.get(u'citedby-count', '0')),
-            author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
-            authors=[_translate_publication_author(a) for a in p.get('author', [])],
-            keywords=p.get(u'authkeywords', ''),
-            is_open_access=p.get(u'openaccess', '0') == "1",
-        ) for p in search_results.results
-    ]
+    result = []
+
+    for p in search_results.results:
+        catalog_identifier=p.get(u'dc:identifier', ':').split(':')[1]
+
+        if not catalog_identifier:
+            print(p)
+            return []
+
+        result.append(
+            PublicationData(
+                catalog='scopus',
+                catalog_identifier=p.get(u'dc:identifier', ':').split(':')[1],
+                href=_get_scopus_publication_link(p),
+                doi=p.get(u'prism:doi', ''),
+                title=p.get(u'dc:title', ''),
+                journal_name=p.get(u'prism:publicationName', ''),
+                publication_cover_date=parse_date(p.get(u'prism:coverDate', '')),
+                abstract_text=p.get(u'dc:description', ''),
+                volume=p.get(u'prism:volume', ''),
+                issue=p.get(u'prism:issueIdentifier', ''),
+                pages=p.get(u'prism:pageRange', ''),
+                subtype_code=p.get(u'subtype', ''),
+                subtype_description=p.get(u'subtypeDescription', ''),
+                sponsor_name=p.get(u'fund-sponsor', ''),
+                funding_acronym=p.get(u'fund-acr', ''),
+                cited_by_count=int(p.get(u'citedby-count', '0')),
+                author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
+                authors=[_translate_publication_author(a) for a in p.get('author', [])],
+                keywords=p.get(u'authkeywords', ''),
+                is_open_access=p.get(u'openaccess', '0') == "1",
+            ))
+    return result
 
 
 def _translate_publication_author(author_dict):
@@ -272,11 +281,11 @@ class Author(ElsAuthor):
         except Exception as e:
             log_exception(e)
             logging.info('Error reading Scopus data')
-            return None
+            raise e
         
         if self.data is None:
             logging.info('No error reading Scopus data, but data is still None')
-            return None
+            raise Exception('No error reading Scopus data, but data is still None')
 
         return result
 
