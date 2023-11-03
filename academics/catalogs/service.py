@@ -331,4 +331,4 @@ def _get_or_create_source(author_data):
     if not s:
         s = author_data.get_new_source()
 
-    return 
+    return s
