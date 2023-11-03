@@ -270,10 +270,6 @@ def add_publications(publication_datas, source):
     logging.info('add_publications: started')
 
     for p in publication_datas:
-        print('*'*1000)
-        print(p.authors)
-        print('*'*1000)
-        
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
 
         if not publication:
@@ -308,6 +304,26 @@ def add_publications(publication_datas, source):
         if source not in publication.sources:
             publication.sources.append(source)
 
+        publication.publication_sources.clear()
+
+        for a in p.authors:
+            publication.publication_sources.append(_get_or_create_source(a))
+
         _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
 
     logging.info('add_publications: ended')
+
+
+def _get_or_create_source(author_data):
+    result = None
+
+    result = db.session.execute(
+        select(Source)
+        .where(Source.type == author_data.catalog)
+        .where(Source.source_identifier == author_data.catalog_identifier)
+    ).scalar()
+
+    if not result:
+        result = author_data.get_new_source(update_metrics=False)
+
+    return result
