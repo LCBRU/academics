@@ -312,6 +312,8 @@ def add_publications(publication_datas, source):
             for a in p.authors
         ]
 
+        db.session.add_all(new_publications)
+
         publication.publication_sources = new_publications
 
         _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
