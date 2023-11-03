@@ -485,12 +485,12 @@ class AuthorData():
     def affiliation_summary(self):
         return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
 
-    def get_new_source(self, update_metrics=False):
+    def get_new_source(self, get_details=False):
         result = ScopusAuthor()
-        self.update_source(result, update_metrics)
+        self.update_source(result, get_details)
         return result
 
-    def update_source(self, source, update_metrics=False):
+    def update_source(self, source, get_details=False):
         source.source_identifier = self.catalog_identifier
         source.orcid = self.orcid
         source.first_name = self.first_name
@@ -498,12 +498,12 @@ class AuthorData():
         source.display_name = self.display_name
         source.href = self.href            
 
-        if update_metrics:
+        if get_details:
             metrics = Author(self.catalog_identifier)
             if metrics.read_metrics(_client()):
                 source.citation_count = metrics.citation_count
                 source.document_count = metrics.document_count
                 source.h_index = metrics.h_index
         
-        sa = ScopusAffiliation(self.affiliation_identifier)
-        source.affiliation = sa.get_affiliation()
+            sa = ScopusAffiliation(self.affiliation_identifier)
+            source.affiliation = sa.get_affiliation()
