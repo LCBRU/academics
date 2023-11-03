@@ -270,7 +270,7 @@ def add_publications(publication_datas, source):
     logging.info('add_publications: started')
 
     for p in publication_datas:
-        print(p.get('authors', None))
+        print(p.authors)
         
         publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
 
