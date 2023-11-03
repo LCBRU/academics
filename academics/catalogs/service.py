@@ -329,6 +329,6 @@ def _get_or_create_source(author_data):
     ).scalar()
 
     if not s:
-        s = author_data.get_new_source(update_metrics=False)
+        s = author_data.get_new_source()
 
     return 

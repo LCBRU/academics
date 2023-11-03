@@ -165,12 +165,12 @@ class AuthorData:
         result, _ = self.display_name.split(maxsplit=1)
         return result
 
-    def get_new_source(self, update_metrics=False):
+    def get_new_source(self, get_details=False):
         result = OpenAlexAuthor()
-        self.update_source(result, update_metrics)
+        self.update_source(result, get_details)
         return result
 
-    def update_source(self, source, update_metrics=False):
+    def update_source(self, source, get_details=False):
         source.source_identifier = self.catalog_identifier
         source.orcid = self.orcid
         source.first_name = self.first_name
@@ -178,12 +178,12 @@ class AuthorData:
         source.display_name = self.display_name
         source.href = self.href
 
-        if update_metrics:
+        if get_details:
             source.citation_count = self.citation_count
             source.document_count = self.document_count
             source.h_index = self.h_index
 
-        source.affiliation =self.get_affiliation()
+            source.affiliation =self.get_affiliation()
 
 
     def get_affiliation(self):

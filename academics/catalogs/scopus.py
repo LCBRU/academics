@@ -496,7 +496,7 @@ class AuthorData():
         source.first_name = self.first_name
         source.last_name = self.last_name
         source.display_name = self.display_name
-        source.href = self.href            
+        source.href = self.href
 
         if get_details:
             metrics = Author(self.catalog_identifier)
