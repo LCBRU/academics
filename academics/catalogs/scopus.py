@@ -473,7 +473,7 @@ class AuthorData():
     @property
     def display_name(self):
         if self.author_name:
-            return self.display_name
+            return self.author_name
         else:
             return ' '.join(filter(None, [self.first_name, self.last_name]))
 
