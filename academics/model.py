@@ -1,9 +1,12 @@
+from typing import List
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 from lbrc_flask.security import User as BaseUser
-
-from sqlalchemy import func, select
+from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
+from sqlalchemy import ForeignKey, func, select
+from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):
@@ -186,6 +189,17 @@ class Source(AuditMixin, CommonMixin, db.Model):
     def full_name(self):
         return self.display_name
 
+    @property
+    def is_academic(self):
+        return self.academic is not None
+
+    @property
+    def has_left_brc(self):
+        if self.academic:
+            return self.academic.has_left_brc
+        else:
+            return None
+
 
 class ScopusAuthor(Source):
     __mapper_args__ = {
@@ -360,6 +374,13 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     sources = db.relationship("Source", secondary=sources__publications, backref=db.backref("scopus_publications"), lazy="joined")
+    publication_sources = db.relationship(
+        "PublicationSource",
+        order_by="PublicationSource.ordinal",
+        collection_class=ordering_list('ordinal'),
+    )
+
+    authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
 
     scopus_id = db.Column(db.String(1000))
     doi = db.Column(db.String(1000))
@@ -485,6 +506,15 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
     @property
     def all_academics_left_brc(self):
         return all(a.has_left_brc for a in self.academics)
+
+
+class PublicationSource(db.Model):
+    publication_id: Mapped[int] = mapped_column(ForeignKey(ScopusPublication.id), primary_key=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), primary_key=True)
+    ordinal: Mapped[int]
+
+    publication: Mapped[ScopusPublication] = relationship()
+    source: Mapped[Source] = relationship()
 
 
 class Keyword(db.Model):

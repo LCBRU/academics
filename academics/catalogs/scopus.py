@@ -104,12 +104,6 @@ def get_scopus_publications(identifier):
     result = []
 
     for p in search_results.results:
-        catalog_identifier=p.get(u'dc:identifier', ':').split(':')[1]
-
-        if not catalog_identifier:
-            print(p)
-            return []
-
         result.append(
             PublicationData(
                 catalog='scopus',

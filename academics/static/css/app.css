@@ -18,3 +18,21 @@ a.source.collapsed::after {
     content: "\f0d7";
     margin-left: 1em;
 }
+
+ol.author_list {
+    margin: 0;
+    padding: 0;
+}
+
+ol.author_list li{
+    display: inline-block;
+}
+
+ol.author_list li:not(:last-child)::after{
+    display: inline-block;
+    content: ', ';
+}
+
+ol.author_list li.is_academic {
+    color: var(--color-dark-green);
+}

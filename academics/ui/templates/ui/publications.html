@@ -62,6 +62,20 @@
                 <div>
                     <h4>
                         <div>{{p.author_list | blank_if_none}}</div>
+                        <ol class="author_list">
+                            {% for a in p.authors %}
+                                {% set cls = 'not_academic' %}
+
+                                {% if a.is_academic %}
+                                    {% set cls = 'is_academic' %}
+                                {% endif %}
+                                {% if a.has_left_brc %}
+                                    {% set cls = 'text-danger' %}
+                                {% endif %}
+
+                                <li class="{{cls}}">{{ a.full_name }}</li>
+                            {% endfor%}
+                        </ol>
                         {% if p.all_academics_left_brc %}
                             <div class="text-danger">All authors have left the BRC</div>
                         {% endif %}
