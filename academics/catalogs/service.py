@@ -168,6 +168,7 @@ def update_source(s):
         s.error = True
     finally:
         db.session.add(s)
+        db.session.commit()
 
 
 def _find_new_scopus_sources(academic):
@@ -207,7 +208,7 @@ def _find_new_scopus_sources(academic):
             academic=academic,
             source=s,
         ))
-    
+   
     db.session.commit()
 
 
