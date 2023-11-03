@@ -446,6 +446,7 @@ class PublicationData():
     @property
     def abstract(self):
         if not self._abstract:
+            print(f'Reading Abstract for: {self.catalog_identifier}')
             self._abstract = Abstract(self.catalog_identifier)
             self._abstract.read(_client())
 
