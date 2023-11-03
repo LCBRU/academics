@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, NihrAcknowledgement, NihrFundedOpenAccess, ScopusAuthor, ScopusPublication, Source, Subtype
+from academics.model import Academic, AcademicPotentialSource, NihrAcknowledgement, NihrFundedOpenAccess, PublicationSource, ScopusAuthor, ScopusPublication, Source, Subtype
 from lbrc_flask.celery import celery
 from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
@@ -305,7 +305,10 @@ def add_publications(publication_datas, source):
             publication.sources.append(source)
 
         new_publications  = [
-            _get_or_create_source(a)
+            PublicationSource(
+                source=_get_or_create_source(a),
+                publication=publication
+            ) 
             for a in p.authors
         ]
 
@@ -317,15 +320,15 @@ def add_publications(publication_datas, source):
 
 
 def _get_or_create_source(author_data):
-    result = None
+    s = None
 
-    result = db.session.execute(
+    s = db.session.execute(
         select(Source)
         .where(Source.type == author_data.catalog)
         .where(Source.source_identifier == author_data.catalog_identifier)
     ).scalar()
 
-    if not result:
-        result = author_data.get_new_source(update_metrics=False)
+    if not s:
+        s = author_data.get_new_source(update_metrics=False)
 
-    return result
+    return 
