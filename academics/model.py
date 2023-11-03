@@ -379,6 +379,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
         "PublicationSource",
         order_by="PublicationSource.ordinal",
         collection_class=ordering_list('ordinal'),
+        cascade="delete, delete-orphan"
     )
 
     authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
