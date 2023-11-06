@@ -332,9 +332,9 @@ class Author(ElsAuthor):
         
         if self.data is None:
             logging.info('No error reading Scopus metrics, but data is still None')
-            return None
+            return False
 
-        return result
+        return True
 
     def get_data(self):
         sa = ScopusAffiliation(self.affiliation_id).get_affiliation()
