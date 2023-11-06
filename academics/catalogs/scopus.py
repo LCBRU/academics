@@ -323,8 +323,6 @@ class Author(ElsAuthor):
             if data.get('h-index', None):
                 self._data['h-index'] = int(data['h-index'])
             logging.info('Added/updated author metrics')
-        
-            result = super().read_metrics(client)
         except ResourceNotFoundException as e:
             return False
         except Exception as e:
