@@ -299,6 +299,31 @@ class Author(ElsAuthor):
 
     def read_metrics(self, client):
         try:
+            fields = [
+                    "document-count",
+                    "cited-by-count",
+                    "citation-count",
+                    "h-index",
+                    "dc:identifier",
+                    ]
+            api_response = client.exec_request(
+                    self.uri + "?field=" + ",".join(fields))
+            data = api_response[self._payload_type][0]
+            if not self.data:
+                self._data = dict()
+                self._data['coredata'] = dict()
+            # TODO: apply decorator for type conversion of common fields
+            self._data['coredata']['dc:identifier'] = data['coredata']['dc:identifier']
+            if data.get('coredata', {}).get('citation-count', None):
+                self._data['coredata']['citation-count'] = int(data['coredata']['citation-count'])
+            if data.get('coredata', {}).get('cited-by-count', None):
+                self._data['coredata']['cited-by-count'] = int(data['coredata']['citation-count'])
+            if data.get('coredata', {}).get('document-count', None):
+                self._data['coredata']['document-count'] = int(data['coredata']['document-count'])
+            if data.get('h-index', None):
+                self._data['h-index'] = int(data['h-index'])
+            logging.info('Added/updated author metrics')
+        
             result = super().read_metrics(client)
         except ResourceNotFoundException as e:
             return False
