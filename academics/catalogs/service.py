@@ -305,7 +305,7 @@ def add_publications(publication_datas, source):
         if source not in publication.sources:
             publication.sources.append(source)
 
-        new_publications  = [
+        new_sources  = [
             PublicationSource(
                 source=_get_or_create_source(a),
                 publication=publication
@@ -313,9 +313,9 @@ def add_publications(publication_datas, source):
             for a in p.authors
         ]
 
-        publication.publication_sources = new_publications
+        publication.publication_sources = new_sources
 
-        db.session.add_all(new_publications)
+        db.session.add_all(new_sources)
 
         _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
 

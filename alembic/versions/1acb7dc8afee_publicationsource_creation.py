@@ -23,7 +23,7 @@ def upgrade() -> None:
     sa.Column('ordinal', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['publication_id'], ['scopus_publication.id'], ),
     sa.ForeignKeyConstraint(['source_id'], ['source.id'], ),
-    sa.PrimaryKeyConstraint('publication_id', 'source_id')
+    sa.PrimaryKeyConstraint('publication_id', 'source_id', 'ordinal')
     )
 
 

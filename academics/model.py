@@ -513,7 +513,7 @@ class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 class PublicationSource(db.Model):
     publication_id: Mapped[int] = mapped_column(ForeignKey(ScopusPublication.id), primary_key=True)
     source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), primary_key=True)
-    ordinal: Mapped[int]
+    ordinal: Mapped[int] = mapped_column(primary_key=True)
 
     publication: Mapped[ScopusPublication] = relationship()
     source: Mapped[Source] = relationship()
