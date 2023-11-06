@@ -21,6 +21,9 @@ from functools import cache
 
 SCOPUS_CATALOG = 'scopus'
 
+class ResourceNotFoundException(Exception):
+    pass
+
 
 class ScopusClient(ElsClient):
     # class variables
@@ -74,6 +77,9 @@ class ScopusClient(ElsClient):
             logging.warn(f'QUOTA EXCEEDED: Next Request Allowed {next_allowed}')
             self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
             raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + "\nand using headers " + str(headers) + ":\n" + r.text)
+        elif r.status_code == 404:
+            logging.warn(f'Resource not found: for URL {URL}')
+            raise ResourceNotFoundException(f'Resource not found: for URL {URL}')
         else:
             self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
             raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + "\nand using headers " + str(headers) + ":\n" + r.text)
@@ -278,6 +284,8 @@ class Author(ElsAuthor):
     def read(self, client):
         try:
             result = super().read(client)
+        except ResourceNotFoundException as e:
+            return False
         except Exception as e:
             log_exception(e)
             logging.info('Error reading Scopus data')
@@ -292,6 +300,8 @@ class Author(ElsAuthor):
     def read_metrics(self, client):
         try:
             result = super().read_metrics(client)
+        except ResourceNotFoundException as e:
+            return False
         except Exception as e:
             log_exception(e)
             logging.info('Error reading Scopus metrics')
@@ -411,8 +421,7 @@ class Abstract(AbsDoc):
 
     def read(self, client):
         try:
-            super().read(client)
-            return True
+            return super().read(client)
         except Exception as e:
             logging.error(e)
             return False
