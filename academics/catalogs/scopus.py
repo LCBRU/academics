@@ -355,14 +355,14 @@ class Author(ElsAuthor):
             affiliation_country=None,
         )
 
-        if not self.affiliation_id:
-            logging.info('No error affiliation ID')
-
+        if self.affiliation_id:
             sa = ScopusAffiliation(self.affiliation_id).get_affiliation()
 
             result.affiliation_name=sa.name,
             result.affiliation_address=sa.address
             result.affiliation_country=sa.country
+        else:
+            logging.info('No error affiliation ID')
 
         return result
 
