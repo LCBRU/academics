@@ -61,7 +61,6 @@
                 </div>
                 <div>
                     <h4>
-                        <div>{{p.author_list | blank_if_none}}</div>
                         <ol class="author_list">
                             {% for a in p.authors %}
                                 {% set cls = 'not_academic' %}
