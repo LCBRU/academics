@@ -66,14 +66,15 @@
                             {% for a in p.authors %}
                                 {% set cls = 'not_academic' %}
 
-                                {% if a.is_academic %}
-                                    {% set cls = 'is_academic' %}
-                                {% endif %}
                                 {% if a.has_left_brc %}
-                                    {% set cls = 'text-danger' %}
+                                    <li class="text-danger">{{ a.full_name }}</li>
+                                {% elif a.is_academic %}
+                                    <li class="not_academic">
+                                        <a href="{{ url_for('ui.publications', academic_id=a.academic_id ) }}">{{ a.full_name }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="not_academic">{{ a.full_name }}</li>
                                 {% endif %}
-
-                                <li class="{{cls}}">{{ a.full_name }}</li>
                             {% endfor%}
                         </ol>
                         {% if p.all_academics_left_brc %}
