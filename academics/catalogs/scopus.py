@@ -501,7 +501,7 @@ class PublicationData():
     @property
     def abstract(self):
         if not self._abstract:
-            print(f'Reading Abstract for: {self.catalog_identifier}')
+            logging.info(f'Reading Abstract for: {self.catalog_identifier}')
             self._abstract = Abstract(self.catalog_identifier)
             self._abstract.read(_client())
 
@@ -561,7 +561,3 @@ class AuthorData():
             if self.affiliation_identifier:
                 sa = ScopusAffiliation(self.affiliation_identifier)
                 source.affiliation = sa.get_affiliation()
-            else:
-                print('-'*100)
-                print(self.affiliation_identifier)
-                print('-'*100)
