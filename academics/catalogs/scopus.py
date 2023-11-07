@@ -111,6 +111,7 @@ def get_scopus_publications(identifier):
 
     for p in search_results.results:
         if not p.get(u'dc:identifier', ':').split(':')[1]:
+            # SCOPUS sends an "Empty Set" result as opposed to no results
             continue
 
         result.append(
@@ -340,6 +341,13 @@ class Author(ElsAuthor):
         return True
 
     def get_data(self):
+        if not self.affiliation_id:
+            print('='*100)
+            print('No Affilation ID')
+            print('='*100)
+            print(self._data)
+            print('='*100)
+
         sa = ScopusAffiliation(self.affiliation_id).get_affiliation()
 
         return AuthorData(
