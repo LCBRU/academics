@@ -341,16 +341,7 @@ class Author(ElsAuthor):
         return True
 
     def get_data(self):
-        if not self.affiliation_id:
-            print('='*100)
-            print('No Affilation ID')
-            print('='*100)
-            print(self._data)
-            print('='*100)
-
-        sa = ScopusAffiliation(self.affiliation_id).get_affiliation()
-
-        return AuthorData(
+        result = AuthorData(
             catalog=SCOPUS_CATALOG,
             catalog_identifier=self.source_identifier,
             orcid=self.orcid,
@@ -359,10 +350,18 @@ class Author(ElsAuthor):
             initials=self.initials,
             href=self.href,
             affiliation_identifier=self.affiliation_id,
-            affiliation_name=sa.name,
-            affiliation_address=sa.address,
-            affiliation_country=sa.country,
         )
+
+        if not self.affiliation_id:
+            logging.info('No error affiliation ID')
+
+            sa = ScopusAffiliation(self.affiliation_id).get_affiliation()
+
+            result.affiliation_name=sa.name,
+            result.affiliation_address=sa.address
+            result.affiliation_country=sa.country
+
+        return result
 
 
 class ScopusAffiliation(ElsAffil):
