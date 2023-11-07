@@ -552,5 +552,10 @@ class AuthorData():
                 source.document_count = metrics.document_count
                 source.h_index = metrics.h_index
         
-            sa = ScopusAffiliation(self.affiliation_identifier)
-            source.affiliation = sa.get_affiliation()
+            if self.affiliation_identifier:
+                sa = ScopusAffiliation(self.affiliation_identifier)
+                source.affiliation = sa.get_affiliation()
+            else:
+                print('-'*100)
+                print(self.affiliation_identifier)
+                print('-'*100)
