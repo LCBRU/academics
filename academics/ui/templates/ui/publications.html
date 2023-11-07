@@ -72,7 +72,7 @@
                                         <a href="{{ url_for('ui.publications', academic_id=a.academic_id ) }}">{{ a.full_name }}</a>
                                     </li>
                                 {% else %}
-                                    <li class="not_academic">{{ a.full_name }}</li>
+                                    <li class="is_academic">{{ a.full_name }}</li>
                                 {% endif %}
                             {% endfor%}
                         </ol>
