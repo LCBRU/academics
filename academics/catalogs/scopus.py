@@ -350,6 +350,9 @@ class Author(ElsAuthor):
             initials=self.initials,
             href=self.href,
             affiliation_identifier=self.affiliation_id,
+            affiliation_name=None,
+            affiliation_address=None,
+            affiliation_country=None,
         )
 
         if not self.affiliation_id:
