@@ -37,3 +37,33 @@ ol.author_list li.is_academic {
     color: var(--color-dark-green);
     font-size: 1.1em;
 }
+
+dl.publication_details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+}
+
+dl.publication_details > div {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+}
+
+.acordian h3 {
+    cursor: pointer;
+}
+
+.acordian h3::after {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    content: "\f0d8";
+    margin-left: 1em;
+}
+
+.acordian h3.collapsed::after {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    content: "\f0d7";
+    margin-left: 1em;
+}
+

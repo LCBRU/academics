@@ -1,7 +1,7 @@
 {% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary, render_field %}
-{% from "lbrc_flask/modal_macros.html" import render_modal %}
-{% from "ui/_publications_folders.html" import render_publication_folders %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
+{% from "ui/_publication_details.html" import render_publication_title, render_publication_folders, render_publication_authors, render_publication_attributes, render_publication_funding, render_publication_abstract, render_publication_keywords %}
+
 
 {% block content %}
 <section>
@@ -21,97 +21,10 @@
     <ul class="list-group">
         {% for p in publications.items %}
             <li class="list-group-item summary_details">
-                <div class='row'>
-                    <div class="col-7">
-                        <h3>{{p.title}}</h3>
-                    </div>
-                    <div class="col-5">
-                        <div class="btn-toolbar float-right">
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a href="{{ p.href }}" class="btn btn-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
-                            </div>
-
-                            {% if p.doi %}
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <a href="http://doi.org/{{ p.doi }}" class="btn btn-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
-                                </div>
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <a href="https://google.com/search?q={{ p.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <h4>
-                            <div>{{p.author_list | blank_if_none}}</div>
-                            {% if p.all_academics_left_brc %}
-                                <div class="text-danger">All authors have left the BRC</div>
-                            {% endif %}
-                        </h4>
-                        <dl class="row">
-                            {% if p.journal %}
-                                <dt class="col-auto">Journal</dt>
-                                <dd class="col-auto">{{p.journal.name | blank_if_none | title_case}}</dd>
-                            {% endif %}
-                            <dd class="col-auto">({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
-                            {% if p.subtype %}
-                                <dt class="col-auto">Type</dt>
-                                <dd class="col-auto">{{ p.subtype.description }}</dd>
-                            {% endif %}
-                            <dt class="col-auto">Open Access</dt>
-                            {% if p.is_open_access %}
-                                <dd class="col-auto"><i class="fas fa-check"></i></dd>
-                            {% else %}
-                                <dd class="col-auto"><i class="fas fa-question"></i></dd>
-                            {% endif %}
-                        </dl>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div class="card">
-                            <div class="card-header">
-                                Acknowledgement
-                                <div class="btn-toolbar float-right">
-                                    <div class="btn-group mr-1 mb-1" role="group">
-                                        {% set cls = 'btn-info' %}
-                                        {% if p.nihr_acknowledgement.name | default_if_none('Unvalidated') == 'Unvalidated' %}
-                                            {% set cls = 'btn-primary' %}
-                                        {% endif %}
-                                        <button id="btnGroupAcknowledgement_{{p.id}}" type="button" class="btn {{cls}} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            {{ p.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{p.id}}">
-                                            <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{p.id}}" data-nihr_acknowledgement_id="-1">Unvalidated</a>
-                                            {% for n in nihr_acknowledgements %}
-                                                <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{p.id}}" data-nihr_acknowledgement_id="{{ n.id }}">{{ n.name }}</a>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col">
-                                        <h3>Funding Sponsors</h3>
-                                        <ul class="list-group">
-                                            {% for s in p.sponsors %}
-                                                <li class="list-group-item {% if s.is_nihr %} list-group-item-success{% endif %}">{{ s.name }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                    <div class="col">
-                                        <h3>Funding text</h3>
-                                        {{ p.funding_text | blank_if_none | paragraphs }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {{ render_publication_title(p) }}
+                {{ render_publication_authors(p) }}
+                {{ render_publication_attributes(p, current_user, nihr_acknowledgements) }}
+                {{ render_publication_funding(p) }}
             </li>
         {% endfor %}
     </ul>

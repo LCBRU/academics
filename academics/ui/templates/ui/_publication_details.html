@@ -1,0 +1,182 @@
+{% macro render_publication_title(publication) %}
+<div class='row'>
+    <div class="col-7">
+        <h3>{{publication.title}}</h3>
+    </div>
+    <div class="col-5">
+        <div class="btn-toolbar float-right">
+            <div class="btn-group mr-1 mb-1" role="group">
+                <a href="{{ publication.href }}" class="btn btn-primary" target="_blank" title="View on Scopus"><i class="fas fa-external-link-square-alt"></i></a>
+            </div>
+
+            {% if publication.doi %}
+                <div class="btn-group mr-1 mb-1" role="group">
+                    <a href="http://doi.org/{{ publication.doi }}" class="btn btn-primary" target="_blank" title="View publication"><i class="fas fa-file-alt"></i></a>
+                </div>
+                <div class="btn-group mr-1 mb-1" role="group">
+                    <a href="https://google.com/search?q={{ publication.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro render_publication_authors(publication) %}
+<h4>
+    <ol class="author_list">
+        {% for a in publication.authors %}
+            {% set cls = 'not_academic' %}
+
+            {% if a.has_left_brc %}
+                <li class="text-danger">{{ a.full_name }}</li>
+            {% elif a.is_academic %}
+                <li class="is_academic">
+                    <a href="{{ url_for('ui.publications', academic_id=a.academic_id ) }}">{{ a.full_name }}</a>
+                </li>
+            {% else %}
+                <li class="not_academic">{{ a.full_name }}</li>
+            {% endif %}
+        {% endfor%}
+    </ol>
+    {% if publication.all_academics_left_brc %}
+        <div class="text-danger">All authors have left the BRC</div>
+    {% endif %}
+</h4>
+{% endmacro %}
+
+
+{% macro render_publication_attributes(publication, current_user, nihr_acknowledgements) %}
+<dl class="publication_details">
+    <div>
+        <dt>DOI</dt>
+        <dd><a href="http://doi.org/{{ publication.doi }}">{{publication.doi | blank_if_none}}</a></dd>
+    </div>
+
+    <div>
+        <dt>Journal</dt>
+        <dd><a href="{{ url_for('ui.publications', journal_id=publication.journal_id ) }}">{{publication.journal.name | blank_if_none | title_case}}</a> ({{publication.publication_cover_date | date_format}}{{publication.issue_volume | blank_if_none}}{{publication.pp | blank_if_none}})</dd>
+    </div>
+
+    <div>
+        <dt>Type</dt>
+        <dd>{{ publication.subtype.description | blank_if_none }}</dd>
+    </div>
+
+    <div>
+        <dt>Citations</dt>
+        <dd>{{ publication.cited_by_count | blank_if_none }}</dd>
+    </div>
+
+    <div>
+        <dt>Open Access</dt>
+        <dd>
+            {% if publication.is_open_access %}
+                <i class="fas fa-check"></i>
+            {% else %}
+                <i class="fas fa-question"></i>
+            {% endif %}
+        </dd>
+    </div>
+
+    <div>
+        <dt>Acknowledgement</dt>
+        <dd>
+            {% if current_user.has_role('validator') %}
+                <div class="btn-toolbar">
+                    <div class="btn-group mr-1 mb-1" role="group">
+                        {% set cls = 'btn-info' %}
+                        {% if publication.nihr_acknowledgement.name | default_if_none('Unvalidated') == 'Unvalidated' %}
+                            {% set cls = 'btn-primary' %}
+                        {% endif %}
+                        <button id="btnGroupAcknowledgement_{{publication.id}}" type="button" class="btn {{cls}} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{publication.id}}">
+                            <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="-1">Unvalidated</a>
+                            {% for n in nihr_acknowledgements %}
+                                <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="{{ n.id }}">{{ n.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
+            {% endif %}
+        </dd>
+    </div>
+</dl>
+{% endmacro %}
+
+
+{% macro render_publication_funding(publication) %}
+{% if publication.abstract %}
+<div class="acordian">
+    <h3 class="text-left collapsed" type="button" data-toggle="collapse" data-target="#funding_{{publication.id}}">Funding</h3>
+</div>
+<div id="funding_{{publication.id}}" class="collapse row">
+    <div class="col">
+        <h3>Sponsors</h3>
+        <ul class="list-group">
+            {% for s in publication.sponsors %}
+                <li class="list-group-item {% if s.is_nihr %} list-group-item-success{% endif %}">{{ s.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col">
+        <h3>Funding text</h3>
+        {{ publication.funding_text | blank_if_none | paragraphs }}
+    </div>
+</div>
+{% endif%}
+{% endmacro %}
+
+
+{% macro render_publication_abstract(publication) %}
+    {% if publication.abstract %}
+        <div class="acordian">
+            <h3 class="text-left collapsed" type="button" data-toggle="collapse" data-target="#abstract_{{publication.id}}">Abstract</h3>
+        </div>
+        <div id="abstract_{{publication.id}}" class="collapse">{{publication.abstract | blank_if_none}}</div>
+    {% endif%}
+{% endmacro %}
+
+
+{% macro render_publication_keywords(publication) %}
+    {% if publication.keywords | length > 0 %}
+        <h3>Keywords</h3>
+        <div>
+            {% for k in publication.keywords | sort(attribute='keyword')%}
+                <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1"><i class="fas fa-key"></i> {{ k.keyword }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro render_publication_folders(publication, folders) %}
+    {% if folders | length > 0 %}
+        <h3>Folders</h3>
+        {% for f in publication.folders | sort(attribute='name')%}
+            <div class="btn-group mr-1 mb-1" role="group">
+                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ f.name }}</button>
+                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                    <a class="dropdown-item" href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications in this folder</a>
+                    <a class="dropdown-item" href="javascript://" data-folder-id="{{f.id}}" onclick="folder_remove_publication()" data-scopus-publication-id="{{publication.id}}">Remove</a>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if folders | reject('in', publication.folders) | list | length > 0 %}
+            <div class="btn-group mr-1 mb-1" role="group">
+                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
+                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                    {% for f in folders | reject('in', publication.folders) | sort(attribute='name') %}
+                        <a class="dropdown-item" href="javascript://" data-folder-id="{{f.id}}" onclick="folder_add_publication()" data-scopus-publication-id="{{publication.id}}">Add to '{{f.name}}' folder</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endmacro %}
