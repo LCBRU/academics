@@ -125,6 +125,9 @@ def _get_author_datas(authors):
 
 
 def _get_id_from_href(href):
+    if not href:
+        return None
+
     if not '/' in href:
         return href
     
