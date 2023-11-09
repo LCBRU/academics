@@ -84,12 +84,9 @@ def get_open_alex_author_data(identifier):
         logging.info('OpenAlex Not Enabled')
         return None
 
-    authors = {
-        _get_id_from_href(a.get('id', '')): a
-        for a in _get_for_open_alex_id(identifier)
-    }
+    author = Authors()[identifier]
 
-    results = _get_author_datas(authors.values())
+    results = _get_author_datas([author])
 
     return next(results, None)
 
@@ -133,13 +130,6 @@ def _get_id_from_href(href):
     
     _, result = href.rsplit('/', 1)
     return result
-
-
-def _get_for_open_alex_id(id):
-    logging.info(f'Getting OpenAlex authors for Open Alex ID: {id}')
-
-    q = Authors().filter(id=id)
-    return chain(*q.paginate(per_page=200))
 
 
 def _get_for_orcid(orcid):
