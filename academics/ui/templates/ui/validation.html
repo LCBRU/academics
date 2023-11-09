@@ -24,7 +24,7 @@
                 {{ render_publication_title(p) }}
                 {{ render_publication_authors(p) }}
                 {{ render_publication_attributes(p, current_user, nihr_acknowledgements) }}
-                {{ render_publication_funding(p) }}
+                {{ render_publication_funding(p, False) }}
             </li>
         {% endfor %}
     </ul>

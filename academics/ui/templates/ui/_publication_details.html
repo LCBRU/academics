@@ -110,33 +110,43 @@
 {% endmacro %}
 
 
-{% macro render_publication_funding(publication) %}
-{% if publication.abstract %}
-<div class="acordian">
-    <h3 class="text-left collapsed" type="button" data-toggle="collapse" data-target="#funding_{{publication.id}}">Funding</h3>
-</div>
-<div id="funding_{{publication.id}}" class="collapse row">
-    <div class="col">
-        <h3>Sponsors</h3>
-        <ul class="list-group">
-            {% for s in publication.sponsors %}
-                <li class="list-group-item {% if s.is_nihr %} list-group-item-success{% endif %}">{{ s.name }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="col">
-        <h3>Funding text</h3>
-        {{ publication.funding_text | blank_if_none | paragraphs }}
-    </div>
-</div>
-{% endif%}
+{% macro render_publication_funding(publication, collapsed=True) %}
+    {% if publication.abstract %}
+        <div class="acordian">
+            <button
+                type="button"
+                class="btn btn-light btn-sm btn-block {% if collapsed %}collapsed{% endif %}"
+                data-toggle="collapse"
+                data-target="#funding_{{publication.id}}"
+                ><h3>Funding</h3></button>
+        </div>
+        <div id="funding_{{publication.id}}" class="collapse{% if not collapsed %} show{% endif %} row">
+            <div class="col">
+                <h3>Sponsors</h3>
+                <ul class="list-group">
+                    {% for s in publication.sponsors %}
+                        <li class="list-group-item {% if s.is_nihr %} list-group-item-success{% endif %}">{{ s.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col">
+                <h3>Funding text</h3>
+                {{ publication.funding_text | blank_if_none | paragraphs }}
+            </div>
+        </div>
+    {% endif%}
 {% endmacro %}
 
 
 {% macro render_publication_abstract(publication) %}
     {% if publication.abstract %}
         <div class="acordian">
-            <h3 class="text-left collapsed" type="button" data-toggle="collapse" data-target="#abstract_{{publication.id}}">Abstract</h3>
+            <button
+                type="button"
+                class="btn btn-light btn-sm btn-block collapsed"
+                data-toggle="collapse"
+                data-target="#abstract_{{publication.id}}"
+                ><h3>Abstract</h3></button>
         </div>
         <div id="abstract_{{publication.id}}" class="collapse">{{publication.abstract | blank_if_none}}</div>
     {% endif%}
@@ -146,7 +156,12 @@
 {% macro render_publication_keywords(publication) %}
     {% if publication.keywords | length > 0 %}
         <div class="acordian">
-            <h3 class="text-left collapsed" type="button" data-toggle="collapse" data-target="#keywords_{{publication.id}}">Keywords</h3>
+            <button
+                type="button"
+                class="btn btn-outline-primary btn-sm btn-block collapsed"
+                data-toggle="collapse"
+                data-target="#keywords_{{publication.id}}"
+                ><h3>Keywords</h3></button>
         </div>
         <div id="keywords_{{publication.id}}" class="collapse">
             {% for k in publication.keywords | sort(attribute='keyword')%}

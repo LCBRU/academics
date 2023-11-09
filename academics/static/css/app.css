@@ -53,6 +53,14 @@ dl.publication_details > div {
     cursor: pointer;
 }
 
+.acordian {
+    margin-bottom: 1em;
+}
+
+.acordian h3 {
+    font-size: 1.2em;
+}
+
 .acordian h3::after {
     font-family: 'Font Awesome 5 Free';
     font-weight: 900;
@@ -60,10 +68,7 @@ dl.publication_details > div {
     margin-left: 1em;
 }
 
-.acordian h3.collapsed::after {
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
+.acordian .collapsed h3::after {
     content: "\f0d7";
-    margin-left: 1em;
 }
 
