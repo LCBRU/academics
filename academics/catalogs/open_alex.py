@@ -106,7 +106,7 @@ def _get_author_datas(authors):
             AuthorData(
                 catalog=OPEN_ALEX_CATALOG,
                 catalog_identifier=_get_id_from_href(a.get('id', '')),
-                orcid=a.get('orcid', None),
+                orcid=_get_id_from_href(a.get('orcid', None)),
                 display_name=a.get('display_name', ''),
                 initials='',
                 href=a.get('id', ''),
