@@ -88,7 +88,7 @@ def get_open_alex_author_data(identifier):
 
     results = _get_author_datas([author])
 
-    return next(results, None)
+    return next(iter(results), None)
 
 
 def _get_author_datas(authors):
