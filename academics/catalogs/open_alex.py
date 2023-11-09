@@ -60,23 +60,45 @@ def open_alex_similar_authors(academic: Academic):
 
     for o in academic.all_orcids():
         authors.update({
-            _get_open_alex_id_from_href(a.get('id', '')): a
+            _get_id_from_href(a.get('id', '')): a
             for a in _get_for_orcid(o)
         })
     for s in academic.all_scopus_ids():
         authors.update({
-            _get_open_alex_id_from_href(a.get('id', '')): a
+            _get_id_from_href(a.get('id', '')): a
             for a in _get_for_scopus_id(s)
         })
     authors.update({
-        _get_open_alex_id_from_href(a.get('id', '')): a
+        _get_id_from_href(a.get('id', '')): a
         for a in _get_for_name(academic.full_name)
     })
 
+    new_authors = [a for a in authors.values() if _get_id_from_href(a.get('id', '')) not in existing]
+
+    return _get_author_datas(new_authors)
+
+
+def get_open_alex_author_data(identifier):
+    if not current_app.config['OPEN_ALEX_ENABLED']:
+        print(current_app.config['OPEN_ALEX_ENABLED'])
+        logging.info('OpenAlex Not Enabled')
+        return None
+
+    authors = {
+        _get_id_from_href(a.get('id', '')): a
+        for a in _get_for_open_alex_id(identifier)
+    }
+
+    results = _get_author_datas(authors.values())
+
+    return next(results, None)
+
+
+def _get_author_datas(authors):
     result = []
 
-    for a in [a for a in authors.values() if _get_open_alex_id_from_href(a.get('id', '')) not in existing]:
-        institution_id = _get_open_alex_id_from_href((a.get('last_known_institution') or {}).get('id', ''))
+    for a in authors:
+        institution_id = _get_id_from_href((a.get('last_known_institution') or {}).get('id', ''))
 
         if institution_id:
             i = Institutions()[institution_id]
@@ -86,7 +108,7 @@ def open_alex_similar_authors(academic: Academic):
         result.append(
             AuthorData(
                 catalog=OPEN_ALEX_CATALOG,
-                catalog_identifier=_get_open_alex_id_from_href(a.get('id', '')),
+                catalog_identifier=_get_id_from_href(a.get('id', '')),
                 orcid=a.get('orcid', None),
                 display_name=a.get('display_name', ''),
                 initials='',
@@ -104,12 +126,20 @@ def open_alex_similar_authors(academic: Academic):
     return result
 
 
-def _get_open_alex_id_from_href(href):
+
+def _get_id_from_href(href):
     if not '/' in href:
         return href
     
     _, result = href.rsplit('/', 1)
     return result
+
+
+def _get_for_open_alex_id(id):
+    logging.info(f'Getting OpenAlex authors for Open Alex ID: {id}')
+
+    q = Authors().filter(id=id)
+    return chain(*q.paginate(per_page=200))
 
 
 def _get_for_orcid(orcid):
