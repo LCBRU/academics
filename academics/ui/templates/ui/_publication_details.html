@@ -145,8 +145,10 @@
 
 {% macro render_publication_keywords(publication) %}
     {% if publication.keywords | length > 0 %}
-        <h3>Keywords</h3>
-        <div>
+        <div class="acordian">
+            <h3 class="text-left collapsed" type="button" data-toggle="collapse" data-target="#keywords_{{publication.id}}">Keywords</h3>
+        </div>
+        <div id="keywords_{{publication.id}}" class="collapse">
             {% for k in publication.keywords | sort(attribute='keyword')%}
                 <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1"><i class="fas fa-key"></i> {{ k.keyword }}</a>
             {% endfor %}
