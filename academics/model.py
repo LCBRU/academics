@@ -563,16 +563,16 @@ class Publication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     validation_historic: Mapped[bool] = mapped_column(default=False)
 
-    auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), primary_key=True)
+    auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), primary_key=True, nullable=True)
     auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[auto_nihr_acknowledgement_id])
 
-    auto_nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True)
+    auto_nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True, nullable=True)
     auto_nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[auto_nihr_funded_open_access_id])
 
-    nihr_acknowledgement_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True)
+    nihr_acknowledgement_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True, nullable=True)
     nihr_acknowledgement: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
 
-    nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True)
+    nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True, nullable=True)
     nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
 
 
