@@ -1,10 +1,11 @@
+from datetime import date
 from typing import List
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 from lbrc_flask.security import User as BaseUser
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import ForeignKey, func, select
+from sqlalchemy import ForeignKey, String, UnicodeText, func, select
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
@@ -556,3 +557,48 @@ class Objective(db.Model, AuditMixin):
 
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme, backref=db.backref("objectives", cascade="all,delete"))
+
+
+class Publication(db.Model, AuditMixin):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    validation_historic: Mapped[bool] = mapped_column(default=False)
+
+    auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), primary_key=True)
+    auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[auto_nihr_acknowledgement_id])
+
+    auto_nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True)
+    auto_nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[auto_nihr_funded_open_access_id])
+
+    nihr_acknowledgement_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True)
+    nihr_acknowledgement: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
+
+    nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), primary_key=True)
+    nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
+
+
+class CatalogPublication(db.Model, AuditMixin):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    publication_id: Mapped[int] = mapped_column(ForeignKey(Source.id), primary_key=True)
+    catalog: Mapped[str] = mapped_column(String(50), index=True)
+    catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
+
+    doi: Mapped[str] = mapped_column(String(50), index=True)
+    title: Mapped[str] = mapped_column(String(1000))
+    publication_cover_date: Mapped[date]
+
+    pubmed_id: Mapped[str] = mapped_column(String(50), index=True)
+    abstract: Mapped[str] = mapped_column(UnicodeText)
+    author_list: Mapped[str] = mapped_column(UnicodeText)
+    volume: Mapped[str] = mapped_column(String(100))
+    issue: Mapped[str] = mapped_column(String(100))
+    pages: Mapped[str] = mapped_column(String(100))
+    funding_text: Mapped[str] = mapped_column(UnicodeText)
+    is_open_access: Mapped[bool]
+    cited_by_count: Mapped[int]
+    href: Mapped[str] = mapped_column(UnicodeText)
+
+    journal_id = mapped_column(ForeignKey(Journal.id), primary_key=True)
+    journal: Mapped[Journal] = relationship(lazy="joined")
+
+    subtype_id = mapped_column(ForeignKey(Subtype.id), primary_key=True)
+    subtype: Mapped[Subtype] = relationship(lazy="joined")
