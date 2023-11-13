@@ -582,7 +582,7 @@ class CatalogPublication(db.Model, AuditMixin):
     catalog: Mapped[str] = mapped_column(String(50), index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
 
-    doi: Mapped[str] = mapped_column(String(500), index=True)
+    doi: Mapped[str] = mapped_column(String(1000), index=True)
     title: Mapped[str] = mapped_column(String(1000))
     publication_cover_date: Mapped[date]
 
