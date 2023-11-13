@@ -5,7 +5,7 @@ from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 from lbrc_flask.security import User as BaseUser
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import ForeignKey, String, UnicodeText, func, select
+from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, func, select
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
@@ -593,7 +593,7 @@ class CatalogPublication(db.Model, AuditMixin):
     issue: Mapped[str] = mapped_column(String(100))
     pages: Mapped[str] = mapped_column(String(100))
     funding_text: Mapped[str] = mapped_column(UnicodeText)
-    is_open_access: Mapped[bool] = mapped_column(bool, nullable=True)
+    is_open_access: Mapped[bool] = mapped_column(Boolean, nullable=True)
     cited_by_count: Mapped[int] = mapped_column(UnicodeText, nullable=True)
     href: Mapped[str] = mapped_column(UnicodeText)
 
