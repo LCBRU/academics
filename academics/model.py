@@ -593,8 +593,8 @@ class CatalogPublication(db.Model, AuditMixin):
     issue: Mapped[str] = mapped_column(String(100))
     pages: Mapped[str] = mapped_column(String(100))
     funding_text: Mapped[str] = mapped_column(UnicodeText)
-    is_open_access: Mapped[bool]
-    cited_by_count: Mapped[int]
+    is_open_access: Mapped[bool] = mapped_column(bool, nullable=True)
+    cited_by_count: Mapped[int] = mapped_column(UnicodeText, nullable=True)
     href: Mapped[str] = mapped_column(UnicodeText)
 
     journal_id = mapped_column(ForeignKey(Journal.id), primary_key=True)
