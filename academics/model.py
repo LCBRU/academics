@@ -578,11 +578,11 @@ class Publication(db.Model, AuditMixin):
 
 class CatalogPublication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
-    publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id), primary_key=True)
+    publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id))
     catalog: Mapped[str] = mapped_column(String(50), index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
 
-    doi: Mapped[str] = mapped_column(String(50), index=True)
+    doi: Mapped[str] = mapped_column(String(500), index=True)
     title: Mapped[str] = mapped_column(String(1000))
     publication_cover_date: Mapped[date]
 
@@ -597,8 +597,8 @@ class CatalogPublication(db.Model, AuditMixin):
     cited_by_count: Mapped[int] = mapped_column(UnicodeText, nullable=True)
     href: Mapped[str] = mapped_column(UnicodeText)
 
-    journal_id = mapped_column(ForeignKey(Journal.id), primary_key=True)
+    journal_id = mapped_column(ForeignKey(Journal.id))
     journal: Mapped[Journal] = relationship(lazy="joined")
 
-    subtype_id = mapped_column(ForeignKey(Subtype.id), primary_key=True)
+    subtype_id = mapped_column(ForeignKey(Subtype.id))
     subtype: Mapped[Subtype] = relationship(lazy="joined")
