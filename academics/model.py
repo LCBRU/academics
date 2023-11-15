@@ -353,26 +353,6 @@ class NihrAcknowledgement(db.Model):
 
 class ScopusPublication(AuditMixin, CommonMixin, db.Model):
 
-    ACKNOWLEDGEMENT_UNKNOWN = 'unknown'
-    ACKNOWLEDGEMENT_ACKNOWLEDGED = 'acknowledged'
-    ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED = 'not_acknowledged'
-
-    ACKNOWLEDGEMENTS = {
-        ACKNOWLEDGEMENT_UNKNOWN: None,
-        ACKNOWLEDGEMENT_ACKNOWLEDGED: True,
-        ACKNOWLEDGEMENT_NOT_ACKNOWLEDGED: False,
-    }
-
-    OPEN_ACCESS_UNKNOWN = 'unknown'
-    OPEN_ACCESS_OPEN_ACCESS = 'open_access'
-    OPEN_ACCESS_NOT_OPEN_ACCESS = 'not_open_access'
-
-    OPEN_ACCESS = {
-        OPEN_ACCESS_UNKNOWN: None,
-        OPEN_ACCESS_OPEN_ACCESS: True,
-        OPEN_ACCESS_NOT_OPEN_ACCESS: False,
-    }
-
     id = db.Column(db.Integer, primary_key=True)
 
     sources = db.relationship("Source", secondary=sources__publications, backref=db.backref("scopus_publications"), lazy="joined")
