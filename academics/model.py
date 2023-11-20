@@ -539,6 +539,27 @@ class Objective(db.Model, AuditMixin):
     theme = db.relationship(Theme, backref=db.backref("objectives", cascade="all,delete"))
 
 
+# publications__keywords = db.Table(
+#     'publication__keyword',
+#     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+#     db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
+# )
+
+
+# folders__publications = db.Table(
+#     'folders__publications',
+#     db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
+#     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+# )
+
+
+# sponsors__publications = db.Table(
+#     'sponsors__publications',
+#     db.Column('sponsor_id', db.Integer(), db.ForeignKey('sponsor.id'), primary_key=True),
+#     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+# )
+
+
 class Publication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     validation_historic: Mapped[bool] = mapped_column(default=False, nullable=True)
@@ -555,10 +576,168 @@ class Publication(db.Model, AuditMixin):
     nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), nullable=True)
     nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
 
+    publication_sources = db.relationship(
+        "PublicationsSources",
+        order_by="PublicationsSources.ordinal",
+        collection_class=ordering_list('ordinal'),
+        cascade="delete, delete-orphan"
+    )
+
+    authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
+
+    @property
+    def scopus_catalog_publication(self):
+        return next([cp for cp in self.catalog_publications if cp.catalog == 'scopus'])
+
+    @property
+    def openalex_catalog_publication(self):
+        return next([cp for cp in self.catalog_publications if cp.catalog == 'open_alex'])
+
+    @property
+    def best_catalog_publication(self):
+        return self.scopus_catalog_publication or self.openalex_catalog_publication or None
+
+    @property
+    def catalog(self) -> str:
+        return self.best_catalog_publication.catalog
+
+    @property
+    def catalog_id(self) -> str:
+        return self.best_catalog_publication.catalog_id
+
+    @property
+    def doi(self) -> str:
+        return self.best_catalog_publication.doi
+
+    @property
+    def title(self) -> str:
+        return self.best_catalog_publication.title
+
+    @property
+    def publication_cover_date(self) -> date:
+        return self.best_catalog_publication.publication_cover_date
+
+    @property
+    def pubmed_id(self) -> str:
+        return self.best_catalog_publication.pubmed_id
+
+    @property
+    def pii(self) -> str:
+        return self.best_catalog_publication.pii
+
+    @property
+    def abstract(self) -> str:
+        return self.best_catalog_publication.abstract
+
+    @property
+    def author_list(self) -> str:
+        return self.best_catalog_publication.author_list
+
+    @property
+    def volume(self) -> str:
+        return self.best_catalog_publication.volume
+
+    @property
+    def issue(self) -> str:
+        return self.best_catalog_publication.issue
+
+    @property
+    def pages(self) -> str:
+        return self.best_catalog_publication.pages
+
+    @property
+    def funding_text(self) -> str:
+        return self.best_catalog_publication.funding_text
+
+    @property
+    def is_open_access(self) -> bool:
+        return self.best_catalog_publication.is_open_access
+
+    @property
+    def cited_by_count(self) -> int:
+        return self.best_catalog_publication.cited_by_count
+
+    @property
+    def href(self) -> str:
+        return self.best_catalog_publication.href
+
+    @property
+    def journal_id(self) -> int:
+        return self.best_catalog_publication.journal_id
+
+    @property
+    def journal(self) -> Journal:
+        return self.best_catalog_publication.journal
+
+    @property
+    def subtype_id(self) -> int:
+        return self.best_catalog_publication.subtype_id
+
+    @property
+    def subtype(self) -> Subtype:
+        return self.best_catalog_publication.subtype
+
+    @property
+    def issue_volume(self):
+        return '/'.join(filter(None, [self.issue, self.volume]))
+
+    @property
+    def pp(self):
+        if self.pages:
+            return f'pp{self.pages}'
+        else:
+            return ''
+
+    @property
+    def vancouverish(self):
+        authors = (self.author_list or '').split(',')
+
+        author_list = ', '.join(authors[0:6])
+
+        if len(authors) > 6:
+            author_list = f'{author_list}, et al'
+
+        parts = []
+
+        parts.append(author_list)
+        parts.append(self.title)
+        
+        if self.journal:
+            parts.append(self.journal.name)
+        
+        parts.append(f'({self.publication_cover_date:%B %y}{self.issue_volume}{self.pp})')
+
+        return '. '.join(parts)
+
+    # keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
+    # folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
+    # sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__scopus_publications, back_populates="publications", collection_class=set)
+
+    @property
+    def folder_ids(self):
+        return ','.join([str(f.id) for f in self.folders])
+
+    @property
+    def academics(self):
+        return {a.academic for a in self.sources}
+
+    @property
+    def is_nihr_acknowledged(self):
+        return any([s.is_nihr for s in self.sponsors])
+
+    @property
+    def all_nihr_acknowledged(self):
+        return len(self.sponsors) > 0 and all([s.is_nihr for s in self.sponsors])
+
+    @property
+    def all_academics_left_brc(self):
+        return all(a.has_left_brc for a in self.academics)
+
 
 class CatalogPublication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id))
+    publication: Mapped[Publication] = relationship(lazy="joined", backref=backref("catalog_publications", lazy="joined"))
     catalog: Mapped[str] = mapped_column(String(50), index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
 
@@ -582,3 +761,12 @@ class CatalogPublication(db.Model, AuditMixin):
 
     subtype_id = mapped_column(ForeignKey(Subtype.id))
     subtype: Mapped[Subtype] = relationship(lazy="joined")
+
+
+class PublicationsSources(db.Model):
+    publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id), primary_key=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), primary_key=True)
+    ordinal: Mapped[int] = mapped_column(primary_key=True)
+
+    publication: Mapped[Publication] = relationship()
+    source: Mapped[Source] = relationship()
