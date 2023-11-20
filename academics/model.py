@@ -102,8 +102,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     @property
     def publication_count(self):
         q =  (
-            select(func.count(ScopusPublication.id))
-            .where(ScopusPublication.sources.any(Source.academic_id == self.id))
+            select(func.count(Publication.id))
+            .where(Publication.sources.any(Source.academic_id == self.id))
         )
 
         return db.session.execute(q).scalar()
