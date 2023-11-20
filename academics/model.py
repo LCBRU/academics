@@ -558,7 +558,7 @@ class Folder(db.Model):
 
     @property
     def publication_count(self):
-        return ScopusPublication.query.filter(ScopusPublication.folders.any(Folder.id == self.id)).count()
+        return Publication.query.filter(Publication.folders.any(Folder.id == self.id)).count()
 
 
 class Objective(db.Model, AuditMixin):
