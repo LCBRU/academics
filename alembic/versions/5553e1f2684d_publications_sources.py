@@ -25,9 +25,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['source_id'], ['source.id'], ),
     sa.PrimaryKeyConstraint('publication_id', 'source_id', 'ordinal')
     )
-    op.create_index(op.f('ix_catalog_publication_doi'), 'catalog_publication', ['doi'], unique=False)
 
 
 def downgrade() -> None:
-    op.drop_index(op.f('ix_catalog_publication_doi'), table_name='catalog_publication')
     op.drop_table('publications_sources')
