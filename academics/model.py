@@ -586,6 +586,7 @@ class Publication(db.Model, AuditMixin):
     nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), nullable=True)
     nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
 
+    sources = db.relationship("Source", secondary=sources__publicationses, backref=db.backref("publications"), lazy="joined")
     publication_sources = db.relationship(
         "PublicationsSources",
         order_by="PublicationsSources.ordinal",
