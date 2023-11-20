@@ -291,6 +291,13 @@ sponsors__publications = db.Table(
 )
 
 
+sources__publicationses = db.Table(
+    'sources__publicationses',
+    db.Column('source_id', db.Integer(), db.ForeignKey('source.id'), primary_key=True),
+    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+)
+
+
 class Subtype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(1000))
