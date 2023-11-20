@@ -270,6 +270,27 @@ sponsors__scopus_publications = db.Table(
 )
 
 
+publications__keywords = db.Table(
+    'publication__keyword',
+    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+    db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
+)
+
+
+folders__publications = db.Table(
+    'folders__publications',
+    db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
+    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+)
+
+
+sponsors__publications = db.Table(
+    'sponsors__publications',
+    db.Column('sponsor_id', db.Integer(), db.ForeignKey('sponsor.id'), primary_key=True),
+    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+)
+
+
 class Subtype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(1000))
@@ -291,6 +312,7 @@ class Sponsor(db.Model):
     name = db.Column(db.String(255))
 
     publications = db.relationship("ScopusPublication", secondary=sponsors__scopus_publications, back_populates="sponsors", collection_class=set)
+    publicationses = db.relationship("Publication", secondary=sponsors__publications, back_populates="sponsors", collection_class=set)
 
     @property
     def is_nihr(self):
@@ -506,6 +528,7 @@ class Keyword(db.Model):
     keyword = db.Column(db.String(1000))
 
     publications = db.relationship("ScopusPublication", secondary=scopus_publications__keywords, back_populates="keywords", collection_class=set)
+    publicationses = db.relationship("Publication", secondary=publications__keywords, back_populates="keywords", collection_class=set)
 
 
 folders__shared_users = db.Table(
@@ -523,6 +546,7 @@ class Folder(db.Model):
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
 
     publications = db.relationship("ScopusPublication", secondary=folders__scopus_publications, back_populates="folders", collection_class=set)
+    publicationses = db.relationship("Publication", secondary=folders__publications, back_populates="folders", collection_class=set)
     shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set)
 
     @property
@@ -537,27 +561,6 @@ class Objective(db.Model, AuditMixin):
 
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme, backref=db.backref("objectives", cascade="all,delete"))
-
-
-# publications__keywords = db.Table(
-#     'publication__keyword',
-#     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
-#     db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
-# )
-
-
-# folders__publications = db.Table(
-#     'folders__publications',
-#     db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
-#     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
-# )
-
-
-# sponsors__publications = db.Table(
-#     'sponsors__publications',
-#     db.Column('sponsor_id', db.Integer(), db.ForeignKey('sponsor.id'), primary_key=True),
-#     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
-# )
 
 
 class Publication(db.Model, AuditMixin):
@@ -584,6 +587,10 @@ class Publication(db.Model, AuditMixin):
     )
 
     authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
+
+    keywords = db.relationship("Keyword", lazy="joined", secondary=publications__keywords, back_populates="publicationses", collection_class=set)
+    folders = db.relationship("Folder", lazy="joined", secondary=folders__publications, back_populates="publicationses", collection_class=set)
+    sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__publications, back_populates="publicationses", collection_class=set)
 
     @property
     def scopus_catalog_publication(self):
@@ -708,10 +715,6 @@ class Publication(db.Model, AuditMixin):
         parts.append(f'({self.publication_cover_date:%B %y}{self.issue_volume}{self.pp})')
 
         return '. '.join(parts)
-
-    # keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
-    # folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
-    # sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__scopus_publications, back_populates="publications", collection_class=set)
 
     @property
     def folder_ids(self):
