@@ -21,7 +21,7 @@ def updating():
 
 
 def auto_validate():
-    form = PublicationSearchForm()
+    form = PublicationSearchForm(meta={'csrf': False})
     form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     form.supress_validation_historic.data = False
     form.nihr_acknowledgement_ids.data = -1
