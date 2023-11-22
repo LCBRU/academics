@@ -164,7 +164,7 @@ def update_source(s):
             if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
                 publications = get_scopus_publications(s.source_identifier)
 
-            add_publications(publications, s)
+            add_publications(publications)
 
         s.last_fetched_datetime = datetime.utcnow()
     except Exception as e:
@@ -272,7 +272,7 @@ def delete_orphan_publications():
         db.session.commit()
 
 
-def add_publications(publication_datas, source):
+def add_publications(publication_datas):
     logging.info('add_publications: started')
 
     for p in publication_datas:
@@ -294,15 +294,15 @@ def add_publications(publication_datas, source):
         cat_pub.journal = _get_journal(p.journal_name)
         cat_pub.publication_cover_date = p.publication_cover_date
         cat_pub.href = p.href
-        cat_pub.abstract = p.abstract_text
-        cat_pub.volume = p.volume
-        cat_pub.issue = p.issue
-        cat_pub.pages = p.pages
+        cat_pub.abstract = p.abstract_text or ''
+        cat_pub.volume = p.volume or ''
+        cat_pub.issue = p.issue or ''
+        cat_pub.pages = p.pages or ''
         cat_pub.is_open_access = p.is_open_access
         cat_pub.subtype = _get_subtype(p.subtype_code, p.subtype_description)
         cat_pub.funding_acr = _get_funding_acr(p.funding_acronym)
         cat_pub.cited_by_count = p.cited_by_count
-        cat_pub.author_list = p.author_list
+        cat_pub.author_list = p.author_list or ''
 
         if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             pub.validation_historic = True
