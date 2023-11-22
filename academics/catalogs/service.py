@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationSource, ScopusAuthor, ScopusPublication, Source, Subtype
+from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationSource, PublicationsSources, ScopusAuthor, Source, Subtype
 from lbrc_flask.celery import celery
 from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
@@ -308,7 +308,7 @@ def add_publications(publication_datas, source):
             pub.validation_historic = True
 
         new_sources  = [
-            PublicationSource(
+            PublicationsSources(
                 source=_get_or_create_source(a),
                 publication=pub
             ) 
