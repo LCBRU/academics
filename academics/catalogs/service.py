@@ -7,7 +7,7 @@ from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsor
 from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationSource, PublicationsSources, ScopusAuthor, Source, Subtype
 from lbrc_flask.celery import celery
 
-from academics.publication_searching import PublicationSearchForm, publication_search_query
+from academics.publication_searching import ValidationSearchForm, publication_search_query
 from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
@@ -21,10 +21,10 @@ def updating():
 
 
 def auto_validate():
-    form = PublicationSearchForm(meta={'csrf': False})
+    form = ValidationSearchForm(meta={'csrf': False})
     form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     form.supress_validation_historic.data = False
-    form.nihr_acknowledgement_ids.data = -1
+    form.nihr_acknowledgement_id.data = -1
 
     q = publication_search_query(form)
 
