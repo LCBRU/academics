@@ -341,7 +341,7 @@ def _get_or_create_publication(p):
     if result:
         return
     else:
-        Publication()
+        return Publication()
 
 
 def _get_or_create_catalog_publication(p):
@@ -356,9 +356,9 @@ def _get_or_create_catalog_publication(p):
     result = db.session.execute(q).scalar()
 
     if result:
-        return
+        return result
     else:
-        CatalogPublication(
+        return CatalogPublication(
             catalog=p.catalog,
             catalog_identifier=p.catalog_identifier,
         )
