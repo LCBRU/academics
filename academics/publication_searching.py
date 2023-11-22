@@ -111,34 +111,11 @@ class ValidationSearchForm(SearchForm):
         self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
-def best_catalog_publications():
-    catalog_publications = (
-        select(
-            CatalogPublication.id.label('id'),
-            CatalogPublication.publication_id.label('publication_id'),
-            func.row_number().over(partition_by=CatalogPublication.id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
-        )
-    ).alias()
-
-    return (
-        select(
-            catalog_publications.c.id,
-            catalog_publications.c.publication_id,
-        )
-        .select_from(catalog_publications)
-        .where(catalog_publications.c.priority == 1)
-    ).alias()
-
-
 def publication_search_query(search_form):
     logging.info(f'publication_search_query started')
 
-    bcp = best_catalog_publications()
-
     q = select(Publication).join(
-        bcp, bcp.c.id == Publication.id
-    ).join(
-        CatalogPublication, CatalogPublication.id == bcp.c.publication_id
+        CatalogPublication, CatalogPublication.publication_id == Publication.id and CatalogPublication.is_main == True
     )
 
     if search_form.has_value('author_id'):
