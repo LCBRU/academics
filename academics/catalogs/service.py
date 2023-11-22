@@ -6,6 +6,8 @@ from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_si
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
 from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationSource, PublicationsSources, ScopusAuthor, Source, Subtype
 from lbrc_flask.celery import celery
+
+from academics.publication_searching import PublicationSearchForm, publication_search_query
 from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
@@ -19,16 +21,12 @@ def updating():
 
 
 def auto_validate():
-    q = Publication.query
-    q = q.filter(and_(
-            Publication.nihr_acknowledgement_id == None,
-            Publication.nihr_funded_open_access_id == None,
-        ))
-    q = q.filter(or_(
-            Publication.validation_historic == False,
-            Publication.validation_historic == None,
-        ))
-    q = q.filter(Publication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
+    form = PublicationSearchForm()
+    form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
+    form.supress_validation_historic.data = False
+    form.nihr_acknowledgement_ids.data = -1
+
+    q = publication_search_query(form)
 
     amended_count = 0
 
