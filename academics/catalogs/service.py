@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, PublicationSource, ScopusAuthor, ScopusPublication, Source, Subtype
+from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationSource, ScopusAuthor, ScopusPublication, Source, Subtype
 from lbrc_flask.celery import celery
 from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
@@ -19,16 +19,16 @@ def updating():
 
 
 def auto_validate():
-    q = ScopusPublication.query
+    q = Publication.query
     q = q.filter(and_(
-            ScopusPublication.nihr_acknowledgement_id == None,
-            ScopusPublication.nihr_funded_open_access_id == None,
+            Publication.nihr_acknowledgement_id == None,
+            Publication.nihr_funded_open_access_id == None,
         ))
     q = q.filter(or_(
-            ScopusPublication.validation_historic == False,
-            ScopusPublication.validation_historic == None,
+            Publication.validation_historic == False,
+            Publication.validation_historic == None,
         ))
-    q = q.filter(ScopusPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
+    q = q.filter(Publication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
 
     amended_count = 0
 
@@ -267,7 +267,7 @@ def add_sources_to_academic(source_identifiers, academic_id=None, theme_id=None)
 
 
 def delete_orphan_publications():
-    for p in ScopusPublication.query.filter(~ScopusPublication.sources.any()):
+    for p in Publication.query.filter(~Publication.sources.any()):
         db.session.delete(p)
         db.session.commit()
 
@@ -276,55 +276,92 @@ def add_publications(publication_datas, source):
     logging.info('add_publications: started')
 
     for p in publication_datas:
-        publication = ScopusPublication.query.filter(ScopusPublication.scopus_id == p.catalog_identifier).one_or_none()
+        pub = _get_or_create_publication(p)
+        cat_pub = _get_or_create_catalog_publication(p)
 
-        if not publication:
-            publication = ScopusPublication(scopus_id=p.catalog_identifier)
-            publication.funding_text = p.abstract.funding_text
-            _add_sponsors_to_publications(
-                publication=publication,
-                sponsor_names=p.abstract.funding_list,
-            )
+        cat_pub.publication = pub
 
-        db.session.add(publication)
+        _add_sponsors_to_publications(
+            publication=pub,
+            sponsor_names=p.abstract.funding_list,
+        )
 
-        publication.doi = p.doi
-        publication.title = p.title
-        publication.journal = _get_journal(p.journal_name)
-        publication.publication_cover_date = p.publication_cover_date
-        publication.href = p.href
-        publication.abstract = p.abstract_text
-        publication.volume = p.volume
-        publication.issue = p.issue
-        publication.pages = p.pages
-        publication.is_open_access = p.is_open_access
-        publication.subtype = _get_subtype(p.subtype_code, p.subtype_description)
-        publication.sponsor = _get_sponsor(p.sponsor_name)
-        publication.funding_acr = _get_funding_acr(p.funding_acronym)
-        publication.cited_by_count = p.cited_by_count
-        publication.author_list = p.author_list
+        db.session.add(pub)
+        db.session.add(cat_pub)
 
-        if publication.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
-            publication.validation_historic = True
+        cat_pub.doi = p.doi
+        cat_pub.title = p.title
+        cat_pub.journal = _get_journal(p.journal_name)
+        cat_pub.publication_cover_date = p.publication_cover_date
+        cat_pub.href = p.href
+        cat_pub.abstract = p.abstract_text
+        cat_pub.volume = p.volume
+        cat_pub.issue = p.issue
+        cat_pub.pages = p.pages
+        cat_pub.is_open_access = p.is_open_access
+        cat_pub.subtype = _get_subtype(p.subtype_code, p.subtype_description)
+        cat_pub.funding_acr = _get_funding_acr(p.funding_acronym)
+        cat_pub.cited_by_count = p.cited_by_count
+        cat_pub.author_list = p.author_list
 
-        if source not in publication.sources:
-            publication.sources.append(source)
+        if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
+            pub.validation_historic = True
 
         new_sources  = [
             PublicationSource(
                 source=_get_or_create_source(a),
-                publication=publication
+                publication=pub
             ) 
             for a in p.authors
         ]
 
-        publication.publication_sources = new_sources
+        pub.publication_sources = new_sources
 
         db.session.add_all(new_sources)
 
-        _add_keywords_to_publications(publication=publication, keyword_list=p.keywords)
+        _add_keywords_to_publications(publication=pub, keyword_list=p.keywords)
 
     logging.info('add_publications: ended')
+
+
+def _get_or_create_publication(p):
+    q = (
+        select(Publication)
+        .join(Publication.catalog_publications)
+        .where(or_(
+            CatalogPublication.doi == p.doi,
+            and_(
+                CatalogPublication.catalog == p.catalog,
+                CatalogPublication.catalog_identifier == p.catalog_identifier,
+            )
+        ))).distinct()
+    
+    result = db.session.execute(q).scalar()
+
+    if result:
+        return
+    else:
+        Publication()
+
+
+def _get_or_create_catalog_publication(p):
+    q = (
+        select(CatalogPublication)
+        .where(and_(
+                CatalogPublication.catalog == p.catalog,
+                CatalogPublication.catalog_identifier == p.catalog_identifier,
+            )
+        )).distinct()
+    
+    result = db.session.execute(q).scalar()
+
+    if result:
+        return
+    else:
+        CatalogPublication(
+            catalog=p.catalog,
+            catalog_identifier=p.catalog_identifier,
+        )
 
 
 def _get_or_create_source(author_data):

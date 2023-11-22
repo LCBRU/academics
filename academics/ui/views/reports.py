@@ -7,7 +7,7 @@ from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 from lbrc_flask.export import csv_download
 from sqlalchemy import select
 
-from academics.model import Academic, ScopusPublication, Source
+from academics.model import Academic, Publication, Source
 from academics.publication_searching import nihr_acknowledgement_select_choices, publication_count, publication_search_query, publication_summary, theme_select_choices
 
 from .. import blueprint
@@ -53,9 +53,9 @@ def get_report_defs(search_form):
             .select_from(
                 publications
             ).join(
-                ScopusPublication, ScopusPublication.id == publications.c.id
+                Publication, Publication.id == publications.c.id
             ).join(
-                ScopusPublication.sources
+                Publication.sources
             ).join(
                 Source.academic
             )

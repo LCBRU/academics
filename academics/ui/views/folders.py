@@ -3,7 +3,7 @@ from flask import jsonify, redirect, render_template, request
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from sqlalchemy import or_
-from academics.model import Folder, ScopusPublication, User
+from academics.model import Folder, Publication, User
 from academics.ui.views.decorators import assert_folder_user
 from .. import blueprint
 from wtforms import HiddenField, StringField
@@ -104,7 +104,7 @@ def folder_delete():
 })
 @assert_folder_user()
 def folder_remove_publication():
-    p = db.get_or_404(ScopusPublication, request.json.get('scopus_publication_id'))
+    p = db.get_or_404(Publication, request.json.get('publication_id'))
     f = db.get_or_404(Folder, request.json.get('folder_id'))
 
     f.publications.remove(p)
@@ -126,7 +126,7 @@ def folder_remove_publication():
 })
 @assert_folder_user()
 def folder_add_publication():
-    p = db.get_or_404(ScopusPublication, request.json.get('scopus_publication_id'))
+    p = db.get_or_404(Publication, request.json.get('publication_id'))
     f = db.get_or_404(Folder, request.json.get('folder_id'))
 
     f.publications.add(p)
