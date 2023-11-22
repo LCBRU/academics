@@ -11,9 +11,9 @@ from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import or_
 from wtforms import HiddenField
 
-from academics.model import (Folder, Journal, Keyword,
-                             NihrAcknowledgement, ScopusAuthor,
-                             ScopusPublication, Subtype, Theme, User)
+from academics.model import (CatalogPublication, Folder, Journal, Keyword,
+                             NihrAcknowledgement, Publication, ScopusAuthor,
+                             Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
 
@@ -21,7 +21,7 @@ from .. import blueprint
 
 
 class PublicationFolderForm(FlashingForm):
-    scopus_publication_id = HiddenField('scopus_publication_id')
+    publication_id = HiddenField('publication_id')
     folder_ids = MultiCheckboxField('Folders', coerce=int)
 
     def __init__(self, **kwargs):
@@ -36,7 +36,7 @@ def publications():
     
     q = publication_search_query(search_form)
 
-    q = q.order_by(ScopusPublication.publication_cover_date.desc())
+    q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     publications = db.paginate(
         select=q,
@@ -73,7 +73,7 @@ def validation():
     
     q = publication_search_query(search_form)
 
-    q = q.order_by(ScopusPublication.publication_cover_date.asc())
+    q = q.order_by(CatalogPublication.publication_cover_date.asc())
 
     publications = db.paginate(
         select=q,
@@ -99,7 +99,7 @@ def validation():
     "required": ["id"]
 })
 def publication_folders():
-    publication = db.get_or_404(ScopusPublication, request.json.get('id'))
+    publication = db.get_or_404(Publication, request.json.get('id'))
 
     folder_query = Folder.query.filter(or_(
         Folder.owner_id == current_user_id(),
@@ -139,10 +139,10 @@ def publication_full_export_xlsx():
     
     q = publication_search_query(search_form)
 
-    q = q.order_by(ScopusPublication.publication_cover_date.desc())
+    q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     publication_details = ({
-        'scopus_id': p.scopus_id,
+        'catalog_id': p.catalog_id,
         'doi': p.doi,
         'pubmed_id': p.pubmed_id,
         'journal': p.journal.name if p.journal else '',
@@ -174,7 +174,7 @@ def publication_full_annual_report_xlsx():
     
     q = publication_search_query(search_form)
 
-    q = q.order_by(ScopusPublication.publication_cover_date.desc())
+    q = q.order_by(Publication.publication_cover_date.desc())
 
     publication_details = ({
         'Publication Reference': p.vancouverish,
@@ -208,7 +208,7 @@ def publication_export_pdf():
     if publication_end_date:
         parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 
-    publications = list(db.session.execute(q.order_by(ScopusPublication.publication_cover_date.desc())).unique().scalars())
+    publications = list(db.session.execute(q.order_by(CatalogPublication.publication_cover_date.desc())).unique().scalars())
 
     if len(publications) > 100:
         abort(413)
@@ -232,7 +232,7 @@ def publication_export_pdf():
 })
 @roles_accepted('validator')
 def publication_nihr_acknowledgement():
-    p = db.get_or_404(ScopusPublication, request.json.get('id'))
+    p = db.get_or_404(Publication, request.json.get('id'))
 
     if request.json.get('nihr_acknowledgement_id') == -1:
         p.nihr_acknowledgement = None

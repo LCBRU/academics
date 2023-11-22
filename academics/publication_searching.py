@@ -234,7 +234,7 @@ def get_publication_by_theme(search_form):
     publications = publication_search_query(search_form).alias()
 
     pub_themes = select(
-        publications.c.id.label('scopus_publication_id'),
+        publications.c.id.label('publication_id'),
         Theme.name.label('bucket')
     ).join(
         Publication, Publication.id == publications.c.id
@@ -252,10 +252,10 @@ def get_publication_by_theme(search_form):
     pub_themes = pub_themes.cte('pubs')
 
     multi_theme = select(
-        pub_themes.c.scopus_publication_id,
+        pub_themes.c.publication_id,
         func.group_concat(pub_themes.c.bucket.distinct().op('ORDER BY pubs.bucket SEPARATOR')(literal_column('" / "'))).label("bucket")
     ).group_by(
-        pub_themes.c.scopus_publication_id
+        pub_themes.c.publication_id
     ).having(func.count() > 1)
 
     return multi_theme.union_all(
@@ -267,7 +267,7 @@ def get_publication_by_academic(search_form):
     publications = publication_search_query(search_form).alias()
 
     q = select(
-        publications.c.id.label('scopus_publication_id'),
+        publications.c.id.label('publication_id'),
         func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
     ).join(
         Publication, Publication.id == publications.c.id
@@ -290,7 +290,7 @@ def get_publication_by_brc(search_form):
     publications = publication_search_query(search_form).alias()
 
     return select(
-        publications.c.id.label('scopus_publication_id'),
+        publications.c.id.label('publication_id'),
         literal('brc').label('bucket')
     ).cte()
 
@@ -313,7 +313,7 @@ def by_acknowledge_status(publications):
             q_total.c.total_count
         )
         .select_from(Publication)
-        .join(publications, publications.c.scopus_publication_id == Publication.id)
+        .join(publications, publications.c.publication_id == Publication.id)
         .join(NihrAcknowledgement, NihrAcknowledgement.id == Publication.nihr_acknowledgement_id, isouter=True)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
