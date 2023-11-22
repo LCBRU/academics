@@ -217,7 +217,7 @@ for p in [
         'publication_cover_date': '2023-01-16',
     },
 ]:
-    sp = ScopusPublication(
+    sp = Publication(
         title=p['title'],
         publication_cover_date=p['publication_cover_date'],
         subtype_id=1,

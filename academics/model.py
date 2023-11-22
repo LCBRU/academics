@@ -602,11 +602,11 @@ class Publication(db.Model, AuditMixin):
 
     @property
     def scopus_catalog_publication(self):
-        return next([cp for cp in self.catalog_publications if cp.catalog == 'scopus'])
+        return next((cp for cp in self.catalog_publications if cp.catalog == 'scopus'))
 
     @property
     def openalex_catalog_publication(self):
-        return next([cp for cp in self.catalog_publications if cp.catalog == 'open_alex'])
+        return next((cp for cp in self.catalog_publications if cp.catalog == 'open_alex'))
 
     @property
     def best_catalog_publication(self):

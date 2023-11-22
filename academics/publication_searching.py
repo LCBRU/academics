@@ -2,7 +2,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, ScopusPublication, Source, Subtype, Theme
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Publication, Source, Subtype, Theme, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
@@ -111,19 +111,44 @@ class ValidationSearchForm(SearchForm):
         self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
+def best_catalog_publications():
+    catalog_publications = (
+        select(
+            CatalogPublication.id.label('id'),
+            CatalogPublication.publication_id.label('publication_id'),
+            func.row_number().over(partition_by=CatalogPublication.id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
+        )
+    ).alias()
+
+    return (
+        select(
+            catalog_publications.c.id,
+            catalog_publications.c.publication_id,
+        )
+        .select_from(catalog_publications)
+        .where(catalog_publications.c.priority == 1)
+    ).alias()
+
+
 def publication_search_query(search_form):
     logging.info(f'publication_search_query started')
 
-    q = select(ScopusPublication)
+    bcp = best_catalog_publications()
+
+    q = select(Publication).join(
+        bcp, bcp.c.id == Publication.id
+    ).join(
+        CatalogPublication, CatalogPublication.id == bcp.c.publication_id
+    )
 
     if search_form.has_value('author_id'):
-        q = q.where(ScopusPublication.sources.any(Source.id == search_form.author_id.data))
+        q = q.where(Publication.sources.any(Source.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
-        q = q.where(ScopusPublication.sources.any(Source.academic_id == search_form.academic_id.data))
+        q = q.where(Publication.sources.any(Source.academic_id == search_form.academic_id.data))
 
     if search_form.has_value('theme_id'):
-        q = q.where(ScopusPublication.sources.any(
+        q = q.where(Publication.sources.any(
             Source.academic_id.in_(
                 select(Academic.id)
                 .where(Academic.theme_id == search_form.theme_id.data)
@@ -132,14 +157,14 @@ def publication_search_query(search_form):
         )
 
     if  search_form.has_value('journal_id'):
-        q = q.where(ScopusPublication.journal_id.in_(search_form.journal_id.data))
+        q = q.where(CatalogPublication.journal_id.in_(search_form.journal_id.data))
 
     if search_form.has_value('subtype_id'):
-        q = q.where(ScopusPublication.subtype_id.in_(search_form.subtype_id.data))
+        q = q.where(CatalogPublication.subtype_id.in_(search_form.subtype_id.data))
 
     if search_form.has_value('keywords'):
         for k in search_form.keywords.data:
-            q = q.where(ScopusPublication.keywords.any(Keyword.id == k))
+            q = q.where(Publication.keywords.any(Keyword.id == k))
 
     publication_start_date = None
 
@@ -150,7 +175,7 @@ def publication_search_query(search_form):
         publication_start_date = parse_date_or_none(search_form.publication_start_date.data)
 
     if publication_start_date:
-        q = q.where(ScopusPublication.publication_cover_date >= publication_start_date)
+        q = q.where(CatalogPublication.publication_cover_date >= publication_start_date)
 
     publication_end_date = None
 
@@ -161,13 +186,13 @@ def publication_search_query(search_form):
         publication_end_date = parse_date_or_none(search_form.publication_end_date.data)
 
     if publication_end_date:
-        q = q.where(ScopusPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
+        q = q.where(CatalogPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
 
     if search_form.has_value('search'):
         q = q.where(or_(
-            ScopusPublication.title.like(f'%{search_form.search.data}%'),
-            ScopusPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%')),
-            ScopusPublication.doi.like(f'%{search_form.search.data}%'),
+            CatalogPublication.title.like(f'%{search_form.search.data}%'),
+            CatalogPublication.journal.has(Journal.name.like(f'%{search_form.search.data}%')),
+            CatalogPublication.doi.like(f'%{search_form.search.data}%'),
         ))
 
     acknowledgements = []
@@ -185,18 +210,18 @@ def publication_search_query(search_form):
             if ack == '-1':
                 ack = None
 
-            status_filter = (*status_filter, ScopusPublication.nihr_acknowledgement_id == ack)
+            status_filter = (*status_filter, Publication.nihr_acknowledgement_id == ack)
 
         q = q.where(or_(*status_filter))
 
     if search_form.has_value('folder_id'):
-        q = q.where(ScopusPublication.folders.any(Folder.id == search_form.folder_id.data))
+        q = q.where(Publication.folders.any(Folder.id == search_form.folder_id.data))
 
     if search_form.supress_validation_historic.data == True:
         logging.info(f'Supressing Historic Publications')
         q = q.where(or_(
-            ScopusPublication.validation_historic == False,
-            ScopusPublication.validation_historic == None,
+            Publication.validation_historic == False,
+            Publication.validation_historic == None,
         ))
 
     logging.info(f'publication_search_query ended')
@@ -235,9 +260,9 @@ def get_publication_by_theme(search_form):
         publications.c.id.label('scopus_publication_id'),
         Theme.name.label('bucket')
     ).join(
-        ScopusPublication, ScopusPublication.id == publications.c.id
+        Publication, Publication.id == publications.c.id
     ).join(
-        ScopusPublication.sources
+        Publication.sources
     ).join(
         Source.academic
     ).join(
@@ -268,9 +293,9 @@ def get_publication_by_academic(search_form):
         publications.c.id.label('scopus_publication_id'),
         func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
     ).join(
-        ScopusPublication, ScopusPublication.id == publications.c.id
+        Publication, Publication.id == publications.c.id
     ).join(
-        ScopusPublication.sources
+        Publication.sources
     ).join(
         Source.academic
     ).order_by(
@@ -310,9 +335,9 @@ def by_acknowledge_status(publications):
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(ScopusPublication)
-        .join(publications, publications.c.scopus_publication_id == ScopusPublication.id)
-        .join(NihrAcknowledgement, NihrAcknowledgement.id == ScopusPublication.nihr_acknowledgement_id, isouter=True)
+        .select_from(Publication)
+        .join(publications, publications.c.scopus_publication_id == Publication.id)
+        .join(NihrAcknowledgement, NihrAcknowledgement.id == Publication.nihr_acknowledgement_id, isouter=True)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
