@@ -286,7 +286,6 @@ def add_publications(publication_datas, source):
             sponsor_names=p.abstract.funding_list,
         )
 
-        db.session.add(pub)
         db.session.add(cat_pub)
 
         cat_pub.doi = p.doi
