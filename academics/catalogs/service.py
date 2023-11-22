@@ -30,7 +30,7 @@ def auto_validate():
 
     amended_count = 0
 
-    for p in q.all():
+    for p in db.session.execute(q).all():
         auto_ack = _get_nihr_acknowledgement(p)
         auto_open = _get_nihr_funded_open_access(p)
 
