@@ -109,7 +109,6 @@ for a in [
     db.session.add(ScopusAuthor(**a))
 db.session.commit()
 
-# ScopusPublication
 for p in [
     {
         'scopus_author_id': 1,

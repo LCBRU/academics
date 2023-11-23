@@ -318,7 +318,6 @@ class Sponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
 
-    publications = db.relationship("ScopusPublication", secondary=sponsors__scopus_publications, back_populates="sponsors", collection_class=set)
     publicationses = db.relationship("Publication", secondary=sponsors__publications, back_populates="sponsors", collection_class=set)
 
     @property
@@ -380,161 +379,11 @@ class NihrAcknowledgement(db.Model):
         return NihrAcknowledgement.query.filter_by(name=name).one()
 
 
-class ScopusPublication(AuditMixin, CommonMixin, db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    sources = db.relationship("Source", secondary=sources__publications, backref=db.backref("scopus_publications"), lazy="joined")
-    publication_sources = db.relationship(
-        "PublicationSource",
-        order_by="PublicationSource.ordinal",
-        collection_class=ordering_list('ordinal'),
-        cascade="delete, delete-orphan"
-    )
-
-    authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
-
-    scopus_id = db.Column(db.String(1000))
-    doi = db.Column(db.String(1000))
-    title = db.Column(db.String(1000))
-    publication_cover_date = db.Column(db.Date)
-    pubmed_id = db.Column(db.String(1000))
-    pii = db.Column(db.String(1000))
-    abstract = db.Column(db.String(1000))
-    author_list = db.Column(db.String(1000))
-    volume = db.Column(db.String(1000))
-    issue = db.Column(db.String(1000))
-    pages = db.Column(db.String(1000))
-    funding_text = db.Column(db.String(1000))
-    is_open_access = db.Column(db.Boolean)
-    cited_by_count = db.Column(db.Integer)
-
-    href = db.Column(db.String(1000))
-    deleted = db.Column(db.Boolean, default=False)
-
-    validation_historic = db.Column(db.Boolean, default=None)
-
-    auto_nihr_acknowledgement_id = db.Column(db.Integer, db.ForeignKey(NihrAcknowledgement.id))
-    auto_nihr_acknowledgement = db.relationship(NihrAcknowledgement, foreign_keys=[auto_nihr_acknowledgement_id])
-
-    auto_nihr_funded_open_access_id = db.Column(db.Integer, db.ForeignKey(NihrFundedOpenAccess.id))
-    auto_nihr_funded_open_access = db.relationship(NihrFundedOpenAccess, foreign_keys=[auto_nihr_funded_open_access_id])
-
-    nihr_acknowledgement_id = db.Column(db.Integer, db.ForeignKey(NihrAcknowledgement.id))
-    nihr_acknowledgement = db.relationship(NihrAcknowledgement, foreign_keys=[nihr_acknowledgement_id], lazy="joined")
-
-    nihr_funded_open_access_id = db.Column(db.Integer, db.ForeignKey(NihrFundedOpenAccess.id))
-    nihr_funded_open_access = db.relationship(NihrFundedOpenAccess, foreign_keys=[nihr_funded_open_access_id], lazy="joined")
-
-    journal_id = db.Column(db.Integer, db.ForeignKey(Journal.id))
-    journal = db.relationship(Journal, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
-
-    subtype_id = db.Column(db.Integer, db.ForeignKey(Subtype.id))
-    subtype = db.relationship(Subtype, lazy="joined", backref=db.backref("publications", cascade="all,delete"))
-
-    keywords = db.relationship("Keyword", lazy="joined", secondary=scopus_publications__keywords, back_populates="publications", collection_class=set)
-    folders = db.relationship("Folder", lazy="joined", secondary=folders__scopus_publications, back_populates="publications", collection_class=set)
-    sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__scopus_publications, back_populates="publications", collection_class=set)
-
-    @property
-    def nihr_acknowledgement_yesno(self):
-        if self.nihr_acknowledgement is None:
-            return ''
-        elif self.nihr_acknowledgement.acknowledged:
-            return 'Yes'
-        else:
-            return 'No'
-    
-    @property
-    def nihr_acknowledgement_detail(self):
-        if self.nihr_acknowledgement is None or self.nihr_acknowledgement.acknowledged:
-            return ''
-        else:
-            return self.nihr_acknowledgement.name
-    
-    @property
-    def is_open_access_yesno(self):
-        if self.is_open_access:
-            return 'Yes'
-        else:
-            return 'No'
-    
-    @property
-    def issue_volume(self):
-        if self.issue and self.volume:
-            return f' {self.issue}/{self.volume}'
-        else:
-            return ''
-
-    @property
-    def pp(self):
-        if self.pages:
-            return f' pp{self.pages}'
-        else:
-            return ''
-
-    @property
-    def vancouverish(self):
-        authors = (self.author_list or '').split(',')
-
-        author_list = ', '.join(authors[0:6])
-
-        if len(authors) > 6:
-            author_list = f'{author_list}, et al'
-
-        parts = []
-
-        parts.append(author_list)
-        parts.append(self.title)
-        
-        if self.journal:
-            parts.append(self.journal.name)
-        
-        parts.append(f'({self.publication_cover_date:%B %y}{self.issue_volume}{self.pp})')
-
-        return '. '.join(parts)
-
-    @property
-    def folder_ids(self):
-        return ','.join([str(f.id) for f in self.folders])
-
-    @property
-    def academics(self):
-        return {a.academic for a in self.sources}
-
-    @property
-    def theme(self):
-        themes = [a.theme.name for a in self.academics]
-        return max(themes, key=themes.count)
-
-    @property
-    def is_nihr_acknowledged(self):
-        return any([s.is_nihr for s in self.sponsors])
-
-    @property
-    def all_nihr_acknowledged(self):
-        return len(self.sponsors) > 0 and all([s.is_nihr for s in self.sponsors])
-
-    @property
-    def all_academics_left_brc(self):
-        return all(a.has_left_brc for a in self.academics)
-
-
-class PublicationSource(db.Model):
-    publication_id: Mapped[int] = mapped_column(ForeignKey(ScopusPublication.id), primary_key=True)
-    source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), primary_key=True)
-    ordinal: Mapped[int] = mapped_column(primary_key=True)
-
-    publication: Mapped[ScopusPublication] = relationship()
-    source: Mapped[Source] = relationship()
-
-
 class Keyword(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     keyword = db.Column(db.String(1000))
 
-    publications = db.relationship("ScopusPublication", secondary=scopus_publications__keywords, back_populates="keywords", collection_class=set)
     publicationses = db.relationship("Publication", secondary=publications__keywords, back_populates="keywords", collection_class=set)
 
 
@@ -552,7 +401,6 @@ class Folder(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
 
-    publications = db.relationship("ScopusPublication", secondary=folders__scopus_publications, back_populates="folders", collection_class=set)
     publicationses = db.relationship("Publication", secondary=folders__publications, back_populates="folders", collection_class=set)
     shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set)
 
