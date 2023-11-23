@@ -242,33 +242,6 @@ class Journal(db.Model):
     name = db.Column(db.String(255))
 
 
-sources__publications = db.Table(
-    'sources__publications',
-    db.Column('source_id', db.Integer(), db.ForeignKey('source.id'), primary_key=True),
-    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
-)
-
-
-scopus_publications__keywords = db.Table(
-    'scopus_publication__keyword',
-    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
-    db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
-)
-
-
-folders__scopus_publications = db.Table(
-    'folders__scopus_publications',
-    db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
-    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
-)
-
-
-sponsors__scopus_publications = db.Table(
-    'sponsors__scopus_publications',
-    db.Column('sponsor_id', db.Integer(), db.ForeignKey('sponsor.id'), primary_key=True),
-    db.Column('scopus_publication_id', db.Integer(), db.ForeignKey('scopus_publication.id'), primary_key=True),
-)
-
 
 publications__keywords = db.Table(
     'publication__keyword',

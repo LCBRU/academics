@@ -98,9 +98,9 @@ def folder_delete():
     'type': 'object',
     'properties': {
         'folder_id': {'type': 'integer'},
-        'scopus_publication_id': {'type': 'integer'},
+        'publication_id': {'type': 'integer'},
     },
-    "required": ["folder_id", "scopus_publication_id"]
+    "required": ["folder_id", "publication_id"]
 })
 @assert_folder_user()
 def folder_remove_publication():
@@ -120,9 +120,9 @@ def folder_remove_publication():
     'type': 'object',
     'properties': {
         'folder_id': {'type': 'integer'},
-        'scopus_publication_id': {'type': 'integer'},
+        'publication_id': {'type': 'integer'},
     },
-    "required": ["folder_id", "scopus_publication_id"]
+    "required": ["folder_id", "publication_id"]
 })
 @assert_folder_user()
 def folder_add_publication():

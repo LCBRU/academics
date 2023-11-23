@@ -80,11 +80,11 @@
             headers: {"Content-type": "application/json; charset=UTF-8"},
             body: JSON.stringify({
                 folder_id: button.data('folder-id'),
-                scopus_publication_id: button.data('scopus-publication-id'),
+                publication_id: button.data('publication-id'),
             }),
         });
 
-        await replace_publications_folders(button.data('scopus-publication-id'));
+        await replace_publications_folders(button.data('publication-id'));
     }
 
     async function folder_add_publication() {
@@ -95,11 +95,11 @@
             headers: {"Content-type": "application/json; charset=UTF-8"},
             body: JSON.stringify({
                 folder_id: button.data('folder-id'),
-                scopus_publication_id: button.data('scopus-publication-id'),
+                publication_id: button.data('publication-id'),
             }),
         })
         
-        await replace_publications_folders(button.data('scopus-publication-id'));
+        await replace_publications_folders(button.data('publication-id'));
     }
 
     async function replace_publications_folders(publication_id) {
