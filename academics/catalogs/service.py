@@ -3,8 +3,8 @@ from time import sleep
 from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
-from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_sponsor, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationSource, PublicationsSources, ScopusAuthor, Source, Subtype
+from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_subtype
+from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
