@@ -149,12 +149,6 @@ def _translate_publication_author(author_dict):
     else:
         affiliation_identifier = None
 
-    print('|'*20)
-    print(author_dict)
-    print('|'*20)
-    print(affiliation_identifier)
-    print('|'*20)
-
     result = AuthorData(
         catalog=SCOPUS_CATALOG,
         catalog_identifier=author_dict.get('authid', None),
@@ -229,10 +223,6 @@ def scopus_author_search(search_string):
         affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
 
         sa = ScopusAffiliation(affiliation_identifier).get_affiliation()
-
-        print('£'*20)
-        print(affiliation_identifier)
-        print('£'*20)
 
         a = AuthorData(
             catalog=SCOPUS_CATALOG,
@@ -588,6 +578,7 @@ class AuthorData():
     def get_new_source(self):
         result = ScopusAuthor()
         self.update_source(result)
+
         return result
 
     def update_source(self, source):
@@ -600,29 +591,3 @@ class AuthorData():
         source.citation_count = self.citation_count
         source.document_count = self.document_count
         source.h_index = self.h_index
-        
-        print('@'*20)
-        print(self.affiliation_identifier)
-        print('@'*20)
-
-        sa = db.session.execute(
-            select(AcaAffil).where(
-                AcaAffil.catalog_identifier == self.affiliation_identifier
-            ).where(
-                AcaAffil.catalog == SCOPUS_CATALOG
-            )
-        ).scalar()
-
-        if not sa:
-            print('@'*20)
-            print(self.affiliation_identifier)
-            print('@'*20)
-            sa = AcaAffil(catalog_identifier=self.affiliation_identifier)
-        
-            sa.name = self.affiliation_name
-            sa.address = self.affiliation_address
-            sa.country = self.affiliation_country
-
-            sa.catalog = SCOPUS_CATALOG
-
-        return sa

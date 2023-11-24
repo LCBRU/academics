@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype
+from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
@@ -153,7 +153,7 @@ def update_source(s):
 
         if author_data:
             sleep(1)
-            author_data.update_source(s)
+            _get_or_create_source(author_data=author_data)
         else:
             logging.info(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
@@ -377,5 +377,23 @@ def _get_or_create_source(author_data):
         s = author_data.get_new_source()
     else:
         author_data.update_source(s)
+
+    sa = db.session.execute(
+        select(Affiliation).where(
+            Affiliation.catalog_identifier == author_data.affiliation_identifier
+        ).where(
+            Affiliation.catalog == author_data.catalog
+        )
+    ).scalar()
+
+    if not sa:
+        sa = Affiliation(catalog_identifier=author_data.affiliation_identifier)
+    
+        sa.name = author_data.affiliation_name
+        sa.address = author_data.affiliation_address
+        sa.country = author_data.affiliation_country
+        sa.catalog = author_data.catalog
+    
+    s.affiliation = sa
 
     return s
