@@ -241,51 +241,50 @@ def scopus_author_search(search_string):
 class Author(ElsAuthor):
     def __init__(self, source_identifier):
         self.source_identifier = source_identifier
-        self.affiliation = None
+        self.orcid = None
+        self.href = None
+        self.initials = None
+        self.citation_count = None
+        self.document_count = None
+        self.h_index = None
+        self.affiliation_id = None
+        self.affiliation_name = None
+        self.affiliation_address = None
+        self.affiliation_country = None
+
         super().__init__(author_id=self.source_identifier)
 
-    @property
-    def orcid(self):
-        return self.data.get(u'coredata', {}).get(u'orcid', '')
+    def _set_orcid(self):
+        self.orcid = self.data.get(u'coredata', {}).get(u'orcid', '')
 
-    @property
-    def href(self):
+    def _set_href(self):
         for h in  self.data.get(u'coredata', {}).get(u'link', ''):
             if h['@rel'] == 'scopus-author':
-                return h['@href']
+                self.href = h['@href']
 
-    @property
-    def initials(self):
-        return self.data.get(u'author-profile', {}).get(u'preferred-name').get(u'initials', '')
+    def _set_initials(self):
+        self.initials = self.data.get(u'author-profile', {}).get(u'preferred-name').get(u'initials', '')
 
-    @property
-    def citation_count(self):
-        return self.data.get(u'coredata', {}).get(u'citation-count', '')
+    def _set_citation_count(self):
+        self.citation_count = self.data.get(u'coredata', {}).get(u'citation-count', '')
 
-    @property
-    def document_count(self):
-        return self.data.get(u'coredata', {}).get(u'document-count', '')
+    def _set_document_count(self):
+        self.document_count = self.data.get(u'coredata', {}).get(u'document-count', '')
 
-    @property
-    def affiliation_id(self):
-        return self.data.get(u'affiliation-current', {}).get(u'@id', '')
+    def _set_h_index(self):
+        self.h_index = self.data.get(u'h-index', None)
 
-    @property
-    def affiliation_name(self):
-        return self.data.get(u'affiliation-current', {}).get(u'@name', '')
+    def _set_affiliation_id(self):
+        self.affiliation_id = self.data.get(u'affiliation-current', {}).get(u'@id', '')
 
-    @property
-    def affiliation_city(self):
-        return self.data.get(u'affiliation-current', {}).get(u'@city', '')
+    def _set_affiliation_name(self):
+        self.affiliation_name = self.data.get(u'affiliation-current', {}).get(u'@name', '')
 
-    @property
-    def affiliation_country(self):
-        return self.data.get(u'affiliation-current', {}).get(u'@country', '')
+    def _set_affiliation_address(self):
+        self.affiliation_address = self.data.get(u'affiliation-current', {}).get(u'@city', '')
 
-    @property
-    def h_index(self):
-        return self.data.get(u'h-index', None)
-
+    def _set_affiliation_country(self):
+        self.affiliation_country = self.data.get(u'affiliation-current', {}).get(u'@country', '')
 
     def populate(self, client, get_extended_details):
         result = self.read(client)
@@ -294,7 +293,12 @@ class Author(ElsAuthor):
             self.read_metrics(client)
 
             if self.affiliation_id:
-                self.affiliation = ScopusAffiliation(self.affiliation_id)
+                sa = ScopusAffiliation(self.affiliation_id)
+                sa.read(client)
+
+                self.affiliation_name = sa.name
+                self.affiliation_address = sa.address
+                self.affiliation_country = sa.country
         
         return result
 
@@ -312,6 +316,15 @@ class Author(ElsAuthor):
             logging.info('No error reading Scopus data, but data is still None')
             raise Exception('No error reading Scopus data, but data is still None')
 
+        self._set_initials()
+        self._set_citation_count()
+        self._set_document_count()
+        self._set_h_index()
+        self._set_affiliation_id()
+        self._set_affiliation_name()
+        self._set_affiliation_address()
+        self._set_affiliation_country()
+
         return result
 
     def read_metrics(self, client):
@@ -323,25 +336,17 @@ class Author(ElsAuthor):
                     "h-index",
                     "dc:identifier",
                     ]
-            api_response = client.exec_request(
-                    self.uri + "?field=" + ",".join(fields))
+            api_response = client.exec_request(self.uri + "?field=" + ",".join(fields))
             data = api_response[self._payload_type][0]
             if not self.data:
                 self._data = dict()
                 self._data['coredata'] = dict()
-            # TODO: apply decorator for type conversion of common fields
-            self._data['coredata']['dc:identifier'] = data['coredata']['dc:identifier']
             if data.get('coredata', {}).get('citation-count', None):
-                self._data['coredata']['citation-count'] = int(data['coredata']['citation-count'])
-            if data.get('coredata', {}).get('cited-by-count', None):
-                self._data['coredata']['cited-by-count'] = int(data['coredata']['citation-count'])
+                self.citation_count = data['coredata']['citation-count']
             if data.get('coredata', {}).get('document-count', None):
-                self._data['coredata']['document-count'] = int(data['coredata']['document-count'])
+                self.document_count = data['coredata']['document-count']
             if data.get('h-index', None):
-                print('*'*20)
-                print(data['h-index'])
-                print('*'*20)
-                self._data['h-index'] = data['h-index']
+                self.h_index = data['h-index']
             logging.info('Added/updated author metrics')
         except ResourceNotFoundException as e:
             return False
@@ -560,26 +565,37 @@ class AuthorData():
     def affiliation_summary(self):
         return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
 
-    def get_new_source(self, get_details=False):
+    def get_new_source(self):
         result = ScopusAuthor()
-        self.update_source(result, get_details)
+        self.update_source(result)
         return result
 
-    def update_source(self, source, get_details=False):
+    def update_source(self, source):
         source.source_identifier = self.catalog_identifier
         source.orcid = self.orcid
         source.first_name = self.first_name
         source.last_name = self.last_name
         source.display_name = self.display_name
         source.href = self.href
-
-        if get_details:
-            metrics = Author(self.catalog_identifier)
-            if metrics.read_metrics(_client()):
-                source.citation_count = metrics.citation_count
-                source.document_count = metrics.document_count
-                source.h_index = metrics.h_index
+        source.citation_count = self.citation_count
+        source.document_count = self.document_count
+        source.h_index = self.h_index
         
-            if self.affiliation_identifier:
-                sa = ScopusAffiliation(self.affiliation_identifier)
-                source.affiliation = sa.get_affiliation()
+        sa = db.session.execute(
+            select(AcaAffil).where(
+                AcaAffil.catalog_identifier == self.affiliation_identifier
+            ).where(
+                AcaAffil.catalog == SCOPUS_CATALOG
+            )
+        ).scalar()
+
+        if not sa:
+            sa = AcaAffil(catalog_identifier=self.affiliation_identifier)
+        
+            sa.name = self.affiliation_name
+            sa.address = self.affiliation_address
+            sa.country = self.affiliation_country
+
+            sa.catalog = SCOPUS_CATALOG
+
+        return sa
