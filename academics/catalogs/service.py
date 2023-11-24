@@ -126,11 +126,12 @@ def _update_academic(academic: Academic):
             else:
                 refresh_source(s)
 
-        #  _find_new_scopus_sources(academic)
+        _find_new_scopus_sources(academic)
 
         _ensure_all_academic_sources_are_proposed(academic)
 
         academic.ensure_initialisation()
+        academic.
         academic.updating = False
 
     except Exception as e:
@@ -170,7 +171,7 @@ def refresh_source(s):
             if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
                 publications = get_scopus_publications(s.source_identifier)
 
-            # add_publications(publications)
+            add_publications(publications)
 
         s.last_fetched_datetime = datetime.utcnow()
 
