@@ -590,7 +590,9 @@ class AuthorData():
         ).scalar()
 
         if not sa:
+            print('@'*20)
             print(self.affiliation_identifier)
+            print('@'*20)
             sa = AcaAffil(catalog_identifier=self.affiliation_identifier)
         
             sa.name = self.affiliation_name
