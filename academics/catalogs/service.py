@@ -170,6 +170,11 @@ def refresh_source(s):
             # add_publications(publications)
 
         s.last_fetched_datetime = datetime.utcnow()
+
+        db.session.add(s)
+        db.session.flush()
+        db.session.commit()
+
     except Exception as e:
         log_exception(e)
         logging.info(f'Setting Source {s.full_name} to be in error')
