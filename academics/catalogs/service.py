@@ -120,6 +120,7 @@ def _update_academic(academic: Academic):
         s: Source
 
         for s in academic.sources:
+            print(s.id)
             if s.error:
                 logging.info(f'Source in ERROR')
             else:
@@ -142,6 +143,7 @@ def _update_academic(academic: Academic):
 
 def refresh_source(s):
     try:
+        print(s.id)
         author_data = None
 
         if isinstance(s, ScopusAuthor):
