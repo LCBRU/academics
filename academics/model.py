@@ -82,7 +82,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             self.first_name = top_author.first_name
             self.last_name = top_author.last_name
         else:
-            self.first_name, self.last_name = top_author.display_name.strip().rsplit(maxsplit=1)
+            self.first_name, self.last_name = (top_author.display_name or '').strip().rsplit(maxsplit=1)
 
     @property
     def orcid_link(self):
