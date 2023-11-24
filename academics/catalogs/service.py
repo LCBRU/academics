@@ -157,6 +157,8 @@ def update_source(s):
             logging.info(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
 
+        print(s.display_name)
+
         if s.academic:
             publications = []
 
