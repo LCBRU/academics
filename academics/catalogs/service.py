@@ -370,13 +370,12 @@ def _get_or_create_source(author_data):
         .where(Source.source_identifier == author_data.catalog_identifier)
     ).scalar()
 
-    print(author_data.display_name)
     if not s:
-        print('*'*20)
         s = author_data.get_new_source()
     else:
-        print('^'*20)
         author_data.update_source(s)
+
+    print(s.first_name, s.display_name, s.last_name)
 
     sa = db.session.execute(
         select(Affiliation).where(
