@@ -282,9 +282,11 @@ def add_publications(publication_datas):
         pub = _get_or_create_publication(p)
         cat_pub = _get_or_create_catalog_publication(p)
 
+        db.session.add(pub)
+        db.session.flush()
+
         cat_pub.publication = pub
 
-        db.session.add(pub)
         db.session.add(cat_pub)
 
         _add_sponsors_to_publications(
