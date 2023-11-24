@@ -149,8 +149,10 @@ def update_source(s):
         if isinstance(s, OpenAlexAuthor):
             author_data = get_open_alex_author_data(s.source_identifier)
 
+        print(author_data)
+
         if author_data:
-            _get_or_create_source(author_data=author_data)
+            s = _get_or_create_source(author_data=author_data)
         else:
             logging.info(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
@@ -374,8 +376,6 @@ def _get_or_create_source(author_data):
         s = author_data.get_new_source()
     else:
         author_data.update_source(s)
-
-    print(s.first_name, s.display_name, s.last_name)
 
     sa = db.session.execute(
         select(Affiliation).where(
