@@ -152,7 +152,6 @@ def update_source(s):
         print(author_data)
 
         if author_data:
-            sleep(1)
             _get_or_create_source(author_data=author_data)
         else:
             logging.info(f'Source {s.full_name} not found so setting it to be in error')
@@ -375,8 +374,10 @@ def _get_or_create_source(author_data):
     ).scalar()
 
     if not s:
+        print('*'*20)
         s = author_data.get_new_source()
     else:
+        print('^'*20)
         author_data.update_source(s)
 
     sa = db.session.execute(
