@@ -337,6 +337,9 @@ class Author(ElsAuthor):
             if data.get('coredata', {}).get('document-count', None):
                 self._data['coredata']['document-count'] = int(data['coredata']['document-count'])
             if data.get('h-index', None):
+                print('*'*20)
+                print(data['h-index'])
+                print('*'*20)
                 self._data['h-index'] = int(data['h-index'])
             logging.info('Added/updated author metrics')
         except ResourceNotFoundException as e:
