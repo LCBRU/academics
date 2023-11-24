@@ -169,7 +169,7 @@ def get_scopus_author_data(identifier, get_extended_details=False):
     result = Author(identifier)
 
     logging.info(f'Reading Scopus Author')
-    if not result.read(_client()):
+    if not result.populate(_client(), get_extended_details):
         logging.info(f'Scopus Author not read from Scopus')
         return None
 
@@ -288,13 +288,15 @@ class Author(ElsAuthor):
 
 
     def populate(self, client, get_extended_details):
-        self.read(client)
+        result = self.read(client)
 
         if get_extended_details:
             self.read_metrics(client)
 
             if self.affiliation_identifier:
                 self.affiliation = ScopusAffiliation(self.affiliation_identifier)
+        
+        return result
 
 
     def read(self, client):
