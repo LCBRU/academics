@@ -293,11 +293,10 @@ class Author(ElsAuthor):
         if get_extended_details:
             self.read_metrics(client)
 
-            if self.affiliation_identifier:
-                self.affiliation = ScopusAffiliation(self.affiliation_identifier)
+            if self.affiliation_id:
+                self.affiliation = ScopusAffiliation(self.affiliation_id)
         
         return result
-
 
     def read(self, client):
         try:
