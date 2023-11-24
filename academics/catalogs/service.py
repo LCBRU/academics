@@ -294,7 +294,6 @@ def add_publications(publication_datas):
 
         cat_pub.doi = p.doi
         cat_pub.title = p.title
-        cat_pub.journal = _get_journal(p.journal_name)
         cat_pub.publication_cover_date = p.publication_cover_date
         cat_pub.href = p.href
         cat_pub.abstract = p.abstract_text or ''
@@ -302,13 +301,15 @@ def add_publications(publication_datas):
         cat_pub.issue = p.issue or ''
         cat_pub.pages = p.pages or ''
         cat_pub.is_open_access = p.is_open_access
-        cat_pub.subtype = _get_subtype(p.subtype_code, p.subtype_description)
-        cat_pub.funding_acr = _get_funding_acr(p.funding_acronym)
         cat_pub.cited_by_count = p.cited_by_count
         cat_pub.author_list = p.author_list or ''
 
         if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             pub.validation_historic = True
+
+        cat_pub.journal = _get_journal(p.journal_name)
+        cat_pub.subtype = _get_subtype(p.subtype_code, p.subtype_description)
+        cat_pub.funding_acr = _get_funding_acr(p.funding_acronym)
 
         new_sources  = [
             PublicationsSources(
