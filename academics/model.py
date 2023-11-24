@@ -76,7 +76,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         if not self.sources:
             return
 
-        top_author = sorted(self.sources, key=lambda a: int(a.document_count or ''), reverse=True)[0]
+        top_author = sorted(self.sources, key=lambda a: int(a.document_count or '0'), reverse=True)[0]
 
         if top_author.last_name:
             self.first_name = top_author.first_name
