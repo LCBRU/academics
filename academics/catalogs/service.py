@@ -294,9 +294,11 @@ def add_publications(publication_datas):
         cat_pub.publication_cover_date = p.publication_cover_date
         cat_pub.href = p.href
         cat_pub.abstract = p.abstract_text or ''
+        cat_pub.funding_text = p.abstract.funding_text or ''
         cat_pub.volume = p.volume or ''
         cat_pub.issue = p.issue or ''
         cat_pub.pages = p.pages or ''
+
         cat_pub.is_open_access = p.is_open_access
         cat_pub.cited_by_count = p.cited_by_count
         cat_pub.author_list = p.author_list or ''
