@@ -167,7 +167,7 @@ def refresh_source(s):
             if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
                 publications = get_scopus_publications(s.source_identifier)
 
-            add_publications(publications)
+            # add_publications(publications)
 
         s.last_fetched_datetime = datetime.utcnow()
     except Exception as e:
