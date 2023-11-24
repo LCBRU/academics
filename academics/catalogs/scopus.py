@@ -340,7 +340,7 @@ class Author(ElsAuthor):
                 print('*'*20)
                 print(data['h-index'])
                 print('*'*20)
-                self._data['h-index'] = int(data['h-index'])
+                self._data['h-index'] = data['h-index']
             logging.info('Added/updated author metrics')
         except ResourceNotFoundException as e:
             return False
