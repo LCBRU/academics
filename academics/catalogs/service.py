@@ -131,7 +131,6 @@ def _update_academic(academic: Academic):
         _ensure_all_academic_sources_are_proposed(academic)
 
         academic.ensure_initialisation()
-        academic.
         academic.updating = False
 
     except Exception as e:
