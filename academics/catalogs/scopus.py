@@ -144,6 +144,8 @@ def _translate_publication_author(author_dict):
     affiliation_identifier = author_dict.get('afid', None)
 
     print('|'*20)
+    print(author_dict)
+    print('|'*20)
     print(affiliation_identifier)
     print('|'*20)
 
