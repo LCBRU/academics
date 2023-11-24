@@ -284,6 +284,9 @@ def add_publications(publication_datas):
 
         cat_pub.publication = pub
 
+        db.session.add(pub)
+        db.session.add(cat_pub)
+
         _add_sponsors_to_publications(
             publication=pub,
             sponsor_names=p.abstract.funding_list,
@@ -317,9 +320,6 @@ def add_publications(publication_datas):
             ) 
             for a in p.authors
         ]
-
-        db.session.add(pub)
-        db.session.add(cat_pub)
 
         pub.publication_sources = new_sources
 
