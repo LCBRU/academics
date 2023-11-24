@@ -158,6 +158,8 @@ def update_source(s):
             s.error = True
 
         print(s.display_name)
+        print(s.first_name)
+        print(s.last_name)
 
         if s.academic:
             publications = []
@@ -173,6 +175,7 @@ def update_source(s):
         logging.info(f'Setting Source {s.full_name} to be in error')
         s.error = True
     finally:
+        print('+'*20)
         db.session.add(s)
         db.session.commit()
 
