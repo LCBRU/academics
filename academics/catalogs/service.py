@@ -8,7 +8,7 @@ from academics.model import Academic, AcademicPotentialSource, CatalogPublicatio
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
-from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
+from .scopus import SCOPUS_CATALOG, get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
@@ -255,8 +255,9 @@ def add_sources_to_academic(source_identifiers, academic_id=None, theme_id=None)
     db.session.add(academic)
 
     for source_identifier in source_identifiers:
-        sa = ScopusAuthor(
+        sa = Source(
             source_identifier=source_identifier,
+            type=SCOPUS_CATALOG,
             academic=academic,
         )
         db.session.add(sa)
