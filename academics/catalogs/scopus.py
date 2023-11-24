@@ -145,7 +145,7 @@ def _translate_publication_author(author_dict):
 
     if affiliations:
         affiliation = affiliations[0]
-        affiliation_identifier = affiliation.get('$': None)
+        affiliation_identifier = affiliation.get('$', None)
     else:
         affiliation_identifier = None
 
