@@ -581,6 +581,10 @@ class AuthorData():
         source.document_count = self.document_count
         source.h_index = self.h_index
         
+        print('@'*20)
+        print(self.affiliation_identifier)
+        print('@'*20)
+
         sa = db.session.execute(
             select(AcaAffil).where(
                 AcaAffil.catalog_identifier == self.affiliation_identifier
