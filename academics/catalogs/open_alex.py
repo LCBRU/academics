@@ -8,6 +8,7 @@ from pyalex import Authors, Works, Institutions
 from itertools import chain
 from flask import current_app
 from lbrc_flask.database import db
+from datetime import date
 
 from academics.model import Academic, OpenAlexAuthor, Affiliation
 
@@ -22,26 +23,29 @@ def get_open_alex():
     q = Authors().search_filter(display_name="samani")
     # q = Authors().filter(orcid="0000-0002-5542-8448")
     # q = Authors().filter(scopus="7005783434")
-    # # # works = Works().filter(**{"author.id": author['id']}).filter(publication_year="2022").get()
 
-    for a in chain(*q.paginate(per_page=200)):
-        # print(a['id'], a["display_name"])
-        print(a["display_name"].strip().rsplit(maxsplit=1))
-        # print(a.keys())
-        # if a['summary_stats']:
-        #     print(a['summary_stats'].keys())
-        #     print(a['summary_stats'])
-        if a['last_known_institution']:
-            # print(a['last_known_institution'].keys())
-            print(a['last_known_institution'])
+    # works = Works().filter(**{"author.id": }).filter(publication_year="2022").get()
+
+    print(Works().random())
+
+    # for a in chain(*q.paginate(per_page=200)):
+    #     # print(a['id'], a["display_name"])
+    #     print(a["display_name"].strip().rsplit(maxsplit=1))
+    #     # print(a.keys())
+    #     # if a['summary_stats']:
+    #     #     print(a['summary_stats'].keys())
+    #     #     print(a['summary_stats'])
+    #     if a['last_known_institution']:
+    #         # print(a['last_known_institution'].keys())
+    #         print(a['last_known_institution'])
         
-        # i = Institutions()[a['last_known_institution']['id']]
-        # print(i['geo'])
+    #     # i = Institutions()[a['last_known_institution']['id']]
+    #     # print(i['geo'])
 
-        # if a:
-        #     if a.get('last_known_institution', None):
-        #         if 'leicester' in a.get('last_known_institution', {}).get('display_name', '').lower():
-        #             print(a['id'], a["display_name"], a['last_known_institution']['display_name'])
+    #     # if a:
+    #     #     if a.get('last_known_institution', None):
+    #     #         if 'leicester' in a.get('last_known_institution', {}).get('display_name', '').lower():
+    #     #             print(a['id'], a["display_name"], a['last_known_institution']['display_name'])
 
 
 def open_alex_similar_authors(academic: Academic):

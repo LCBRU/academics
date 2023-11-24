@@ -157,7 +157,7 @@ def _translate_publication_author(author_dict):
     )
 
 
-def get_scopus_author_data(identifier):
+def get_scopus_author_data(identifier, get_extended_details=False):
     logging.info(f'Getting Scopus Author Data {identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
@@ -241,6 +241,7 @@ def scopus_author_search(search_string):
 class Author(ElsAuthor):
     def __init__(self, source_identifier):
         self.source_identifier = source_identifier
+        self.affiliation = None
         super().__init__(author_id=self.source_identifier)
 
     @property
@@ -284,6 +285,17 @@ class Author(ElsAuthor):
     @property
     def h_index(self):
         return self.data.get(u'h-index', None)
+
+
+    def populate(self, client, get_extended_details):
+        self.read(client)
+
+        if get_extended_details:
+            self.read_metrics(client)
+
+            if self.affiliation_identifier:
+                self.affiliation = ScopusAffiliation(self.affiliation_identifier)
+
 
     def read(self, client):
         try:
@@ -353,6 +365,9 @@ class Author(ElsAuthor):
             affiliation_name=None,
             affiliation_address=None,
             affiliation_country=None,
+            citation_count=self.citation_count,
+            document_count=self.document_count,
+            h_index=self.h_index,
         )
 
         if self.affiliation_id:
@@ -522,6 +537,9 @@ class AuthorData():
     affiliation_address: str
     affiliation_country: str
     author_name: str = None
+    citation_count: str = None
+    document_count: str = None
+    h_index: str = None
 
     @property
     def display_name(self):

@@ -145,9 +145,11 @@ def update_source(s):
         author_data = None
 
         if isinstance(s, ScopusAuthor):
-            author_data = get_scopus_author_data(s.source_identifier)
+            author_data = get_scopus_author_data(s.source_identifier, True)
         if isinstance(s, OpenAlexAuthor):
             author_data = get_open_alex_author_data(s.source_identifier)
+
+        print(author_data)
 
         if author_data:
             sleep(1)
