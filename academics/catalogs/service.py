@@ -149,8 +149,6 @@ def update_source(s):
         if isinstance(s, OpenAlexAuthor):
             author_data = get_open_alex_author_data(s.source_identifier)
 
-        print(author_data)
-
         if author_data:
             _get_or_create_source(author_data=author_data)
         else:
@@ -204,7 +202,6 @@ def _find_new_scopus_sources(academic):
         if not s:
             logging.info(f'New potential source {new_source.catalog_identifier} from catalog {new_source.catalog} is not currently known')
 
-            sleep(1)
             s = _get_or_create_source(new_source)
             db.session.add(s)
 
