@@ -153,7 +153,7 @@ def update_source(s):
 
         if author_data:
             sleep(1)
-            author_data.update_source(s, True)
+            author_data.update_source(s)
         else:
             logging.info(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
