@@ -141,7 +141,13 @@ def get_scopus_publications(identifier):
 
 
 def _translate_publication_author(author_dict):
-    affiliation_identifier = author_dict.get('afid', None)
+    affiliations = author_dict.get('afid', None)
+
+    if affiliations:
+        affiliation = affiliations[0]
+        affiliation_identifier = affiliation.get('$': None)
+    else:
+        affiliation_identifier = None
 
     print('|'*20)
     print(author_dict)
@@ -149,7 +155,7 @@ def _translate_publication_author(author_dict):
     print(affiliation_identifier)
     print('|'*20)
 
-    return AuthorData(
+    result = AuthorData(
         catalog=SCOPUS_CATALOG,
         catalog_identifier=author_dict.get('authid', None),
         orcid=author_dict.get('orcid', None),
@@ -163,6 +169,8 @@ def _translate_publication_author(author_dict):
         affiliation_address='',
         affiliation_country='',
     )
+
+    return result
 
 
 def get_scopus_author_data(identifier, get_extended_details=False):
