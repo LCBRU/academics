@@ -382,6 +382,11 @@ def _get_or_create_source(author_data):
     else:
         author_data.update_source(s)
 
+
+    if s.id == 231:
+        print('-'*20)
+        print(author_data)
+
     sa = db.session.execute(
         select(Affiliation).where(
             Affiliation.catalog_identifier == author_data.affiliation_identifier
