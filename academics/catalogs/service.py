@@ -157,6 +157,7 @@ def refresh_source(s):
             logging.info(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
 
+        print(s.id)
         print(s.display_name)
         print(s.first_name)
         print(s.last_name)
