@@ -7,7 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import Academic, ScopusAuthor
+from academics.model import Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
 from flask import current_app
@@ -208,8 +208,9 @@ def scopus_author_search(search_string):
     auth_srch.execute(_client())
 
     existing_source_identifiers = set(db.session.execute(
-        select(ScopusAuthor.source_identifier)
-        .where(ScopusAuthor.academic_id != None)
+        select(Source.source_identifier)
+        .where(Source.academic_id != None)
+        .where(Source.type != SCOPUS_CATALOG)
     ).scalars())
 
     result = []
@@ -556,13 +557,14 @@ class AuthorData():
         return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
 
     def get_new_source(self):
-        result = ScopusAuthor()
+        result = Source()
         self.update_source(result)
 
         return result
 
     def update_source(self, source):
         source.source_identifier = self.catalog_identifier
+        source.type = self.catalog
         source.orcid = self.orcid
         source.first_name = self.first_name
         source.last_name = self.last_name
