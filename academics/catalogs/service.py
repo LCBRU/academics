@@ -120,7 +120,6 @@ def _update_academic(academic: Academic):
         s: Source
 
         for s in academic.sources:
-            print(s.id)
             if s.error:
                 logging.info(f'Source in ERROR')
             else:
@@ -143,7 +142,6 @@ def _update_academic(academic: Academic):
 
 def refresh_source(s):
     try:
-        print(s.id)
         author_data = None
 
         if isinstance(s, ScopusAuthor):
@@ -151,18 +149,11 @@ def refresh_source(s):
         if isinstance(s, OpenAlexAuthor):
             author_data = get_open_alex_author_data(s.source_identifier)
 
-        print(author_data)
-
         if author_data:
             s = _get_or_create_source(author_data=author_data)
         else:
             logging.info(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
-
-        print(s.id)
-        print(s.display_name)
-        print(s.first_name)
-        print(s.last_name)
 
         if s.academic:
             publications = []
@@ -183,7 +174,6 @@ def refresh_source(s):
         logging.info(f'Setting Source {s.full_name} to be in error')
         s.error = True
     finally:
-        print('+'*20)
         db.session.add(s)
         db.session.commit()
 
