@@ -570,7 +570,7 @@ class CatalogPublication(db.Model, AuditMixin):
     title: Mapped[str] = mapped_column(String(1000))
     publication_cover_date: Mapped[date]
 
-    pubmed_id: Mapped[str] = mapped_column(String(50), index=True)
+    pubmed_id: Mapped[str] = mapped_column(String(50), index=True, nullable=True)
     abstract: Mapped[str] = mapped_column(UnicodeText)
     author_list: Mapped[str] = mapped_column(UnicodeText)
     volume: Mapped[str] = mapped_column(String(100))
