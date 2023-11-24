@@ -68,21 +68,11 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         )
 
     def ensure_initialisation(self):
-        if self.initialised:
-            return
-
-        self.initialised = True
-
-        if not self.sources:
-            return
-
-        top_author = sorted(self.sources, key=lambda a: int(a.document_count or '0'), reverse=True)[0]
-
-        if top_author.last_name:
-            self.first_name = top_author.first_name
-            self.last_name = top_author.last_name
-        elif top_author.display_name:
-            parts = top_author.display_name.strip().rsplit(maxsplit=1)
+        if self.best_source.last_name:
+            self.first_name = self.best_source.first_name
+            self.last_name = self.best_source.last_name
+        elif self.best_source.display_name:
+            parts = self.best_source.display_name.strip().rsplit(maxsplit=1)
             self.first_name = parts[0]
             self.last_name = parts[-1]
 
