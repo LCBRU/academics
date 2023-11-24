@@ -7,7 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import Academic, ScopusAuthor, Affiliation as AcaAffil
+from academics.model import Academic, ScopusAuthor
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
 from flask import current_app
@@ -222,7 +222,8 @@ def scopus_author_search(search_string):
         
         affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
 
-        sa = ScopusAffiliation(affiliation_identifier).get_affiliation()
+        sa = ScopusAffiliation(affiliation_identifier)
+        sa.read(_client())
 
         a = AuthorData(
             catalog=SCOPUS_CATALOG,
@@ -390,7 +391,8 @@ class Author(ElsAuthor):
         )
 
         if self.affiliation_id:
-            sa = ScopusAffiliation(self.affiliation_id).get_affiliation()
+            sa = ScopusAffiliation(self.affiliation_id)
+            sa.read(_client())
 
             result.affiliation_name=sa.name,
             result.affiliation_address=sa.address
@@ -426,28 +428,6 @@ class ScopusAffiliation(ElsAffil):
             return self.data.get(u'country', '')
         else:
             return ''
-
-    def get_affiliation(self):
-        result = db.session.execute(
-            select(AcaAffil).where(
-                AcaAffil.catalog_identifier == self.affiliation_id
-            ).where(
-                AcaAffil.catalog == SCOPUS_CATALOG
-            )
-        ).scalar()
-
-        if not result:
-            self.read(_client())
-
-            result = AcaAffil(catalog_identifier=self.affiliation_id)
-        
-            result.name = self.name
-            result.address = self.address
-            result.country = self.country
-
-            result.catalog = SCOPUS_CATALOG
-
-        return result
 
 
 class Abstract(AbsDoc):
