@@ -214,6 +214,10 @@ def scopus_author_search(search_string):
 
         sa = ScopusAffiliation(affiliation_identifier).get_affiliation()
 
+        print('£'*20)
+        print(affiliation_identifier)
+        print('£'*20)
+
         a = AuthorData(
             catalog=SCOPUS_CATALOG,
             catalog_identifier=r.get(u'dc:identifier', ':').split(':')[1],
