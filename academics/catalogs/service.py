@@ -123,9 +123,9 @@ def _update_academic(academic: Academic):
             if s.error:
                 logging.info(f'Source in ERROR')
             else:
-                update_source(s)
+                refresh_source(s)
 
-        _find_new_scopus_sources(academic)
+        #  _find_new_scopus_sources(academic)
 
         _ensure_all_academic_sources_are_proposed(academic)
 
@@ -140,7 +140,7 @@ def _update_academic(academic: Academic):
         db.session.add(academic)
 
 
-def update_source(s):
+def refresh_source(s):
     try:
         author_data = None
 
@@ -381,11 +381,6 @@ def _get_or_create_source(author_data):
         s = author_data.get_new_source()
     else:
         author_data.update_source(s)
-
-
-    if s.id == 231:
-        print('-'*20)
-        print(author_data)
 
     sa = db.session.execute(
         select(Affiliation).where(
