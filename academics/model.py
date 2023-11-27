@@ -138,12 +138,6 @@ class Source(AuditMixin, CommonMixin, db.Model):
     catalog: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
 
-    __tablename__ = "source"
-    __mapper_args__ = {
-        "polymorphic_identity": "source",
-        "polymorphic_on": "type",
-    }
-
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
     academic = db.relationship(Academic, backref=db.backref("sources", cascade="all,delete"))
 
