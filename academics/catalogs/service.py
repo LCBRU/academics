@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_subtype
-from academics.model import SCOPUS_CATALOG, Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
+from academics.model import CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
@@ -249,7 +249,7 @@ def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None)
     for catalog_identifier in catalog_identifier:
         sa = Source(
             catalog_identifier=catalog_identifier,
-            catalog=SCOPUS_CATALOG,
+            catalog=CATALOG_SCOPUS,
             academic=academic,
         )
         db.session.add(sa)

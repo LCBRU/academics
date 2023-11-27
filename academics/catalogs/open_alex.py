@@ -10,7 +10,7 @@ from flask import current_app
 from lbrc_flask.database import db
 from datetime import date
 
-from academics.model import OPEN_ALEX_CATALOG, Academic, OpenAlexAuthor, Affiliation
+from academics.model import CATALOG_OPEN_ALEX, Academic, OpenAlexAuthor, Affiliation
 
 
 def get_open_alex():
@@ -105,7 +105,7 @@ def _get_author_datas(authors):
 
         result.append(
             AuthorData(
-                catalog=OPEN_ALEX_CATALOG,
+                catalog=CATALOG_OPEN_ALEX,
                 catalog_identifier=_get_id_from_href(a.get('id', '')),
                 orcid=_get_id_from_href(a.get('orcid', None)),
                 display_name=a.get('display_name', ''),
@@ -217,7 +217,7 @@ class AuthorData:
             select(Affiliation).where(
                 Affiliation.catalog_identifier == self.affiliation_identifier
             ).where(
-                Affiliation.catalog == OPEN_ALEX_CATALOG
+                Affiliation.catalog == CATALOG_OPEN_ALEX
             )
         ).scalar()
 
@@ -228,6 +228,6 @@ class AuthorData:
             result.address = self.affiliation_address
             result.country = self.affiliation_country
 
-            result.catalog = OPEN_ALEX_CATALOG
+            result.catalog = CATALOG_OPEN_ALEX
 
         return result

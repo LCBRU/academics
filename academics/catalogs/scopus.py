@@ -7,7 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import SCOPUS_CATALOG, Academic, Source
+from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
 from flask import current_app
@@ -148,7 +148,7 @@ def _translate_publication_author(author_dict):
         affiliation_identifier = None
 
     result = AuthorData(
-        catalog=SCOPUS_CATALOG,
+        catalog=CATALOG_SCOPUS,
         catalog_identifier=author_dict.get('authid', None),
         orcid=author_dict.get('orcid', None),
         first_name=author_dict.get('given-name', None),
@@ -208,7 +208,7 @@ def scopus_author_search(search_string):
     existing_catalog_identifiers = set(db.session.execute(
         select(Source.catalog_identifier)
         .where(Source.academic_id != None)
-        .where(Source.catalog == SCOPUS_CATALOG)
+        .where(Source.catalog == CATALOG_SCOPUS)
     ).scalars())
 
     result = []
@@ -225,7 +225,7 @@ def scopus_author_search(search_string):
         sa.read(_client())
 
         a = AuthorData(
-            catalog=SCOPUS_CATALOG,
+            catalog=CATALOG_SCOPUS,
             catalog_identifier=r.get(u'dc:identifier', ':').split(':')[1],
             orcid=r.get(u'coredata', {}).get(u'orcid', ''),
             first_name=r.get(u'preferred-name', {}).get(u'given-name', ''),
@@ -373,7 +373,7 @@ class Author(ElsAuthor):
 
     def get_data(self):
         result = AuthorData(
-            catalog=SCOPUS_CATALOG,
+            catalog=CATALOG_SCOPUS,
             catalog_identifier=self.catalog_identifier,
             orcid=self.orcid,
             first_name=self.first_name,

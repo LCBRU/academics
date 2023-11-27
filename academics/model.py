@@ -10,8 +10,8 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
 
-SCOPUS_CATALOG = 'scopus'
-OPEN_ALEX_CATALOG = 'open alex'
+CATALOG_SCOPUS = 'scopus'
+CATALOG_OPEN_ALEX = 'open alex'
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):
