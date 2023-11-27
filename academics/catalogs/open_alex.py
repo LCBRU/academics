@@ -57,7 +57,7 @@ def open_alex_similar_authors(academic: Academic):
     logging.info(f'Getting OpenAlex data for {academic.full_name}')
 
     existing = set(db.session.execute(
-        select(OpenAlexAuthor.source_identifier)
+        select(OpenAlexAuthor.catalog_identifier)
     ).scalars())
 
     authors = {}
@@ -200,7 +200,7 @@ class AuthorData:
         return result
 
     def update_source(self, source, get_details=False):
-        source.source_identifier = self.catalog_identifier
+        source.catalog_identifier = self.catalog_identifier
         source.orcid = self.orcid
         source.first_name = self.first_name
         source.last_name = self.last_name

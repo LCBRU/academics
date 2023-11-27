@@ -136,9 +136,9 @@ def refresh_source(s):
         author_data = None
 
         if isinstance(s, ScopusAuthor):
-            author_data = get_scopus_author_data(s.source_identifier, get_extended_details=True)
+            author_data = get_scopus_author_data(s.catalog_identifier, get_extended_details=True)
         if isinstance(s, OpenAlexAuthor):
-            author_data = get_open_alex_author_data(s.source_identifier)
+            author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
             s = _get_or_create_source(author_data=author_data)
@@ -150,7 +150,7 @@ def refresh_source(s):
             publications = []
 
             if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
-                publications = get_scopus_publications(s.source_identifier)
+                publications = get_scopus_publications(s.catalog_identifier)
 
             add_publications(publications)
 
@@ -184,14 +184,14 @@ def _find_new_scopus_sources(academic):
         if db.session.execute(
             select(db.func.count(AcademicPotentialSource.id))
             .where(AcademicPotentialSource.academic == academic)
-            .where(AcademicPotentialSource.source.has(Source.source_identifier == new_source.catalog_identifier))
+            .where(AcademicPotentialSource.source.has(Source.catalog_identifier == new_source.catalog_identifier))
             .where(AcademicPotentialSource.source.has(Source.type == new_source.catalog))
         ).scalar() > 0:
             continue
 
         s = db.session.execute(
             select(Source)
-            .where(Source.source_identifier == new_source.catalog_identifier)
+            .where(Source.catalog_identifier == new_source.catalog_identifier)
             .where(Source.type == new_source.catalog)
         ).scalar()
 
@@ -231,7 +231,7 @@ def _ensure_all_academic_sources_are_proposed(academic):
     db.session.commit()
 
 
-def add_sources_to_academic(source_identifiers, academic_id=None, theme_id=None):
+def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None):
     academic = None
 
     if academic_id:
@@ -246,9 +246,9 @@ def add_sources_to_academic(source_identifiers, academic_id=None, theme_id=None)
 
     db.session.add(academic)
 
-    for source_identifier in source_identifiers:
+    for catalog_identifier in catalog_identifier:
         sa = Source(
-            source_identifier=source_identifier,
+            catalog_identifier=catalog_identifier,
             type=SCOPUS_CATALOG,
             academic=academic,
         )
@@ -368,7 +368,7 @@ def _get_or_create_source(author_data):
     s = db.session.execute(
         select(Source)
         .where(Source.type == author_data.catalog)
-        .where(Source.source_identifier == author_data.catalog_identifier)
+        .where(Source.catalog_identifier == author_data.catalog_identifier)
     ).scalar()
 
     if not s:

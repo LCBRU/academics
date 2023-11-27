@@ -125,14 +125,14 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         return {self.orcid} | {s.orcid for s in self.sources if s.orcid}
 
     def all_scopus_ids(self):
-        return {s.source_identifier for s in self.sources if s.source_identifier and s.type == 'scopus'}
+        return {s.catalog_identifier for s in self.sources if s.catalog_identifier and s.catalog == 'scopus'}
 
 
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)
-    catalog: Mapped[str] = mapped_column(String(100), index=True)
-    catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
+    catalog: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    catalog_identifier: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
 
     __tablename__ = "source"
     __mapper_args__ = {

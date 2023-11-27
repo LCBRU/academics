@@ -207,8 +207,8 @@ def scopus_author_search(search_string):
     auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
     auth_srch.execute(_client())
 
-    existing_source_identifiers = set(db.session.execute(
-        select(Source.source_identifier)
+    existing_catalog_identifiers = set(db.session.execute(
+        select(Source.catalog_identifier)
         .where(Source.academic_id != None)
         .where(Source.type != SCOPUS_CATALOG)
     ).scalars())
@@ -243,7 +243,7 @@ def scopus_author_search(search_string):
         if len(a.catalog_identifier) == 0:
             continue
 
-        a.existing = a.catalog_identifier in existing_source_identifiers
+        a.existing = a.catalog_identifier in existing_catalog_identifiers
 
         result.append(a)
 
@@ -251,8 +251,8 @@ def scopus_author_search(search_string):
 
 
 class Author(ElsAuthor):
-    def __init__(self, source_identifier):
-        self.source_identifier = source_identifier
+    def __init__(self, catalog_identifier):
+        self.catalog_identifier = catalog_identifier
         self.orcid = None
         self.href = None
         self.initials = None
@@ -264,7 +264,7 @@ class Author(ElsAuthor):
         self.affiliation_address = None
         self.affiliation_country = None
 
-        super().__init__(author_id=self.source_identifier)
+        super().__init__(author_id=self.catalog_identifier)
 
     def _set_orcid(self):
         self.orcid = self.data.get(u'coredata', {}).get(u'orcid', '')
@@ -376,7 +376,7 @@ class Author(ElsAuthor):
     def get_data(self):
         result = AuthorData(
             catalog=SCOPUS_CATALOG,
-            catalog_identifier=self.source_identifier,
+            catalog_identifier=self.catalog_identifier,
             orcid=self.orcid,
             first_name=self.first_name,
             last_name=self.last_name,
@@ -563,7 +563,7 @@ class AuthorData():
         return result
 
     def update_source(self, source):
-        source.source_identifier = self.catalog_identifier
+        source.catalog_identifier = self.catalog_identifier
         source.type = self.catalog
         source.orcid = self.orcid
         source.first_name = self.first_name

@@ -117,7 +117,7 @@ def publication_folders():
 def publication_full_export_xlsx():
     # Use of dictionary instead of set to maintain order of headers
     headers = {
-        'source_identifier': None,
+        'catalog_identifier': None,
         'doi': None,
         'pubmed_id': None,
         'journal': None,
@@ -142,7 +142,7 @@ def publication_full_export_xlsx():
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     publication_details = ({
-        'catalog_id': p.catalog_id,
+        'catalog_identifier': p.catalog_id,
         'doi': p.doi,
         'pubmed_id': p.pubmed_id,
         'journal': p.journal.name if p.journal else '',
