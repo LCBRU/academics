@@ -98,6 +98,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .where(Publication.publication_sources.any(PublicationsSources.source.academic_id == self.id))
         )
 
+        print('^'*20)
+        print(q)
+        print('^'*20)
+
         return db.session.execute(q).scalar()
 
     @property
