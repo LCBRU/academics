@@ -93,6 +93,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def publication_count(self):
+        print('+'*20)
         q =  (
             select(func.count(Publication.id))
             .join(PublicationsSources, PublicationsSources.publication_id == Publication.id)
