@@ -505,7 +505,14 @@ class Publication(db.Model, AuditMixin):
 class CatalogPublication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id))
-    publication: Mapped[Publication] = relationship(lazy="joined", backref=backref("catalog_publications", lazy="joined"))
+    publication: Mapped[Publication] = relationship(
+        lazy="joined",
+        backref=backref(
+            "catalog_publications",
+            lazy="joined",
+            cascade="delete, delete-orphan",
+        )
+    )
     is_main: Mapped[bool] = mapped_column(Boolean, nullable=True)
     catalog: Mapped[str] = mapped_column(String(50), index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
