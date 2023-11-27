@@ -423,12 +423,12 @@ class Publication(db.Model, AuditMixin):
     nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
 
     sources = db.relationship("Source", secondary=sources__publicationses, backref=db.backref("publications"), lazy="joined")
-    publication_sources = db.relationship(
-        "PublicationsSources",
-        order_by="PublicationsSources.ordinal",
-        collection_class=ordering_list('ordinal'),
-        cascade="delete, delete-orphan"
-    )
+    # publication_sources = db.relationship(
+    #     "PublicationsSources",
+    #     order_by="PublicationsSources.ordinal",
+    #     collection_class=ordering_list('ordinal'),
+    #     cascade="delete, delete-orphan"
+    # )
 
     authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
 
@@ -616,5 +616,14 @@ class PublicationsSources(db.Model):
     source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), primary_key=True)
     ordinal: Mapped[int] = mapped_column(primary_key=True)
 
-    publication: Mapped[Publication] = relationship()
+    publication: Mapped[Publication] = relationship(
+        lazy="joined",
+        backref=backref(
+            "publication_sources",
+            lazy="joined",
+            order_by="PublicationsSources.ordinal",
+            collection_class=ordering_list('ordinal'),
+            cascade="delete, delete-orphan"
+        ),
+    )
     source: Mapped[Source] = relationship()
