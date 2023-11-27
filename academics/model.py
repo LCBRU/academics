@@ -98,6 +98,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .where(Publication.publication_sources.any(PublicationsSources.source.academic_id == self.id))
         )
 
+        return db.session.execute(q).scalar()    
+
     @property
     def orcid_mismatch(self):
         return any([s.orcid_mismatch for s in self.sources])
