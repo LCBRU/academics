@@ -181,14 +181,19 @@ class Source(AuditMixin, CommonMixin, db.Model):
         # print('^'*20)
 
         # return db.session.execute(q).scalar()
-        return 1
+        # return 1
 
         # q =  (
         #     select(func.count(Publication.id))
         #     .where(Publication.publication_sources.any(Source.id == self.id))
         # )
 
-        # return db.session.execute(q).scalar()
+        q =  (
+            select(func.count(Publication.id))
+            .where(Publication.publication_sources.any(PublicationsSources.source_id == self.id))
+        )
+
+        return db.session.execute(q).scalar()
 
     @property
     def orcid_mismatch(self):
@@ -423,12 +428,6 @@ class Publication(db.Model, AuditMixin):
     nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
 
     sources = db.relationship("Source", secondary=sources__publicationses, backref=db.backref("publications"), lazy="joined")
-    # publication_sources = db.relationship(
-    #     "PublicationsSources",
-    #     order_by="PublicationsSources.ordinal",
-    #     collection_class=ordering_list('ordinal'),
-    #     cascade="delete, delete-orphan"
-    # )
 
     authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
 
