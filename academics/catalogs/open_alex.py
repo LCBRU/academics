@@ -10,7 +10,7 @@ from flask import current_app
 from lbrc_flask.database import db
 from datetime import date
 
-from academics.model import CATALOG_OPEN_ALEX, Academic, OpenAlexAuthor, Affiliation
+from academics.model import CATALOG_OPEN_ALEX, Academic, Affiliation, Source
 
 
 def get_open_alex():
@@ -192,12 +192,13 @@ class AuthorData:
         return result
 
     def get_new_source(self, get_details=False):
-        result = OpenAlexAuthor()
+        result = Source()
         self.update_source(result, get_details)
         return result
 
     def update_source(self, source, get_details=False):
         source.catalog_identifier = self.catalog_identifier
+        source.catalog = CATALOG_OPEN_ALEX
         source.orcid = self.orcid
         source.first_name = self.first_name
         source.last_name = self.last_name

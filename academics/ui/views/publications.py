@@ -12,7 +12,7 @@ from sqlalchemy import or_
 from wtforms import HiddenField
 
 from academics.model import (CatalogPublication, Folder, Journal, Keyword,
-                             NihrAcknowledgement, Publication, ScopusAuthor,
+                             NihrAcknowledgement, Publication, Source,
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
@@ -193,7 +193,7 @@ def publication_export_pdf():
     parameters = []
 
     if search_form.author_id.data:
-        author = db.get_or_404(ScopusAuthor, search_form.author_id.data)
+        author = db.get_or_404(Source, search_form.author_id.data)
         parameters.append(('Author', author.full_name))
 
     if search_form.theme_id.data:

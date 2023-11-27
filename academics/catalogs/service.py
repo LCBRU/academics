@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_subtype
-from academics.model import CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
+from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, Publication, PublicationsSources, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
@@ -135,9 +135,9 @@ def refresh_source(s):
     try:
         author_data = None
 
-        if isinstance(s, ScopusAuthor):
+        if s.catalog == CATALOG_SCOPUS:
             author_data = get_scopus_author_data(s.catalog_identifier, get_extended_details=True)
-        if isinstance(s, OpenAlexAuthor):
+        if s.catalog == CATALOG_OPEN_ALEX:
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
@@ -149,7 +149,7 @@ def refresh_source(s):
         if s.academic:
             publications = []
 
-            if isinstance(s, ScopusAuthor) and current_app.config['SCOPUS_ENABLED']:
+            if s.catalog == CATALOG_SCOPUS:
                 publications = get_scopus_publications(s.catalog_identifier)
 
             add_publications(publications)

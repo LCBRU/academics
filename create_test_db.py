@@ -68,40 +68,46 @@ for a in [
     db.session.add(Academic(**a, initialised=True))
 db.session.commit()
 
-# ScopusAuthor
 for a in [
     {
         'academic_id': 1,
         'first_name': 'Fred',
         'last_name': 'Hoyle',
+        'catalog': CATALOG_SCOPUS,
     },
     {
         'academic_id': 1,
         'first_name': 'Frederick',
         'last_name': 'Hoyle',
+        'catalog': CATALOG_SCOPUS,
     },
     {
         'academic_id': 2,
         'first_name': 'Richard',
         'last_name': 'Feynman',
+        'catalog': CATALOG_SCOPUS,
     },
     {
         'academic_id': 2,
         'first_name': 'Dicky',
         'last_name': 'Feynman',
+        'catalog': CATALOG_SCOPUS,
     },
     {
         'academic_id': 3,
         'first_name': 'Peter',
         'last_name': 'Faulk',
+        'catalog': CATALOG_SCOPUS,
     },
     {
         'academic_id': 3,
         'first_name': 'Pete',
         'last_name': 'Faulk',
+        'catalog': CATALOG_SCOPUS,
     },
 ]:
-    db.session.add(ScopusAuthor(**a))
+    db.session.add(Source(**a))
+
 db.session.commit()
 
 for p in [
@@ -216,7 +222,7 @@ for p in [
         publication_cover_date=p['publication_cover_date'],
         subtype_id=1,
     )
-    sp.sources.append(ScopusAuthor.query.get(p['scopus_author_id']))
+    sp.sources.append(Source.query.get(p['scopus_author_id']))
     db.session.add(sp)
 
 db.session.commit()

@@ -562,6 +562,7 @@ class AuthorData():
 
     def update_source(self, source):
         source.catalog_identifier = self.catalog_identifier
+        source.catalog = CATALOG_SCOPUS
         source.type = self.catalog
         source.orcid = self.orcid
         source.first_name = self.first_name
