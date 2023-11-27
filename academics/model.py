@@ -100,7 +100,6 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .where(Source.academic_id == self.id)
         )
 
-        print(q)
         return db.session.execute(q).scalar()    
 
     @property

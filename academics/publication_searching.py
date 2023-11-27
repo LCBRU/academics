@@ -2,7 +2,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Publication, Source, Subtype, Theme, CatalogPublication
+from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Subtype, Theme, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
@@ -142,19 +142,24 @@ def publication_search_query(search_form):
     )
 
     if search_form.has_value('author_id'):
-        q = q.where(Publication.publication_sources.any(Source.id == search_form.author_id.data))
+        q = q.where(Publication.publication_sources.any(
+            PublicationsSources.source_id == search_form.author_id.data
+        ))
 
     if search_form.has_value('academic_id'):
-        q = q.where(Publication.publication_sources.any(Source.academic_id == search_form.academic_id.data))
+        q = q.where(Publication.id.in_(
+            select(PublicationsSources.publication_id)
+            .join(PublicationsSources.source)
+            .where(Source.academic_id == search_form.academic_id.data)
+        ))
 
     if search_form.has_value('theme_id'):
-        q = q.where(Publication.publication_sources.any(
-            Source.academic_id.in_(
-                select(Academic.id)
-                .where(Academic.theme_id == search_form.theme_id.data)
-                )
-            )
-        )
+        q = q.where(Publication.id.in_(
+            select(PublicationsSources.publication_id)
+            .join(PublicationsSources.source)
+            .join(Source.academic)
+            .where(Academic.theme_id == search_form.theme_id.data)
+        ))
 
     if  search_form.has_value('journal_id'):
         q = q.where(CatalogPublication.journal_id.in_(search_form.journal_id.data))
