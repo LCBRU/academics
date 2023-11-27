@@ -134,7 +134,6 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(100), nullable=False)
     catalog: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
 
@@ -150,7 +149,6 @@ class Source(AuditMixin, CommonMixin, db.Model):
     display_name = db.Column(db.String(255))
 
     href = db.Column(db.String(1000))
-    source_identifier = db.Column(db.String(1000))
     orcid = db.Column(db.String(255))
 
     citation_count = db.Column(db.String(1000))
