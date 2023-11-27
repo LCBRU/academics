@@ -95,7 +95,9 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def publication_count(self):
         q =  (
             select(func.count(Publication.id))
-            .where(Publication.publication_sources.any(PublicationsSources.source.academic_id == self.id))
+            .join(PublicationsSources, PublicationsSources.publication_id == Publication.id)
+            .where(PublicationsSources.source.academic_id == self.id)
+            .distinct()
         )
 
         print('^'*20)
