@@ -210,7 +210,7 @@ def scopus_author_search(search_string):
     existing_catalog_identifiers = set(db.session.execute(
         select(Source.catalog_identifier)
         .where(Source.academic_id != None)
-        .where(Source.type != SCOPUS_CATALOG)
+        .where(Source.catalog == SCOPUS_CATALOG)
     ).scalars())
 
     result = []

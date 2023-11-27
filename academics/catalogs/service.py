@@ -185,14 +185,14 @@ def _find_new_scopus_sources(academic):
             select(db.func.count(AcademicPotentialSource.id))
             .where(AcademicPotentialSource.academic == academic)
             .where(AcademicPotentialSource.source.has(Source.catalog_identifier == new_source.catalog_identifier))
-            .where(AcademicPotentialSource.source.has(Source.type == new_source.catalog))
+            .where(AcademicPotentialSource.source.has(Source.catalog == new_source.catalog))
         ).scalar() > 0:
             continue
 
         s = db.session.execute(
             select(Source)
             .where(Source.catalog_identifier == new_source.catalog_identifier)
-            .where(Source.type == new_source.catalog)
+            .where(Source.catalog == new_source.catalog)
         ).scalar()
 
         if not s:
@@ -249,7 +249,7 @@ def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None)
     for catalog_identifier in catalog_identifier:
         sa = Source(
             catalog_identifier=catalog_identifier,
-            type=SCOPUS_CATALOG,
+            catalog=SCOPUS_CATALOG,
             academic=academic,
         )
         db.session.add(sa)
@@ -367,7 +367,7 @@ def _get_or_create_source(author_data):
 
     s = db.session.execute(
         select(Source)
-        .where(Source.type == author_data.catalog)
+        .where(Source.catalog == author_data.catalog)
         .where(Source.catalog_identifier == author_data.catalog_identifier)
     ).scalar()
 
