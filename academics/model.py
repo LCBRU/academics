@@ -5,7 +5,7 @@ from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 from lbrc_flask.security import User as BaseUser
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, func, select
+from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, distinct, func, select
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
@@ -94,10 +94,13 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     @property
     def publication_count(self):
         q =  (
-            select(func.count(Publication.id))
-            .where(Publication.publication_sources.any(PublicationsSources.source.academic_id == self.id))
+            select(func.count(distinct(Publication.id)))
+            .join(Publication.publication_sources)
+            .join(PublicationsSources.source)
+            .where(Source.academic_id == self.id)
         )
 
+        print(q)
         return db.session.execute(q).scalar()    
 
     @property
