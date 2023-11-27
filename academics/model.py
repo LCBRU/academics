@@ -93,20 +93,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def publication_count(self):
-        print('+'*20)
-        # q =  (
-        #     select(func.count(Publication.id))
-        #     .join(PublicationsSources, PublicationsSources.publication_id == Publication.id)
-        #     .where(PublicationsSources.source.academic_id == self.id)
-        #     .distinct()
-        # )
-
-        # print('^'*20)
-        # print(q)
-        # print('^'*20)
-
-        # return db.session.execute(q).scalar()
-        return 1
+        q =  (
+            select(func.count(Publication.id))
+            .where(Publication.publication_sources.any(PublicationsSources.source.academic_id == self.id))
+        )
 
     @property
     def orcid_mismatch(self):
@@ -168,26 +158,6 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
     @property
     def publication_count(self):
-        print('+'*20)
-        # q =  (
-        #     select(func.count(Publication.id))
-        #     .join(PublicationsSources, PublicationsSources.publication_id == Publication.id)
-        #     .where(PublicationsSources.source.academic_id == self.id)
-        #     .distinct()
-        # )
-
-        # print('^'*20)
-        # print(q)
-        # print('^'*20)
-
-        # return db.session.execute(q).scalar()
-        # return 1
-
-        # q =  (
-        #     select(func.count(Publication.id))
-        #     .where(Publication.publication_sources.any(Source.id == self.id))
-        # )
-
         q =  (
             select(func.count(Publication.id))
             .where(Publication.publication_sources.any(PublicationsSources.source_id == self.id))
