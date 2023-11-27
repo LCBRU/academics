@@ -279,7 +279,6 @@ def add_publications(publication_datas):
     logging.info('add_publications: started')
 
     for p in publication_datas:
-        print('Publication')
         pub = _get_or_create_publication(p)
         cat_pub = _get_or_create_catalog_publication(p)
 
