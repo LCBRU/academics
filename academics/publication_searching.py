@@ -142,13 +142,13 @@ def publication_search_query(search_form):
     )
 
     if search_form.has_value('author_id'):
-        q = q.where(Publication.sources.any(Source.id == search_form.author_id.data))
+        q = q.where(Publication.publication_sources.any(Source.id == search_form.author_id.data))
 
     if search_form.has_value('academic_id'):
-        q = q.where(Publication.sources.any(Source.academic_id == search_form.academic_id.data))
+        q = q.where(Publication.publication_sources.any(Source.academic_id == search_form.academic_id.data))
 
     if search_form.has_value('theme_id'):
-        q = q.where(Publication.sources.any(
+        q = q.where(Publication.publication_sources.any(
             Source.academic_id.in_(
                 select(Academic.id)
                 .where(Academic.theme_id == search_form.theme_id.data)

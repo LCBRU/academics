@@ -95,7 +95,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def publication_count(self):
         q =  (
             select(func.count(Publication.id))
-            .where(Publication.sources.any(Source.academic_id == self.id))
+            .where(Publication.publication_sources.any(Source.academic_id == self.id))
         )
 
         return db.session.execute(q).scalar()
@@ -162,7 +162,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     def publication_count(self):
         q =  (
             select(func.count(Publication.id))
-            .where(Publication.sources.any(Source.id == self.id))
+            .where(Publication.publication_sources.any(Source.id == self.id))
         )
 
         return db.session.execute(q).scalar()
