@@ -269,9 +269,10 @@ def add_sources_to_academic(source_identifiers, academic_id=None, theme_id=None)
 
 
 def delete_orphan_publications():
-    for p in Publication.query.filter(~Publication.sources.any()):
-        db.session.delete(p)
-        db.session.commit()
+    for p in Publication.query.filter(~Publication.publication_sources.any()):
+        if len(p.sources) == 0:
+            db.session.delete(p)
+            db.session.commit()
 
 
 def add_publications(publication_datas):
