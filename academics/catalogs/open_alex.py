@@ -10,10 +10,7 @@ from flask import current_app
 from lbrc_flask.database import db
 from datetime import date
 
-from academics.model import Academic, OpenAlexAuthor, Affiliation
-
-
-OPEN_ALEX_CATALOG = 'open alex'
+from academics.model import OPEN_ALEX_CATALOG, Academic, OpenAlexAuthor, Affiliation
 
 
 def get_open_alex():

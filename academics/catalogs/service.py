@@ -4,11 +4,11 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
+from academics.model import SCOPUS_CATALOG, Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
-from .scopus import SCOPUS_CATALOG, get_scopus_author_data, get_scopus_publications, scopus_similar_authors
+from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception

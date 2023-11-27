@@ -7,7 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.model import Academic, Source
+from academics.model import SCOPUS_CATALOG, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
 from flask import current_app
@@ -18,8 +18,6 @@ from lbrc_flask.validators import parse_date
 from elsapy import version
 from functools import cache
 
-
-SCOPUS_CATALOG = 'scopus'
 
 class ResourceNotFoundException(Exception):
     pass

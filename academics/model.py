@@ -10,6 +10,10 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
 
+SCOPUS_CATALOG = 'scopus'
+OPEN_ALEX_CATALOG = 'open alex'
+
+
 class Theme(AuditMixin, CommonMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
