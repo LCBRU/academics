@@ -131,6 +131,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(100), nullable=False)
+    catalog: Mapped[str] = mapped_column(String(100), index=True)
+    catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
 
     __tablename__ = "source"
     __mapper_args__ = {
@@ -230,7 +232,6 @@ class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
 
 
 class Journal(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     # MariaDB backends need a VARChar variable, added 255 to set a max length
     name = db.Column(db.String(255))
