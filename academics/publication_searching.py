@@ -267,7 +267,9 @@ def get_publication_by_theme(search_form):
     ).join(
         Publication, Publication.id == publications.c.id
     ).join(
-        Publication.sources
+        Publication.publication_sources
+    ).join(
+        PublicationsSources.source
     ).join(
         Source.academic
     ).join(
@@ -300,7 +302,9 @@ def get_publication_by_academic(search_form):
     ).join(
         Publication, Publication.id == publications.c.id
     ).join(
-        Publication.sources
+        Publication.publication_sources
+    ).join(
+        PublicationsSources.source
     ).join(
         Source.academic
     ).order_by(

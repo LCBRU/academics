@@ -539,7 +539,7 @@ class Publication(db.Model, AuditMixin):
 
     @property
     def academics(self):
-        return {a.academic for a in self.sources}
+        return {a.academic for a in self.authors}
 
     @property
     def is_nihr_acknowledged(self):
