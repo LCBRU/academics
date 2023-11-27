@@ -290,28 +290,6 @@ class FundingAcr(db.Model):
     name = db.Column(db.String(255))
 
 
-class NihrFundedOpenAccess(db.Model):
-    UKNOWN = 'unknown'
-    NIHR_FUNDED = 'NIHR Funded'
-    OTHER_NIHR_PROGRAMME_FUNDED = 'Other NIHR Programme Funded'
-    OTHER_NIHR_INFRASTRUCTURE_FUNDED = 'Other NIHR Infrastructure Funded'
-    NON_NIHR_FUNDED = 'Non NIHR Funded'
-
-    all_details = [
-        NIHR_FUNDED,
-        OTHER_NIHR_PROGRAMME_FUNDED,
-        OTHER_NIHR_INFRASTRUCTURE_FUNDED,
-        NON_NIHR_FUNDED,
-    ]
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-
-    @classmethod
-    def get_instance_by_name(cls, name):
-        return NihrFundedOpenAccess.query.filter_by(name=name).one()
-
-
 class NihrAcknowledgement(db.Model):
     UKNOWN = 'unknown'
     NIHR_ACKNOWLEDGED = 'NIHR Acknowledged'
@@ -385,14 +363,8 @@ class Publication(db.Model, AuditMixin):
     auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[auto_nihr_acknowledgement_id])
 
-    auto_nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), nullable=True)
-    auto_nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[auto_nihr_funded_open_access_id])
-
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
-
-    nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), nullable=True)
-    nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
 
     authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
 

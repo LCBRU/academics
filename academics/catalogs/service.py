@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
 from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_subtype
-from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, NihrFundedOpenAccess, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
+from academics.model import Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, OpenAlexAuthor, Publication, PublicationsSources, ScopusAuthor, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
@@ -32,16 +32,12 @@ def auto_validate():
 
     for p in db.session.execute(q).all():
         auto_ack = _get_nihr_acknowledgement(p)
-        auto_open = _get_nihr_funded_open_access(p)
 
-        if auto_ack or auto_open:
+        if auto_ack:
             amended_count += 1
 
             p.auto_nihr_acknowledgement = auto_ack
             p.nihr_acknowledgement = auto_ack
-
-            p.auto_nihr_funded_open_access = auto_open
-            p.nihr_funded_open_access = auto_open
 
             db.session.add(p)
 
@@ -53,11 +49,6 @@ def auto_validate():
 def _get_nihr_acknowledgement(pub):
     if pub.is_nihr_acknowledged:
         return NihrAcknowledgement.get_instance_by_name(NihrAcknowledgement.NIHR_ACKNOWLEDGED)
-
-
-def _get_nihr_funded_open_access(pub):
-    if pub.all_nihr_acknowledged and pub.is_open_access:
-        return NihrFundedOpenAccess.get_instance_by_name(NihrFundedOpenAccess.NIHR_FUNDED)
 
 
 def update_single_academic(academic: Academic):

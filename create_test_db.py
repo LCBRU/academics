@@ -37,11 +37,6 @@ for s in ['Sponsor 1', 'Sponsor 2']:
     db.session.add(Sponsor(name=s))
 db.session.commit()
 
-# Funded Open Access
-for n in NihrFundedOpenAccess.all_details:
-    db.session.add(NihrFundedOpenAccess(name=n))
-db.session.commit()
-
 # Acknowledgement
 for n, a in NihrAcknowledgement.all_details.items():
     db.session.add(NihrAcknowledgement(name=n, acknowledged=a))
