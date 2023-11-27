@@ -393,8 +393,8 @@ class Publication(db.Model, AuditMixin):
     auto_nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), nullable=True)
     auto_nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[auto_nihr_funded_open_access_id])
 
-    nihr_acknowledgement_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), nullable=True)
-    nihr_acknowledgement: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
+    nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
+    nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
 
     nihr_funded_open_access_id = mapped_column(ForeignKey(NihrFundedOpenAccess.id), nullable=True)
     nihr_funded_open_access: Mapped[NihrFundedOpenAccess] = relationship(lazy="joined", foreign_keys=[nihr_funded_open_access_id])
