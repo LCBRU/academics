@@ -327,7 +327,7 @@ def _get_or_create_publication(p):
         select(Publication)
         .join(Publication.catalog_publications)
         .where(or_(
-            CatalogPublication.doi == p.doi,
+            CatalogPublication.doi == p.doi or '',
             and_(
                 CatalogPublication.catalog == p.catalog,
                 CatalogPublication.catalog_identifier == p.catalog_identifier,
