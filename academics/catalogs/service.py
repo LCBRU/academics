@@ -319,8 +319,8 @@ def add_publications(publication_datas):
 
         pub.publication_sources = new_sources
 
-        db.session.add(pub)
         db.session.add_all(new_sources)
+        db.session.add(pub)
 
         _add_keywords_to_publications(publication=pub, keyword_list=p.keywords)
 
