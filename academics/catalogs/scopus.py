@@ -109,20 +109,28 @@ def get_scopus_publications(identifier):
     result = []
 
     for p in search_results.results:
-        if not p.get(u'dc:identifier', ':').split(':')[1]:
+        id = p.get(u'dc:identifier', ':').split(':')[1]
+
+        if not id:
             # SCOPUS sends an "Empty Set" result as opposed to no results
             continue
+
+        a = Abstract(id)
+        a.read(_client())
+
+        print(a.data)
 
         result.append(
             PublicationData(
                 catalog='scopus',
-                catalog_identifier=p.get(u'dc:identifier', ':').split(':')[1],
+                catalog_identifier=id,
                 href=_get_scopus_publication_link(p),
                 doi=p.get(u'prism:doi', ''),
                 title=p.get(u'dc:title', ''),
                 journal_name=p.get(u'prism:publicationName', ''),
                 publication_cover_date=parse_date(p.get(u'prism:coverDate', '')),
                 abstract_text=p.get(u'dc:description', ''),
+                funding_text=a.funding_text,
                 volume=p.get(u'prism:volume', ''),
                 issue=p.get(u'prism:issueIdentifier', ''),
                 pages=p.get(u'prism:pageRange', ''),
@@ -469,6 +477,18 @@ class Abstract(AbsDoc):
         else:
             return funding_text
 
+    @property
+    def abstract_text(self):
+        if not self.data:
+            return ''
+
+        funding_text = self.data.get('item', {}).get('xocs:meta', {}).get('xocs:funding-list', {}).get('xocs:funding-text', '')
+
+        if type(funding_text) is list:
+            return '\n'.join([t.get('$', '') for t in funding_text])
+        else:
+            return funding_text
+
     def read(self, client):
         try:
             return super().read(client)
@@ -498,6 +518,7 @@ class PublicationData():
     journal_name: str
     publication_cover_date: date
     abstract_text: str
+    funding_text: str
     volume: str
     issue: str
     pages: str
@@ -509,16 +530,4 @@ class PublicationData():
     author_list: str
     authors: list
     keywords: str
-    _abstract: Abstract = None
     is_open_access : bool = False
-
-    @property
-    def abstract(self):
-        if not self._abstract:
-            logging.info(f'Reading Abstract for: {self.catalog_identifier}')
-            self._abstract = Abstract(self.catalog_identifier)
-            self._abstract.read(_client())
-
-        return self._abstract
-
-
