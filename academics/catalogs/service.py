@@ -272,6 +272,10 @@ def add_publications(publication_datas):
         pub = _get_or_create_publication(p)
         cat_pub = _get_or_create_catalog_publication(p)
 
+        j = _get_journal(p.journal_name)
+        st = _get_subtype(p.subtype_code, p.subtype_description)
+        fa = _get_funding_acr(p.funding_acronym)
+
         db.session.add(pub)
         db.session.flush()
 
@@ -296,9 +300,9 @@ def add_publications(publication_datas):
         if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             pub.validation_historic = True
 
-        cat_pub.journal = _get_journal(p.journal_name)
-        cat_pub.subtype = _get_subtype(p.subtype_code, p.subtype_description)
-        cat_pub.funding_acr = _get_funding_acr(p.funding_acronym)
+        cat_pub.journal = j
+        cat_pub.subtype = st
+        cat_pub.funding_acr = fa
 
         _add_sponsors_to_publications(
             publication=pub,
