@@ -309,17 +309,17 @@ def add_publications(publication_datas):
             sponsor_names=p.funding_list,
         )
 
-        new_sources  = [
+        pub_sources  = [
             PublicationsSources(
-                source=_get_or_create_source(a),
+                source=s,
                 publication=pub
             ) 
-            for a in p.authors
+            for s in [_get_or_create_source(a) for a in p.authors]
         ]
 
-        pub.publication_sources = new_sources
+        pub.publication_sources = pub_sources
 
-        db.session.add_all(new_sources)
+        db.session.add_all(pub_sources)
         db.session.add(pub)
 
         _add_keywords_to_publications(publication=pub, keyword_list=p.keywords)
