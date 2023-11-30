@@ -156,6 +156,7 @@ class PublicationData():
     journal_name: str
     publication_cover_date: date
     abstract_text: str
+    funding_list: set
     funding_text: str
     volume: str
     issue: str

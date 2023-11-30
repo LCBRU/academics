@@ -129,6 +129,7 @@ def get_scopus_publications(identifier):
                 publication_cover_date=parse_date(p.get(u'prism:coverDate', '')),
                 abstract_text=p.get(u'dc:description', ''),
                 funding_text=a.funding_text,
+                funding_list=a.funding_list,
                 volume=p.get(u'prism:volume', ''),
                 issue=p.get(u'prism:issueIdentifier', ''),
                 pages=p.get(u'prism:pageRange', ''),

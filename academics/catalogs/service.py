@@ -281,7 +281,7 @@ def add_publications(publication_datas):
 
         _add_sponsors_to_publications(
             publication=pub,
-            sponsor_names=p.abstract.funding_list,
+            sponsor_names=p.funding_list,
         )
 
         cat_pub.doi = p.doi
