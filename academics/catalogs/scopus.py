@@ -7,7 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.catalogs.utils import AuthorData
+from academics.catalogs.utils import AuthorData, PublicationData
 from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
@@ -117,8 +117,6 @@ def get_scopus_publications(identifier):
 
         a = Abstract(id)
         a.read(_client())
-
-        print(a.data)
 
         result.append(
             PublicationData(
@@ -506,28 +504,3 @@ class DocumentSearch(ElsSearch):
 
         super().__init__(query=q, index='scopus')
         self._uri += '&view=complete'
-
-
-@dataclass
-class PublicationData():
-    catalog: str
-    catalog_identifier: str
-    href: str
-    doi: str
-    title: str
-    journal_name: str
-    publication_cover_date: date
-    abstract_text: str
-    funding_text: str
-    volume: str
-    issue: str
-    pages: str
-    subtype_code: str
-    subtype_description: str
-    sponsor_name: str
-    funding_acronym: str
-    cited_by_count: int
-    author_list: str
-    authors: list
-    keywords: str
-    is_open_access : bool = False

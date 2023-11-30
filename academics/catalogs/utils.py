@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from academics.model import FundingAcr, Journal, Keyword, Sponsor, Subtype
 from lbrc_flask.database import db
 from academics.model import Source
+from datetime import date
 
 
 def _get_journal(journal_name):
@@ -143,3 +144,28 @@ class AuthorData():
         source.citation_count = self.citation_count
         source.document_count = self.document_count
         source.h_index = self.h_index
+
+
+@dataclass
+class PublicationData():
+    catalog: str
+    catalog_identifier: str
+    href: str
+    doi: str
+    title: str
+    journal_name: str
+    publication_cover_date: date
+    abstract_text: str
+    funding_text: str
+    volume: str
+    issue: str
+    pages: str
+    subtype_code: str
+    subtype_description: str
+    sponsor_name: str
+    funding_acronym: str
+    cited_by_count: int
+    author_list: str
+    authors: list
+    keywords: str
+    is_open_access : bool = False
