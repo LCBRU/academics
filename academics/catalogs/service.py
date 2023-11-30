@@ -284,8 +284,8 @@ def add_publications(publication_datas):
             sponsor_names=p.funding_list,
         )
 
-        cat_pub.doi = p.doi
-        cat_pub.title = p.title
+        cat_pub.doi = p.doi or ''
+        cat_pub.title = p.title or ''
         cat_pub.publication_cover_date = p.publication_cover_date
         cat_pub.href = p.href
         cat_pub.abstract = p.abstract_text or ''
