@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from academics.model import FundingAcr, Journal, Keyword, Sponsor, Subtype
 from lbrc_flask.database import db
+from academics.model import Source
 
 
 def _get_journal(journal_name):
@@ -88,3 +90,56 @@ def _add_sponsors_to_publications(publication, sponsor_names):
             db.session.add(sponsor)
         
         publication.sponsors.add(sponsor)
+
+
+@dataclass
+class AuthorData():
+    catalog: str
+    catalog_identifier: str
+    orcid: str
+    first_name: str
+    last_name: str
+    initials: str
+    href: str
+    affiliation_identifier: str
+    affiliation_name: str
+    affiliation_address: str
+    affiliation_country: str
+    author_name: str = None
+    citation_count: str = None
+    document_count: str = None
+    h_index: str = None
+
+    @property
+    def display_name(self):
+        if self.author_name:
+            return self.author_name
+        else:
+            return ' '.join(filter(None, [self.first_name, self.last_name]))
+
+    @property
+    def is_leicester(self):
+        return 'leicester' in self.affiliation_summary.lower()
+
+    @property
+    def affiliation_summary(self):
+        return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
+
+    def get_new_source(self):
+        result = Source()
+        self.update_source(result)
+
+        return result
+
+    def update_source(self, source):
+        source.catalog_identifier = self.catalog_identifier
+        source.catalog = self.catalog
+        source.type = self.catalog
+        source.orcid = self.orcid
+        source.first_name = self.first_name
+        source.last_name = self.last_name
+        source.display_name = self.display_name
+        source.href = self.href
+        source.citation_count = self.citation_count
+        source.document_count = self.document_count
+        source.h_index = self.h_index

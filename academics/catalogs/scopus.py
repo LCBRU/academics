@@ -7,6 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
+from academics.catalogs.utils import AuthorData
 from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
@@ -521,54 +522,3 @@ class PublicationData():
         return self._abstract
 
 
-@dataclass
-class AuthorData():
-    catalog: str
-    catalog_identifier: str
-    orcid: str
-    first_name: str
-    last_name: str
-    initials: str
-    href: str
-    affiliation_identifier: str
-    affiliation_name: str
-    affiliation_address: str
-    affiliation_country: str
-    author_name: str = None
-    citation_count: str = None
-    document_count: str = None
-    h_index: str = None
-
-    @property
-    def display_name(self):
-        if self.author_name:
-            return self.author_name
-        else:
-            return ' '.join(filter(None, [self.first_name, self.last_name]))
-
-    @property
-    def is_leicester(self):
-        return 'leicester' in self.affiliation_summary.lower()
-
-    @property
-    def affiliation_summary(self):
-        return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
-
-    def get_new_source(self):
-        result = Source()
-        self.update_source(result)
-
-        return result
-
-    def update_source(self, source):
-        source.catalog_identifier = self.catalog_identifier
-        source.catalog = CATALOG_SCOPUS
-        source.type = self.catalog
-        source.orcid = self.orcid
-        source.first_name = self.first_name
-        source.last_name = self.last_name
-        source.display_name = self.display_name
-        source.href = self.href
-        source.citation_count = self.citation_count
-        source.document_count = self.document_count
-        source.h_index = self.h_index

@@ -1,16 +1,14 @@
-from dataclasses import dataclass
 import pyalex
 import logging
 
 from sqlalchemy import select
+from academics.catalogs.utils import AuthorData
 from academics.config import Config
 from pyalex import Authors, Works, Institutions
 from itertools import chain
 from flask import current_app
 from lbrc_flask.database import db
-from datetime import date
-
-from academics.model import CATALOG_OPEN_ALEX, Academic, Affiliation, Source
+from academics.model import CATALOG_OPEN_ALEX, Academic, Source
 
 
 def get_open_alex():
@@ -23,7 +21,9 @@ def get_open_alex():
 
     # works = Works().filter(**{"author.id": }).filter(publication_year="2022").get()
 
-    print(Works().random())
+    w = Works().random()
+
+    print(w.keys())
 
     # for a in chain(*q.paginate(per_page=200)):
     #     # print(a['id'], a["display_name"])
@@ -54,7 +54,8 @@ def open_alex_similar_authors(academic: Academic):
     logging.info(f'Getting OpenAlex data for {academic.full_name}')
 
     existing = set(db.session.execute(
-        select(OpenAlexAuthor.catalog_identifier)
+        select(Source.catalog_identifier).
+        where(Source.catalog == CATALOG_OPEN_ALEX)
     ).scalars())
 
     authors = {}
@@ -155,80 +156,3 @@ def _get_for_name(name):
 
     q = Authors().search_filter(display_name=name)
     return chain(*q.paginate(per_page=200))
-
-
-@dataclass
-class AuthorData:
-    catalog: str
-    catalog_identifier: str
-    orcid: str
-    display_name: str
-    initials: str
-    href: str
-    affiliation_identifier: str
-    affiliation_name: str
-    affiliation_address: str
-    affiliation_country: str
-    citation_count: int
-    document_count: int
-    h_index: float
-
-    @property
-    def is_leicester(self):
-        return 'leicester' in self.affiliation_summary.lower()
-
-    @property
-    def affiliation_summary(self):
-        return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
-
-    @property
-    def last_name(self):
-        _, result = self.display_name.rsplit(maxsplit=1)
-        return result
-
-    @property
-    def first_name(self):
-        result, _ = self.display_name.split(maxsplit=1)
-        return result
-
-    def get_new_source(self, get_details=False):
-        result = Source()
-        self.update_source(result, get_details)
-        return result
-
-    def update_source(self, source, get_details=False):
-        source.catalog_identifier = self.catalog_identifier
-        source.catalog = CATALOG_OPEN_ALEX
-        source.orcid = self.orcid
-        source.first_name = self.first_name
-        source.last_name = self.last_name
-        source.display_name = self.display_name
-        source.href = self.href
-
-        if get_details:
-            source.citation_count = self.citation_count
-            source.document_count = self.document_count
-            source.h_index = self.h_index
-
-            source.affiliation =self.get_affiliation()
-
-
-    def get_affiliation(self):
-        result = db.session.execute(
-            select(Affiliation).where(
-                Affiliation.catalog_identifier == self.affiliation_identifier
-            ).where(
-                Affiliation.catalog == CATALOG_OPEN_ALEX
-            )
-        ).scalar()
-
-        if not result:
-            result = Affiliation(catalog_identifier=self.affiliation_identifier)
-        
-            result.name = self.affiliation_name
-            result.address = self.affiliation_address
-            result.country = self.affiliation_country
-
-            result.catalog = CATALOG_OPEN_ALEX
-
-        return result
