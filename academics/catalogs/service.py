@@ -279,11 +279,6 @@ def add_publications(publication_datas):
 
         db.session.add(cat_pub)
 
-        _add_sponsors_to_publications(
-            publication=pub,
-            sponsor_names=p.funding_list,
-        )
-
         cat_pub.doi = p.doi or ''
         cat_pub.title = p.title or ''
         cat_pub.publication_cover_date = p.publication_cover_date
@@ -304,6 +299,11 @@ def add_publications(publication_datas):
         cat_pub.journal = _get_journal(p.journal_name)
         cat_pub.subtype = _get_subtype(p.subtype_code, p.subtype_description)
         cat_pub.funding_acr = _get_funding_acr(p.funding_acronym)
+
+        _add_sponsors_to_publications(
+            publication=pub,
+            sponsor_names=p.funding_list,
+        )
 
         new_sources  = [
             PublicationsSources(
@@ -327,7 +327,7 @@ def _get_or_create_publication(p):
         select(Publication)
         .join(Publication.catalog_publications)
         .where(or_(
-            CatalogPublication.doi == (p.doi or ''),
+            CatalogPublication.doi == p.doi,
             and_(
                 CatalogPublication.catalog == p.catalog,
                 CatalogPublication.catalog_identifier == p.catalog_identifier,
