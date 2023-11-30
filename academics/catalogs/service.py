@@ -289,7 +289,7 @@ def add_publications(publication_datas):
         cat_pub.publication_cover_date = p.publication_cover_date
         cat_pub.href = p.href
         cat_pub.abstract = p.abstract_text or ''
-        cat_pub.funding_text = p.abstract.funding_text or ''
+        cat_pub.funding_text = p.funding_text or ''
         cat_pub.volume = p.volume or ''
         cat_pub.issue = p.issue or ''
         cat_pub.pages = p.pages or ''
