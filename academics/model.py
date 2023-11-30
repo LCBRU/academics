@@ -551,7 +551,7 @@ class PublicationsSources(db.Model):
             lazy="joined",
             order_by="PublicationsSources.ordinal",
             collection_class=ordering_list('ordinal'),
-            cascade="delete, delete-orphan"
+            cascade="all, delete, delete-orphan"
         ),
     )
     source: Mapped[Source] = relationship()
