@@ -165,7 +165,7 @@ def _get_author_datas(authors):
                 catalog=CATALOG_OPEN_ALEX,
                 catalog_identifier=_get_id_from_href(a.get('id', '')),
                 orcid=_get_id_from_href(a.get('orcid', None)),
-                display_name=a.get('display_name', ''),
+                author_name=a.get('display_name', ''),
                 initials='',
                 href=a.get('id', ''),
                 affiliation_identifier=institution_id,
