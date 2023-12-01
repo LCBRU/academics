@@ -10,6 +10,7 @@ from itertools import chain
 from flask import current_app
 from lbrc_flask.database import db
 from academics.model import CATALOG_OPEN_ALEX, DOI_URL, Academic, Source
+from lbrc_flask.validators import parse_date
 
 
 def get_open_alex():
@@ -54,7 +55,7 @@ def _get_publication_data(pubdata):
         doi=_get_orcid_from_href(pubdata['doi']),
         title=pubdata['title'],
         journal_name=pubdata.get('primary_location', {}).get('source', {}).get('display_name', ''),
-        publication_cover_date=pubdata['publication_date'],
+        publication_cover_date=parse_date(pubdata['publication_date']),
         abstract_text=abstract_from_inverted_index(pubdata['abstract_inverted_index']),
         funding_list={g.get('funder_display_name', None) for g in grants},
         funding_text='',
