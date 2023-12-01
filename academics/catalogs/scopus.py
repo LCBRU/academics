@@ -137,7 +137,7 @@ def get_scopus_publications(identifier):
                 cited_by_count=int(p.get(u'citedby-count', '0')),
                 author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
                 authors=[_translate_publication_author(a) for a in p.get('author', [])],
-                keywords={p.get(u'authkeywords', '').split('|')},
+                keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
             ))
     return result
