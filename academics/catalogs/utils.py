@@ -46,23 +46,10 @@ def _get_sponsor(name):
     return result
 
 
-def _get_funding_acr(name):
-    if not name:
-        return None
-
-    result = FundingAcr.query.filter(FundingAcr.name == name).one_or_none()
-
-    if not result:
-        result = FundingAcr(name=name)
-        db.session.add(result)
-
-    return result
-
-
-def _add_keywords_to_publications(publication, keyword_list):
+def  _add_keywords_to_publications(publication, keyword_list):
     publication.keywords.clear()
 
-    for k in keyword_list.split('|'):
+    for k in filter(None, keyword_list):
         keyword_word = k.strip().lower()
 
         if not keyword_word:
@@ -163,8 +150,6 @@ class PublicationData():
     pages: str
     subtype_code: str
     subtype_description: str
-    sponsor_name: str
-    funding_acronym: str
     cited_by_count: int
     author_list: str
     authors: list

@@ -13,6 +13,8 @@ from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 CATALOG_SCOPUS = 'scopus'
 CATALOG_OPEN_ALEX = 'open alex'
 
+DOI_URL = 'doi.org'
+
 
 class Theme(AuditMixin, CommonMixin, db.Model):
 

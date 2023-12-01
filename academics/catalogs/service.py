@@ -2,8 +2,8 @@ import logging
 from time import sleep
 from flask import current_app
 from sqlalchemy import and_, or_, select
-from academics.catalogs.open_alex import get_open_alex_author_data, open_alex_similar_authors
-from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_funding_acr, _get_journal, _get_subtype
+from academics.catalogs.open_alex import get_open_alex_author_data, get_openalex_publications, open_alex_similar_authors
+from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_journal, _get_subtype
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, Publication, PublicationsSources, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
@@ -151,6 +151,8 @@ def refresh_source(s):
 
             if s.catalog == CATALOG_SCOPUS:
                 publications = get_scopus_publications(s.catalog_identifier)
+            if s.catalog == CATALOG_OPEN_ALEX:
+                publications = get_openalex_publications(s.catalog_identifier)
 
             add_publications(publications)
 
@@ -274,7 +276,6 @@ def add_publications(publication_datas):
 
         j = _get_journal(p.journal_name)
         st = _get_subtype(p.subtype_code, p.subtype_description)
-        fa = _get_funding_acr(p.funding_acronym)
 
         db.session.add(pub)
         db.session.flush()
@@ -302,7 +303,6 @@ def add_publications(publication_datas):
 
         cat_pub.journal = j
         cat_pub.subtype = st
-        cat_pub.funding_acr = fa
 
         _add_sponsors_to_publications(
             publication=pub,

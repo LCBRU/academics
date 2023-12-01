@@ -1,48 +1,94 @@
 import pyalex
 import logging
 
+from datetime import date
 from sqlalchemy import select
-from academics.catalogs.utils import AuthorData
+from academics.catalogs.utils import AuthorData, PublicationData
 from academics.config import Config
 from pyalex import Authors, Works, Institutions
 from itertools import chain
 from flask import current_app
 from lbrc_flask.database import db
-from academics.model import CATALOG_OPEN_ALEX, Academic, Source
+from academics.model import CATALOG_OPEN_ALEX, DOI_URL, Academic, Source
 
 
 def get_open_alex():
     config = Config()
     pyalex.config.email = config.OPEN_ALEX_EMAIL
 
-    q = Authors().search_filter(display_name="samani")
-    # q = Authors().filter(orcid="0000-0002-5542-8448")
-    # q = Authors().filter(scopus="7005783434")
+    q = Authors().search_filter(display_name="samani").get()
+    a = next(iter(q))
 
-    # works = Works().filter(**{"author.id": }).filter(publication_year="2022").get()
+    pubs = get_openalex_publications(a['id'])
 
-    w = Works().random()
+    print(pubs)
 
-    print(w.keys())
 
-    # for a in chain(*q.paginate(per_page=200)):
-    #     # print(a['id'], a["display_name"])
-    #     print(a["display_name"].strip().rsplit(maxsplit=1))
-    #     # print(a.keys())
-    #     # if a['summary_stats']:
-    #     #     print(a['summary_stats'].keys())
-    #     #     print(a['summary_stats'])
-    #     if a['last_known_institution']:
-    #         # print(a['last_known_institution'].keys())
-    #         print(a['last_known_institution'])
-        
-    #     # i = Institutions()[a['last_known_institution']['id']]
-    #     # print(i['geo'])
+def get_openalex_publications(identifier):
+    logging.info('get_openalex_publications: started')
 
-    #     # if a:
-    #     #     if a.get('last_known_institution', None):
-    #     #         if 'leicester' in a.get('last_known_institution', {}).get('display_name', '').lower():
-    #     #             print(a['id'], a["display_name"], a['last_known_institution']['display_name'])
+    pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
+
+    if not current_app.config['OPEN_ALEX_ENABLED']:
+        print(current_app.config['OPEN_ALEX_ENABLED'])
+        logging.info('OpenAlex Not Enabled')
+        return []
+    
+    return [
+        _get_publication_data(w)
+        for w in Works()
+            .filter(**{"author.id": identifier})
+            .filter(publication_year=f'{date.today().year - 1}')
+            .get()
+    ]
+
+
+def _get_publication_data(pubdata):
+    bib = pubdata.get('biblio', {})
+    grants = pubdata.get('grants', [])
+
+    return PublicationData(
+        catalog=CATALOG_OPEN_ALEX,
+        catalog_identifier=_get_id_from_href(pubdata['id']),
+        href=pubdata['id'],
+        doi=_get_orcid_from_href(pubdata['doi']),
+        title=pubdata['title'],
+        journal_name=pubdata.get('primary_location', {}).get('source', {}).get('display_name', ''),
+        publication_cover_date=pubdata['publication_date'],
+        abstract_text=abstract_from_inverted_index(pubdata['abstract_inverted_index']),
+        funding_list={g.get('funder_display_name', None) for g in grants},
+        funding_text='',
+        volume=bib.get('volume', ''),
+        issue=bib.get('issue', ''),
+        pages='-'.join(filter(None, [bib.get('first_page'), bib.get('last_page')])),
+        subtype_code='',
+        subtype_description=pubdata['type'],
+        cited_by_count=pubdata['cited_by_count'],
+        author_list='',
+        authors=[_translate_publication_author(a) for a in pubdata.get('authorships', [])],
+        keywords={k.get('keyword', None) for k in pubdata.get('keywords', {})},
+        is_open_access=pubdata.get('open_access', {}).get('is_oa', False),
+    )
+
+
+def _translate_publication_author(author_dict):
+    affiliation = next(iter(author_dict.get('institutions', [])), {})
+    author = author_dict.get('author', {})
+
+    return AuthorData(
+        catalog=CATALOG_OPEN_ALEX,
+        catalog_identifier=_get_id_from_href(author.get('id', None)),
+        orcid=_get_orcid_from_href(author.get('orcid', None)),
+        first_name='',
+        last_name='',
+        initials='',
+        author_name=author_dict.get('display_name', None),
+        href=author_dict.get('id', None),
+        affiliation_identifier=_get_id_from_href(affiliation.get('id', None)),
+        affiliation_name=affiliation.get('display_name', None),
+        affiliation_address='',
+        affiliation_country=affiliation.get('country_code', None),
+    )
 
 
 def open_alex_similar_authors(academic: Academic):
@@ -78,6 +124,16 @@ def open_alex_similar_authors(academic: Academic):
     new_authors = [a for a in authors.values() if _get_id_from_href(a.get('id', '')) not in existing]
 
     return _get_author_datas(new_authors)
+
+
+def abstract_from_inverted_index(inverted_index):
+    words = {}
+
+    for w, indices in inverted_index.items():
+        for i in indices:
+            words[i] = w
+
+    return ' '.join([w[1] for w in sorted(words.items(), key=lambda w: w[0])])
 
 
 def get_open_alex_author_data(identifier):
@@ -129,12 +185,23 @@ def _get_author_datas(authors):
 def _get_id_from_href(href):
     if not href:
         return None
-
+    
     if not '/' in href:
         return href
     
     _, result = href.rsplit('/', 1)
     return result
+
+
+def _get_orcid_from_href(href):
+    if not href:
+        return None
+
+    parts = href.partition(DOI_URL)
+    rparts = list(reversed(parts))
+    fparts = filter(len, rparts)
+
+    return next(iter(fparts)).strip('/')
 
 
 def _get_for_orcid(orcid):
