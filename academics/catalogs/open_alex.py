@@ -169,7 +169,6 @@ def _get_author_datas(authors):
                 last_name='',
                 initials='',
                 author_name=a.get('display_name', ''),
-                initials='',
                 href=a.get('id', ''),
                 affiliation_identifier=institution_id,
                 affiliation_name=i.get('display_name', ''),
