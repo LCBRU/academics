@@ -21,10 +21,13 @@ def _get_journal(journal_name):
 
 
 def _get_subtype(code, description):
-    if not code:
-        return None
+    result = None
 
-    result = Subtype.query.filter(Subtype.code == code).one_or_none()
+    if code:
+        result = Subtype.query.filter(Subtype.code == code).one_or_none()
+
+    if not result:
+        result = Subtype.query.filter(Subtype.description == description).one_or_none()
 
     if not result:
         result = Subtype(code=code, description=description)
