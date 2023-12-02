@@ -380,6 +380,8 @@ def _get_or_create_source(author_data):
         s = author_data.get_new_source()
     else:
         author_data.update_source(s)
+    
+    db.session.add(s)
 
     sa = db.session.execute(
         select(Affiliation).where(
