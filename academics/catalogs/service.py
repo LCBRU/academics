@@ -284,14 +284,6 @@ def add_publications(publication_datas):
 
         db.session.add(cat_pub)
 
-        pub_sources  = [
-            PublicationsSources(
-                source=s,
-                publication=pub
-            ) 
-            for s in [_get_or_create_source(a) for a in p.authors]
-        ]
-
         cat_pub.doi = p.doi or ''
         cat_pub.title = p.title or ''
         cat_pub.publication_cover_date = p.publication_cover_date
@@ -316,6 +308,14 @@ def add_publications(publication_datas):
             publication=pub,
             sponsor_names=p.funding_list,
         )
+
+        pub_sources  = [
+            PublicationsSources(
+                source=s,
+                publication=pub
+            ) 
+            for s in [_get_or_create_source(a) for a in p.authors]
+        ]
 
         pub.publication_sources = pub_sources
 
