@@ -271,11 +271,11 @@ def add_publications(publication_datas):
     logging.info('add_publications: started')
 
     for p in publication_datas:
-        pub = _get_or_create_publication(p)
-        cat_pub = _get_or_create_catalog_publication(p)
-
         j = _get_journal(p.journal_name)
         st = _get_subtype(p.subtype_code, p.subtype_description)
+
+        pub = _get_or_create_publication(p)
+        cat_pub = _get_or_create_catalog_publication(p)
 
         db.session.add(pub)
         db.session.flush()
