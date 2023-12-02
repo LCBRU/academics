@@ -48,6 +48,20 @@ def _get_publication_data(pubdata):
     bib = pubdata.get('biblio', {})
     grants = pubdata.get('grants', [])
 
+    print('*'*30)
+    print(pubdata)
+    print('*'*30)
+
+    pl = pubdata.get('primary_location', {})
+    print(pl)
+    print('*'*30)
+    s = pl.get('source', {})
+    print(s)
+    print('*'*30)
+    dn = s.get('display_name', '')
+    print(dn)
+    print('*'*30)
+
     return PublicationData(
         catalog=CATALOG_OPEN_ALEX,
         catalog_identifier=_get_id_from_href(pubdata['id']),
