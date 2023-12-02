@@ -277,6 +277,13 @@ def add_publications(publication_datas):
         j = _get_journal(p.journal_name)
         st = _get_subtype(p.subtype_code, p.subtype_description)
 
+        db.session.add(pub)
+        db.session.flush()
+
+        cat_pub.publication = pub
+
+        db.session.add(cat_pub)
+
         pub_sources  = [
             PublicationsSources(
                 source=s,
@@ -284,13 +291,6 @@ def add_publications(publication_datas):
             ) 
             for s in [_get_or_create_source(a) for a in p.authors]
         ]
-
-        db.session.add(pub)
-        db.session.flush()
-
-        cat_pub.publication = pub
-
-        db.session.add(cat_pub)
 
         cat_pub.doi = p.doi or ''
         cat_pub.title = p.title or ''
