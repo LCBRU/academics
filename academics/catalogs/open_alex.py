@@ -45,45 +45,47 @@ def get_openalex_publications(identifier):
 
 
 def _get_publication_data(pubdata):
-    bib = pubdata.get('biblio', {})
-    grants = pubdata.get('grants', [])
-
-    print('*'*30)
-    print(pubdata)
-    print('*'*30)
-
-    pl = pubdata.get('primary_location', {})
-    print(pl)
-    print('*'*30)
-    s = pl.get('source', {})
-    print(s)
-    print('*'*30)
-    dn = s.get('display_name', '')
-    print(dn)
-    print('*'*30)
+    pd = _diction_purge_none(pubdata)
+    bib = pd.get('biblio', {})
+    grants = pd.get('grants', [])
 
     return PublicationData(
         catalog=CATALOG_OPEN_ALEX,
-        catalog_identifier=_get_id_from_href(pubdata['id']),
-        href=pubdata['id'],
-        doi=_get_orcid_from_href(pubdata['doi']),
-        title=pubdata['title'],
-        journal_name=pubdata.get('primary_location', {}).get('source', {}).get('display_name', ''),
-        publication_cover_date=parse_date(pubdata['publication_date']),
-        abstract_text=abstract_from_inverted_index(pubdata['abstract_inverted_index']),
+        catalog_identifier=_get_id_from_href(pd['id']),
+        href=pd['id'],
+        doi=_get_orcid_from_href(pd['doi']),
+        title=pd['title'],
+        journal_name=pd.get('primary_location', {}).get('source', {}).get('display_name', ''),
+        publication_cover_date=parse_date(pd['publication_date']),
+        abstract_text=abstract_from_inverted_index(pd['abstract_inverted_index']),
         funding_list={g.get('funder_display_name', None) for g in grants},
         funding_text='',
         volume=bib.get('volume', ''),
         issue=bib.get('issue', ''),
         pages='-'.join(filter(None, [bib.get('first_page'), bib.get('last_page')])),
         subtype_code='',
-        subtype_description=pubdata['type'],
-        cited_by_count=pubdata['cited_by_count'],
+        subtype_description=pd['type'],
+        cited_by_count=pd['cited_by_count'],
         author_list='',
-        authors=[_translate_publication_author(a) for a in pubdata.get('authorships', [])],
-        keywords={k.get('keyword', None) for k in pubdata.get('keywords', {})},
-        is_open_access=pubdata.get('open_access', {}).get('is_oa', False),
+        authors=[_translate_publication_author(a) for a in pd.get('authorships', [])],
+        keywords={k.get('keyword', None) for k in pd.get('keywords', {})},
+        is_open_access=pd.get('open_access', {}).get('is_oa', False),
     )
+
+
+def _diction_purge_none(_dict):
+    """Delete None values recursively from all of the dictionaries"""
+    for key, value in list(_dict.items()):
+        if isinstance(value, dict):
+            _diction_purge_none(value)
+        elif value is None:
+            del _dict[key]
+        elif isinstance(value, list):
+            for v_i in value:
+                if isinstance(v_i, dict):
+                    _diction_purge_none(v_i)
+
+    return _dict
 
 
 def _translate_publication_author(author_dict):
