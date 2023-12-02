@@ -274,6 +274,14 @@ def add_publications(publication_datas):
         pub = _get_or_create_publication(p)
         cat_pub = _get_or_create_catalog_publication(p)
 
+        pub_sources  = [
+            PublicationsSources(
+                source=s,
+                publication=pub
+            ) 
+            for s in [_get_or_create_source(a) for a in p.authors]
+        ]
+
         j = _get_journal(p.journal_name)
         st = _get_subtype(p.subtype_code, p.subtype_description)
 
@@ -308,14 +316,6 @@ def add_publications(publication_datas):
             publication=pub,
             sponsor_names=p.funding_list,
         )
-
-        pub_sources  = [
-            PublicationsSources(
-                source=s,
-                publication=pub
-            ) 
-            for s in [_get_or_create_source(a) for a in p.authors]
-        ]
 
         pub.publication_sources = pub_sources
 
