@@ -383,22 +383,20 @@ def _get_or_create_source(author_data):
     
     db.session.add(s)
 
-    sa = db.session.execute(
-        select(Affiliation).where(
-            Affiliation.catalog_identifier == author_data.affiliation_identifier
-        ).where(
-            Affiliation.catalog == author_data.catalog
-        )
+    a = db.session.execute(
+        select(Affiliation)
+        .where(Affiliation.catalog_identifier == author_data.affiliation_identifier)
+        .where(Affiliation.catalog == author_data.catalog)
     ).scalar()
 
-    if not sa:
-        sa = Affiliation(catalog_identifier=author_data.affiliation_identifier)
+    if not a:
+        a = Affiliation(catalog_identifier=author_data.affiliation_identifier)
     
-        sa.name = author_data.affiliation_name
-        sa.address = author_data.affiliation_address
-        sa.country = author_data.affiliation_country
-        sa.catalog = author_data.catalog
+        a.name = author_data.affiliation_name
+        a.address = author_data.affiliation_address
+        a.country = author_data.affiliation_country
+        a.catalog = author_data.catalog
     
-    s.affiliation = sa
+    s.affiliation = a
 
     return s

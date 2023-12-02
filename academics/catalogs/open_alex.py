@@ -130,7 +130,7 @@ def open_alex_similar_authors(academic: Academic):
 def abstract_from_inverted_index(inverted_index):
     words = {}
 
-    for w, indices in inverted_index.items():
+    for w, indices in (inverted_index or {}).items():
         for i in indices:
             words[i] = w
 
