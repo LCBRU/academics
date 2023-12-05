@@ -14,6 +14,7 @@ CATALOG_SCOPUS = 'scopus'
 CATALOG_OPEN_ALEX = 'open alex'
 
 DOI_URL = 'doi.org'
+ORCID_URL = 'orcid.org'
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):

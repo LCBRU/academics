@@ -9,7 +9,7 @@ from pyalex import Authors, Works, Institutions
 from itertools import chain
 from flask import current_app
 from lbrc_flask.database import db
-from academics.model import CATALOG_OPEN_ALEX, DOI_URL, Academic, Source
+from academics.model import CATALOG_OPEN_ALEX, DOI_URL, ORCID_URL, Academic, Source
 from lbrc_flask.validators import parse_date
 
 
@@ -53,7 +53,7 @@ def _get_publication_data(pubdata):
         catalog=CATALOG_OPEN_ALEX,
         catalog_identifier=_get_id_from_href(pd['id']),
         href=pd['id'],
-        doi=_get_orcid_from_href(pd.get('doi', None)),
+        doi=_get_doi_from_href(pd.get('doi', None)),
         title=pd.get('title', None),
         journal_name=pd.get('primary_location', {}).get('source', {}).get('display_name', ''),
         publication_cover_date=parse_date(pd.get('publication_date', None)),
@@ -213,6 +213,20 @@ def _get_id_from_href(href):
 
 
 def _get_orcid_from_href(href):
+    if not href:
+        return None
+
+    parts = href.partition(ORCID_URL)
+
+    print(parts)
+
+    rparts = list(reversed(parts))
+    fparts = filter(len, rparts)
+
+    return next(iter(fparts)).strip('/')
+
+
+def _get_doi_from_href(href):
     if not href:
         return None
 
