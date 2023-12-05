@@ -217,6 +217,9 @@ def _get_orcid_from_href(href):
         return None
 
     parts = href.partition(DOI_URL)
+
+    print(parts)
+
     rparts = list(reversed(parts))
     fparts = filter(len, rparts)
 
