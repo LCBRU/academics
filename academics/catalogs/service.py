@@ -96,8 +96,6 @@ def _process_academics_who_need_an_update():
 
         db.session.commit()
 
-        sleep(30)
-
     delete_orphan_publications()
     auto_validate()
 
