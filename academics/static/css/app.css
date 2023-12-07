@@ -59,6 +59,7 @@ dl.publication_details > div {
 
 .acordian h3 {
     font-size: 1.2em;
+    text-align: left;
 }
 
 .acordian h3::after {
