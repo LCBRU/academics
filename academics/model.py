@@ -163,7 +163,8 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
     @property
     def author_url(self):
-        return f'https://www.scopus.com/authid/detail.uri?authorId={self.catalog_identifier}'
+        if self.catalog == CATALOG_SCOPUS:
+            return f'https://www.scopus.com/authid/detail.uri?authorId={self.catalog_identifier}'
 
     @property
     def publication_count(self):
