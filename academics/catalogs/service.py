@@ -139,11 +139,6 @@ def refresh_source(s):
             author_data = get_scopus_author_data(s.catalog_identifier, get_extended_details=True)
         if s.catalog == CATALOG_OPEN_ALEX:
             author_data = get_open_alex_author_data(s.catalog_identifier)
-            print('*'*40)
-            print(author_data)
-            print('*'*40)
-            print(author_data.display_name)
-            print('*'*40)
 
         if author_data:
             s = _get_or_create_source(author_data=author_data)
@@ -386,9 +381,15 @@ def _get_or_create_source(author_data):
     else:
         author_data.update_source(s)
     
-    print('^'*40)
-    print(s)
-    print('^'*40)
+    if author_data == 'A5027073118':
+        print('v'*40)
+        print(author_data)
+        print('-'*40)
+        print(s)
+        print('^'*40)
+
+    
+
     db.session.add(s)
 
     a = db.session.execute(
