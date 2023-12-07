@@ -17,7 +17,7 @@ from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
 from elsapy import version
 from functools import cache
-
+from cachetools import cached, TTLCache
 
 class ResourceNotFoundException(Exception):
     pass
@@ -31,6 +31,7 @@ class ScopusClient(ElsClient):
     __ts_last_req = time.time()                 ## Tracker for throttling
  
 
+    @cached(cache=TTLCache(maxsize=1024, ttl=60*60))
     def exec_request(self, URL):
         """Sends the actual request; returns response."""
 
