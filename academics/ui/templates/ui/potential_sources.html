@@ -16,7 +16,11 @@
             <tr>
                 <td>
                     <div>
-                        <a href="{{ ps.source.href }}" target="_blank">{{ps.source.full_name}}</a>
+                        {% if ps.source.author_url %}
+                            <a href="{{ ps.source.author_url }}" target="_blank">{{ps.source.full_name}}</a>
+                        {% else %}
+                            {{ps.source.full_name}}
+                        {% endif %}
                     </div>
                     {% if ps.source.affiliation %}
                         <address>
