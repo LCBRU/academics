@@ -187,8 +187,6 @@ def update_academic():
 def academics_potential_sources(id):
     a = db.session.get(Academic, id)
 
-    print(a)
-
     if not a:
         abort(404)
 

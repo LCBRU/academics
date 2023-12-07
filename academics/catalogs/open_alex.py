@@ -170,6 +170,8 @@ def _get_author_datas(authors):
     result = []
 
     for a in authors:
+        print(a)
+
         institution_id = _get_id_from_href((a.get('last_known_institution') or {}).get('id', ''))
 
         if institution_id:
