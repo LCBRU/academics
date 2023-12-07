@@ -68,9 +68,7 @@ def index():
         else:
             q = q.filter(Academic.theme_id == search_form.theme_id.data)
     
-    q.order_by(Academic.last_name).order_by(Academic.first_name)
-
-    print(q)
+    q = q.order_by(Academic.last_name).order_by(Academic.first_name)
 
     academics = q.paginate(
         page=search_form.page.data,
