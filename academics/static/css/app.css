@@ -37,6 +37,7 @@ ol.author_list li:not(:last-child)::after{
 ol.author_list li.is_academic {
     color: var(--color-dark-green);
     font-size: 1.1em;
+    font-weight: bold;
 }
 
 dl.publication_details {
