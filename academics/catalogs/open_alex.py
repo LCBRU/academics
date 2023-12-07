@@ -94,7 +94,7 @@ def _translate_publication_author(author_dict):
 
     if _get_id_from_href(author.get('id', None)) == 'A5027073118':
         print('v'*40)
-        print(author_dict)
+        print(affiliation)
         print('^'*40)
 
 
@@ -105,8 +105,8 @@ def _translate_publication_author(author_dict):
         first_name='',
         last_name='',
         initials='',
-        author_name=author_dict.get('display_name', None),
-        href=author_dict.get('id', None),
+        author_name=author.get('display_name', None),
+        href=author.get('id', None),
         affiliation_identifier=_get_id_from_href(affiliation.get('id', None)),
         affiliation_name=affiliation.get('display_name', None),
         affiliation_address='',
