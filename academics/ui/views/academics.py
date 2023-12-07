@@ -70,6 +70,8 @@ def index():
     
     q.order_by(Academic.last_name).order_by(Academic.first_name)
 
+    print(q)
+
     academics = q.paginate(
         page=search_form.page.data,
         per_page=5,
