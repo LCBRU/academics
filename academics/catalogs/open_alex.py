@@ -92,7 +92,7 @@ def _translate_publication_author(author_dict):
     affiliation = next(iter(author_dict.get('institutions', [])), {})
     author = author_dict.get('author', {})
 
-    if author.get('id', None) == 'A5027073118':
+    if _get_id_from_href(author.get('id', None)) == 'A5027073118':
         print('v'*40)
         print(author_dict)
         print('^'*40)
