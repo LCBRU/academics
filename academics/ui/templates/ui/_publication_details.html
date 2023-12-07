@@ -61,7 +61,7 @@
 
     <div>
         <dt>Source</dt>
-        <dd>{{ publication.catalog | blank_if_none }}</dd>
+        <dd>{{ publication.catalog | blank_if_none | title_case }}</dd>
     </div>
 
     <div>
