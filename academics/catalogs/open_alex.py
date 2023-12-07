@@ -220,8 +220,6 @@ def _get_orcid_from_href(href):
 
     parts = href.partition(ORCID_URL)
 
-    print(parts)
-
     rparts = list(reversed(parts))
     fparts = filter(len, rparts)
 
@@ -233,8 +231,6 @@ def _get_doi_from_href(href):
         return None
 
     parts = href.partition(DOI_URL)
-
-    print(parts)
 
     rparts = list(reversed(parts))
     fparts = filter(len, rparts)
