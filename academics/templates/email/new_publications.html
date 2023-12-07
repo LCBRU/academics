@@ -62,6 +62,36 @@
             text-decoration: underline;
         }
 
+        ol.author_list {
+            margin: 0;
+            padding: 0;
+        }
+
+        ol.author_list li{
+            display: inline-block;
+        }
+
+        ol.author_list li:not(:last-child)::after{
+            display: inline-block;
+            content: ', ';
+        }
+
+        ol.author_list li.not_academic {
+            color:  #424949;
+            font-size: 1.1em;
+        }
+
+        ol.author_list li.is_academic {
+            color:  #196f3d;
+            font-size: 1.1em;
+        }
+
+        ol.author_list li.left_academic {
+            color:  #7b241c;
+            font-size: 1.1em;
+        }
+
+
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" crossorigin="anonymous">
 </head>
@@ -76,7 +106,22 @@
                     <header>
                         <div>
                             <h3><a href="http://doi.org/{{ p.doi }}">{{p.title}}</a></h3>
-                            <h4>{{p.author_list}}</h4>
+                            <h4>
+                                <ol class="author_list">
+                                    {% for a in p.authors %}
+                                        {% if a.has_left_brc %}
+                                            <li class="left_academic">{{ a.full_name }}</li>
+                                        {% elif a.is_academic %}
+                                            <li class="is_academic">{{ a.full_name }}</li>
+                                        {% else %}
+                                            <li class="not_academic">{{ a.full_name }}</li>
+                                        {% endif %}
+                                    {% endfor%}
+                                </ol>
+                                {% if publication.all_academics_left_brc %}
+                                    <div class="text-danger">All authors have left the BRC</div>
+                                {% endif %}
+                            </h4>
                         </div>
                     </header>
                     <dl>
