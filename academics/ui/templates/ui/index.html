@@ -181,7 +181,11 @@
                                                 </td>
                                                 <td>
                                                     <div>
-                                                        <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.catalog | title}})</a>
+                                                        {% if au.href %}
+                                                            <a href="{{ au.href }}" target="_blank">{{au.full_name}} ({{au.catalog | title}})</a>
+                                                        {% else %}
+                                                            {{au.full_name}} ({{au.catalog | title}})
+                                                        {% endif %}
                                                     </div>
                                                     <div>
                                                         {% if au.affiliation %}
