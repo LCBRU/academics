@@ -381,7 +381,7 @@ def _get_or_create_source(author_data):
     else:
         author_data.update_source(s)
     
-    if author_data == 'A5027073118':
+    if author_data.catalog_identifier == 'A5027073118':
         print('v'*40)
         print(author_data)
         print('-'*40)
