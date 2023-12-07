@@ -56,7 +56,13 @@
 
     <div>
         <dt>Journal</dt>
-        <dd><a href="{{ url_for('ui.publications', journal_id=publication.journal_id ) }}">{{publication.journal.name | blank_if_none | title_case}}</a> ({{publication.publication_cover_date | date_format}}{{publication.issue_volume | blank_if_none}} {{publication.pp | blank_if_none}})</dd>
+        <dd><a href="{{ url_for('ui.publications', journal_id=publication.journal_id ) }}">
+        </a> ({{publication.publication_cover_date | date_format}}{{publication.issue_volume | blank_if_none}} {{publication.pp | blank_if_none}})</dd>
+    </div>
+
+    <div>
+        <dt>Source</dt>
+        <dd>{{ publication.catalog | blank_if_none }}</dd>
     </div>
 
     <div>
