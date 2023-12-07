@@ -163,10 +163,6 @@ def get_open_alex_author_data(identifier):
 
     results = _get_author_datas([author])
 
-    print('*'*40)
-    print(results)
-    print('*'*40)
-
     return next(iter(results), None)
 
 
