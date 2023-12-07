@@ -162,6 +162,10 @@ class Source(AuditMixin, CommonMixin, db.Model):
     error = db.Column(db.Boolean, default=False)
 
     @property
+    def author_url(self):
+        return f'https://www.scopus.com/authid/detail.uri?authorId={self.catalog_identifier}'
+
+    @property
     def publication_count(self):
         q =  (
             select(func.count(Publication.id))
