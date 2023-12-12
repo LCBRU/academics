@@ -16,7 +16,7 @@ from academics.model import (CatalogPublication, Folder, Journal, Keyword,
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from .. import blueprint
 
@@ -184,8 +184,8 @@ def publication_full_annual_report_xlsx():
             CatalogPublication.publication_cover_date,
             CatalogPublication.issue,
             CatalogPublication.volume,
-            CatalogPublication.pages,
-            Journal.name,
+            func.coalesce(CatalogPublication.pages, '').label('pp'),
+            func.coalesce(Journal.name, '').label('journal_name'),
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
         .join(CatalogPublication.journal, isouter=True)
