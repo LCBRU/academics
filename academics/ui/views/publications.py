@@ -184,7 +184,7 @@ def publication_full_annual_report_xlsx():
             CatalogPublication.publication_cover_date,
             CatalogPublication.issue,
             CatalogPublication.volume,
-            func.coalesce(CatalogPublication.pages, '').label('pp'),
+            CatalogPublication.pages,
             func.coalesce(Journal.name, '').label('journal_name'),
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
@@ -194,13 +194,18 @@ def publication_full_annual_report_xlsx():
 
     print('Gonna query')
 
-    # publication_details = ({
-    #     'Publication Reference': p.vancouverish,
-    #     'DOI': p.doi,
-    # } for p in db.session.execute(q).unique().scalars())
-
-    for p in db.session.execute(q).unique().mappings():
-        print(p)
+    publication_details = ({
+        'Publication Reference': Publication.vancouver(
+            p['author_list'],
+            p['title'],
+            p['journal_name'],
+            p['publication_cover_date'],
+            p['issue'],
+            p['volume'],
+            p['pages'],
+        ),
+        'DOI': p.doi,
+    } for p in db.session.execute(q).unique().mappings())
 
     print('Hello')
 

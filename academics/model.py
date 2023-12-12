@@ -470,7 +470,7 @@ class Publication(db.Model, AuditMixin):
             return ''
 
     @staticmethod
-    def vancouver(author_list, title, journal_name, publication_cover_date, issue_volume, pp):
+    def vancouver(author_list, title, journal_name, publication_cover_date, issue, volume, pages):
         authors = (author_list or '').split(',')
 
         author_list = ', '.join(authors[0:6])
@@ -486,6 +486,12 @@ class Publication(db.Model, AuditMixin):
         if journal_name:
             parts.append(journal_name)
         
+        pp = ''
+        if pages:
+            pp = f'pp{pages}'
+
+        issue_volume = '/'.join(filter(None, [issue, volume]))
+
         parts.append(f'({publication_cover_date:%B %y}{issue_volume}{pp})')
 
         return '. '.join(parts)
@@ -503,8 +509,9 @@ class Publication(db.Model, AuditMixin):
             self.title,
             journal_name,
             self.publication_cover_date,
-            self.issue_volume,
-            self.pp,
+            self.issue,
+            self.volume,
+            self.pages,
         )
 
     @property
