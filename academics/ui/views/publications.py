@@ -166,6 +166,7 @@ def publication_full_export_xlsx():
         .join(CatalogPublication.journal, isouter=True)
         .join(CatalogPublication.subtype, isouter=True)
         .join(Publication.sponsors, isouter=True)
+        .group_by(CatalogPublication.id)
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
 
