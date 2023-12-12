@@ -173,20 +173,32 @@ def publication_full_annual_report_xlsx():
 
     search_form = PublicationSearchForm(formdata=request.args)
     
-    q = publication_search_query(search_form)
+    pubs = publication_search_query(search_form).alias()
 
-    q = q.order_by(CatalogPublication.publication_cover_date.desc())
+    q = (
+        select(
+            CatalogPublication.id,
+            CatalogPublication.publication_cover_date,
+        )
+        .join(pubs, pubs.c.id == CatalogPublication.publication_id)
+        .order_by(CatalogPublication.publication_cover_date.desc())
+    )
 
     print('Gonna query')
 
-    publication_details = ({
-        'Publication Reference': p.vancouverish,
-        'DOI': p.doi,
-    } for p in db.session.execute(q).unique().scalars())
+    # publication_details = ({
+    #     'Publication Reference': p.vancouverish,
+    #     'DOI': p.doi,
+    # } for p in db.session.execute(q).unique().scalars())
 
+    for p in db.session.execute(q).unique().scalars():
+        print(p)
+        
     print('Hello')
 
-    return excel_download('Academics_Publications', headers.keys(), publication_details)
+    # return excel_download('Academics_Publications', headers.keys(), publication_details)
+
+    return ''
 
 
 @blueprint.route("/publications/export/pdf")
