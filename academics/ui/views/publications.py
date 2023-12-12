@@ -118,6 +118,7 @@ def publication_folders():
 def publication_full_export_xlsx():
     # Use of dictionary instead of set to maintain order of headers
     headers = {
+        'catalog': None,
         'catalog_identifier': None,
         'doi': None,
         'pubmed_id': None,
@@ -133,7 +134,6 @@ def publication_full_export_xlsx():
         'open access': None,
         'citations': None,
         'sponsor': None,
-        'funding acronym': None,
     }
 
     search_form = PublicationSearchForm(formdata=request.args)
@@ -168,7 +168,7 @@ def publication_full_export_xlsx():
     )
 
     publication_details = ({
-        'catalog': p['catalog_identifier'],
+        'catalog': p['catalog'],
         'catalog_identifier': p['catalog_identifier'],
         'doi': p['doi'],
         'journal': p['journal_name'],
