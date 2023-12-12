@@ -215,8 +215,8 @@ def publication_full_annual_report_xlsx():
 
     prime_catalog_publication = (
         select(
-            CatalogPublication.id.label('id'),
-            func.row_number().over(partition_by=CatalogPublication.id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
+            CatalogPublication.id,
+            func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
         )
     ).alias()
 
