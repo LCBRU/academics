@@ -184,7 +184,7 @@ def publication_full_annual_report_xlsx():
     publication_details = ({
         'Publication Reference': p.vancouverish,
         'DOI': p.doi,
-    } for p in db.session.execution_options(stream_results=True).execute(q).unique().scalars())
+    } for p in db.session.execute(q).unique().scalars())
 
     print('Hello')
 
