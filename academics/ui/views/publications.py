@@ -12,7 +12,7 @@ from sqlalchemy import or_
 from wtforms import HiddenField
 
 from academics.model import (CatalogPublication, Folder, Journal, Keyword,
-                             NihrAcknowledgement, Publication, Source,
+                             NihrAcknowledgement, Publication, Source, Sponsor,
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
@@ -137,28 +137,77 @@ def publication_full_export_xlsx():
     }
 
     search_form = PublicationSearchForm(formdata=request.args)
-    
-    q = publication_search_query(search_form)
 
-    q = q.order_by(CatalogPublication.publication_cover_date.desc())
+
+
+
+    pubs = publication_search_query(search_form).alias()
+
+    q = (
+        select(
+            CatalogPublication.id,
+            CatalogPublication.catalog,
+            CatalogPublication.catalog_identifier,
+            CatalogPublication.doi,
+            CatalogPublication.author_list,
+            CatalogPublication.title,
+            CatalogPublication.publication_cover_date,
+            CatalogPublication.issue,
+            CatalogPublication.volume,
+            CatalogPublication.pages,
+            CatalogPublication.abstract,
+            CatalogPublication.is_open_access,
+            CatalogPublication.cited_by_count,
+            func.coalesce(Journal.name, '').label('journal_name'),
+            func.coalesce(Subtype.description, '').label('subtype_description'),
+            func.group_concat(Sponsor.name.distinct()).label('sponsors')
+        )
+        .join(pubs, pubs.c.id == CatalogPublication.publication_id)
+        .join(CatalogPublication.journal, isouter=True)
+        .join(CatalogPublication.subtype, isouter=True)
+        .join(Publication.sponsors, isouter=True)
+        .order_by(CatalogPublication.publication_cover_date.desc())
+    )
 
     publication_details = ({
-        'catalog_identifier': p.catalog_identifier,
-        'doi': p.doi,
-        'pubmed_id': p.pubmed_id,
-        'journal': p.journal.name if p.journal else '',
-        'type': p.subtype.description if p.subtype else '',
-        'volume': p.volume,
-        'issue': p.issue,
-        'pages': p.pages,
-        'publication_cover_date': p.publication_cover_date,
-        'authors': p.author_list,
-        'title': p.title,
-        'abstract': p.abstract,
-        'open access': p.is_open_access,
-        'citations': p.cited_by_count,
-        'sponsor': '; '.join([s.name for s in p.sponsors]),
-    } for p in db.session.execute(q).unique().scalars())
+        'catalog': p['catalog_identifier'],
+        'catalog_identifier': p['catalog_identifier'],
+        'doi': p['doi'],
+        'journal': p['journal_name'],
+        'type': p['subtype_description'],
+        'volume': p['volume'],
+        'issue': p['issue'],
+        'pages': p['pages'],
+        'publication_cover_date': p['publication_cover_date'],
+        'authors': p['author_list'],
+        'title': p['title'],
+        'abstract': p['abstract'],
+        'open access': p['is_open_access'],
+        'citations': p['cited_by_count'],
+        'sponsor': p['sponsors'],
+    } for p in db.session.execute(q).unique().mappings())
+
+    # q = publication_search_query(search_form)
+
+    # q = q.order_by(CatalogPublication.publication_cover_date.desc())
+
+    # publication_details = ({
+    #     'catalog_identifier': p.catalog_identifier,
+    #     'doi': p.doi,
+    #     'pubmed_id': p.pubmed_id,
+    #     'journal': p.journal.name if p.journal else '',
+    #     'type': p.subtype.description if p.subtype else '',
+    #     'volume': p.volume,
+    #     'issue': p.issue,
+    #     'pages': p.pages,
+    #     'publication_cover_date': p.publication_cover_date,
+    #     'authors': p.author_list,
+    #     'title': p.title,
+    #     'abstract': p.abstract,
+    #     'open access': p.is_open_access,
+    #     'citations': p.cited_by_count,
+    #     'sponsor': '; '.join([s.name for s in p.sponsors]),
+    # } for p in db.session.execute(q).unique().scalars())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
@@ -192,8 +241,6 @@ def publication_full_annual_report_xlsx():
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
 
-    print('Gonna query')
-
     publication_details = ({
         'Publication Reference': Publication.vancouver(
             p['author_list'],
@@ -206,8 +253,6 @@ def publication_full_annual_report_xlsx():
         ),
         'DOI': p.doi,
     } for p in db.session.execute(q).unique().mappings())
-
-    print('Hello')
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
