@@ -469,9 +469,9 @@ class Publication(db.Model, AuditMixin):
         else:
             return ''
 
-    @property
-    def vancouverish(self):
-        authors = (self.author_list or '').split(',')
+    @staticmethod
+    def vancouver(author_list, title, journal_name, publication_cover_date, issue_volume, pp):
+        authors = (author_list or '').split(',')
 
         author_list = ', '.join(authors[0:6])
 
@@ -481,14 +481,31 @@ class Publication(db.Model, AuditMixin):
         parts = []
 
         parts.append(author_list)
-        parts.append(self.title)
+        parts.append(title)
         
-        if self.journal:
-            parts.append(self.journal.name)
+        if journal_name:
+            parts.append(journal_name)
         
-        parts.append(f'({self.publication_cover_date:%B %y}{self.issue_volume}{self.pp})')
+        parts.append(f'({publication_cover_date:%B %y}{issue_volume}{pp})')
 
         return '. '.join(parts)
+
+
+    @property
+    def vancouverish(self):
+        journal_name = ''
+
+        if self.journal:
+            journal_name = self.journal.name
+
+        return Publication.vancouver(
+            self.author_list,
+            self.title,
+            journal_name,
+            self.publication_cover_date,
+            self.issue_volume,
+            self.pp,
+        )
 
     @property
     def folder_ids(self):
