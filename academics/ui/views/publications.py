@@ -191,9 +191,9 @@ def publication_full_annual_report_xlsx():
     #     'DOI': p.doi,
     # } for p in db.session.execute(q).unique().scalars())
 
-    for p in db.session.execute(q).unique().scalars():
+    for p in db.session.execute(q).unique().mappings():
         print(p)
-        
+
     print('Hello')
 
     # return excel_download('Academics_Publications', headers.keys(), publication_details)
