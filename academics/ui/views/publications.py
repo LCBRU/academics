@@ -173,7 +173,7 @@ def publication_full_annual_report_xlsx():
 
     search_form = PublicationSearchForm(formdata=request.args)
     
-    q = publication_search_query(search_form).alias()
+    q = publication_search_query(search_form)
 
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
