@@ -167,7 +167,7 @@ def publication_full_export_xlsx():
 def publication_full_annual_report_xlsx():
     # Use of dictionary instead of set to maintain order of headers
     headers = {
-        # 'Publication Reference': None,
+        'Publication Reference': None,
         'DOI': None,
     }
 
@@ -180,7 +180,7 @@ def publication_full_annual_report_xlsx():
     print('Gonna query')
 
     publication_details = ({
-        # 'Publication Reference': p.vancouverish,
+        'Publication Reference': p.vancouverish,
         'DOI': p.doi,
     } for p in db.session.execute(q).unique().scalars())
 
