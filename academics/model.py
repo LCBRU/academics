@@ -383,8 +383,8 @@ class Publication(db.Model, AuditMixin):
         return self.best_catalog_publication.catalog
 
     @property
-    def catalog_id(self) -> str:
-        return self.best_catalog_publication.catalog_id
+    def catalog_identifier(self) -> str:
+        return self.best_catalog_publication.catalog_identifier
 
     @property
     def doi(self) -> str:
