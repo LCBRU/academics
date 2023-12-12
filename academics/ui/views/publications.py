@@ -142,7 +142,7 @@ def publication_full_export_xlsx():
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     publication_details = ({
-        'catalog_identifier': p.catalog_id,
+        'catalog_identifier': p.catalog_identifier,
         'doi': p.doi,
         'pubmed_id': p.pubmed_id,
         'journal': p.journal.name if p.journal else '',
