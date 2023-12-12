@@ -138,9 +138,6 @@ def publication_full_export_xlsx():
 
     search_form = PublicationSearchForm(formdata=request.args)
 
-
-
-
     pubs = publication_search_query(search_form).alias()
 
     q = (
@@ -187,28 +184,6 @@ def publication_full_export_xlsx():
         'citations': p['cited_by_count'],
         'sponsor': p['sponsors'],
     } for p in db.session.execute(q).unique().mappings())
-
-    # q = publication_search_query(search_form)
-
-    # q = q.order_by(CatalogPublication.publication_cover_date.desc())
-
-    # publication_details = ({
-    #     'catalog_identifier': p.catalog_identifier,
-    #     'doi': p.doi,
-    #     'pubmed_id': p.pubmed_id,
-    #     'journal': p.journal.name if p.journal else '',
-    #     'type': p.subtype.description if p.subtype else '',
-    #     'volume': p.volume,
-    #     'issue': p.issue,
-    #     'pages': p.pages,
-    #     'publication_cover_date': p.publication_cover_date,
-    #     'authors': p.author_list,
-    #     'title': p.title,
-    #     'abstract': p.abstract,
-    #     'open access': p.is_open_access,
-    #     'citations': p.cited_by_count,
-    #     'sponsor': '; '.join([s.name for s in p.sponsors]),
-    # } for p in db.session.execute(q).unique().scalars())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
