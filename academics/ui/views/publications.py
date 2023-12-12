@@ -176,10 +176,14 @@ def publication_full_annual_report_xlsx():
 
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
+    print('Gonna query')
+
     publication_details = ({
         'Publication Reference': p.vancouverish,
         'DOI': p.doi,
     } for p in db.session.execute(q).unique().scalars())
+
+    print('Hello')
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
