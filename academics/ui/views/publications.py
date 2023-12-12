@@ -185,8 +185,10 @@ def publication_full_annual_report_xlsx():
             CatalogPublication.issue,
             CatalogPublication.volume,
             CatalogPublication.pages,
+            Journal.name,
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
+        .join(CatalogPublication.journal, isouter=True)
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
 
