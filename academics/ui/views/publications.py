@@ -16,7 +16,7 @@ from academics.model import (CatalogPublication, Folder, Journal, Keyword,
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 
 from .. import blueprint
 
@@ -166,7 +166,11 @@ def publication_full_export_xlsx():
             func.group_concat(Sponsor.name.distinct()).label('sponsors')
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
-        .join(prime_catalog_publication, prime_catalog_publication.c.id == CatalogPublication.id and prime_catalog_publication.c.priority == 1)
+        .join(prime_catalog_publication,
+            and_(
+                prime_catalog_publication.c.id == CatalogPublication.id,
+                prime_catalog_publication.c.priority == 1,
+            ))
         .join(CatalogPublication.journal, isouter=True)
         .join(CatalogPublication.subtype, isouter=True)
         .join(Publication.sponsors, isouter=True)
@@ -230,7 +234,11 @@ def publication_full_annual_report_xlsx():
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
         .join(CatalogPublication.journal, isouter=True)
-        .join(prime_catalog_publication, prime_catalog_publication.c.id == CatalogPublication.id and prime_catalog_publication.c.priority == 1)
+        .join(prime_catalog_publication,
+            and_(
+                prime_catalog_publication.c.id == CatalogPublication.id,
+                prime_catalog_publication.c.priority == 1,
+            ))
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
 
