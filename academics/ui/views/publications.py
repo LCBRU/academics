@@ -178,7 +178,13 @@ def publication_full_annual_report_xlsx():
     q = (
         select(
             CatalogPublication.id,
+            CatalogPublication.doi,
+            CatalogPublication.author_list,
+            CatalogPublication.title,
             CatalogPublication.publication_cover_date,
+            CatalogPublication.issue,
+            CatalogPublication.volume,
+            CatalogPublication.pages,
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
         .order_by(CatalogPublication.publication_cover_date.desc())
