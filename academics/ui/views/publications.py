@@ -174,7 +174,7 @@ def publication_full_annual_report_xlsx():
     
     q = publication_search_query(search_form)
 
-    q = q.order_by(Publication.publication_cover_date.desc())
+    q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     publication_details = ({
         'Publication Reference': p.vancouverish,
