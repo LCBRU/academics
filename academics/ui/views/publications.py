@@ -209,9 +209,7 @@ def publication_full_annual_report_xlsx():
 
     print('Hello')
 
-    # return excel_download('Academics_Publications', headers.keys(), publication_details)
-
-    return ''
+    return excel_download('Academics_Publications', headers.keys(), publication_details)
 
 
 @blueprint.route("/publications/export/pdf")
