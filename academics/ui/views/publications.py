@@ -121,7 +121,6 @@ def publication_full_export_xlsx():
         'catalog': None,
         'catalog_identifier': None,
         'doi': None,
-        'pubmed_id': None,
         'journal': None,
         'type': None,
         'volume': None,
