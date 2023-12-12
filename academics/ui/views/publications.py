@@ -179,8 +179,6 @@ def publication_full_annual_report_xlsx():
 
     print('Gonna query')
 
-    print(q)
-
     publication_details = ({
         # 'Publication Reference': p.vancouverish,
         'DOI': p.doi,
