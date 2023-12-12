@@ -166,13 +166,15 @@ def publication_full_export_xlsx():
             func.group_concat(Sponsor.name.distinct()).label('sponsors')
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
+        .join(prime_catalog_publication, prime_catalog_publication.c.id == CatalogPublication.id and prime_catalog_publication.c.priority == 1)
         .join(CatalogPublication.journal, isouter=True)
         .join(CatalogPublication.subtype, isouter=True)
         .join(Publication.sponsors, isouter=True)
-        .join(prime_catalog_publication, prime_catalog_publication.c.id == CatalogPublication.id and prime_catalog_publication.c.priority == 1)
         .group_by(CatalogPublication.id)
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
+
+    print(q)
 
     publication_details = ({
         'catalog': p['catalog'],
