@@ -141,7 +141,7 @@ def publication_full_export_xlsx():
 
     prime_catalog_publication = (
         select(
-            CatalogPublication.id.label('id'),
+            CatalogPublication.publication_id,
             func.row_number().over(partition_by=CatalogPublication.id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
         )
     ).alias()
@@ -168,7 +168,7 @@ def publication_full_export_xlsx():
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
         .join(prime_catalog_publication,
             and_(
-                prime_catalog_publication.c.id == CatalogPublication.id,
+                prime_catalog_publication.c.publication_id == CatalogPublication.publication_id,
                 prime_catalog_publication.c.priority == 1,
             ))
         .join(CatalogPublication.journal, isouter=True)
