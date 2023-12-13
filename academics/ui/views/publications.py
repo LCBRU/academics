@@ -195,24 +195,20 @@ def publication_full_annual_report_xlsx():
     }
 
     search_form = PublicationSearchForm(formdata=request.args)
-    
-    pubs = publication_search_query(search_form).alias()
 
-    q = (
-        select(
-            CatalogPublication.id,
-            CatalogPublication.doi,
-            CatalogPublication.author_list,
-            CatalogPublication.title,
-            CatalogPublication.publication_cover_date,
-            CatalogPublication.issue,
-            CatalogPublication.volume,
-            CatalogPublication.pages,
-            func.coalesce(Journal.name, '').label('journal_name'),
-        )
-        .join(pubs, pubs.c.id == CatalogPublication.publication_id)
-        .join(CatalogPublication.journal, isouter=True)
-        .order_by(CatalogPublication.publication_cover_date.desc())
+    q = publication_search_query(search_form)
+    q = q.join(CatalogPublication.journal, isouter=True)
+
+    q = q.with_only_columns(
+        CatalogPublication.id,
+        CatalogPublication.doi,
+        CatalogPublication.author_list,
+        CatalogPublication.title,
+        CatalogPublication.publication_cover_date,
+        CatalogPublication.issue,
+        CatalogPublication.volume,
+        CatalogPublication.pages,
+        func.coalesce(Journal.name, '').label('journal_name'),
     )
 
     publication_details = ({
