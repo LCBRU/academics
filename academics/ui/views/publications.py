@@ -168,7 +168,24 @@ def publication_full_export_xlsx():
     # )
 
     q = publication_search_query(search_form)
-    q = q.with_only_columns(CatalogPublication.id)
+    q = q.with_only_columns(
+        CatalogPublication.id,
+        CatalogPublication.catalog,
+        CatalogPublication.catalog_identifier,
+        CatalogPublication.doi,
+        CatalogPublication.author_list,
+        CatalogPublication.title,
+        CatalogPublication.publication_cover_date,
+        CatalogPublication.issue,
+        CatalogPublication.volume,
+        CatalogPublication.pages,
+        CatalogPublication.abstract,
+        CatalogPublication.is_open_access,
+        CatalogPublication.cited_by_count,
+        func.coalesce(Journal.name, '').label('journal_name'),
+        func.coalesce(Subtype.description, '').label('subtype_description'),
+        func.group_concat(Sponsor.name.distinct()).label('sponsors')        
+    )
 
     logging.getLogger('query').info(q)
     # logging.info(list(q.inner_columns))
