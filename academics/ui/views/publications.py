@@ -138,35 +138,6 @@ def publication_full_export_xlsx():
 
     search_form = PublicationSearchForm(formdata=request.args)
 
-    # pubs = publication_search_query(search_form).alias()
-
-    # q = (
-    #     select(
-    #         CatalogPublication.id,
-    #         CatalogPublication.catalog,
-    #         CatalogPublication.catalog_identifier,
-    #         CatalogPublication.doi,
-    #         CatalogPublication.author_list,
-    #         CatalogPublication.title,
-    #         CatalogPublication.publication_cover_date,
-    #         CatalogPublication.issue,
-    #         CatalogPublication.volume,
-    #         CatalogPublication.pages,
-    #         CatalogPublication.abstract,
-    #         CatalogPublication.is_open_access,
-    #         CatalogPublication.cited_by_count,
-    #         func.coalesce(Journal.name, '').label('journal_name'),
-    #         func.coalesce(Subtype.description, '').label('subtype_description'),
-    #         func.group_concat(Sponsor.name.distinct()).label('sponsors')
-    #     )
-    #     .join(pubs, pubs.c.id == CatalogPublication.publication_id)
-    #     .join(CatalogPublication.journal, isouter=True)
-    #     .join(CatalogPublication.subtype, isouter=True)
-    #     .join(Publication.sponsors, isouter=True)
-    #     .group_by(CatalogPublication.id)
-    #     .order_by(CatalogPublication.publication_cover_date.desc())
-    # )
-
     q = publication_search_query(search_form)
     q = q.with_only_columns(
         CatalogPublication.id,
@@ -187,30 +158,26 @@ def publication_full_export_xlsx():
         func.group_concat(Sponsor.name.distinct()).label('sponsors')        
     )
 
-    logging.getLogger('query').info(q)
-    # logging.info(list(q.inner_columns))
+    publication_details = ({
+        'catalog': p['catalog'],
+        'catalog_identifier': p['catalog_identifier'],
+        'doi': p['doi'],
+        'journal': p['journal_name'],
+        'type': p['subtype_description'],
+        'volume': p['volume'],
+        'issue': p['issue'],
+        'pages': p['pages'],
+        'publication_cover_date': p['publication_cover_date'],
+        'authors': p['author_list'],
+        'title': p['title'],
+        'abstract': p['abstract'],
+        'open access': p['is_open_access'],
+        'citations': p['cited_by_count'],
+        'sponsor': p['sponsors'],
+    } for p in db.session.execute(q).unique().mappings())
 
-    # publication_details = ({
-    #     'catalog': p['catalog'],
-    #     'catalog_identifier': p['catalog_identifier'],
-    #     'doi': p['doi'],
-    #     'journal': p['journal_name'],
-    #     'type': p['subtype_description'],
-    #     'volume': p['volume'],
-    #     'issue': p['issue'],
-    #     'pages': p['pages'],
-    #     'publication_cover_date': p['publication_cover_date'],
-    #     'authors': p['author_list'],
-    #     'title': p['title'],
-    #     'abstract': p['abstract'],
-    #     'open access': p['is_open_access'],
-    #     'citations': p['cited_by_count'],
-    #     'sponsor': p['sponsors'],
-    # } for p in db.session.execute(q).unique().mappings())
+    return excel_download('Academics_Publications', headers.keys(), publication_details)
 
-    # return excel_download('Academics_Publications', headers.keys(), publication_details)
-
-    return ''
 
 @blueprint.route("/publications/export/annual_report")
 def publication_full_annual_report_xlsx():
