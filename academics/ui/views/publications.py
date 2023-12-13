@@ -139,6 +139,10 @@ def publication_full_export_xlsx():
     search_form = PublicationSearchForm(formdata=request.args)
 
     q = publication_search_query(search_form)
+    q = q.join(CatalogPublication.journal, isouter=True)
+    q = q.join(CatalogPublication.subtype, isouter=True)
+    q = q.join(Publication.sponsors, isouter=True)
+
     q = q.with_only_columns(
         CatalogPublication.id,
         CatalogPublication.catalog,
@@ -153,8 +157,9 @@ def publication_full_export_xlsx():
         CatalogPublication.abstract,
         CatalogPublication.is_open_access,
         CatalogPublication.cited_by_count,
-        Journal.name,
-        Subtype.description,
+        func.coalesce(Journal.name, '').label('journal_name'),
+        func.coalesce(Subtype.description, '').label('subtype_description'),
+        func.group_concat(Sponsor.name.distinct()).label('sponsors')        
     )
 
     publication_details = ({
@@ -172,7 +177,7 @@ def publication_full_export_xlsx():
         'abstract': p['abstract'],
         'open access': p['is_open_access'],
         'citations': p['cited_by_count'],
-        'sponsor': '',
+        'sponsor': p['sponsors'],
     } for p in db.session.execute(q).unique().mappings())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
