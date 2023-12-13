@@ -118,6 +118,9 @@ def get_scopus_publications(identifier):
         a = Abstract(id)
         a.read(_client())
 
+        if id == '85172482133':
+            print([a for a in p.get('author', [])])
+
         result.append(
             PublicationData(
                 catalog='scopus',
