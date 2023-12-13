@@ -153,9 +153,8 @@ def publication_full_export_xlsx():
         CatalogPublication.abstract,
         CatalogPublication.is_open_access,
         CatalogPublication.cited_by_count,
-        func.coalesce(Journal.name, '').label('journal_name'),
-        func.coalesce(Subtype.description, '').label('subtype_description'),
-        func.group_concat(Sponsor.name.distinct()).label('sponsors')        
+        Journal.name,
+        Subtype.description,
     )
 
     publication_details = ({
@@ -173,7 +172,7 @@ def publication_full_export_xlsx():
         'abstract': p['abstract'],
         'open access': p['is_open_access'],
         'citations': p['cited_by_count'],
-        'sponsor': p['sponsors'],
+        'sponsor': '',
     } for p in db.session.execute(q).unique().mappings())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
