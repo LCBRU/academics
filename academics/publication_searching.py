@@ -116,7 +116,7 @@ def best_catalog_publications():
         select(
             CatalogPublication.id.label('id'),
             CatalogPublication.publication_id.label('publication_id'),
-            func.row_number().over(partition_by=CatalogPublication.id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
+            func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
         )
     ).alias()
 
@@ -138,7 +138,7 @@ def publication_search_query(search_form):
     q = select(Publication).join(
         bcp, bcp.c.id == Publication.id
     ).join(
-        CatalogPublication, CatalogPublication.id == bcp.c.publication_id
+        CatalogPublication, CatalogPublication.id == bcp.c.id
     )
 
     if search_form.has_value('author_id'):
@@ -230,6 +230,8 @@ def publication_search_query(search_form):
         ))
 
     logging.info(f'publication_search_query ended')
+
+    logging.info(q)
 
     return q
 
