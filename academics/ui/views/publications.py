@@ -213,12 +213,12 @@ def publication_full_annual_report_xlsx():
     
     pubs = publication_search_query(search_form).alias()
 
-    prime_catalog_publication = (
-        select(
-            CatalogPublication.id,
-            func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
-        )
-    ).alias()
+    # prime_catalog_publication = (
+    #     select(
+    #         CatalogPublication.id,
+    #         func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
+    #     )
+    # ).alias()
 
     q = (
         select(
@@ -234,11 +234,11 @@ def publication_full_annual_report_xlsx():
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
         .join(CatalogPublication.journal, isouter=True)
-        .join(prime_catalog_publication,
-            and_(
-                prime_catalog_publication.c.id == CatalogPublication.id,
-                prime_catalog_publication.c.priority == 1,
-            ))
+        # .join(prime_catalog_publication,
+        #     and_(
+        #         prime_catalog_publication.c.id == CatalogPublication.id,
+        #         prime_catalog_publication.c.priority == 1,
+        #     ))
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
 
