@@ -1,3 +1,4 @@
+import logging
 from flask import (abort, flash, jsonify, redirect, render_template, request,
                    url_for)
 from flask_login import current_user
@@ -165,6 +166,8 @@ def publication_full_export_xlsx():
         .group_by(CatalogPublication.id)
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
+
+    logging.getLogger('query').info(q)
 
     publication_details = ({
         'catalog': p['catalog'],
