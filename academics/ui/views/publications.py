@@ -212,7 +212,6 @@ def publication_full_annual_report_xlsx():
             func.coalesce(Journal.name, '').label('journal_name'),
         )
         .join(pubs, pubs.c.id == CatalogPublication.publication_id)
-        .join(CatalogPublication.journal, isouter=True)
         .order_by(CatalogPublication.publication_cover_date.desc())
     )
 
