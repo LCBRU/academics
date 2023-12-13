@@ -120,7 +120,7 @@ def get_scopus_publications(identifier):
 
         if id == '85172482133':
             print('*'*50)
-            print(len([a for a in p.get('author', [])]))
+            print([a for a in p.get('author', [])])
             print('*'*50)
 
         result.append(
