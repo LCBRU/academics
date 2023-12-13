@@ -168,9 +168,10 @@ def publication_full_export_xlsx():
     # )
 
     q = publication_search_query(search_form)
+    q = q.with_only_columns([CatalogPublication.id])
 
     logging.getLogger('query').info(q)
-    logging.info(list(q.inner_columns))
+    # logging.info(list(q.inner_columns))
 
     # publication_details = ({
     #     'catalog': p['catalog'],
