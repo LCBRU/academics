@@ -15,14 +15,13 @@ from lbrc_flask.validators import parse_date
 
 def get_open_alex():
     config = Config()
-    pyalex.config.email = config.OPEN_ALEX_EMAIL
 
-    q = Authors().search_filter(display_name="samani").get()
-    a = next(iter(q))
-
-    pubs = get_openalex_publications(a['id'])
-
-    print(pubs)
+    pubs = [w for w in Works()
+            .filter(**{"author.id": 'A5048320859'})
+            .filter(publication_year=f'{date.today().year - 2}')
+            .get()]
+    
+    print(len(pubs))
 
 
 def get_openalex_publications(identifier):
@@ -39,7 +38,7 @@ def get_openalex_publications(identifier):
         _get_publication_data(w)
         for w in Works()
             .filter(**{"author.id": identifier})
-            .filter(publication_year=f'{date.today().year - 1}')
+            # .filter(publication_year=f'{date.today().year - 1}')
             .get()
     ]
 
