@@ -96,8 +96,12 @@ def _process_academics_who_need_an_update():
 
         db.session.commit()
 
+    logging.info('_process_academics_who_need_an_update: Start doing the publications')
+
     while True:
         p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
+
+        _update_publication(p)
 
         if not p:
             logging.info(f'_process_academics_who_need_an_update: No more publications to refresh')
