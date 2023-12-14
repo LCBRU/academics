@@ -107,6 +107,9 @@ def _process_academics_who_need_an_update():
             logging.info(f'_process_academics_who_need_an_update: No more publications to refresh')
             break
 
+        db.session.commit()
+
+
     delete_orphan_publications()
     auto_validate()
 
