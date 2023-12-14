@@ -139,7 +139,8 @@ def get_scopus_publications(identifier):
         a = Abstract(id)
         a.read(_client())
 
-        print(a.data.get('authors', {}))
+        if id == '85172482133':
+            print(a.authors)
 
         result.append(
             PublicationData(
@@ -492,18 +493,18 @@ class Abstract(AbsDoc):
 
         if affiliations:
             affiliation = affiliations[0]
-            affiliation_identifier = affiliation.get('$', None)
+            affiliation_identifier = affiliation.get('@id', None)
         else:
             affiliation_identifier = None
 
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
-            catalog_identifier=author_dict.get('authid', None),
-            orcid=author_dict.get('orcid', None),
-            first_name=author_dict.get('given-name', None),
-            last_name=author_dict.get('surname', None),
-            initials=author_dict.get('initials', None),
-            author_name=author_dict.get('authname', None),
+            catalog_identifier=author_dict.get('@authid', None),
+            orcid='',
+            first_name=author_dict.get('ce:given-name', None),
+            last_name=author_dict.get('ce:surname', None),
+            initials=author_dict.get('ce:initials', None),
+            author_name=author_dict.get('ce:indexed-name', None),
             href=author_dict.get('author-url', None),
             affiliation_identifier=affiliation_identifier,
             affiliation_name='',
