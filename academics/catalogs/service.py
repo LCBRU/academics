@@ -303,10 +303,20 @@ def add_publications(publication_datas):
         logging.info(f'publication: {p.catalog_identifier}')
 
         j = _get_journal(p.journal_name)
+
+        logging.info(f'publication: {p.catalog_identifier} - got journal')
+
         st = _get_subtype(p.subtype_code, p.subtype_description)
 
+        logging.info(f'publication: {p.catalog_identifier} - got subtype')
+
         pub = _get_or_create_publication(p)
+
+        logging.info(f'publication: {p.catalog_identifier} - got publication')
+
         cat_pub = _get_catalog_publication(p)
+
+        logging.info(f'publication: {p.catalog_identifier} - got cat pub')
 
         if cat_pub:
             logging.info(f'publication: {p.catalog_identifier} - skipping')
