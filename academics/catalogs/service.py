@@ -317,12 +317,20 @@ def add_publications(publication_datas):
             catalog_identifier=p.catalog_identifier,
         )
 
+        logging.info(f'publication: {p.catalog_identifier} - flushing')
+
         db.session.add(pub)
         db.session.flush()
 
+        logging.info(f'publication: {p.catalog_identifier} - flushed')
+
         cat_pub.publication = pub
 
+        logging.info(f'publication: {p.catalog_identifier} - adding cat to pub')
+
         db.session.add(cat_pub)
+
+        logging.info(f'publication: {p.catalog_identifier} - setting values')
 
         cat_pub.doi = p.doi or ''
         cat_pub.title = p.title or ''
@@ -342,13 +350,22 @@ def add_publications(publication_datas):
         if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
             pub.validation_historic = True
 
+        logging.info(f'publication: {p.catalog_identifier} - set values')
+
         cat_pub.journal = j
+
+        logging.info(f'publication: {p.catalog_identifier} - set journal')
+
         cat_pub.subtype = st
+
+        logging.info(f'publication: {p.catalog_identifier} - set subtype - adding sponsors')
 
         _add_sponsors_to_publications(
             publication=pub,
             sponsor_names=p.funding_list,
         )
+
+        logging.info(f'publication: {p.catalog_identifier} - sponsors adding - creating sources')
 
         pub_sources  = [
             PublicationsSources(
@@ -358,12 +375,24 @@ def add_publications(publication_datas):
             for s in [_get_or_create_source(a) for a in p.authors]
         ]
 
+        logging.info(f'publication: {p.catalog_identifier} - adding sources')
+
         pub.publication_sources = pub_sources
 
+        logging.info(f'publication: {p.catalog_identifier} - saving sources')
+
         db.session.add_all(pub_sources)
+
+        logging.info(f'publication: {p.catalog_identifier} - saving pub')
+
         db.session.add(pub)
 
+        logging.info(f'publication: {p.catalog_identifier} - adding keywords')
+
         _add_keywords_to_publications(publication=pub, keyword_list=p.keywords)
+
+        logging.info(f'publication: {p.catalog_identifier} is done')
+
 
     logging.info('add_publications: ended')
 
