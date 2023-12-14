@@ -128,6 +128,9 @@ def get_scopus_publications(identifier):
         if id == '85172482133':
             logging.getLogger('query').info(a.data)
             logging.getLogger('query').info(a.data.get('authors', {}))
+            fa = a.data.get('authors', {})[0]
+            logging.getLogger('query').info(fa)
+            logging.getLogger('query').info(list[fa.keys()])
             logging.getLogger('query').info(a.authors)
 
         result.append(
@@ -487,7 +490,7 @@ class Abstract(AbsDoc):
 
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
-            catalog_identifier=author_dict.get('@authid', None),
+            catalog_identifier=author_dict.get('authid', None),
             orcid='',
             first_name=author_dict.get('ce:given-name', None),
             last_name=author_dict.get('ce:surname', None),
