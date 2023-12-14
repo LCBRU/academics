@@ -6,6 +6,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
+from elsapy.elsdoc import FullDoc
 from academics.catalogs.utils import AuthorData, PublicationData
 from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
@@ -95,6 +96,20 @@ def _get_scopus_publication_link(p):
             return h['@href']
 
 
+def get_single_publication(identifier):
+    logging.info('get_single_publication: started')
+
+    if not current_app.config['SCOPUS_ENABLED']:
+        print(current_app.config['SCOPUS_ENABLED'])
+        logging.info('SCOPUS Not Enabled')
+        return None
+    
+    d = FullDoc(identifier)
+    d.read()
+
+    return d
+
+
 def get_scopus_publications(identifier):
     logging.info('get_scopus_publications: started')
 
@@ -120,7 +135,7 @@ def get_scopus_publications(identifier):
 
         if id == '85172482133':
             print('*'*50)
-            print([a for a in p.get('author', [])])
+            print(get_scopus_publications(id))
             print('*'*50)
 
         result.append(
