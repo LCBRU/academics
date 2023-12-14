@@ -96,6 +96,12 @@ def _get_scopus_publication_link(p):
             return h['@href']
 
 
+def _get_scopus_publication_self_link(p):
+    for h in p.get(u'link', ''):
+        if h['@ref'] == 'self':
+            return h['@href']
+
+
 def get_single_publication(identifier):
     logging.info('get_single_publication: started')
 
@@ -104,7 +110,7 @@ def get_single_publication(identifier):
         logging.info('SCOPUS Not Enabled')
         return None
     
-    d = FullDoc(doi=identifier)
+    d = FullDoc(uri=identifier)
     d.read(_client())
 
     return d
@@ -137,7 +143,7 @@ def get_scopus_publications(identifier):
             print('*'*50)
             print(p)
             print('Getting Single Publication')
-            print(get_single_publication(p.get(u'prism:doi', '')))
+            print(_get_scopus_publication_self_link(p))
             print('*'*50)
 
         result.append(
