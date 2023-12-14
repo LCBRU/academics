@@ -546,6 +546,7 @@ class CatalogPublication(db.Model, AuditMixin):
             cascade="delete, delete-orphan",
         )
     )
+    refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
     is_main: Mapped[bool] = mapped_column(Boolean, nullable=True)
     catalog: Mapped[str] = mapped_column(String(50), index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
