@@ -303,8 +303,15 @@ def add_publications(publication_datas):
     subtypes = {d: _get_subtype(c, d) for c, d in {(p.subtype_code, p.subtype_description) for p in publication_datas}}
     publications = {(p.catalog, p.catalog_identifier): _get_or_create_publication(p) for p in publication_datas}
 
+    db.session.add_all(journals.values())
+    db.session.add_all(subtypes.values())
+    db.session.add_all(publications.values())
+
+    db.session.commit()
 
     for p in publication_datas:
+        pub = publications[(p.catalog, p.catalog_identifier)]
+
         cat_pub = _get_catalog_publication(p)
 
         logging.info(f'publication: {p.catalog_identifier} - got cat pub')
@@ -317,11 +324,6 @@ def add_publications(publication_datas):
             catalog=p.catalog,
             catalog_identifier=p.catalog_identifier,
         )
-
-        logging.info(f'publication: {p.catalog_identifier} - flushing')
-
-        db.session.add(pub)
-        db.session.flush()
 
         logging.info(f'publication: {p.catalog_identifier} - flushed')
 
