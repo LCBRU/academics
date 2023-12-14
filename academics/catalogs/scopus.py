@@ -490,7 +490,7 @@ class Abstract(AbsDoc):
 
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
-            catalog_identifier=author_dict.get('authid', None),
+            catalog_identifier=author_dict.get('@auid', None),
             orcid='',
             first_name=author_dict.get('ce:given-name', None),
             last_name=author_dict.get('ce:surname', None),
