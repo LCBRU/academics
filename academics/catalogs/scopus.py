@@ -127,8 +127,8 @@ def get_scopus_publications(identifier):
 
         if id == '85172482133':
             logging.getLogger('query').info(a.data)
-            logging.getLogger(a.data.get('authors', {}))
-            logging.getLogger(a.authors)
+            logging.getLogger('query')a.data.get('authors', {}))
+            logging.getLogger('query')a.authors)
 
         result.append(
             PublicationData(
