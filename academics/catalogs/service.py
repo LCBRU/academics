@@ -8,7 +8,7 @@ from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, Academi
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
-from .scopus import get_scopus_author_data, get_scopus_publications, scopus_similar_authors
+from .scopus import get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
@@ -96,6 +96,13 @@ def _process_academics_who_need_an_update():
 
         db.session.commit()
 
+    while True:
+        p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
+
+        if not p:
+            logging.info(f'_process_academics_who_need_an_update: No more publications to refresh')
+            break
+
     delete_orphan_publications()
     auto_validate()
 
@@ -127,6 +134,24 @@ def _update_academic(academic: Academic):
 
     finally:
         db.session.add(academic)
+
+
+def _update_publication(catalog_publication: CatalogPublication):
+    logging.info(f'Updating publication {catalog_publication.catalog_identifier}')
+
+    try:
+        if catalog_publication.catalog == CATALOG_SCOPUS:
+            pub_data = get_scopus_publication_data(catalog_publication.catalog_identifier)
+        # if catalog_publication.catalog == CATALOG_OPEN_ALEX:
+        #     pub_data = get_open_alex_publication_data(catalog_publication.catalog_identifier)
+
+    except Exception as e:
+        log_exception(e)
+
+    finally:
+        catalog_publication.refresh_full_details = False
+
+        db.session.add(catalog_publication)
 
 
 def refresh_source(s):
@@ -268,12 +293,21 @@ def delete_orphan_publications():
 def add_publications(publication_datas):
     logging.info('add_publications: started')
 
+
     for p in publication_datas:
         j = _get_journal(p.journal_name)
         st = _get_subtype(p.subtype_code, p.subtype_description)
 
         pub = _get_or_create_publication(p)
-        cat_pub = _get_or_create_catalog_publication(p)
+        cat_pub = _get_catalog_publication(p)
+
+        if cat_pub:
+            continue
+
+        cat_pub = CatalogPublication(
+            catalog=p.catalog,
+            catalog_identifier=p.catalog_identifier,
+        )
 
         db.session.add(pub)
         db.session.flush()
@@ -291,6 +325,7 @@ def add_publications(publication_datas):
         cat_pub.volume = p.volume or ''
         cat_pub.issue = p.issue or ''
         cat_pub.pages = p.pages or ''
+        cat_pub.refresh_full_details = True
 
         cat_pub.is_open_access = p.is_open_access
         cat_pub.cited_by_count = p.cited_by_count
@@ -345,7 +380,7 @@ def _get_or_create_publication(p):
         return Publication()
 
 
-def _get_or_create_catalog_publication(p):
+def _get_catalog_publication(p):
     q = (
         select(CatalogPublication)
         .where(and_(
@@ -354,15 +389,7 @@ def _get_or_create_catalog_publication(p):
             )
         )).distinct()
     
-    result = db.session.execute(q).scalar()
-
-    if result:
-        return result
-    else:
-        return CatalogPublication(
-            catalog=p.catalog,
-            catalog_identifier=p.catalog_identifier,
-        )
+    return db.session.execute(q).scalar()
 
 
 def _get_or_create_source(author_data):
