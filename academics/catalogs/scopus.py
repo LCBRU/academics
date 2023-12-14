@@ -178,12 +178,38 @@ def get_scopus_publications(identifier):
                 subtype_description=p.get(u'subtypeDescription', ''),
                 cited_by_count=int(p.get(u'citedby-count', '0')),
                 author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
-                authors=p.authors,
+                authors=[_translate_publication_author(a) for a in p.data.get('author', [])],
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
             ))
     return result
 
+
+def _translate_publication_author(author_dict):
+    affiliations = author_dict.get('afid', None)
+
+    if affiliations:
+        affiliation = affiliations[0]
+        affiliation_identifier = affiliation.get('$', None)
+    else:
+        affiliation_identifier = None
+
+    result = AuthorData(
+        catalog=CATALOG_SCOPUS,
+        catalog_identifier=author_dict.get('authid', None),
+        orcid=author_dict.get('orcid', None),
+        first_name=author_dict.get('given-name', None),
+        last_name=author_dict.get('surname', None),
+        initials=author_dict.get('initials', None),
+        author_name=author_dict.get('authname', None),
+        href=author_dict.get('author-url', None),
+        affiliation_identifier=affiliation_identifier,
+        affiliation_name='',
+        affiliation_address='',
+        affiliation_country='',
+    )
+
+    return result
 
 def get_scopus_author_data(identifier, get_extended_details=False):
     logging.info(f'Getting Scopus Author Data {identifier}')
@@ -548,35 +574,3 @@ class DocumentSearch(ElsSearch):
 
         super().__init__(query=q, index='scopus')
         self._uri += '&view=complete'
-
-
-    @property
-    def authors(self):
-        return [self._translate_publication_author(a) for a in self.data.get('author', [])]
-
-
-    def _translate_publication_author(self, author_dict):
-        affiliations = author_dict.get('afid', None)
-
-        if affiliations:
-            affiliation = affiliations[0]
-            affiliation_identifier = affiliation.get('$', None)
-        else:
-            affiliation_identifier = None
-
-        result = AuthorData(
-            catalog=CATALOG_SCOPUS,
-            catalog_identifier=author_dict.get('authid', None),
-            orcid=author_dict.get('orcid', None),
-            first_name=author_dict.get('given-name', None),
-            last_name=author_dict.get('surname', None),
-            initials=author_dict.get('initials', None),
-            author_name=author_dict.get('authname', None),
-            href=author_dict.get('author-url', None),
-            affiliation_identifier=affiliation_identifier,
-            affiliation_name='',
-            affiliation_address='',
-            affiliation_country='',
-        )
-
-        return result
