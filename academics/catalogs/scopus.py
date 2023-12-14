@@ -139,12 +139,7 @@ def get_scopus_publications(identifier):
         a = Abstract(id)
         a.read(_client())
 
-        if id == '85172482133':
-            print('*'*50)
-            authors = [_translate_publication_author(a) for a in a.data.get('authors', {}).get('author', [])]
-            print(len(authors))
-
-            print('*'*50)
+        print(a.data.get('authors', {}))
 
         result.append(
             PublicationData(
@@ -165,37 +160,10 @@ def get_scopus_publications(identifier):
                 subtype_description=p.get(u'subtypeDescription', ''),
                 cited_by_count=int(p.get(u'citedby-count', '0')),
                 author_list=', '.join(list(dict.fromkeys(filter(len, [a['authname'] for a in p.get('author', [])])))),
-                authors=[_translate_publication_author(a) for a in p.get('author', [])],
+                authors=a.authors,
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
             ))
-    return result
-
-
-def _translate_publication_author(author_dict):
-    affiliations = author_dict.get('afid', None)
-
-    if affiliations:
-        affiliation = affiliations[0]
-        affiliation_identifier = affiliation.get('$', None)
-    else:
-        affiliation_identifier = None
-
-    result = AuthorData(
-        catalog=CATALOG_SCOPUS,
-        catalog_identifier=author_dict.get('authid', None),
-        orcid=author_dict.get('orcid', None),
-        first_name=author_dict.get('given-name', None),
-        last_name=author_dict.get('surname', None),
-        initials=author_dict.get('initials', None),
-        author_name=author_dict.get('authname', None),
-        href=author_dict.get('author-url', None),
-        affiliation_identifier=affiliation_identifier,
-        affiliation_name='',
-        affiliation_address='',
-        affiliation_country='',
-    )
-
     return result
 
 
@@ -513,6 +481,37 @@ class Abstract(AbsDoc):
             return '\n'.join([t.get('$', '') for t in funding_text])
         else:
             return funding_text
+
+    @property
+    def authors(self):
+        return [self._translate_publication_author(a) for a in self.data.get('authors', {}).get('author', [])]
+
+
+    def _translate_publication_author(self, author_dict):
+        affiliations = author_dict.get('afid', None)
+
+        if affiliations:
+            affiliation = affiliations[0]
+            affiliation_identifier = affiliation.get('$', None)
+        else:
+            affiliation_identifier = None
+
+        result = AuthorData(
+            catalog=CATALOG_SCOPUS,
+            catalog_identifier=author_dict.get('authid', None),
+            orcid=author_dict.get('orcid', None),
+            first_name=author_dict.get('given-name', None),
+            last_name=author_dict.get('surname', None),
+            initials=author_dict.get('initials', None),
+            author_name=author_dict.get('authname', None),
+            href=author_dict.get('author-url', None),
+            affiliation_identifier=affiliation_identifier,
+            affiliation_name='',
+            affiliation_address='',
+            affiliation_country='',
+        )
+
+        return result
 
     def read(self, client):
         try:
