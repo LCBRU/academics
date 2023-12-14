@@ -109,7 +109,6 @@ def _process_academics_who_need_an_update():
 
         db.session.commit()
 
-
     delete_orphan_publications()
     auto_validate()
 
@@ -300,8 +299,9 @@ def delete_orphan_publications():
 def add_publications(publication_datas):
     logging.info('add_publications: started')
 
-
     for p in publication_datas:
+        logging.info(f'publication: {p.catalog_identifier}')
+
         j = _get_journal(p.journal_name)
         st = _get_subtype(p.subtype_code, p.subtype_description)
 
@@ -309,6 +309,7 @@ def add_publications(publication_datas):
         cat_pub = _get_catalog_publication(p)
 
         if cat_pub:
+            logging.info(f'publication: {p.catalog_identifier} - skipping')
             continue
 
         cat_pub = CatalogPublication(
