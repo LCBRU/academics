@@ -141,15 +141,7 @@ def get_scopus_publications(identifier):
 
         if id == '85172482133':
             print('*'*50)
-            print('Getting Single Publication')
-
-            indi_pub = get_single_publication(_get_scopus_publication_self_link(p))
-            print(indi_pub)
-
-            print('l'*50)
-
-            authors = [_translate_publication_author(a) for a in indi_pub.get('author', [])]
-
+            authors = [_translate_publication_author(a) for a in a.get('authors', {}).get('author', [])]
             print(len(authors))
 
             print('*'*50)
