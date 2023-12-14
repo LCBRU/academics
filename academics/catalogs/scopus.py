@@ -105,7 +105,7 @@ def get_single_publication(identifier):
         return None
     
     d = FullDoc(doi=identifier)
-    d.read()
+    d.read(_client())
 
     return d
 
