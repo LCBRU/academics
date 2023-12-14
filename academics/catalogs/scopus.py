@@ -141,7 +141,7 @@ def get_scopus_publications(identifier):
 
         if id == '85172482133':
             print('*'*50)
-            authors = [_translate_publication_author(a) for a in a.get('authors', {}).get('author', [])]
+            authors = [_translate_publication_author(a) for a in a.data.get('authors', {}).get('author', [])]
             print(len(authors))
 
             print('*'*50)
