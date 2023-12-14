@@ -104,7 +104,7 @@ def get_single_publication(identifier):
         logging.info('SCOPUS Not Enabled')
         return None
     
-    d = FullDoc(identifier)
+    d = FullDoc(uri=identifier)
     d.read()
 
     return d
@@ -135,7 +135,8 @@ def get_scopus_publications(identifier):
 
         if id == '85172482133':
             print('*'*50)
-            print(get_scopus_publications(id))
+            print('Getting Single Publication')
+            print(get_scopus_publications(_get_scopus_publication_link(p)))
             print('*'*50)
 
         result.append(
