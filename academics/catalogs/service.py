@@ -299,21 +299,12 @@ def delete_orphan_publications():
 def add_publications(publication_datas):
     logging.info('add_publications: started')
 
+    journals = {n: _get_journal(n) for n in {p.journal_name for p in publication_datas}}
+    subtypes = {d: _get_subtype(c, d) for c, d in {(p.subtype_code, p.subtype_description) for p in publication_datas}}
+    publications = {(p.catalog, p.catalog_identifier): _get_or_create_publication(p) for p in publication_datas}
+
+
     for p in publication_datas:
-        logging.info(f'publication: {p.catalog_identifier}')
-
-        j = _get_journal(p.journal_name)
-
-        logging.info(f'publication: {p.catalog_identifier} - got journal')
-
-        st = _get_subtype(p.subtype_code, p.subtype_description)
-
-        logging.info(f'publication: {p.catalog_identifier} - got subtype')
-
-        pub = _get_or_create_publication(p)
-
-        logging.info(f'publication: {p.catalog_identifier} - got publication')
-
         cat_pub = _get_catalog_publication(p)
 
         logging.info(f'publication: {p.catalog_identifier} - got cat pub')
@@ -362,11 +353,8 @@ def add_publications(publication_datas):
 
         logging.info(f'publication: {p.catalog_identifier} - set values')
 
-        cat_pub.journal = j
-
-        logging.info(f'publication: {p.catalog_identifier} - set journal')
-
-        cat_pub.subtype = st
+        cat_pub.journal = journals[p.journal_name]
+        cat_pub.subtype = subtypes[p.subtype_description]
 
         logging.info(f'publication: {p.catalog_identifier} - set subtype - adding sponsors')
 
@@ -405,6 +393,7 @@ def add_publications(publication_datas):
 
 
     logging.info('add_publications: ended')
+
 
 
 def _get_or_create_publication(p):
