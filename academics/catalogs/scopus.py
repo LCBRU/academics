@@ -135,6 +135,7 @@ def get_scopus_publications(identifier):
 
         if id == '85172482133':
             print('*'*50)
+            print(p)
             print('Getting Single Publication')
             print(get_single_publication(p.get(u'prism:doi', '')))
             print('*'*50)
