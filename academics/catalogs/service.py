@@ -312,6 +312,8 @@ def add_publications(publication_datas):
     for p in publication_datas:
         pub = publications[(p.catalog, p.catalog_identifier)]
 
+        logging.info(f'publication: {p.catalog_identifier} - getting cat pub')
+
         cat_pub = _get_catalog_publication(p)
 
         logging.info(f'publication: {p.catalog_identifier} - got cat pub')
