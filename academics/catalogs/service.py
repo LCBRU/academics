@@ -336,7 +336,7 @@ def _get_subtype_xref(publication_datas):
 def _get_publication_xref(catalog, publication_datas):
     logging.info('_get_publication_xref: started')
 
-    ids = {p.catalog_identifier for p in publication_datas.funding_list}
+    ids = {p.catalog_identifier for p in publication_datas}
 
     q = select(
         CatalogPublication.publication_id,
