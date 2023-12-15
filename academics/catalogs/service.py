@@ -332,11 +332,13 @@ def add_publications(catalog, publication_datas):
         ))
     )
 
-    existing_cat_ids = db.session.execute(q).scalars()
+    existing_cat_ids = set(db.session.execute(q).scalars())
 
     print(existing_cat_ids)
 
     new_pubs = [p for p in publication_datas if p.catalog_identifier not in existing_cat_ids]
+
+    print(new_pubs)
 
     # journal_xref = _get_journal_xref(publication_datas)
 
