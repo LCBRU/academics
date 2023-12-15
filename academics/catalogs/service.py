@@ -295,8 +295,11 @@ def delete_orphan_publications():
 
 
 def _get_journal_xref(publication_datas):
+    logging.info('_get_journal_xref: started')
 
     names = {n for n in {p.journal_name for p in publication_datas}}
+
+    logging.info('_get_journal_xref: getting existing')
 
     existing_q = select(
         Journal.id,
@@ -307,18 +310,30 @@ def _get_journal_xref(publication_datas):
         Journal.name.in_(names)
     )
 
+    logging.info('_get_journal_xref: rejigging')
+
     xref = {
         j['name']: j['id'] for j in db.session.execute(existing_q).mappings()
     }
 
+    logging.info('_get_journal_xref: whats missing')
+
     missing = xref.keys() - names
 
+    logging.info('_get_journal_xref: creating new ones')
+
     new_journals = [Journal(name=m) for m in missing]
+
+    logging.info('_get_journal_xref: Adding to DB')
 
     db.session.add_all(new_journals)
     db.session.commit()
 
+    logging.info('_get_journal_xref: Merging')
+
     xref.extend({j.name: j.id for j in new_journals})
+
+    logging.info('_get_journal_xref: Second rejigging')
 
     return {p.catalog_identifier: xref[p.journal_name] for p in publication_datas}
 
