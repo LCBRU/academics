@@ -304,8 +304,6 @@ def _get_journal_xref(publication_datas):
     existing_q = select(
         Journal.id,
         Journal.name,
-    ).join_from(
-        Journal
     ).where(
         Journal.name.in_(names)
     )
