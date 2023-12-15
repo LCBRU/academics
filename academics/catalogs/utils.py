@@ -5,37 +5,6 @@ from academics.model import Source
 from datetime import date
 
 
-def _get_journal(journal_name):
-    journal_name = (journal_name or '').lower().strip()
-
-    if not journal_name:
-        journal_name = '[unset]'
-
-    result = Journal.query.filter(Journal.name == journal_name).one_or_none()
-
-    if not result:
-        result = Journal(name=journal_name)
-        db.session.add(result)
-
-    return result
-
-
-def _get_subtype(code, description):
-    result = None
-
-    if code:
-        result = Subtype.query.filter(Subtype.code == code).one_or_none()
-
-    if not result:
-        result = Subtype.query.filter(Subtype.description == description).one_or_none()
-
-    if not result:
-        result = Subtype(code=code, description=description)
-        db.session.add(result)
-
-    return result
-
-
 def _get_sponsor(name):
     if not name:
         return None

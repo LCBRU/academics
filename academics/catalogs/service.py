@@ -1,7 +1,6 @@
 import logging
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, get_openalex_publications, open_alex_similar_authors
-from academics.catalogs.utils import _get_journal, _get_subtype
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, NihrAcknowledgement, Publication, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
@@ -297,7 +296,7 @@ def delete_orphan_publications():
 def _get_journal_xref(publication_datas):
     logging.info('_get_journal_xref: started')
 
-    names = {n for n in {p.journal_name for p in publication_datas}}
+    names = {p.journal_name for p in publication_datas}
 
     q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
 
@@ -314,11 +313,60 @@ def _get_journal_xref(publication_datas):
 
 
 def _get_subtype_xref(publication_datas):
-    return {d: _get_subtype(c, d) for c, d in {(p.subtype_code, p.subtype_description) for p in publication_datas}}
+    logging.info('_get_subtype_xref: started')
+
+    descs = {p.subtype_description for p in publication_datas}
+
+    q = select(Subtype.id, Subtype.description).where(Subtype.description.in_(descs))
+
+    xref = {st['desc']: st['id'] for st in db.session.execute(q).mappings()}
+
+    new_subtypes = [Subtype(code=d, description=d) for d in xref.keys() - descs]
+
+    db.session.add_all(new_subtypes)
+    db.session.commit()
+
+    xref = xref | {st.description: st.id for st in new_subtypes}
+
+    return {p.catalog_identifier: xref[p.subtype_description] for p in publication_datas}
 
 
-def _get_publication_xref(publication_datas):
-    return {(p.catalog, p.catalog_identifier): _get_or_create_publication(p) for p in publication_datas}
+def _get_publication_xref(catalog, publication_datas):
+    logging.info('_get_publication_xref: started')
+
+    ids = {p.catalog_identifier for p in publication_datas}
+
+    q = select(
+        CatalogPublication.publication_id,
+        CatalogPublication.catalog_identifier,
+    ).where(
+        CatalogPublication.catalog_identifier.in_(ids)
+    ).where(
+        CatalogPublication.catalog == catalog
+    )
+
+    xref = {p['catalog_identifier']: p['publication_id'] for p in db.session.execute(q).mappings()}
+
+    new_pubs = {id: Publication() for id in xref.keys() - ids}
+
+    db.session.add_all(new_pubs.values())
+    db.session.commit()
+
+    xref = xref | {p.catalog_identifier: p.id for p in new_pubs}
+
+    return {p.catalog_identifier: xref[p.catalog_identifier] for p in publication_datas}
+
+
+def _get_catalog_publication(p):
+    q = (
+        select(CatalogPublication)
+        .where(and_(
+                CatalogPublication.catalog == p.catalog,
+                CatalogPublication.catalog_identifier == p.catalog_identifier,
+            )
+        )).distinct()
+    
+    return db.session.execute(q).scalar()
 
 
 def add_publications(catalog, publication_datas):
@@ -334,13 +382,10 @@ def add_publications(catalog, publication_datas):
 
     existing_cat_ids = set(db.session.execute(q).scalars())
 
-    print(existing_cat_ids)
-
     new_pubs = [p for p in publication_datas if p.catalog_identifier not in existing_cat_ids]
-
-    print(new_pubs)
-
-    # journal_xref = _get_journal_xref(publication_datas)
+    journal_xref = _get_journal_xref(new_pubs)
+    subtype_xref = _get_subtype_xref(new_pubs)
+    pubs_xref = _get_publication_xref(catalog, new_pubs)
 
     # print(journal_xref)
 
@@ -444,38 +489,6 @@ def add_publications(catalog, publication_datas):
 
     # logging.info('add_publications: ended')
 
-
-
-def _get_or_create_publication(p):
-    q = (
-        select(Publication)
-        .join(Publication.catalog_publications)
-        .where(or_(
-            CatalogPublication.doi == p.doi,
-            and_(
-                CatalogPublication.catalog == p.catalog,
-                CatalogPublication.catalog_identifier == p.catalog_identifier,
-            )
-        ))).distinct()
-    
-    result = db.session.execute(q).scalar()
-
-    if result:
-        return result
-    else:
-        return Publication()
-
-
-def _get_catalog_publication(p):
-    q = (
-        select(CatalogPublication)
-        .where(and_(
-                CatalogPublication.catalog == p.catalog,
-                CatalogPublication.catalog_identifier == p.catalog_identifier,
-            )
-        )).distinct()
-    
-    return db.session.execute(q).scalar()
 
 
 def _get_or_create_source(author_data):
