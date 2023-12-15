@@ -150,6 +150,8 @@ def _update_publication(catalog_publication: CatalogPublication):
         # if catalog_publication.catalog == CATALOG_OPEN_ALEX:
         #     pub_data = get_open_alex_publication_data(catalog_publication.catalog_identifier)
 
+        update_catalog_publication(catalog_publication, pub_data)
+
     except Exception as e:
         log_exception(e)
 
@@ -182,7 +184,7 @@ def refresh_source(s):
             if s.catalog == CATALOG_OPEN_ALEX:
                 publications = get_openalex_publications(s.catalog_identifier)
 
-            add_publications(s.catalog, publications)
+            add_catalog_publications(s.catalog, publications)
 
         s.last_fetched_datetime = datetime.utcnow()
 
@@ -466,8 +468,8 @@ def _get_source_xref(catalog, publication_datas):
     }
 
 
-def add_publications(catalog, publication_datas):
-    logging.info('add_publications: started')
+def add_catalog_publications(catalog, publication_datas):
+    logging.info('add_catalog_publications: started')
 
     q = (
         select(CatalogPublication.catalog_identifier)
@@ -477,7 +479,7 @@ def add_publications(catalog, publication_datas):
         ))
     )
 
-    existing_cat_ids = set(db.session.execute(q).scalars())
+    existing_cat_ids = {db.session.execute(q).scalars()}
     new_pubs = [p for p in publication_datas if p.catalog_identifier not in existing_cat_ids]
 
     journal_xref = _get_journal_xref(new_pubs)
@@ -531,6 +533,57 @@ def add_publications(catalog, publication_datas):
         db.session.add(pub)
 
     logging.info('add_publications: ended')
+
+
+def update_catalog_publication(catalog_publication, p):
+    logging.info('add_catalog_publications: started')
+
+    journal_xref = _get_journal_xref([p])
+    subtype_xref = _get_subtype_xref([p])
+    pubs_xref = _get_publication_xref(catalog_publication.catalog, [p])
+    sponsor_xref = _get_sponsor_xref([p])
+    source_xref = _get_source_xref(catalog_publication.catalog, [p])
+    keyword_xref = _get_keyword_xref([p])
+
+    pub = pubs_xref[p.catalog_identifier]
+
+    catalog_publication.catalog=p.catalog
+    catalog_publication.catalog_identifier=p.catalog_identifier
+    catalog_publication.publication_id=pub.id
+    catalog_publication.doi=p.doi or ''
+    catalog_publication.title=p.title or ''
+    catalog_publication.publication_cover_date=p.publication_cover_date
+    catalog_publication.href=p.href
+    catalog_publication.abstract=p.abstract_text or ''
+    catalog_publication.funding_text=p.funding_text or ''
+    catalog_publication.volume=p.volume or ''
+    catalog_publication.issue=p.issue or ''
+    catalog_publication.pages=p.pages or ''
+    catalog_publication.is_open_access=p.is_open_access
+    catalog_publication.cited_by_count=p.cited_by_count
+    catalog_publication.author_list=p.author_list or ''
+    catalog_publication.journal_id=journal_xref[p.catalog_identifier]
+    catalog_publication.subtype_id=subtype_xref[p.catalog_identifier]
+    catalog_publication.refresh_full_details=False
+
+    catalog_publication.sponsors = sponsor_xref[p.catalog_identifier]
+    catalog_publication.keywords = keyword_xref[p.catalog_identifier]
+
+    publication_sources = [
+        PublicationsSources(
+            source=s,
+            publication=pub
+        ) 
+        for s in source_xref[p.catalog_identifier]
+    ]
+    pub.publication_sources = publication_sources
+    pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
+
+    db.session.add_all(publication_sources)
+    db.session.add(catalog_publication)
+    db.session.add(pub)
+
+    logging.info('add_catalog_publications: ended')
 
 
 def _get_or_create_source(author_data):

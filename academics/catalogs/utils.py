@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from academics.model import FundingAcr, Journal, Keyword, Sponsor, Subtype
+from academics.model import CatalogPublication, FundingAcr, Journal, Keyword, Sponsor, Subtype
 from lbrc_flask.database import db
 from academics.model import Source
 from datetime import date
