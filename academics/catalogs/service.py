@@ -1,7 +1,9 @@
+from itertools import chain
 import logging
+from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, get_openalex_publications, open_alex_similar_authors
-from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, NihrAcknowledgement, Publication, Source, Subtype, Affiliation
+from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
@@ -334,7 +336,7 @@ def _get_subtype_xref(publication_datas):
 def _get_publication_xref(catalog, publication_datas):
     logging.info('_get_publication_xref: started')
 
-    ids = {p.catalog_identifier for p in publication_datas}
+    ids = {p.catalog_identifier for p in publication_datas.funding_list}
 
     q = select(
         CatalogPublication.publication_id,
@@ -357,16 +359,111 @@ def _get_publication_xref(catalog, publication_datas):
     return {p.catalog_identifier: xref[p.catalog_identifier] for p in publication_datas}
 
 
-def _get_catalog_publication(p):
-    q = (
-        select(CatalogPublication)
-        .where(and_(
-                CatalogPublication.catalog == p.catalog,
-                CatalogPublication.catalog_identifier == p.catalog_identifier,
-            )
-        )).distinct()
-    
-    return db.session.execute(q).scalar()
+def _get_sponsor_xref(publication_datas):
+    logging.info('_get_sponsor_xref: started')
+
+    names = {n for n in chain.from_iterable([p.funding_list for p in publication_datas])}
+
+    q = select(Sponsor.id, Sponsor.name).where(Sponsor.name.in_(names))
+
+    xref = {p['name']: p['id'] for p in db.session.execute(q).mappings()}
+
+    new_sponsors = [Sponsor(name=n) for n in xref.keys() - names]
+
+    db.session.add_all(new_sponsors)
+    db.session.commit()
+
+    xref = xref | {s.name: s.id for s in new_sponsors}
+
+    return {
+        p.catalog_identifier: [xref[n] for n in p.funding_list]
+        for p in publication_datas
+    }
+
+
+def _get_keyword_xref(publication_datas):
+    logging.info('_get_keyword_xref: started')
+
+    keywords = {k for k in chain.from_iterable([p.keywords for p in publication_datas])}
+
+    q = select(Keyword).where(Keyword.keyword.in_(keywords))
+
+    xref = {k.keyword: k for k in db.session.execute(q).scalars()}
+
+    new_keywords = [Keyword(keyword=k) for k in xref.keys() - keywords]
+
+    db.session.add_all(new_keywords)
+    db.session.commit()
+
+    xref = xref | {k.keyword: k for k in new_keywords}
+
+    return {
+        p.catalog_identifier: [xref[k] for k in p.keywords]
+        for p in publication_datas
+    }
+
+
+def _get_affiliation_xref(catalog, author_datas):
+    logging.info('_get_affiliation_xref: started')
+
+    affiliations = {a.affiliation_identifier: a for a in chain.from_iterable([p.authors for p in author_datas])}
+
+    q = select(Affiliation).where(
+        Affiliation.catalog_identifier.in_(affiliations.keys())
+    ).where(
+        Affiliation.catalog == catalog
+    )
+
+    xref = {a['catalog_identifier']: a for a in db.session.execute(q).mappings()}
+
+    new_affiliations = [
+        Affiliation(
+            catalog=catalog,
+            catalog_identifier=a.affiliation_identifier,
+            name=a.affiliation_name,
+            address=a.affiliation_address,
+            country=a.affiliation_country,
+        )
+        for a in affiliations if a.catalog_identifier not in xref.keys()
+    ]
+
+    db.session.add_all(new_affiliations)
+    db.session.commit()
+
+    xref = xref | {a.catalog_identifier: a for a in new_affiliations}
+
+    return {a.catalog_identifier: xref[a.affiliation_identifier] for a in author_datas}
+
+
+def _get_source_xref(catalog, publication_datas):
+    logging.info('_get_source_xref: started')
+
+    authors = {a.catalog_identifier: a for a in chain.from_iterable([p.authors for p in publication_datas])}
+
+    q = select(Source).where(
+        Source.catalog_identifier.in_(authors.keys())
+    ).where(
+        Source.catalog == catalog
+    )
+
+    xref = {s['catalog_identifier']: s for s in db.session.execute(q).mappings()}
+
+    new_sources = [a.get_new_source() for a in authors if a.catalog_identifier not in xref.keys()]
+
+    affiliation_xref = _get_affiliation_xref(catalog, authors)
+
+    for a in new_sources:
+        a.affiliation = affiliation_xref[a.catalog_identifier]
+
+    db.session.add_all(new_sources)
+    db.session.commit()
+
+    xref = xref | {s.catalog_identifier: s for s in new_sources}
+
+    return {
+        p.catalog_identifier: [xref[a.catalog_identifier] for a in p.authors]
+        for p in publication_datas
+    }
 
 
 def add_publications(catalog, publication_datas):
@@ -381,114 +478,59 @@ def add_publications(catalog, publication_datas):
     )
 
     existing_cat_ids = set(db.session.execute(q).scalars())
-
     new_pubs = [p for p in publication_datas if p.catalog_identifier not in existing_cat_ids]
+
     journal_xref = _get_journal_xref(new_pubs)
     subtype_xref = _get_subtype_xref(new_pubs)
     pubs_xref = _get_publication_xref(catalog, new_pubs)
+    sponsor_xref = _get_sponsor_xref(new_pubs)
+    source_xref = _get_source_xref(catalog, new_pubs)
+    keyword_xref = _get_keyword_xref(new_pubs)
 
-    # print(journal_xref)
+    for p in publication_datas:
+        logging.info(f'publication: {p.catalog_identifier} - getting cat pub')
 
-    # subtype_xref = _get_subtype_xref(publication_datas)
-    # publication_xref = _get_publication_xref(publication_datas)
+        pub = pubs_xref[p.catalog_identifier]
 
-    print('Hello')
+        cat_pub = CatalogPublication(
+            catalog=p.catalog,
+            catalog_identifier=p.catalog_identifier,
+            publication_id=pub.id,
+            doi=p.doi or '',
+            title=p.title or '',
+            publication_cover_date=p.publication_cover_date,
+            href=p.href,
+            abstract=p.abstract_text or '',
+            funding_text=p.funding_text or '',
+            volume=p.volume or '',
+            issue=p.issue or '',
+            pages=p.pages or '',
+            is_open_access=p.is_open_access,
+            cited_by_count=p.cited_by_count,
+            author_list=p.author_list or '',
+            journal_id=journal_xref[p.catalog_identifier],
+            subtype_id=subtype_xref[p.catalog_identifier],
+            refresh_full_details=True,
+        )
 
-    # db.session.add_all(journals.values())
-    # db.session.add_all(subtypes.values())
-    # db.session.add_all(publications.values())
+        cat_pub.sponsors = sponsor_xref[p.catalog_identifier]
+        cat_pub.keywords = keyword_xref[p.catalog_identifier]
 
-    # db.session.commit()
+        publication_sources = [
+            PublicationsSources(
+                source=s,
+                publication=pub
+            ) 
+            for s in source_xref[p.catalog_identifier]
+        ]
+        pub.publication_sources = publication_sources
+        pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
-    # for p in publication_datas:
-    #     pub = publications[(p.catalog, p.catalog_identifier)]
+        db.session.add_all(publication_sources)
+        db.session.add(cat_pub)
+        db.session.add(pub)
 
-    #     logging.info(f'publication: {p.catalog_identifier} - getting cat pub')
-
-    #     cat_pub = _get_catalog_publication(p)
-
-    #     logging.info(f'publication: {p.catalog_identifier} - got cat pub')
-
-    #     if cat_pub:
-    #         logging.info(f'publication: {p.catalog_identifier} - skipping')
-    #         continue
-
-    #     cat_pub = CatalogPublication(
-    #         catalog=p.catalog,
-    #         catalog_identifier=p.catalog_identifier,
-    #     )
-
-    #     logging.info(f'publication: {p.catalog_identifier} - flushed')
-
-    #     cat_pub.publication = pub
-
-    #     logging.info(f'publication: {p.catalog_identifier} - adding cat to pub')
-
-    #     db.session.add(cat_pub)
-
-    #     logging.info(f'publication: {p.catalog_identifier} - setting values')
-
-    #     cat_pub.doi = p.doi or ''
-    #     cat_pub.title = p.title or ''
-    #     cat_pub.publication_cover_date = p.publication_cover_date
-    #     cat_pub.href = p.href
-    #     cat_pub.abstract = p.abstract_text or ''
-    #     cat_pub.funding_text = p.funding_text or ''
-    #     cat_pub.volume = p.volume or ''
-    #     cat_pub.issue = p.issue or ''
-    #     cat_pub.pages = p.pages or ''
-    #     cat_pub.refresh_full_details = True
-
-    #     cat_pub.is_open_access = p.is_open_access
-    #     cat_pub.cited_by_count = p.cited_by_count
-    #     cat_pub.author_list = p.author_list or ''
-
-    #     if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
-    #         pub.validation_historic = True
-
-    #     logging.info(f'publication: {p.catalog_identifier} - set values')
-
-    #     cat_pub.journal = journals[p.journal_name]
-    #     cat_pub.subtype = subtypes[p.subtype_description]
-
-    #     logging.info(f'publication: {p.catalog_identifier} - set subtype - adding sponsors')
-
-    #     _add_sponsors_to_publications(
-    #         publication=pub,
-    #         sponsor_names=p.funding_list,
-    #     )
-
-    #     logging.info(f'publication: {p.catalog_identifier} - sponsors adding - creating sources')
-
-    #     pub_sources  = [
-    #         PublicationsSources(
-    #             source=s,
-    #             publication=pub
-    #         ) 
-    #         for s in [_get_or_create_source(a) for a in p.authors]
-    #     ]
-
-    #     logging.info(f'publication: {p.catalog_identifier} - adding sources')
-
-    #     pub.publication_sources = pub_sources
-
-    #     logging.info(f'publication: {p.catalog_identifier} - saving sources')
-
-    #     db.session.add_all(pub_sources)
-
-    #     logging.info(f'publication: {p.catalog_identifier} - saving pub')
-
-    #     db.session.add(pub)
-
-    #     logging.info(f'publication: {p.catalog_identifier} - adding keywords')
-
-    #     _add_keywords_to_publications(publication=pub, keyword_list=p.keywords)
-
-    #     logging.info(f'publication: {p.catalog_identifier} is done')
-
-
-    # logging.info('add_publications: ended')
-
+    logging.info('add_publications: ended')
 
 
 def _get_or_create_source(author_data):
