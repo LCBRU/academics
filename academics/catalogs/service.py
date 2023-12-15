@@ -348,6 +348,8 @@ def _get_publication_xref(publication_datas):
 def add_publications(publication_datas):
     logging.info('add_publications: started')
 
+    logging.info(f'add_publications: {publication_datas}')
+
     journal_xref = _get_journal_xref(publication_datas)
 
     print(journal_xref)
