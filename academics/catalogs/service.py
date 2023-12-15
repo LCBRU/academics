@@ -1,10 +1,8 @@
 import logging
-from time import sleep
-from flask import current_app
 from sqlalchemy import and_, or_, select
 from academics.catalogs.open_alex import get_open_alex_author_data, get_openalex_publications, open_alex_similar_authors
-from academics.catalogs.utils import _add_keywords_to_publications, _add_sponsors_to_publications, _get_journal, _get_subtype
-from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, NihrAcknowledgement, Publication, PublicationsSources, Source, Subtype, Affiliation
+from academics.catalogs.utils import _get_journal, _get_subtype
+from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, NihrAcknowledgement, Publication, Source, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
 from academics.publication_searching import ValidationSearchForm, publication_search_query
@@ -297,7 +295,32 @@ def delete_orphan_publications():
 
 
 def _get_journal_xref(publication_datas):
-    return {n: _get_journal(n) for n in {p.journal_name for p in publication_datas}}
+
+    names = {n for n in {p.journal_name for p in publication_datas}}
+
+    existing_q = select(
+        Journal.id,
+        Journal.name,
+    ).join_from(
+        Journal
+    ).where(
+        Journal.name.in_(names)
+    )
+
+    xref = {
+        j['name']: j['id'] for j in db.session.execute(existing_q).mappings()
+    }
+
+    missing = xref.keys() - names
+
+    new_journals = [Journal(name=m) for m in missing]
+
+    db.session.add_all(new_journals)
+    db.session.commit()
+
+    xref.extend({j.name: j.id for j in new_journals})
+
+    return {p.catalog_identifier: xref[p.journal_name] for p in publication_datas}
 
 
 def _get_subtype_xref(publication_datas):
@@ -312,8 +335,11 @@ def add_publications(publication_datas):
     logging.info('add_publications: started')
 
     journal_xref = _get_journal_xref(publication_datas)
-    subtype_xref = _get_subtype_xref(publication_datas)
-    publication_xref = _get_publication_xref(publication_datas)
+
+    print(journal_xref)
+
+    # subtype_xref = _get_subtype_xref(publication_datas)
+    # publication_xref = _get_publication_xref(publication_datas)
 
     print('Hello')
 
