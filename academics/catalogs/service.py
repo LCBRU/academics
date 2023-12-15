@@ -181,7 +181,7 @@ def refresh_source(s):
             if s.catalog == CATALOG_OPEN_ALEX:
                 publications = get_openalex_publications(s.catalog_identifier)
 
-            add_publications(publications)
+            add_publications(s.catalog, publications)
 
         s.last_fetched_datetime = datetime.utcnow()
 
@@ -299,40 +299,16 @@ def _get_journal_xref(publication_datas):
 
     names = {n for n in {p.journal_name for p in publication_datas}}
 
-    logging.info(f'_get_journal_xref: names - {names}')
-    logging.info('_get_journal_xref: getting existing')
+    q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
 
-    existing_q = select(
-        Journal.id,
-        Journal.name,
-    ).where(
-        Journal.name.in_(names)
-    )
+    xref = {j['name']: j['id'] for j in db.session.execute(q).mappings()}
 
-    logging.info('_get_journal_xref: rejigging')
-
-    xref = {
-        j['name']: j['id'] for j in db.session.execute(existing_q).mappings()
-    }
-
-    logging.info('_get_journal_xref: whats missing')
-
-    missing = xref.keys() - names
-
-    logging.info('_get_journal_xref: creating new ones')
-
-    new_journals = [Journal(name=m) for m in missing]
-
-    logging.info('_get_journal_xref: Adding to DB')
+    new_journals = [Journal(name=n) for n in xref.keys() - names]
 
     db.session.add_all(new_journals)
     db.session.commit()
 
-    logging.info('_get_journal_xref: Merging')
-
     xref = xref | {j.name: j.id for j in new_journals}
-
-    logging.info('_get_journal_xref: Second rejigging')
 
     return {p.catalog_identifier: xref[p.journal_name] for p in publication_datas}
 
@@ -345,14 +321,26 @@ def _get_publication_xref(publication_datas):
     return {(p.catalog, p.catalog_identifier): _get_or_create_publication(p) for p in publication_datas}
 
 
-def add_publications(publication_datas):
+def add_publications(catalog, publication_datas):
     logging.info('add_publications: started')
 
-    logging.info(f'add_publications: {publication_datas}')
+    q = (
+        select(CatalogPublication.catalog_identifier)
+        .where(CatalogPublication.catalog == catalog)
+        .where(CatalogPublication.catalog_identifier.in_(
+            p.catalog_identifier for p in publication_datas
+        ))
+    )
 
-    journal_xref = _get_journal_xref(publication_datas)
+    existing_cat_ids = db.session.execute(q).scalars()
 
-    print(journal_xref)
+    print(existing_cat_ids)
+
+    new_pubs = [p for p in publication_datas if p.catalog_identifier not in existing_cat_ids]
+
+    # journal_xref = _get_journal_xref(publication_datas)
+
+    # print(journal_xref)
 
     # subtype_xref = _get_subtype_xref(publication_datas)
     # publication_xref = _get_publication_xref(publication_datas)
