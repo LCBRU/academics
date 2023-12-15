@@ -329,7 +329,7 @@ def _get_journal_xref(publication_datas):
 
     logging.info('_get_journal_xref: Merging')
 
-    xref.extend({j.name: j.id for j in new_journals})
+    xref = xref | {j.name: j.id for j in new_journals}
 
     logging.info('_get_journal_xref: Second rejigging')
 
