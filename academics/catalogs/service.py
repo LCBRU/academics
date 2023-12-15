@@ -299,6 +299,7 @@ def _get_journal_xref(publication_datas):
 
     names = {n for n in {p.journal_name for p in publication_datas}}
 
+    logging.info(f'_get_journal_xref: names - {names}')
     logging.info('_get_journal_xref: getting existing')
 
     existing_q = select(
