@@ -6,7 +6,6 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from elsapy.elsdoc import FullDoc
 from academics.catalogs.utils import AuthorData, PublicationData
 from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
@@ -19,6 +18,7 @@ from lbrc_flask.validators import parse_date
 from elsapy import version
 from functools import cache
 from cachetools import cached, TTLCache
+
 
 class ResourceNotFoundException(Exception):
     pass

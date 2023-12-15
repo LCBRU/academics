@@ -296,107 +296,121 @@ def delete_orphan_publications():
         db.session.commit()
 
 
+def _get_journal_xref(publication_datas):
+    return {n: _get_journal(n) for n in {p.journal_name for p in publication_datas}}
+
+
+def _get_subtype_xref(publication_datas):
+    return {d: _get_subtype(c, d) for c, d in {(p.subtype_code, p.subtype_description) for p in publication_datas}}
+
+
+def _get_publication_xref(publication_datas):
+    return {(p.catalog, p.catalog_identifier): _get_or_create_publication(p) for p in publication_datas}
+
+
 def add_publications(publication_datas):
     logging.info('add_publications: started')
 
-    journals = {n: _get_journal(n) for n in {p.journal_name for p in publication_datas}}
-    subtypes = {d: _get_subtype(c, d) for c, d in {(p.subtype_code, p.subtype_description) for p in publication_datas}}
-    publications = {(p.catalog, p.catalog_identifier): _get_or_create_publication(p) for p in publication_datas}
+    journal_xref = _get_journal_xref(publication_datas)
+    subtype_xref = _get_subtype_xref(publication_datas)
+    publication_xref = _get_publication_xref(publication_datas)
 
-    db.session.add_all(journals.values())
-    db.session.add_all(subtypes.values())
-    db.session.add_all(publications.values())
+    print('Hello')
 
-    db.session.commit()
+    # db.session.add_all(journals.values())
+    # db.session.add_all(subtypes.values())
+    # db.session.add_all(publications.values())
 
-    for p in publication_datas:
-        pub = publications[(p.catalog, p.catalog_identifier)]
+    # db.session.commit()
 
-        logging.info(f'publication: {p.catalog_identifier} - getting cat pub')
+    # for p in publication_datas:
+    #     pub = publications[(p.catalog, p.catalog_identifier)]
 
-        cat_pub = _get_catalog_publication(p)
+    #     logging.info(f'publication: {p.catalog_identifier} - getting cat pub')
 
-        logging.info(f'publication: {p.catalog_identifier} - got cat pub')
+    #     cat_pub = _get_catalog_publication(p)
 
-        if cat_pub:
-            logging.info(f'publication: {p.catalog_identifier} - skipping')
-            continue
+    #     logging.info(f'publication: {p.catalog_identifier} - got cat pub')
 
-        cat_pub = CatalogPublication(
-            catalog=p.catalog,
-            catalog_identifier=p.catalog_identifier,
-        )
+    #     if cat_pub:
+    #         logging.info(f'publication: {p.catalog_identifier} - skipping')
+    #         continue
 
-        logging.info(f'publication: {p.catalog_identifier} - flushed')
+    #     cat_pub = CatalogPublication(
+    #         catalog=p.catalog,
+    #         catalog_identifier=p.catalog_identifier,
+    #     )
 
-        cat_pub.publication = pub
+    #     logging.info(f'publication: {p.catalog_identifier} - flushed')
 
-        logging.info(f'publication: {p.catalog_identifier} - adding cat to pub')
+    #     cat_pub.publication = pub
 
-        db.session.add(cat_pub)
+    #     logging.info(f'publication: {p.catalog_identifier} - adding cat to pub')
 
-        logging.info(f'publication: {p.catalog_identifier} - setting values')
+    #     db.session.add(cat_pub)
 
-        cat_pub.doi = p.doi or ''
-        cat_pub.title = p.title or ''
-        cat_pub.publication_cover_date = p.publication_cover_date
-        cat_pub.href = p.href
-        cat_pub.abstract = p.abstract_text or ''
-        cat_pub.funding_text = p.funding_text or ''
-        cat_pub.volume = p.volume or ''
-        cat_pub.issue = p.issue or ''
-        cat_pub.pages = p.pages or ''
-        cat_pub.refresh_full_details = True
+    #     logging.info(f'publication: {p.catalog_identifier} - setting values')
 
-        cat_pub.is_open_access = p.is_open_access
-        cat_pub.cited_by_count = p.cited_by_count
-        cat_pub.author_list = p.author_list or ''
+    #     cat_pub.doi = p.doi or ''
+    #     cat_pub.title = p.title or ''
+    #     cat_pub.publication_cover_date = p.publication_cover_date
+    #     cat_pub.href = p.href
+    #     cat_pub.abstract = p.abstract_text or ''
+    #     cat_pub.funding_text = p.funding_text or ''
+    #     cat_pub.volume = p.volume or ''
+    #     cat_pub.issue = p.issue or ''
+    #     cat_pub.pages = p.pages or ''
+    #     cat_pub.refresh_full_details = True
 
-        if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
-            pub.validation_historic = True
+    #     cat_pub.is_open_access = p.is_open_access
+    #     cat_pub.cited_by_count = p.cited_by_count
+    #     cat_pub.author_list = p.author_list or ''
 
-        logging.info(f'publication: {p.catalog_identifier} - set values')
+    #     if p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF']:
+    #         pub.validation_historic = True
 
-        cat_pub.journal = journals[p.journal_name]
-        cat_pub.subtype = subtypes[p.subtype_description]
+    #     logging.info(f'publication: {p.catalog_identifier} - set values')
 
-        logging.info(f'publication: {p.catalog_identifier} - set subtype - adding sponsors')
+    #     cat_pub.journal = journals[p.journal_name]
+    #     cat_pub.subtype = subtypes[p.subtype_description]
 
-        _add_sponsors_to_publications(
-            publication=pub,
-            sponsor_names=p.funding_list,
-        )
+    #     logging.info(f'publication: {p.catalog_identifier} - set subtype - adding sponsors')
 
-        logging.info(f'publication: {p.catalog_identifier} - sponsors adding - creating sources')
+    #     _add_sponsors_to_publications(
+    #         publication=pub,
+    #         sponsor_names=p.funding_list,
+    #     )
 
-        pub_sources  = [
-            PublicationsSources(
-                source=s,
-                publication=pub
-            ) 
-            for s in [_get_or_create_source(a) for a in p.authors]
-        ]
+    #     logging.info(f'publication: {p.catalog_identifier} - sponsors adding - creating sources')
 
-        logging.info(f'publication: {p.catalog_identifier} - adding sources')
+    #     pub_sources  = [
+    #         PublicationsSources(
+    #             source=s,
+    #             publication=pub
+    #         ) 
+    #         for s in [_get_or_create_source(a) for a in p.authors]
+    #     ]
 
-        pub.publication_sources = pub_sources
+    #     logging.info(f'publication: {p.catalog_identifier} - adding sources')
 
-        logging.info(f'publication: {p.catalog_identifier} - saving sources')
+    #     pub.publication_sources = pub_sources
 
-        db.session.add_all(pub_sources)
+    #     logging.info(f'publication: {p.catalog_identifier} - saving sources')
 
-        logging.info(f'publication: {p.catalog_identifier} - saving pub')
+    #     db.session.add_all(pub_sources)
 
-        db.session.add(pub)
+    #     logging.info(f'publication: {p.catalog_identifier} - saving pub')
 
-        logging.info(f'publication: {p.catalog_identifier} - adding keywords')
+    #     db.session.add(pub)
 
-        _add_keywords_to_publications(publication=pub, keyword_list=p.keywords)
+    #     logging.info(f'publication: {p.catalog_identifier} - adding keywords')
 
-        logging.info(f'publication: {p.catalog_identifier} is done')
+    #     _add_keywords_to_publications(publication=pub, keyword_list=p.keywords)
+
+    #     logging.info(f'publication: {p.catalog_identifier} is done')
 
 
-    logging.info('add_publications: ended')
+    # logging.info('add_publications: ended')
 
 
 
