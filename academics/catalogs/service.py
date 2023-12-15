@@ -487,7 +487,7 @@ def add_publications(catalog, publication_datas):
     source_xref = _get_source_xref(catalog, new_pubs)
     keyword_xref = _get_keyword_xref(new_pubs)
 
-    for p in publication_datas:
+    for p in new_pubs:
         logging.info(f'publication: {p.catalog_identifier} - getting cat pub')
 
         pub = pubs_xref[p.catalog_identifier]
