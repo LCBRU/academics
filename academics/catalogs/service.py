@@ -388,8 +388,6 @@ def _get_keyword_xref(publication_datas):
 
     keywords = {k for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
-    print(keywords)
-
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
     xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
@@ -400,6 +398,8 @@ def _get_keyword_xref(publication_datas):
     db.session.commit()
 
     xref = xref | {k.keyword.lower(): k for k in new_keywords}
+
+    print(xref)
 
     return {
         p.catalog_identifier.lower(): [xref[k.lower()] for k in p.keywords if k]
