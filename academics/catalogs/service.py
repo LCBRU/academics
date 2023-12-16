@@ -560,7 +560,7 @@ def save_publications(catalog, new_pubs):
         db.session.add(cat_pub)
         print('G'*40)
 
-        db.session.add(pub)
+        # db.session.add(pub)
 
         print('H'*40)
         db.session.commit()
