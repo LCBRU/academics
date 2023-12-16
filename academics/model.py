@@ -578,7 +578,6 @@ class PublicationsSources(db.Model):
     ordinal: Mapped[int] = mapped_column(primary_key=True)
 
     publication: Mapped[Publication] = relationship(
-        lazy="joined",
         backref=backref(
             "publication_sources",
             order_by="PublicationsSources.ordinal",
