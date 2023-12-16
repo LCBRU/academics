@@ -536,7 +536,10 @@ def save_publications(catalog, new_pubs):
 
         print('v'*40)
         print(source_xref)
+        print('-'*40)
         print(pub)
+        print('-'*40)
+        print(source_xref[p.catalog_identifier])
         print('^'*40)
 
         publication_sources = [
