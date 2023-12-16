@@ -340,8 +340,6 @@ def _get_publication_xref(catalog, publication_datas):
 
     ids = {p.catalog_identifier for p in publication_datas}
 
-    print(ids)
-
     q = select(CatalogPublication).where(
         CatalogPublication.catalog_identifier.in_(ids)
     ).where(
@@ -350,20 +348,12 @@ def _get_publication_xref(catalog, publication_datas):
 
     xref = {cp.catalog_identifier.lower(): cp.publication for cp in db.session.execute(q).scalars()}
 
-    print(xref)
-
     new_pubs = {id: Publication() for id in xref.keys() - ids}
-
-    print(new_pubs)
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
-    print(new_pubs)
-
     xref = xref | {p.catalog_identifier.lower(): p for p in new_pubs}
-
-    print(xref)
 
     return {p.catalog_identifier.lower(): xref[p.catalog_identifier.lower()] for p in publication_datas}
 
@@ -502,6 +492,9 @@ def save_publications(catalog, new_pubs):
     source_xref = _get_source_xref(catalog, new_pubs)
     keyword_xref = _get_keyword_xref(new_pubs)
 
+
+    print(pubs_xref)
+
     for p in new_pubs:
         logging.info(f'Adding Publication {p.catalog}: {p.catalog_identifier}')
 
@@ -541,13 +534,11 @@ def save_publications(catalog, new_pubs):
         cat_pub.sponsors = sponsor_xref[p.catalog_identifier]
         cat_pub.keywords = keyword_xref[p.catalog_identifier]
 
-        print('v'*40)
-        print(source_xref)
-        print('-'*40)
+        print('A'*40)
+
         print(pub)
-        print('-'*40)
-        print(source_xref[p.catalog_identifier])
-        print('^'*40)
+
+        print('B'*40)
 
         publication_sources = [
             PublicationsSources(
@@ -557,11 +548,21 @@ def save_publications(catalog, new_pubs):
             for s in source_xref[p.catalog_identifier]
         ]
 
+        print('C'*40)
+
         pub.publication_sources = publication_sources
+        print('D'*40)
+
         pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
+        print('E'*40)
+
         db.session.add_all(publication_sources)
+        print('F'*40)
+
         db.session.add(cat_pub)
+        print('G'*40)
+
         db.session.add(pub)
 
 
