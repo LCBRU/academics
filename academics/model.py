@@ -581,7 +581,6 @@ class PublicationsSources(db.Model):
         lazy="joined",
         backref=backref(
             "publication_sources",
-            lazy="joined",
             order_by="PublicationsSources.ordinal",
             collection_class=ordering_list('ordinal'),
             cascade="all, delete, delete-orphan",
