@@ -412,7 +412,7 @@ def _get_keyword_xref(publication_datas):
     print(xref)
 
     return {
-        p.catalog_identifier.lower(): [xref[k.lower()] for k in p.keywords if k]
+        p.catalog_identifier.lower(): [xref[k.strip().lower()] for k in p.keywords if k]
         for p in publication_datas
     }
 
