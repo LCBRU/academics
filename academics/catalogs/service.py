@@ -388,28 +388,16 @@ def _get_keyword_xref(publication_datas):
 
     keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
-    print('1'*50)
-    print(keywords)
-
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
     xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
 
-    print('2'*50)
-    print(xref)
-
     new_keywords = [Keyword(keyword=k) for k in xref.keys() - keywords]
-
-    print('3'*50)
-    print(new_keywords)
 
     db.session.add_all(new_keywords)
     db.session.commit()
 
     xref = xref | {k.keyword.lower(): k for k in new_keywords}
-
-    print('4'*50)
-    print(xref)
 
     return {
         p.catalog_identifier.lower(): [xref[k.strip().lower()] for k in p.keywords if k]
@@ -545,6 +533,11 @@ def save_publications(catalog, new_pubs):
 
         cat_pub.sponsors = sponsor_xref[p.catalog_identifier]
         cat_pub.keywords = keyword_xref[p.catalog_identifier]
+
+        print('v'*40)
+        print(source_xref)
+        print(pub)
+        print('^'*40)
 
         publication_sources = [
             PublicationsSources(
