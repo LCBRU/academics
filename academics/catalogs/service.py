@@ -416,7 +416,7 @@ def _get_affiliation_xref(catalog, author_datas):
         Affiliation.catalog == catalog
     )
 
-    xref = {a['catalog_identifier'].lower(): a for a in db.session.execute(q).mappings()}
+    xref = {a.catalog_identifier.lower(): a for a in db.session.execute(q).mappings()}
 
     new_affiliations = [
         Affiliation(
