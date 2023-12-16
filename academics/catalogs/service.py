@@ -564,6 +564,8 @@ def save_publications(catalog, new_pubs):
         print('G'*40)
 
         db.session.add(pub)
+        print('H'*40)
+        db.session.commit()
 
 
 def _get_or_create_source(author_data):
