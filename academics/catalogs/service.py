@@ -408,7 +408,7 @@ def _get_keyword_xref(publication_datas):
 def _get_affiliation_xref(catalog, author_datas):
     logging.info('_get_affiliation_xref: started')
 
-    affiliations = {a.affiliation_identifier: a for a in author_datas}
+    affiliations = {a.affiliation_identifier: a for a in author_datas if a.affiliation_identifier}
 
     print(affiliations)
 
