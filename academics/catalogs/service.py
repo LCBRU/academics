@@ -348,7 +348,7 @@ def _get_publication_xref(catalog, publication_datas):
         CatalogPublication.catalog == catalog
     )
 
-    xref = {p.catalog_identifier.lower(): p for p in db.session.execute(q).scalars()}
+    xref = {cp.catalog_identifier.lower(): cp.publication for cp in db.session.execute(q).scalars()}
 
     print(xref)
 
