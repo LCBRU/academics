@@ -540,13 +540,13 @@ def save_publications(catalog, new_pubs):
 
         print('B'*40)
 
-        publication_sources = [
-            PublicationsSources(
-                source_id=s.id,
-                publication_id=pub.id
-            ) 
-            for s in source_xref[p.catalog_identifier]
-        ]
+        # publication_sources = [
+        #     PublicationsSources(
+        #         source_id=s.id,
+        #         publication_id=pub.id
+        #     ) 
+        #     for s in source_xref[p.catalog_identifier]
+        # ]
 
         print('C'*40)
 
@@ -554,7 +554,7 @@ def save_publications(catalog, new_pubs):
 
         print('E'*40)
 
-        db.session.add_all(publication_sources)
+        # db.session.add_all(publication_sources)
         print('F'*40)
 
         db.session.add(cat_pub)
