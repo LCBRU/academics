@@ -436,7 +436,7 @@ def _get_affiliation_xref(catalog, author_datas):
 
     xref = xref | {a.catalog_identifier.lower(): a for a in new_affiliations}
 
-    return {a.catalog_identifier: xref[a.affiliation_identifier.lower()] for a in author_datas}
+    return {a.catalog_identifier: xref[a.affiliation_identifier.lower()] for a in author_datas if a.affiliation_identifier}
 
 
 def _get_source_xref(catalog, publication_datas):
