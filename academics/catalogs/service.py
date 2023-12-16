@@ -340,6 +340,10 @@ def _get_publication_xref(catalog, publication_datas):
 
     ids = {p.catalog_identifier for p in publication_datas}
 
+    print(ids)
+
+    return {}
+
     q = select(CatalogPublication).where(
         CatalogPublication.catalog_identifier.in_(ids)
     ).where(
