@@ -351,7 +351,7 @@ def _get_publication_xref(catalog, publication_datas):
             .where(CatalogPublication.catalog == catalog)
         ).scalar()
 
-        xref[i] = cp
+        xref[i] = cp.publication
 
         print(cp)
 
