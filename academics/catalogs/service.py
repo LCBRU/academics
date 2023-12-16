@@ -550,9 +550,6 @@ def save_publications(catalog, new_pubs):
 
         print('C'*40)
 
-        pub.publication_sources = publication_sources
-        print('D'*40)
-
         pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
         print('E'*40)
