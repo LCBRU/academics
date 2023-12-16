@@ -340,23 +340,20 @@ def _get_publication_xref(catalog, publication_datas):
 
     ids = {p.catalog_identifier for p in publication_datas}
 
-    q = select(
-        CatalogPublication.publication_id,
-        CatalogPublication.catalog_identifier,
-    ).where(
+    q = select(CatalogPublication).where(
         CatalogPublication.catalog_identifier.in_(ids)
     ).where(
         CatalogPublication.catalog == catalog
     )
 
-    xref = {p['catalog_identifier'].lower(): p['publication_id'] for p in db.session.execute(q).mappings()}
+    xref = {p.catalog_identifier.lower(): p for p in db.session.execute(q).scalars()}
 
     new_pubs = {id: Publication() for id in xref.keys() - ids}
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
-    xref = xref | {p.catalog_identifier.lower(): p.id for p in new_pubs}
+    xref = xref | {p.catalog_identifier.lower(): p for p in new_pubs}
 
     return {p.catalog_identifier.lower(): xref[p.catalog_identifier.lower()] for p in publication_datas}
 
