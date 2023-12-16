@@ -110,7 +110,7 @@ def get_scopus_publication_data(identifier):
         logging.info('SCOPUS Not Enabled')
         return []
     
-    a = Abstract(id)
+    a = Abstract(identifier)
     a.read(_client())
 
     id = a.data.get(u'dc:identifier', ':').split(':')[1]
