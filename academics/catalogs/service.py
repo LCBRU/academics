@@ -408,7 +408,7 @@ def _get_keyword_xref(publication_datas):
 def _get_affiliation_xref(catalog, author_datas):
     logging.info('_get_affiliation_xref: started')
 
-    affiliations = {a.affiliation_identifier: a for a in chain.from_iterable([p.authors for p in author_datas])}
+    affiliations = {a.affiliation_identifier: a for a in author_datas}
 
     q = select(Affiliation).where(
         Affiliation.catalog_identifier.in_(affiliations.keys())
