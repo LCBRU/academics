@@ -536,7 +536,7 @@ def save_publications(catalog, new_pubs):
 
         print('A'*40)
 
-        print(pub)
+        print(pub.id)
 
         print('B'*40)
 
