@@ -410,6 +410,8 @@ def _get_affiliation_xref(catalog, author_datas):
 
     affiliations = {a.affiliation_identifier: a for a in author_datas}
 
+    print(affiliations)
+
     q = select(Affiliation).where(
         Affiliation.catalog_identifier.in_(affiliations.keys())
     ).where(
