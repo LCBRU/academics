@@ -426,7 +426,7 @@ def _get_affiliation_xref(catalog, author_datas):
             address=a.affiliation_address,
             country=a.affiliation_country,
         )
-        for a in affiliations if a.catalog_identifier not in xref.keys()
+        for a in affiliations.values() if a.catalog_identifier.lower() not in xref.keys()
     ]
 
     db.session.add_all(new_affiliations)
