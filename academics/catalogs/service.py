@@ -342,8 +342,6 @@ def _get_publication_xref(catalog, publication_datas):
 
     print(ids)
 
-    return {}
-
     q = select(CatalogPublication).where(
         CatalogPublication.catalog_identifier.in_(ids)
     ).where(
@@ -352,12 +350,20 @@ def _get_publication_xref(catalog, publication_datas):
 
     xref = {p.catalog_identifier.lower(): p for p in db.session.execute(q).scalars()}
 
+    print(xref)
+
     new_pubs = {id: Publication() for id in xref.keys() - ids}
+
+    print(new_pubs)
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
+    print(new_pubs)
+
     xref = xref | {p.catalog_identifier.lower(): p for p in new_pubs}
+
+    print(xref)
 
     return {p.catalog_identifier.lower(): xref[p.catalog_identifier.lower()] for p in publication_datas}
 
