@@ -313,7 +313,7 @@ def _get_journal_xref(publication_datas):
 
     xref = xref | {j.name.lower(): j.id for j in new_journals}
 
-    return {p.catalog_identifier: xref[p.journal_name.lower()] for p in publication_datas}
+    return {p.catalog_identifier.lower(): xref[p.journal_name.lower()] for p in publication_datas}
 
 
 def _get_subtype_xref(publication_datas):
@@ -332,7 +332,7 @@ def _get_subtype_xref(publication_datas):
 
     xref = xref | {st.description.lower(): st.id for st in new_subtypes}
 
-    return {p.catalog_identifier: xref[p.subtype_description.lower()] for p in publication_datas}
+    return {p.catalog_identifier.lower(): xref[p.subtype_description.lower()] for p in publication_datas}
 
 
 def _get_publication_xref(catalog, publication_datas):
@@ -358,7 +358,7 @@ def _get_publication_xref(catalog, publication_datas):
 
     xref = xref | {p.catalog_identifier.lower(): p.id for p in new_pubs}
 
-    return {p.catalog_identifier: xref[p.catalog_identifier.lower()] for p in publication_datas}
+    return {p.catalog_identifier.lower(): xref[p.catalog_identifier.lower()] for p in publication_datas}
 
 
 def _get_sponsor_xref(publication_datas):
@@ -378,7 +378,7 @@ def _get_sponsor_xref(publication_datas):
     xref = xref | {s.name.lower(): s.id for s in new_sponsors}
 
     return {
-        p.catalog_identifier: [xref[n.lower()] for n in p.funding_list]
+        p.catalog_identifier.lower(): [xref[n.lower()] for n in p.funding_list]
         for p in publication_datas
     }
 
@@ -400,7 +400,7 @@ def _get_keyword_xref(publication_datas):
     xref = xref | {k.keyword.lower(): k for k in new_keywords}
 
     return {
-        p.catalog_identifier: [xref[k.lower()] for k in p.keywords]
+        p.catalog_identifier.lower(): [xref[k.lower()] for k in p.keywords]
         for p in publication_datas
     }
 
@@ -409,8 +409,6 @@ def _get_affiliation_xref(catalog, author_datas):
     logging.info('_get_affiliation_xref: started')
 
     affiliations = {a.affiliation_identifier: a for a in author_datas if a.affiliation_identifier}
-
-    print(affiliations)
 
     q = select(Affiliation).where(
         Affiliation.catalog_identifier.in_(affiliations.keys())
@@ -436,7 +434,7 @@ def _get_affiliation_xref(catalog, author_datas):
 
     xref = xref | {a.catalog_identifier.lower(): a for a in new_affiliations}
 
-    return {a.catalog_identifier: xref[a.affiliation_identifier.lower()] for a in author_datas if a.affiliation_identifier}
+    return {a.catalog_identifier.lower(): xref[a.affiliation_identifier.lower()] for a in author_datas if a.affiliation_identifier}
 
 
 def _get_source_xref(catalog, publication_datas):
@@ -465,7 +463,7 @@ def _get_source_xref(catalog, publication_datas):
     xref = xref | {s.catalog_identifier.lower(): s for s in new_sources}
 
     return {
-        p.catalog_identifier: [xref[a.catalog_identifier.lower()] for a in p.authors]
+        p.catalog_identifier.lower(): [xref[a.catalog_identifier.lower()] for a in p.authors]
         for p in publication_datas
     }
 
