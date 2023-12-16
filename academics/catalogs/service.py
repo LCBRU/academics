@@ -388,16 +388,19 @@ def _get_keyword_xref(publication_datas):
 
     keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
+    print('1'*50)
+    print(xref)
+
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
     xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
 
-    print('1'*50)
+    print('2'*50)
     print(xref)
 
     new_keywords = [Keyword(keyword=k) for k in xref.keys() - keywords]
 
-    print('2'*50)
+    print('3'*50)
     print(new_keywords)
 
     db.session.add_all(new_keywords)
@@ -405,7 +408,7 @@ def _get_keyword_xref(publication_datas):
 
     xref = xref | {k.keyword.lower(): k for k in new_keywords}
 
-    print('3'*50)
+    print('4'*50)
     print(xref)
 
     return {
