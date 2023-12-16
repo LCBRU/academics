@@ -450,7 +450,7 @@ def _get_source_xref(catalog, publication_datas):
 
     xref = {s.catalog_identifier.lower(): s for s in db.session.execute(q).scalars()}
 
-    new_sources = [a.get_new_source() for a in authors if a.catalog_identifier not in xref.keys()]
+    new_sources = [a.get_new_source() for a in authors.values() if a.catalog_identifier not in xref.keys()]
 
     affiliation_xref = _get_affiliation_xref(catalog, authors)
 
