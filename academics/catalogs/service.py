@@ -304,18 +304,16 @@ def _get_journal_xref(publication_datas):
 
     q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
 
-    xref = {j['name']: j['id'] for j in db.session.execute(q).mappings()}
+    xref = {j['name'].lower(): j['id'] for j in db.session.execute(q).mappings()}
 
     new_journals = [Journal(name=n) for n in xref.keys() - names]
 
     db.session.add_all(new_journals)
     db.session.commit()
 
-    xref = xref | {j.name: j.id for j in new_journals}
+    xref = xref | {j.name.lower(): j.id for j in new_journals}
 
-    print(xref)
-
-    return {p.catalog_identifier: xref[p.journal_name] for p in publication_datas}
+    return {p.catalog_identifier: xref[p.journal_name.lower()] for p in publication_datas}
 
 
 def _get_subtype_xref(publication_datas):
