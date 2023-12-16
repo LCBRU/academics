@@ -542,8 +542,8 @@ def save_publications(catalog, new_pubs):
 
         publication_sources = [
             PublicationsSources(
-                source=s,
-                publication=pub
+                source_id=s.id,
+                publication_id=pub.id
             ) 
             for s in source_xref[p.catalog_identifier]
         ]
@@ -564,8 +564,10 @@ def save_publications(catalog, new_pubs):
         print('G'*40)
 
         db.session.add(pub)
+
         print('H'*40)
         db.session.commit()
+        print('I'*40)
 
 
 def _get_or_create_source(author_data):
