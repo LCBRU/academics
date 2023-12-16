@@ -539,7 +539,6 @@ class CatalogPublication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id))
     publication: Mapped[Publication] = relationship(
-        lazy="joined",
         backref=backref(
             "catalog_publications",
             lazy="joined",
