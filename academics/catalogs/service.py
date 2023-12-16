@@ -342,6 +342,12 @@ def _get_publication_xref(catalog, publication_datas):
 
     print(ids)
 
+    q = select(CatalogPublication).where(
+        CatalogPublication.catalog_identifier.in_(ids)
+    ).where(
+        CatalogPublication.catalog == catalog
+    )
+
     xref = {cp.catalog_identifier.lower(): cp.publication for cp in db.session.execute(q).scalars()}
 
     print(xref)
