@@ -323,16 +323,16 @@ def _get_subtype_xref(publication_datas):
 
     q = select(Subtype.id, Subtype.description).where(Subtype.description.in_(descs))
 
-    xref = {st['desc']: st['id'] for st in db.session.execute(q).mappings()}
+    xref = {st['description'].lower(): st['id'] for st in db.session.execute(q).mappings()}
 
     new_subtypes = [Subtype(code=d, description=d) for d in xref.keys() - descs]
 
     db.session.add_all(new_subtypes)
     db.session.commit()
 
-    xref = xref | {st.description: st.id for st in new_subtypes}
+    xref = xref | {st.description.lower(): st.id for st in new_subtypes}
 
-    return {p.catalog_identifier: xref[p.subtype_description] for p in publication_datas}
+    return {p.catalog_identifier: xref[p.subtype_description.lower()] for p in publication_datas}
 
 
 def _get_publication_xref(catalog, publication_datas):
@@ -349,16 +349,16 @@ def _get_publication_xref(catalog, publication_datas):
         CatalogPublication.catalog == catalog
     )
 
-    xref = {p['catalog_identifier']: p['publication_id'] for p in db.session.execute(q).mappings()}
+    xref = {p['catalog_identifier'].lower(): p['publication_id'] for p in db.session.execute(q).mappings()}
 
     new_pubs = {id: Publication() for id in xref.keys() - ids}
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
-    xref = xref | {p.catalog_identifier: p.id for p in new_pubs}
+    xref = xref | {p.catalog_identifier.lower(): p.id for p in new_pubs}
 
-    return {p.catalog_identifier: xref[p.catalog_identifier] for p in publication_datas}
+    return {p.catalog_identifier: xref[p.catalog_identifier.lower()] for p in publication_datas}
 
 
 def _get_sponsor_xref(publication_datas):
@@ -368,17 +368,17 @@ def _get_sponsor_xref(publication_datas):
 
     q = select(Sponsor.id, Sponsor.name).where(Sponsor.name.in_(names))
 
-    xref = {p['name']: p['id'] for p in db.session.execute(q).mappings()}
+    xref = {p['name'].lower(): p['id'] for p in db.session.execute(q).mappings()}
 
     new_sponsors = [Sponsor(name=n) for n in xref.keys() - names]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
 
-    xref = xref | {s.name: s.id for s in new_sponsors}
+    xref = xref | {s.name.lower(): s.id for s in new_sponsors}
 
     return {
-        p.catalog_identifier: [xref[n] for n in p.funding_list]
+        p.catalog_identifier: [xref[n.lower()] for n in p.funding_list]
         for p in publication_datas
     }
 
@@ -390,17 +390,17 @@ def _get_keyword_xref(publication_datas):
 
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
-    xref = {k.keyword: k for k in db.session.execute(q).scalars()}
+    xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
 
     new_keywords = [Keyword(keyword=k) for k in xref.keys() - keywords]
 
     db.session.add_all(new_keywords)
     db.session.commit()
 
-    xref = xref | {k.keyword: k for k in new_keywords}
+    xref = xref | {k.keyword.lower(): k for k in new_keywords}
 
     return {
-        p.catalog_identifier: [xref[k] for k in p.keywords]
+        p.catalog_identifier: [xref[k.lower()] for k in p.keywords]
         for p in publication_datas
     }
 
@@ -416,7 +416,7 @@ def _get_affiliation_xref(catalog, author_datas):
         Affiliation.catalog == catalog
     )
 
-    xref = {a['catalog_identifier']: a for a in db.session.execute(q).mappings()}
+    xref = {a['catalog_identifier'].lower(): a for a in db.session.execute(q).mappings()}
 
     new_affiliations = [
         Affiliation(
@@ -432,9 +432,9 @@ def _get_affiliation_xref(catalog, author_datas):
     db.session.add_all(new_affiliations)
     db.session.commit()
 
-    xref = xref | {a.catalog_identifier: a for a in new_affiliations}
+    xref = xref | {a.catalog_identifier.lower(): a for a in new_affiliations}
 
-    return {a.catalog_identifier: xref[a.affiliation_identifier] for a in author_datas}
+    return {a.catalog_identifier: xref[a.affiliation_identifier.lower()] for a in author_datas}
 
 
 def _get_source_xref(catalog, publication_datas):
@@ -448,7 +448,7 @@ def _get_source_xref(catalog, publication_datas):
         Source.catalog == catalog
     )
 
-    xref = {s['catalog_identifier']: s for s in db.session.execute(q).mappings()}
+    xref = {s['catalog_identifier'].lower(): s for s in db.session.execute(q).mappings()}
 
     new_sources = [a.get_new_source() for a in authors if a.catalog_identifier not in xref.keys()]
 
@@ -460,10 +460,10 @@ def _get_source_xref(catalog, publication_datas):
     db.session.add_all(new_sources)
     db.session.commit()
 
-    xref = xref | {s.catalog_identifier: s for s in new_sources}
+    xref = xref | {s.catalog_identifier.lower(): s for s in new_sources}
 
     return {
-        p.catalog_identifier: [xref[a.catalog_identifier] for a in p.authors]
+        p.catalog_identifier: [xref[a.catalog_identifier.lower()] for a in p.authors]
         for p in publication_datas
     }
 
