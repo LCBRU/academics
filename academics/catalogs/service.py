@@ -386,7 +386,7 @@ def _get_sponsor_xref(publication_datas):
 def _get_keyword_xref(publication_datas):
     logging.info('_get_keyword_xref: started')
 
-    keywords = {k for k in chain.from_iterable([p.keywords for p in publication_datas])}
+    keywords = {k for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
@@ -400,7 +400,7 @@ def _get_keyword_xref(publication_datas):
     xref = xref | {k.keyword.lower(): k for k in new_keywords}
 
     return {
-        p.catalog_identifier.lower(): [xref[k.lower()] for k in p.keywords]
+        p.catalog_identifier.lower(): [xref[k.lower()] for k in p.keywords if k]
         for p in publication_datas
     }
 
