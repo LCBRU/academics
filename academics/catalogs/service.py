@@ -532,9 +532,10 @@ def save_publications(catalog, new_pubs):
         publication_sources = [
             PublicationsSources(
                 source_id=s.id,
-                publication_id=pub.id
+                publication_id=pub.id,
+                ordinal=i,
             ) 
-            for s in source_xref[p.catalog_identifier]
+            for i, s in enumerate(source_xref[p.catalog_identifier])
         ]
 
         pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
