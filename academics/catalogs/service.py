@@ -492,9 +492,6 @@ def save_publications(catalog, new_pubs):
     source_xref = _get_source_xref(catalog, new_pubs)
     keyword_xref = _get_keyword_xref(new_pubs)
 
-
-    print(pubs_xref)
-
     for p in new_pubs:
         logging.info(f'Adding Publication {p.catalog}: {p.catalog_identifier}')
 
@@ -515,20 +512,20 @@ def save_publications(catalog, new_pubs):
                 refresh_full_details=True,
             )
 
-        cat_pub.doi=p.doi or '',
-        cat_pub.title=p.title or '',
-        cat_pub.publication_cover_date=p.publication_cover_date,
-        cat_pub.href=p.href,
-        cat_pub.abstract=p.abstract_text or '',
-        cat_pub.funding_text=p.funding_text or '',
-        cat_pub.volume=p.volume or '',
-        cat_pub.issue=p.issue or '',
-        cat_pub.pages=p.pages or '',
-        cat_pub.is_open_access=p.is_open_access,
-        cat_pub.cited_by_count=p.cited_by_count,
-        cat_pub.author_list=p.author_list or '',
-        cat_pub.journal_id=journal_xref[p.catalog_identifier],
-        cat_pub.subtype_id=subtype_xref[p.catalog_identifier],
+        cat_pub.doi=p.doi or ''
+        cat_pub.title=p.title or ''
+        cat_pub.publication_cover_date=p.publication_cover_date
+        cat_pub.href=p.href
+        cat_pub.abstract=p.abstract_text or ''
+        cat_pub.funding_text=p.funding_text or ''
+        cat_pub.volume=p.volume or ''
+        cat_pub.issue=p.issue or ''
+        cat_pub.pages=p.pages or ''
+        cat_pub.is_open_access=p.is_open_access
+        cat_pub.cited_by_count=p.cited_by_count
+        cat_pub.author_list=p.author_list or ''
+        cat_pub.journal_id=journal_xref[p.catalog_identifier]
+        cat_pub.subtype_id=subtype_xref[p.catalog_identifier]
         cat_pub.sponsors = sponsor_xref[p.catalog_identifier]
         cat_pub.keywords = keyword_xref[p.catalog_identifier]
 
