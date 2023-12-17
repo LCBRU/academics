@@ -498,7 +498,7 @@ def save_publications(catalog, new_pubs):
         pub = pubs_xref[p.catalog_identifier]
 
         cat_pub = db.session.execute(
-            select(CatalogPublication.catalog_identifier)
+            select(CatalogPublication)
             .where(CatalogPublication.catalog == p.catalog)
             .where(CatalogPublication.catalog_identifier == p.catalog_identifier)
         ).scalar()
