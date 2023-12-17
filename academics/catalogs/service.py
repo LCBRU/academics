@@ -506,6 +506,7 @@ def save_publications(catalog, new_pubs):
             .where(CatalogPublication.catalog_identifier == p.catalog_identifier)
         ).scalar()
 
+
         if not cat_pub:
             cat_pub = CatalogPublication(
                 catalog=p.catalog,
@@ -514,57 +515,37 @@ def save_publications(catalog, new_pubs):
                 refresh_full_details=True,
             )
 
-        cat_pub = CatalogPublication(
-            doi=p.doi or '',
-            title=p.title or '',
-            publication_cover_date=p.publication_cover_date,
-            href=p.href,
-            abstract=p.abstract_text or '',
-            funding_text=p.funding_text or '',
-            volume=p.volume or '',
-            issue=p.issue or '',
-            pages=p.pages or '',
-            is_open_access=p.is_open_access,
-            cited_by_count=p.cited_by_count,
-            author_list=p.author_list or '',
-            journal_id=journal_xref[p.catalog_identifier],
-            subtype_id=subtype_xref[p.catalog_identifier],
-        )
-
+        cat_pub.doi=p.doi or '',
+        cat_pub.title=p.title or '',
+        cat_pub.publication_cover_date=p.publication_cover_date,
+        cat_pub.href=p.href,
+        cat_pub.abstract=p.abstract_text or '',
+        cat_pub.funding_text=p.funding_text or '',
+        cat_pub.volume=p.volume or '',
+        cat_pub.issue=p.issue or '',
+        cat_pub.pages=p.pages or '',
+        cat_pub.is_open_access=p.is_open_access,
+        cat_pub.cited_by_count=p.cited_by_count,
+        cat_pub.author_list=p.author_list or '',
+        cat_pub.journal_id=journal_xref[p.catalog_identifier],
+        cat_pub.subtype_id=subtype_xref[p.catalog_identifier],
         cat_pub.sponsors = sponsor_xref[p.catalog_identifier]
         cat_pub.keywords = keyword_xref[p.catalog_identifier]
 
-        print('A'*40)
-
-        print(pub.id)
-
-        print('B'*40)
-
-        # publication_sources = [
-        #     PublicationsSources(
-        #         source_id=s.id,
-        #         publication_id=pub.id
-        #     ) 
-        #     for s in source_xref[p.catalog_identifier]
-        # ]
-
-        print('C'*40)
+        publication_sources = [
+            PublicationsSources(
+                source_id=s.id,
+                publication_id=pub.id
+            ) 
+            for s in source_xref[p.catalog_identifier]
+        ]
 
         pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
-        print('E'*40)
-
-        # db.session.add_all(publication_sources)
-        print('F'*40)
-
+        db.session.add_all(publication_sources)
         db.session.add(cat_pub)
-        print('G'*40)
-
-        # db.session.add(pub)
-
-        print('H'*40)
+        db.session.add(pub)
         db.session.commit()
-        print('I'*40)
 
 
 def _get_or_create_source(author_data):
