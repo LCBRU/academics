@@ -540,7 +540,6 @@ def save_publications(catalog, new_pubs):
 
         pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
-        db.session.add_all(publication_sources)
         db.session.add(cat_pub)
         db.session.add(pub)
         db.session.commit()
