@@ -207,17 +207,17 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    existing_scopus_sources = list(db.session.execute(
-        select(AcademicPotentialSource.source.catalog_id)
+    existing_scopus_sources = [s.catalog_id for s in db.session.execute(
+        select(AcademicPotentialSource.source)
         .where(AcademicPotentialSource.academic == academic)
-        .where(AcademicPotentialSource.source.catalog == CATALOG_SCOPUS)
-    ).scalars())
+        .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_SCOPUS))
+    ).scalars()]
 
-    existing_openalex_sources = list(db.session.execute(
-        select(AcademicPotentialSource.source.catalog_id)
+    existing_openalex_sources = [s.catalog_id for s in db.session.execute(
+        select(AcademicPotentialSource.source)
         .where(AcademicPotentialSource.academic == academic)
-        .where(AcademicPotentialSource.source.catalog == CATALOG_OPEN_ALEX)
-    ).scalars())
+        .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_OPEN_ALEX))
+    ).scalars()]
 
     new_sources = [
         a for a in scopus_similar_authors(academic)
