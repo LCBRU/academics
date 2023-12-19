@@ -180,7 +180,7 @@ def update_academic():
     if form.validate_on_submit():
         academic = db.get_or_404(Academic, form.id.data)
 
-    update_single_academic(academic)
+        update_single_academic(academic)
 
     return redirect(url_for('ui.index'))
 
