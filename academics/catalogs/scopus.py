@@ -158,7 +158,7 @@ def get_scopus_publications(identifier):
             continue
 
         print('B'*50)
-        print(a.data.get(u'authkeywords', ''))
+        print(p.data.get(u'authkeywords', ''))
         print('B'*50)
 
         result.append(
