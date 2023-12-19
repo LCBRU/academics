@@ -207,44 +207,25 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    existing_scopus_sources = {(s.source.catalog, s.source.catalog_identifier): s.source for s in db.session.execute(
+    existing_sources = {(s.source.catalog, s.source.catalog_identifier): s.source for s in db.session.execute(
         select(AcademicPotentialSource)
         .where(AcademicPotentialSource.academic == academic)
-        .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_SCOPUS))
     ).scalars()}
 
-    existing_openalex_sources = {(s.source.catalog, s.source.catalog_identifier): s.source for s in db.session.execute(
-        select(AcademicPotentialSource)
-        .where(AcademicPotentialSource.academic == academic)
-        .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_OPEN_ALEX))
-    ).scalars()}
+    new_sources = scopus_similar_authors(academic)
+    new_sources.extend(open_alex_similar_authors(academic))
 
     new_sources = [
-        a for a in scopus_similar_authors(academic)
+        a for a in new_sources
         if a.is_leicester and
-            (a.catalog, a.catalog_identifier) not in existing_scopus_sources
+            (a.catalog, a.catalog_identifier) not in existing_sources
     ]
 
-    new_sources.extend([
-        a for a in open_alex_similar_authors(academic)
-        if a.is_leicester and
-            (a.catalog, a.catalog_identifier) not in existing_openalex_sources
-    ])
-
     for new_source in new_sources:
-        logging.info(f'Adding new potential source {new_source.catalog_identifier}')
+        logging.info(f'New potential source {new_source.catalog_identifier} from catalog {new_source.catalog} is not currently known')
 
-        s = db.session.execute(
-            select(Source)
-            .where(Source.catalog_identifier == new_source.catalog_identifier)
-            .where(Source.catalog == new_source.catalog)
-        ).scalar()
-
-        if not s:
-            logging.info(f'New potential source {new_source.catalog_identifier} from catalog {new_source.catalog} is not currently known')
-
-            s = _get_or_create_source(new_source)
-            db.session.add(s)
+        s = _get_or_create_source(new_source)
+        db.session.add(s)
 
         db.session.add(AcademicPotentialSource(
             academic=academic,
