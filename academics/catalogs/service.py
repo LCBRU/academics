@@ -207,40 +207,32 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    existing_scopus_sources = [s.source.catalog_identifier for s in db.session.execute(
+    existing_scopus_sources = {(s.source.catalog, s.source.catalog_identifier): s.source for s in db.session.execute(
         select(AcademicPotentialSource)
         .where(AcademicPotentialSource.academic == academic)
         .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_SCOPUS))
-    ).scalars()]
+    ).scalars()}
 
-    existing_openalex_sources = [s.source.catalog_identifier for s in db.session.execute(
+    existing_openalex_sources = {(s.source.catalog, s.source.catalog_identifier): s.source for s in db.session.execute(
         select(AcademicPotentialSource)
         .where(AcademicPotentialSource.academic == academic)
         .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_OPEN_ALEX))
-    ).scalars()]
+    ).scalars()}
 
     new_sources = [
         a for a in scopus_similar_authors(academic)
         if a.is_leicester and
-            a.catalog_identifier not in existing_scopus_sources
+            (a.catalog, a.catalog_identifier) not in existing_scopus_sources
     ]
 
     new_sources.extend([
         a for a in open_alex_similar_authors(academic)
         if a.is_leicester and
-            a.catalog_identifier not in existing_openalex_sources
+            (a.catalog, a.catalog_identifier) not in existing_openalex_sources
     ])
 
     for new_source in new_sources:
         logging.info(f'Adding new potential source {new_source.catalog_identifier}')
-
-        if db.session.execute(
-            select(db.func.count(AcademicPotentialSource.id))
-            .where(AcademicPotentialSource.academic == academic)
-            .where(AcademicPotentialSource.source.has(Source.catalog_identifier == new_source.catalog_identifier))
-            .where(AcademicPotentialSource.source.has(Source.catalog == new_source.catalog))
-        ).scalar() > 0:
-            continue
 
         s = db.session.execute(
             select(Source)
