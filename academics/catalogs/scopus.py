@@ -109,6 +109,10 @@ def get_scopus_publication_data(identifier):
 
     id = a.data.get(u'dc:identifier', ':').split(':')[1]
 
+    print('A'*50)
+    print(a.data.get(u'authkeywords', ''))
+    print('A'*50)
+
     return PublicationData(
             catalog='scopus',
             catalog_identifier=id,
@@ -152,6 +156,10 @@ def get_scopus_publications(identifier):
         if not id:
             # SCOPUS sends an "Empty Set" result as opposed to no results
             continue
+
+        print('B'*50)
+        print(a.data.get(u'authkeywords', ''))
+        print('B'*50)
 
         result.append(
             PublicationData(
