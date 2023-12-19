@@ -92,7 +92,7 @@ def _client():
 
 def _get_scopus_publication_link(p):
     for h in p.get(u'link', ''):
-        if h.get('@rel', '') == 'scopus' or h.get('@ref', ''):
+        if h.get('@rel', '') == 'scopus' or h.get('@ref', '') == 'scopus':
             return h['@href']
 
 
