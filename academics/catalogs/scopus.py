@@ -157,10 +157,6 @@ def get_scopus_publications(identifier):
             # SCOPUS sends an "Empty Set" result as opposed to no results
             continue
 
-        print('B'*50)
-        print(p.get(u'authkeywords', ''))
-        print('B'*50)
-
         result.append(
             PublicationData(
                 catalog='scopus',

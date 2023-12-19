@@ -207,8 +207,29 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    new_sources = [a for a in scopus_similar_authors(academic) if a.is_leicester]
-    new_sources.extend([a for a in open_alex_similar_authors(academic) if a.is_leicester])
+    existing_scopus_sources = list(db.session.execute(
+        select(AcademicPotentialSource.source.catalog_id)
+        .where(AcademicPotentialSource.academic == academic)
+        .where(AcademicPotentialSource.source.catalog == CATALOG_SCOPUS)
+    ).scalars())
+
+    existing_openalex_sources = list(db.session.execute(
+        select(AcademicPotentialSource.source.catalog_id)
+        .where(AcademicPotentialSource.academic == academic)
+        .where(AcademicPotentialSource.source.catalog == CATALOG_OPEN_ALEX)
+    ).scalars())
+
+    new_sources = [
+        a for a in scopus_similar_authors(academic)
+        if a.is_leicester and
+            a.catalog_identifier not in existing_scopus_sources
+    ]
+
+    new_sources.extend([
+        a for a in open_alex_similar_authors(academic)
+        if a.is_leicester and
+            a.catalog_identifier not in existing_openalex_sources
+    ])
 
     for new_source in new_sources:
         logging.info(f'Adding new potential source {new_source.catalog_identifier}')
