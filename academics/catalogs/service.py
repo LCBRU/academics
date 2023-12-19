@@ -207,13 +207,13 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    existing_scopus_sources = [s.source.catalog_id for s in db.session.execute(
+    existing_scopus_sources = [s.source.catalog_identifier for s in db.session.execute(
         select(AcademicPotentialSource)
         .where(AcademicPotentialSource.academic == academic)
         .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_SCOPUS))
     ).scalars()]
 
-    existing_openalex_sources = [s.source.catalog_id for s in db.session.execute(
+    existing_openalex_sources = [s.source.catalog_identifier for s in db.session.execute(
         select(AcademicPotentialSource)
         .where(AcademicPotentialSource.academic == academic)
         .where(AcademicPotentialSource.source.has(Source.catalog == CATALOG_OPEN_ALEX))
