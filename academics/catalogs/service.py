@@ -476,7 +476,7 @@ def add_catalog_publications(catalog, publication_datas):
         ))
     )
 
-    existing_cat_ids = {db.session.execute(q).scalars()}
+    existing_cat_ids = db.session.execute(q).scalars()
 
     print('*'*40)
     print([p for p in existing_cat_ids])
