@@ -110,7 +110,7 @@ def get_scopus_publication_data(identifier):
     id = a.data.get(u'dc:identifier', ':').split(':')[1]
 
     print('A'*50)
-    print(a.data.get(u'authkeywords', {}).get('author-keywords', []))
+    print(a.data.get(u'authkeywords', {}))
     print('A'*50)
 
     return PublicationData(
