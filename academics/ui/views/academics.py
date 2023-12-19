@@ -241,5 +241,3 @@ def academics_amend_potential_sources():
     db.session.commit()
 
     return jsonify({'status': request.json.get('status')}), 200
-
-
