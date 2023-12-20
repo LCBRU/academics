@@ -109,6 +109,12 @@ def get_scopus_publication_data(identifier):
 
     id = a.data.get(u'dc:identifier', ':').split(':')[1]
 
+    print('1'*40)
+    print(a.data)
+    print('2'*40)
+    print(a.data.get(u'dc:identifier'))
+    print('3'*40)
+
     return PublicationData(
             catalog='scopus',
             catalog_identifier=id,
