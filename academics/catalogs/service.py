@@ -346,22 +346,10 @@ def _get_publication_xref(catalog, publication_datas):
 
     new_pubs = {id: Publication() for id in ids - xref.keys()}
 
-    print('1'*30)
-    print(xref)
-    print('2'*30)
-    print(new_pubs)
-    print('3'*30)
-
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
     xref = xref | {k: p for k, p in new_pubs.items()}
-
-    print('A'*30)
-    print(publication_datas)
-    print('B'*30)
-    print(xref)
-    print('C'*30)
 
     return {p.catalog_identifier.lower(): xref[p.catalog_identifier.lower()] for p in publication_datas}
 
@@ -423,6 +411,12 @@ def _get_affiliation_xref(catalog, author_datas):
 
     xref = {a.catalog_identifier.lower(): a for a in db.session.execute(q).scalars()}
 
+    print('1'*30)
+    print(affiliations)
+    print('2'*30)
+    print(xref)
+    print('3'*30)
+
     new_affiliations = [
         Affiliation(
             catalog=catalog,
@@ -434,10 +428,18 @@ def _get_affiliation_xref(catalog, author_datas):
         for a in affiliations.values() if a.catalog_identifier.lower() not in xref.keys()
     ]
 
+    print('4'*30)
+    print(new_affiliations)
+    print('5'*30)
+
     db.session.add_all(new_affiliations)
     db.session.commit()
 
     xref = xref | {a.catalog_identifier.lower(): a for a in new_affiliations}
+
+    print('6'*30)
+    print(xref)
+    print('7'*30)
 
     return {a.catalog_identifier.lower(): xref[a.affiliation_identifier.lower()] for a in author_datas if a.affiliation_identifier}
 
@@ -458,6 +460,10 @@ def _get_source_xref(catalog, publication_datas):
     new_sources = [a.get_new_source() for a in authors.values() if a.catalog_identifier not in xref.keys()]
 
     affiliation_xref = _get_affiliation_xref(catalog, authors.values())
+
+    print('A'*30)
+    print(affiliation_xref)
+    print('B'*30)
 
     for a in new_sources:
         a.affiliation = affiliation_xref[a.catalog_identifier]
