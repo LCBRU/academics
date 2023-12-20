@@ -20,7 +20,7 @@ def get_open_alex():
             .filter(**{"author.id": 'A5048320859'})
             .filter(publication_year=f'{date.today().year - 2}')
             .get()]
-    
+
     print(len(pubs))
 
 
@@ -41,6 +41,19 @@ def get_openalex_publications(identifier):
             # .filter(publication_year=f'{date.today().year - 1}')
             .get()
     ]
+
+
+def get_open_alex_publication_data(identifier):
+    logging.info('get_openalex_publications: started')
+
+    pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
+
+    if not current_app.config['OPEN_ALEX_ENABLED']:
+        print(current_app.config['OPEN_ALEX_ENABLED'])
+        logging.info('OpenAlex Not Enabled')
+        return []
+    
+    return _get_publication_data(Works()[identifier])
 
 
 def _get_publication_data(pubdata):

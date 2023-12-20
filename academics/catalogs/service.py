@@ -2,7 +2,7 @@ from itertools import chain
 import logging
 from flask import current_app
 from sqlalchemy import and_, or_, select
-from academics.catalogs.open_alex import get_open_alex_author_data, get_openalex_publications, open_alex_similar_authors
+from academics.catalogs.open_alex import get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
@@ -12,7 +12,6 @@ from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
-import string
 
 
 def updating():
@@ -149,8 +148,8 @@ def _update_publication(catalog_publication: CatalogPublication):
     try:
         if catalog_publication.catalog == CATALOG_SCOPUS:
             pub_data = get_scopus_publication_data(catalog_publication.catalog_identifier)
-        # if catalog_publication.catalog == CATALOG_OPEN_ALEX:
-        #     pub_data = get_open_alex_publication_data(catalog_publication.catalog_identifier)
+        if catalog_publication.catalog == CATALOG_OPEN_ALEX:
+            pub_data = get_open_alex_publication_data(catalog_publication.catalog_identifier)
 
         save_publications(pub_data.catalog, [pub_data])
 
@@ -499,46 +498,6 @@ def save_publications(catalog, new_pubs):
             .where(CatalogPublication.catalog_identifier == p.catalog_identifier)
         ).scalar()
 
-        l = iter(list(string.ascii_uppercase))
-
-        print(next(l)*30)
-        print(p.href)
-        print(next(l)*30)
-        print(p.doi)
-        print(next(l)*30)
-        print(p.title)
-        print(next(l)*30)
-        print(p.journal_name)
-        print(next(l)*30)
-        print(p.publication_cover_date)
-        print(next(l)*30)
-        print(p.abstract_text)
-        print(next(l)*30)
-        print(p.funding_text)
-        print(next(l)*30)
-        print(p.funding_list)
-        print(next(l)*30)
-        print(p.volume)
-        print(next(l)*30)
-        print(p.issue)
-        print(next(l)*30)
-        print(p.pages)
-        print(next(l)*30)
-        print(p.subtype_code)
-        print(next(l)*30)
-        print(p.subtype_description)
-        print(next(l)*30)
-        print(p.cited_by_count)
-        print(next(l)*30)
-        print(p.author_list)
-        print(next(l)*30)
-        print(p.authors)
-        print(next(l)*30)
-        print(p.keywords)
-        print(next(l)*30)
-        print(p.is_open_access)
-        print(next(l)*30)
-
         if not cat_pub:
             cat_pub = CatalogPublication(
                 catalog=p.catalog,
@@ -547,20 +506,20 @@ def save_publications(catalog, new_pubs):
                 refresh_full_details=True,
             )
 
-        cat_pub.doi=p.doi or ''
-        cat_pub.title=p.title or ''
-        cat_pub.publication_cover_date=p.publication_cover_date
-        cat_pub.href=p.href
-        cat_pub.abstract=p.abstract_text or ''
-        cat_pub.funding_text=p.funding_text or ''
-        cat_pub.volume=p.volume or ''
-        cat_pub.issue=p.issue or ''
-        cat_pub.pages=p.pages or ''
-        cat_pub.is_open_access=p.is_open_access
-        cat_pub.cited_by_count=p.cited_by_count
-        cat_pub.author_list=p.author_list or ''
-        cat_pub.journal_id=journal_xref[p.catalog_identifier]
-        cat_pub.subtype_id=subtype_xref[p.catalog_identifier]
+        cat_pub.doi = p.doi or ''
+        cat_pub.title = p.title or ''
+        cat_pub.publication_cover_date = p.publication_cover_date
+        cat_pub.href = p.href
+        cat_pub.abstract = p.abstract_text or ''
+        cat_pub.funding_text = p.funding_text or ''
+        cat_pub.volume = p.volume or ''
+        cat_pub.issue = p.issue or ''
+        cat_pub.pages = p.pages or ''
+        cat_pub.is_open_access = p.is_open_access
+        cat_pub.cited_by_count = p.cited_by_count
+        cat_pub.author_list = p.author_list or ''
+        cat_pub.journal_id = journal_xref[p.catalog_identifier]
+        cat_pub.subtype_id = subtype_xref[p.catalog_identifier]
         cat_pub.sponsors = sponsor_xref[p.catalog_identifier]
         cat_pub.keywords = keyword_xref[p.catalog_identifier]
 
