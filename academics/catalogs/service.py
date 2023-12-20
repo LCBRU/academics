@@ -102,6 +102,17 @@ def _process_academics_who_need_an_update():
         p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
 
         if not p:
+            logging.info(f'_process_academics_who_need_an_update: No more catalog publications to refresh')
+            break
+
+        _update_catalog_publication(p)
+
+        db.session.commit()
+
+    while True:
+        p = Publication.query.filter(Publication.vancouver == None).first()
+
+        if not p:
             logging.info(f'_process_academics_who_need_an_update: No more publications to refresh')
             break
 
@@ -142,7 +153,7 @@ def _update_academic(academic: Academic):
         db.session.add(academic)
 
 
-def _update_publication(catalog_publication: CatalogPublication):
+def _update_catalog_publication(catalog_publication: CatalogPublication):
     logging.debug(f'Updating publication {catalog_publication.catalog_identifier}')
 
     try:
@@ -161,6 +172,14 @@ def _update_publication(catalog_publication: CatalogPublication):
         catalog_publication.refresh_full_details = False
 
         db.session.add(catalog_publication)
+
+
+def _update_publication(publication: Publication):
+    logging.debug(f'Updating publication {publication.id}')
+
+    publication.set_vancouver()
+
+    db.session.add(publication)
 
 
 def refresh_source(s):

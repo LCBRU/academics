@@ -16,12 +16,16 @@ from lbrc_flask.validators import parse_date
 def get_open_alex():
     config = Config()
 
+    # a = Authors()['A5027073118']
+
+    # print(a)
+
     pubs = [w for w in Works()
             .filter(**{"author.id": 'A5048320859'})
             .filter(publication_year=f'{date.today().year - 2}')
             .get()]
 
-    print(len(pubs))
+    print(pubs[0])
 
 
 def get_openalex_publications(identifier):

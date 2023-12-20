@@ -189,7 +189,17 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
     @property
     def full_name(self):
-        return self.display_name
+        if self.last_name:
+            return ' '.join(filter(None, [self.first_name, self.initials, self.last_name]))
+        else:
+            return self.display_name
+
+    @property
+    def reference_name(self):
+        if self.last_name:
+            return ' '.join(filter(None, [self.last_name, self.initials]))
+        else:
+            return self.display_name
 
     @property
     def is_academic(self):
@@ -353,6 +363,7 @@ class Publication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     validation_historic: Mapped[bool] = mapped_column(default=False, nullable=True)
     not_brc: Mapped[bool] = mapped_column(default=False, nullable=True)
+    vancouver: Mapped[str] = mapped_column(nullable=True)
 
     auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[auto_nihr_acknowledgement_id])
@@ -465,32 +476,30 @@ class Publication(db.Model, AuditMixin):
         else:
             return ''
 
-    @staticmethod
-    def vancouver(author_list, title, journal_name, publication_cover_date, issue, volume, pages):
-        authors = (author_list or '').split(',')
 
-        author_list = ', '.join(authors[0:6])
+    def set_vancouver(self):
+        author_list = ', '.join([a.reference_name for a in self.authors[0:6]])
 
-        if len(authors) > 6:
+        if len(self.authors) > 6:
             author_list = f'{author_list}, et al'
 
         parts = []
 
         parts.append(author_list)
-        parts.append(title)
+        parts.append(self.title)
         
-        if journal_name:
-            parts.append(journal_name)
+        if self.journal:
+            parts.append(self.journal.name)
         
         pp = ''
-        if pages:
-            pp = f'pp{pages}'
+        if self.pages:
+            pp = f'pp{self.pages}'
 
-        issue_volume = '/'.join(filter(None, [issue, volume]))
+        issue_volume = '/'.join(filter(None, [self.issue, self.volume]))
 
-        parts.append(f'({publication_cover_date:%B %y}{issue_volume}{pp})')
+        parts.append(f'({self.publication_cover_date:%B %y}{issue_volume}{pp})')
 
-        return '. '.join(parts)
+        self.vancouver = '. '.join(parts)
 
 
     @property
@@ -525,7 +534,6 @@ class CatalogPublication(db.Model, AuditMixin):
         )
     )
     refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    is_main: Mapped[bool] = mapped_column(Boolean, nullable=True)
     catalog: Mapped[str] = mapped_column(String(50), index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
 
