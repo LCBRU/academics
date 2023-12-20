@@ -51,7 +51,7 @@ def get_open_alex_publication_data(identifier):
     if not current_app.config['OPEN_ALEX_ENABLED']:
         print(current_app.config['OPEN_ALEX_ENABLED'])
         logging.info('OpenAlex Not Enabled')
-        return []
+        return None
     
     return _get_publication_data(Works()[identifier])
 
