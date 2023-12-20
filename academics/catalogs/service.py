@@ -403,9 +403,6 @@ def _get_affiliation_xref(catalog, author_datas):
 
     affiliations = {a.affiliation_identifier: a for a in author_datas if a.affiliation_identifier}
 
-    print('1'*10)
-    print(affiliations)
-
     q = select(Affiliation).where(
         Affiliation.catalog_identifier.in_(affiliations.keys())
     ).where(
@@ -413,9 +410,6 @@ def _get_affiliation_xref(catalog, author_datas):
     )
 
     xref = {a.catalog_identifier.lower(): a for a in db.session.execute(q).scalars()}
-
-    print('2'*10)
-    print(xref)
 
     new_affiliations = [
         Affiliation(
@@ -431,13 +425,7 @@ def _get_affiliation_xref(catalog, author_datas):
     db.session.add_all(new_affiliations)
     db.session.commit()
 
-    print('3'*10)
-    print(new_affiliations)
-
     xref = xref | {a.catalog_identifier.lower(): a for a in new_affiliations}
-
-    print('4'*10)
-    print(xref)
 
     return {a.catalog_identifier.lower(): xref[a.affiliation_identifier.lower()] for a in author_datas if a.affiliation_identifier}
 
@@ -446,9 +434,6 @@ def _get_source_xref(catalog, publication_datas):
     logging.info('_get_source_xref: started')
 
     authors = {a.catalog_identifier.lower(): a for a in chain.from_iterable([p.authors for p in publication_datas])}
-
-    print('A'*10)
-    print(authors['a5004773599'])
 
     q = select(Source).where(
         Source.catalog_identifier.in_(authors.keys())
@@ -462,11 +447,8 @@ def _get_source_xref(catalog, publication_datas):
 
     affiliation_xref = _get_affiliation_xref(catalog, authors.values())
 
-    print('B'*10)
-    print(affiliation_xref)
-
     for a in new_sources:
-        a.affiliation = affiliation_xref[a.catalog_identifier.lower()]
+        a.affiliation = affiliation_xref.get(a.catalog_identifier.lower())
 
     db.session.add_all(new_sources)
     db.session.commit()
