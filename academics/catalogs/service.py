@@ -355,7 +355,7 @@ def _get_publication_xref(catalog, publication_datas):
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
-    xref = xref | {k: p for k, p in new_pubs.items}
+    xref = xref | {k: p for k, p in new_pubs.items()}
 
     print('A'*30)
     print(publication_datas)
