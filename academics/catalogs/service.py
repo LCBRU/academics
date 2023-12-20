@@ -447,6 +447,8 @@ def _get_source_xref(catalog, publication_datas):
 
     affiliation_xref = _get_affiliation_xref(catalog, authors.values())
 
+    print(affiliation_xref)
+
     for a in new_sources:
         a.affiliation = affiliation_xref[a.catalog_identifier.lower()]
 
