@@ -39,11 +39,11 @@ class ScopusClient(ElsClient):
         ## Throttle request, if need be
         interval = time.time() - self.__ts_last_req
 
-        logging.info(f'Checking throttle - Time: {time.time()}; Last Request: {self.__ts_last_req}; Interval: {interval}')
+        logging.debug(f'Checking throttle - Time: {time.time()}; Last Request: {self.__ts_last_req}; Interval: {interval}')
         if (interval < self.__min_req_interval):
-            logging.info(f'Throttle Start: {time.time()}')
+            logging.debug(f'Throttle Start: {time.time()}')
             time.sleep( self.__min_req_interval - interval )
-            logging.info(f'Throttle End: {time.time()}')
+            logging.debug(f'Throttle End: {time.time()}')
         
         ## Construct and execute request
         headers = {
@@ -65,10 +65,10 @@ class ScopusClient(ElsClient):
             rate_limit = r.headers.get("X-RateLimit-Limit", '')
             rate_limit_remaining = r.headers.get("X-RateLimit-Remaining", '')
 
-            logging.info(f'Request Successful')
-            logging.info(f'X-RateLimit-Limit: {rate_limit}')
-            logging.info(f'X-RateLimit-Remaining: {rate_limit_remaining}')
-            logging.info(f'X-RateLimit-Reset: {next_allowed}')
+            logging.debug(f'Request Successful')
+            logging.debug(f'X-RateLimit-Limit: {rate_limit}')
+            logging.debug(f'X-RateLimit-Remaining: {rate_limit_remaining}')
+            logging.debug(f'X-RateLimit-Reset: {next_allowed}')
 
             self._status_msg='data retrieved'
             return json.loads(r.text)
@@ -97,11 +97,11 @@ def _get_scopus_publication_link(p):
 
 
 def get_scopus_publication_data(identifier):
-    logging.info('get_scopus_publication_data: started')
+    logging.debug('get_scopus_publication_data: started')
 
     if not current_app.config['SCOPUS_ENABLED']:
         print(current_app.config['SCOPUS_ENABLED'])
-        logging.info('SCOPUS Not Enabled')
+        logging.warn('SCOPUS Not Enabled')
         return []
     
     a = Abstract(identifier)
@@ -134,11 +134,11 @@ def get_scopus_publication_data(identifier):
 
 
 def get_scopus_publications(identifier):
-    logging.info('get_scopus_publications: started')
+    logging.debug('get_scopus_publications: started')
 
     if not current_app.config['SCOPUS_ENABLED']:
         print(current_app.config['SCOPUS_ENABLED'])
-        logging.info('SCOPUS Not Enabled')
+        logging.warn('SCOPUS Not Enabled')
         return []
     
     search_results = DocumentSearch(identifier)
@@ -206,22 +206,18 @@ def _translate_publication_author(author_dict):
     return result
 
 def get_scopus_author_data(identifier, get_extended_details=False):
-    logging.info(f'Getting Scopus Author Data {identifier}')
+    logging.debug(f'Getting Scopus Author Data {identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
         print(current_app.config['SCOPUS_ENABLED'])
-        logging.info('SCOPUS Not Enabled')
+        logging.warn('SCOPUS Not Enabled')
         return None
 
-    logging.info(f'Initialising Scopus Author')
     result = Author(identifier)
 
-    logging.info(f'Reading Scopus Author')
     if not result.populate(_client(), get_extended_details):
-        logging.info(f'Scopus Author not read from Scopus')
         return None
 
-    logging.info(f'Scopus Author details read from Scopus')
     return result.get_data()
 
 
@@ -232,7 +228,7 @@ def scopus_similar_authors(academic: Academic):
 def scopus_author_search(search_string):
     if not current_app.config['SCOPUS_ENABLED']:
         print(current_app.config['SCOPUS_ENABLED'])
-        logging.info('SCOPUS Not Enabled')
+        logging.warn('SCOPUS Not Enabled')
         return []
 
     re_orcid = re.compile(r'\d{4}-\d{4}-\d{4}-\d{4}$')
@@ -359,11 +355,11 @@ class Author(ElsAuthor):
             return False
         except Exception as e:
             log_exception(e)
-            logging.info('Error reading Scopus data')
+            logging.error('Error reading Scopus data')
             raise e
         
         if self.data is None:
-            logging.info('No error reading Scopus data, but data is still None')
+            logging.error('No error reading Scopus data, but data is still None')
             raise Exception('No error reading Scopus data, but data is still None')
 
         self._set_initials()
@@ -397,16 +393,16 @@ class Author(ElsAuthor):
                 self.document_count = data['coredata']['document-count']
             if data.get('h-index', None):
                 self.h_index = data['h-index']
-            logging.info('Added/updated author metrics')
+            logging.debug('Added/updated author metrics')
         except ResourceNotFoundException as e:
             return False
         except Exception as e:
             log_exception(e)
-            logging.info('Error reading Scopus metrics')
+            logging.debug('Error reading Scopus metrics')
             return None
         
         if self.data is None:
-            logging.info('No error reading Scopus metrics, but data is still None')
+            logging.debug('No error reading Scopus metrics, but data is still None')
             return False
 
         return True
@@ -437,7 +433,7 @@ class Author(ElsAuthor):
             result.affiliation_address=sa.address
             result.affiliation_country=sa.country
         else:
-            logging.info('No error affiliation ID')
+            logging.warn('No error affiliation ID')
 
         return result
 

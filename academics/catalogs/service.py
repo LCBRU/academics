@@ -1,7 +1,7 @@
 from itertools import chain
 import logging
 from flask import current_app
-from sqlalchemy import and_, or_, select
+from sqlalchemy import select
 from academics.catalogs.open_alex import get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
@@ -52,7 +52,7 @@ def _get_nihr_acknowledgement(pub):
 
 
 def update_single_academic(academic: Academic):
-    logging.info('update_academic: started')
+    logging.debug('update_academic: started')
 
     academic.mark_for_update()
 
@@ -61,11 +61,11 @@ def update_single_academic(academic: Academic):
 
     _process_academics_who_need_an_update.delay()
 
-    logging.info('update_academic: ended')
+    logging.debug('update_academic: ended')
 
 
 def update_academics():
-    logging.info('update_academics: started')
+    logging.debug('update_academics: started')
     if not updating():
         for academic in Academic.query.all():
             logging.info(f'Setting academic {academic.full_name} to be updated')
@@ -78,12 +78,12 @@ def update_academics():
 
         _process_academics_who_need_an_update.delay()
 
-    logging.info('update_academics: ended')
+    logging.debug('update_academics: ended')
 
 
 @celery.task()
 def _process_academics_who_need_an_update():
-    logging.info('_process_academics_who_need_an_update: started')
+    logging.debug('_process_academics_who_need_an_update: started')
 
     while True:
         a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
@@ -96,7 +96,7 @@ def _process_academics_who_need_an_update():
 
         db.session.commit()
 
-    logging.info('_process_academics_who_need_an_update: Start doing the publications')
+    logging.debug('_process_academics_who_need_an_update: Start doing the publications')
 
     while True:
         p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
@@ -112,18 +112,18 @@ def _process_academics_who_need_an_update():
     delete_orphan_publications()
     auto_validate()
 
-    logging.info('_process_academics_who_need_an_update: Ended')
+    logging.debug('_process_academics_who_need_an_update: Ended')
 
 
 def _update_academic(academic: Academic):
-    logging.info(f'Updating Academic {academic.full_name}')
+    logging.debug(f'Updating Academic {academic.full_name}')
 
     try:
         s: Source
 
         for s in academic.sources:
             if s.error:
-                logging.info(f'Source in ERROR')
+                logging.warn(f'Source in ERROR')
             else:
                 refresh_source(s)
 
@@ -143,7 +143,7 @@ def _update_academic(academic: Academic):
 
 
 def _update_publication(catalog_publication: CatalogPublication):
-    logging.info(f'Updating publication {catalog_publication.catalog_identifier}')
+    logging.debug(f'Updating publication {catalog_publication.catalog_identifier}')
 
     try:
         if catalog_publication.catalog == CATALOG_SCOPUS:
@@ -175,7 +175,7 @@ def refresh_source(s):
         if author_data:
             s = _get_or_create_source(author_data=author_data)
         else:
-            logging.info(f'Source {s.full_name} not found so setting it to be in error')
+            logging.warn(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
 
         if s.academic:
@@ -196,7 +196,7 @@ def refresh_source(s):
 
     except Exception as e:
         log_exception(e)
-        logging.info(f'Setting Source {s.full_name} to be in error')
+        logging.warn(f'Setting Source {s.full_name} to be in error')
         s.error = True
     finally:
         db.session.add(s)
@@ -204,7 +204,7 @@ def refresh_source(s):
 
 
 def _find_new_scopus_sources(academic):
-    logging.info(f'Finding new sources for {academic.full_name}')
+    logging.debug(f'Finding new sources for {academic.full_name}')
 
     if len(academic.last_name.strip()) < 1:
         return
@@ -238,7 +238,7 @@ def _find_new_scopus_sources(academic):
 
 
 def _ensure_all_academic_sources_are_proposed(academic):
-    logging.info(f'Ensuring existing sources are proposed for {academic.full_name}')
+    logging.debug(f'Ensuring existing sources are proposed for {academic.full_name}')
 
     missing_proposed_sources = list(db.session.execute(
         select(Source)
@@ -294,7 +294,7 @@ def delete_orphan_publications():
 
 
 def _get_journal_xref(publication_datas):
-    logging.info('_get_journal_xref: started')
+    logging.debug('_get_journal_xref: started')
 
     names = {p.journal_name for p in publication_datas}
 
@@ -313,7 +313,7 @@ def _get_journal_xref(publication_datas):
 
 
 def _get_subtype_xref(publication_datas):
-    logging.info('_get_subtype_xref: started')
+    logging.debug('_get_subtype_xref: started')
 
     descs = {p.subtype_description for p in publication_datas}
 
@@ -332,7 +332,7 @@ def _get_subtype_xref(publication_datas):
 
 
 def _get_publication_xref(catalog, publication_datas):
-    logging.info('_get_publication_xref: started')
+    logging.debug('_get_publication_xref: started')
 
     ids = {p.catalog_identifier.lower() for p in publication_datas}
 
@@ -355,7 +355,7 @@ def _get_publication_xref(catalog, publication_datas):
 
 
 def _get_sponsor_xref(publication_datas):
-    logging.info('_get_sponsor_xref: started')
+    logging.debug('_get_sponsor_xref: started')
 
     names = set(filter([n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
 
@@ -381,7 +381,7 @@ def _get_sponsor_xref(publication_datas):
 
 
 def _get_keyword_xref(publication_datas):
-    logging.info('_get_keyword_xref: started')
+    logging.debug('_get_keyword_xref: started')
 
     keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
@@ -403,7 +403,7 @@ def _get_keyword_xref(publication_datas):
 
 
 def _get_affiliation_xref(catalog, author_datas):
-    logging.info('_get_affiliation_xref: started')
+    logging.debug('_get_affiliation_xref: started')
 
     affiliations = {a.affiliation_identifier: a for a in author_datas if a.affiliation_identifier}
 
@@ -435,7 +435,7 @@ def _get_affiliation_xref(catalog, author_datas):
 
 
 def _get_source_xref(catalog, publication_datas):
-    logging.info('_get_source_xref: started')
+    logging.debug('_get_source_xref: started')
 
     authors = {a.catalog_identifier.lower(): a for a in chain.from_iterable([p.authors for p in publication_datas])}
 
@@ -466,7 +466,7 @@ def _get_source_xref(catalog, publication_datas):
 
 
 def add_catalog_publications(catalog, publication_datas):
-    logging.info('add_catalog_publications: started')
+    logging.debug('add_catalog_publications: started')
 
     q = (
         select(CatalogPublication.catalog_identifier)
@@ -481,7 +481,7 @@ def add_catalog_publications(catalog, publication_datas):
 
     save_publications(catalog, new_pubs)
 
-    logging.info('add_publications: ended')
+    logging.debug('add_publications: ended')
 
 
 def save_publications(catalog, new_pubs):

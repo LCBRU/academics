@@ -25,13 +25,13 @@ def get_open_alex():
 
 
 def get_openalex_publications(identifier):
-    logging.info('get_openalex_publications: started')
+    logging.debug('get_openalex_publications: started')
 
     pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
 
     if not current_app.config['OPEN_ALEX_ENABLED']:
         print(current_app.config['OPEN_ALEX_ENABLED'])
-        logging.info('OpenAlex Not Enabled')
+        logging.warn('OpenAlex Not Enabled')
         return []
     
     return [
@@ -44,13 +44,13 @@ def get_openalex_publications(identifier):
 
 
 def get_open_alex_publication_data(identifier):
-    logging.info('get_openalex_publications: started')
+    logging.debug('get_openalex_publications: started')
 
     pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
 
     if not current_app.config['OPEN_ALEX_ENABLED']:
         print(current_app.config['OPEN_ALEX_ENABLED'])
-        logging.info('OpenAlex Not Enabled')
+        logging.warn('OpenAlex Not Enabled')
         return None
     
     return _get_publication_data(Works()[identifier])
@@ -123,7 +123,7 @@ def _translate_publication_author(author_dict):
 def open_alex_similar_authors(academic: Academic):
     if not current_app.config['OPEN_ALEX_ENABLED']:
         print(current_app.config['OPEN_ALEX_ENABLED'])
-        logging.info('OpenAlex Not Enabled')
+        logging.warn('OpenAlex Not Enabled')
         return []
 
     logging.info(f'Getting OpenAlex data for {academic.full_name}')
@@ -168,7 +168,7 @@ def abstract_from_inverted_index(inverted_index):
 def get_open_alex_author_data(identifier):
     if not current_app.config['OPEN_ALEX_ENABLED']:
         print(current_app.config['OPEN_ALEX_ENABLED'])
-        logging.info('OpenAlex Not Enabled')
+        logging.warn('OpenAlex Not Enabled')
         return None
 
     author = Authors()[identifier]
@@ -249,21 +249,21 @@ def _get_doi_from_href(href):
 
 
 def _get_for_orcid(orcid):
-    logging.info(f'Getting OpenAlex authors for ORCID: {orcid}')
+    logging.debug(f'Getting OpenAlex authors for ORCID: {orcid}')
 
     q = Authors().filter(orcid=orcid)
     return chain(*q.paginate(per_page=200))
 
 
 def _get_for_scopus_id(scopus_id):
-    logging.info(f'Getting OpenAlex authors for SCOPUS ID: {scopus_id}')
+    logging.debug(f'Getting OpenAlex authors for SCOPUS ID: {scopus_id}')
 
     q = Authors().filter(scopus=scopus_id)
     return chain(*q.paginate(per_page=200))
 
 
 def _get_for_name(name):
-    logging.info(f'Getting OpenAlex authors for name: {name}')
+    logging.debug(f'Getting OpenAlex authors for name: {name}')
 
     q = Authors().search_filter(display_name=name)
     return chain(*q.paginate(per_page=200))
