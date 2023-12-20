@@ -499,7 +499,7 @@ def save_publications(catalog, new_pubs):
             .where(CatalogPublication.catalog_identifier == p.catalog_identifier)
         ).scalar()
 
-        l = list(string.ascii_uppercase)
+        l = iter(list(string.ascii_uppercase))
 
         print(next(l)*30)
         print(p.href)
