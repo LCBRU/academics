@@ -302,7 +302,7 @@ def _get_journal_xref(publication_datas):
 
     xref = {j['name'].lower(): j['id'] for j in db.session.execute(q).mappings()}
 
-    new_journals = [Journal(name=n) for n in xref.keys() - names]
+    new_journals = [Journal(name=n) for n in names - xref.keys()]
 
     db.session.add_all(new_journals)
     db.session.commit()
@@ -321,7 +321,7 @@ def _get_subtype_xref(publication_datas):
 
     xref = {st['description'].lower(): st['id'] for st in db.session.execute(q).mappings()}
 
-    new_subtypes = [Subtype(code=d, description=d) for d in xref.keys() - descs]
+    new_subtypes = [Subtype(code=d, description=d) for d in descs - xref.keys()]
 
     db.session.add_all(new_subtypes)
     db.session.commit()
@@ -344,7 +344,7 @@ def _get_publication_xref(catalog, publication_datas):
 
     xref = {cp.catalog_identifier.lower(): cp.publication for cp in db.session.execute(q).scalars()}
 
-    new_pubs = {id: Publication() for id in xref.keys() - ids}
+    new_pubs = {id: Publication() for id in ids - xref.keys()}
 
     print('1'*30)
     print(xref)
@@ -375,7 +375,7 @@ def _get_sponsor_xref(publication_datas):
 
     xref = {p['name'].lower(): p['id'] for p in db.session.execute(q).mappings()}
 
-    new_sponsors = [Sponsor(name=n) for n in xref.keys() - names]
+    new_sponsors = [Sponsor(name=n) for n in names - xref.keys()]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
@@ -397,7 +397,7 @@ def _get_keyword_xref(publication_datas):
 
     xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
 
-    new_keywords = [Keyword(keyword=k) for k in xref.keys() - keywords]
+    new_keywords = [Keyword(keyword=k) for k in keywords - xref.keys()]
 
     db.session.add_all(new_keywords)
     db.session.commit()
