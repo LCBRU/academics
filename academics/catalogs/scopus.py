@@ -110,7 +110,7 @@ def get_scopus_publication_data(identifier):
     id = a.data.get(u'dc:identifier', ':').split(':')[1]
 
     print('A'*50)
-    print(a.data.get(u'authkeywords') or {})
+    print(a.data.get(u'authors', {}))
     print('A'*50)
 
     return PublicationData(
@@ -130,7 +130,7 @@ def get_scopus_publication_data(identifier):
             subtype_code=a.data.get('coredata', {}).get('subtype', ''),
             subtype_description=a.data.get('coredata', {}).get('subtypeDescription', ''),
             cited_by_count=int(a.data.get('coredata', {}).get(u'citedby-count', '0')),
-            author_list=', '.join(list(dict.fromkeys(filter(len, [a['ce:indexed-name'] for a in a.data.get('authors', {}).get('author', [])])))),
+            author_list=', '.join(list(dict.fromkeys(filter(len, [a['ce:indexed-name'] for a in (a.data.get('authors') or {}).get('author', [])])))),
             authors=a.authors,
             keywords=filter(None, set([k.get('$', '') for k in (a.data.get(u'authkeywords') or None).get('author-keywords', [])])),
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
