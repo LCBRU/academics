@@ -11,6 +11,7 @@ from .scopus import get_scopus_author_data, get_scopus_publication_data, get_sco
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
+from lbrc_flask.validators import parse_date
 
 
 def updating():
@@ -349,16 +350,6 @@ def _get_publication_xref(catalog, publication_datas):
 
     xref = xref | {p.catalog_identifier.lower(): p for p in new_pubs}
 
-    print('A'*40)
-
-    print(publication_datas)
-
-    print('B'*40)
-
-    print(xref)
-
-    print('C'*40)
-
     return {p.catalog_identifier.lower(): xref[p.catalog_identifier.lower()] for p in publication_datas}
 
 
@@ -543,7 +534,7 @@ def save_publications(catalog, new_pubs):
         ]
 
         pub.publication_sources = publication_sources
-        pub.validation_historic = (p.publication_cover_date < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
+        pub.validation_historic = (parse_date(p.publication_cover_date) < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
         db.session.add(cat_pub)
         db.session.add(pub)
