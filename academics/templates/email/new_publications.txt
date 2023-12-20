@@ -3,7 +3,7 @@ The following new publications have been created in the last month:
 {% for p in publications %}
 --------------------------------------------------------------------
 # Title: {{p.title}}
-# Author list: {{p.author_list | blank_if_none | title_case}}{% if p.journal %}
+# Author list: {{p.authors | blank_if_none | title_case}}{% if p.journal %}
 # Journal: {{p.journal.name | blank_if_none | title_case}} ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}}){% endif %}{% if p.subtype %}
 # Type: {{ p.subtype.description }}{% endif %}
 {{p.abstract | blank_if_none}}

@@ -123,7 +123,6 @@ class PublicationData():
     subtype_code: str
     subtype_description: str
     cited_by_count: int
-    author_list: str
     authors: list
     keywords: str
     is_open_access : bool = False

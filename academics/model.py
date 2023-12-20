@@ -411,10 +411,6 @@ class Publication(db.Model, AuditMixin):
         return self.best_catalog_publication.abstract
 
     @property
-    def author_list(self) -> str:
-        return self.best_catalog_publication.author_list
-
-    @property
     def volume(self) -> str:
         return self.best_catalog_publication.volume
 
@@ -498,23 +494,6 @@ class Publication(db.Model, AuditMixin):
 
 
     @property
-    def vancouverish(self):
-        journal_name = ''
-
-        if self.journal:
-            journal_name = self.journal.name
-
-        return Publication.vancouver(
-            self.author_list,
-            self.title,
-            journal_name,
-            self.publication_cover_date,
-            self.issue,
-            self.volume,
-            self.pages,
-        )
-
-    @property
     def folder_ids(self):
         return ','.join([str(f.id) for f in self.folders])
 
@@ -556,7 +535,6 @@ class CatalogPublication(db.Model, AuditMixin):
 
     pubmed_id: Mapped[str] = mapped_column(String(50), index=True, nullable=True)
     abstract: Mapped[str] = mapped_column(UnicodeText)
-    author_list: Mapped[str] = mapped_column(UnicodeText)
     volume: Mapped[str] = mapped_column(String(100))
     issue: Mapped[str] = mapped_column(String(100))
     pages: Mapped[str] = mapped_column(String(100))

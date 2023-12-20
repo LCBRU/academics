@@ -149,7 +149,6 @@ def publication_full_export_xlsx():
         CatalogPublication.catalog,
         CatalogPublication.catalog_identifier,
         CatalogPublication.doi,
-        CatalogPublication.author_list,
         CatalogPublication.title,
         CatalogPublication.publication_cover_date,
         CatalogPublication.issue,
@@ -173,7 +172,6 @@ def publication_full_export_xlsx():
         'issue': p['issue'],
         'pages': p['pages'],
         'publication_cover_date': p['publication_cover_date'],
-        'authors': p['author_list'],
         'title': p['title'],
         'abstract': p['abstract'],
         'open access': p['is_open_access'],
@@ -202,7 +200,6 @@ def publication_full_annual_report_xlsx():
     q = q.with_only_columns(
         CatalogPublication.id,
         CatalogPublication.doi,
-        CatalogPublication.author_list,
         CatalogPublication.title,
         CatalogPublication.publication_cover_date,
         CatalogPublication.issue,
@@ -213,7 +210,7 @@ def publication_full_annual_report_xlsx():
 
     publication_details = ({
         'Publication Reference': Publication.vancouver(
-            p['author_list'],
+            '',
             p['title'],
             p['journal_name'],
             p['publication_cover_date'],

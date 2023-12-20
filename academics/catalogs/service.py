@@ -518,7 +518,6 @@ def save_publications(catalog, new_pubs):
         cat_pub.pages = p.pages or ''
         cat_pub.is_open_access = p.is_open_access
         cat_pub.cited_by_count = p.cited_by_count
-        cat_pub.author_list = p.author_list or ''
         cat_pub.journal_id = journal_xref[p.catalog_identifier.lower()]
         cat_pub.subtype_id = subtype_xref[p.catalog_identifier.lower()]
         cat_pub.sponsors = sponsor_xref[p.catalog_identifier.lower()]
