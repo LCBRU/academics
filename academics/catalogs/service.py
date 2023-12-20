@@ -12,6 +12,7 @@ from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
+import string
 
 
 def updating():
@@ -498,6 +499,45 @@ def save_publications(catalog, new_pubs):
             .where(CatalogPublication.catalog_identifier == p.catalog_identifier)
         ).scalar()
 
+        l = list(string.ascii_uppercase)
+
+        print(next(l)*30)
+        print(p.href)
+        print(next(l)*30)
+        print(p.doi)
+        print(next(l)*30)
+        print(p.title)
+        print(next(l)*30)
+        print(p.journal_name)
+        print(next(l)*30)
+        print(p.publication_cover_date)
+        print(next(l)*30)
+        print(p.abstract_text)
+        print(next(l)*30)
+        print(p.funding_text)
+        print(next(l)*30)
+        print(p.funding_list)
+        print(next(l)*30)
+        print(p.volume)
+        print(next(l)*30)
+        print(p.issue)
+        print(next(l)*30)
+        print(p.pages)
+        print(next(l)*30)
+        print(p.subtype_code)
+        print(next(l)*30)
+        print(p.subtype_description)
+        print(next(l)*30)
+        print(p.cited_by_count)
+        print(next(l)*30)
+        print(p.author_list)
+        print(next(l)*30)
+        print(p.authors)
+        print(next(l)*30)
+        print(p.keywords)
+        print(next(l)*30)
+        print(p.is_open_access)
+        print(next(l)*30)
 
         if not cat_pub:
             cat_pub = CatalogPublication(
