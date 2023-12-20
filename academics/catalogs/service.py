@@ -307,6 +307,16 @@ def _get_journal_xref(publication_datas):
 
     xref = xref | {j.name.lower(): j.id for j in new_journals}
 
+    print('A'*40)
+
+    print(publication_datas)
+
+    print('B'*40)
+
+    print(xref)
+
+    print('C'*40)
+
     return {p.catalog_identifier.lower(): xref[p.journal_name.lower()] for p in publication_datas}
 
 
