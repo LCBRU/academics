@@ -371,7 +371,7 @@ def _get_sponsor_xref(publication_datas):
     xref = xref | {s.name.lower(): s.id for s in new_sponsors}
 
     return {
-        p.catalog_identifier.lower(): [xref[n.lower()] for n in p.funding_list]
+        p.catalog_identifier.lower(): [xref[n.lower()] for n in p.funding_list if n]
         for p in publication_datas
     }
 
