@@ -359,6 +359,8 @@ def _get_sponsor_xref(publication_datas):
 
     names = {n for n in chain.from_iterable([p.funding_list for p in publication_datas])}
 
+    print(names)
+
     q = select(Sponsor.id, Sponsor.name).where(Sponsor.name.in_(names))
 
     xref = {p['name'].lower(): p['id'] for p in db.session.execute(q).mappings()}
@@ -489,7 +491,7 @@ def save_publications(catalog, new_pubs):
     keyword_xref = _get_keyword_xref(new_pubs)
 
     for p in new_pubs:
-        logging.info(f'Adding Publication {p.catalog}: {p.catalog_identifier}')
+        logging.info(f'Saving Publication {p.catalog}: {p.catalog_identifier}')
 
         pub = pubs_xref[p.catalog_identifier.lower()]
 
