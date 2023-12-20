@@ -411,12 +411,6 @@ def _get_affiliation_xref(catalog, author_datas):
 
     xref = {a.catalog_identifier.lower(): a for a in db.session.execute(q).scalars()}
 
-    print('1'*30)
-    print(affiliations)
-    print('2'*30)
-    print(xref)
-    print('3'*30)
-
     new_affiliations = [
         Affiliation(
             catalog=catalog,
@@ -428,18 +422,10 @@ def _get_affiliation_xref(catalog, author_datas):
         for a in affiliations.values() if a.catalog_identifier.lower() not in xref.keys()
     ]
 
-    print('4'*30)
-    print(new_affiliations)
-    print('5'*30)
-
     db.session.add_all(new_affiliations)
     db.session.commit()
 
     xref = xref | {a.catalog_identifier.lower(): a for a in new_affiliations}
-
-    print('6'*30)
-    print(xref)
-    print('7'*30)
 
     return {a.catalog_identifier.lower(): xref[a.affiliation_identifier.lower()] for a in author_datas if a.affiliation_identifier}
 
@@ -460,10 +446,6 @@ def _get_source_xref(catalog, publication_datas):
     new_sources = [a.get_new_source() for a in authors.values() if a.catalog_identifier.lower() not in xref.keys()]
 
     affiliation_xref = _get_affiliation_xref(catalog, authors.values())
-
-    print('A'*30)
-    print(affiliation_xref)
-    print('B'*30)
 
     for a in new_sources:
         a.affiliation = affiliation_xref[a.catalog_identifier.lower()]
@@ -509,7 +491,7 @@ def save_publications(catalog, new_pubs):
     for p in new_pubs:
         logging.info(f'Adding Publication {p.catalog}: {p.catalog_identifier}')
 
-        pub = pubs_xref[p.catalog_identifier]
+        pub = pubs_xref[p.catalog_identifier.lower()]
 
         cat_pub = db.session.execute(
             select(CatalogPublication)
@@ -537,10 +519,10 @@ def save_publications(catalog, new_pubs):
         cat_pub.is_open_access = p.is_open_access
         cat_pub.cited_by_count = p.cited_by_count
         cat_pub.author_list = p.author_list or ''
-        cat_pub.journal_id = journal_xref[p.catalog_identifier]
-        cat_pub.subtype_id = subtype_xref[p.catalog_identifier]
-        cat_pub.sponsors = sponsor_xref[p.catalog_identifier]
-        cat_pub.keywords = keyword_xref[p.catalog_identifier]
+        cat_pub.journal_id = journal_xref[p.catalog_identifier.lower()]
+        cat_pub.subtype_id = subtype_xref[p.catalog_identifier.lower()]
+        cat_pub.sponsors = sponsor_xref[p.catalog_identifier.lower()]
+        cat_pub.keywords = keyword_xref[p.catalog_identifier.lower()]
 
         publication_sources = [
             PublicationsSources(
@@ -548,7 +530,7 @@ def save_publications(catalog, new_pubs):
                 publication_id=pub.id,
                 ordinal=i,
             ) 
-            for i, s in enumerate(source_xref[p.catalog_identifier])
+            for i, s in enumerate(source_xref[p.catalog_identifier.lower()])
         ]
 
         pub.publication_sources = publication_sources
