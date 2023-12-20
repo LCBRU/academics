@@ -351,6 +351,12 @@ def _get_publication_xref(catalog, publication_datas):
 
     xref = xref | {p.catalog_identifier.lower(): p for p in new_pubs}
 
+    print('A'*30)
+    print(publication_datas)
+    print('B'*30)
+    print(xref)
+    print('C'*30)
+
     return {p.catalog_identifier.lower(): xref[p.catalog_identifier.lower()] for p in publication_datas}
 
 
