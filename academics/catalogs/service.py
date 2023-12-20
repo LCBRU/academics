@@ -357,7 +357,7 @@ def _get_publication_xref(catalog, publication_datas):
 def _get_sponsor_xref(publication_datas):
     logging.debug('_get_sponsor_xref: started')
 
-    names = set(filter([n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
+    names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
 
     print('A'*10)
     print(names)
