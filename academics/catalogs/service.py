@@ -457,7 +457,7 @@ def _get_source_xref(catalog, publication_datas):
 
     xref = {s.catalog_identifier.lower(): s for s in db.session.execute(q).scalars()}
 
-    new_sources = [a.get_new_source() for a in authors.values() if a.catalog_identifier not in xref.keys()]
+    new_sources = [a.get_new_source() for a in authors.values() if a.catalog_identifier.lower() not in xref.keys()]
 
     affiliation_xref = _get_affiliation_xref(catalog, authors.values())
 
@@ -466,7 +466,7 @@ def _get_source_xref(catalog, publication_datas):
     print('B'*30)
 
     for a in new_sources:
-        a.affiliation = affiliation_xref[a.catalog_identifier]
+        a.affiliation = affiliation_xref[a.catalog_identifier.lower()]
 
     db.session.add_all(new_sources)
     db.session.commit()
