@@ -107,7 +107,7 @@ def get_scopus_publication_data(identifier):
     a = Abstract(identifier)
     a.read(_client())
 
-    id = a.data.get(u'dc:identifier', ':').split(':')[1]
+    id = a.data.get('coredata', {}).get(u'dc:identifier', ':').split(':')[1]
 
     print('1'*40)
     print(a.data)
