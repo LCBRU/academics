@@ -127,7 +127,7 @@ class PublicationData():
     authors: list
     keywords: str
     is_open_access : bool = False
-    affiliations: list
+    affiliations: list = []
 
 
 @dataclass
