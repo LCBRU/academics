@@ -572,10 +572,15 @@ class Abstract(AbsDoc):
 
     def _translate_publication_author(self, author_dict):
 
+        afils = self.data.get('affiliation') or []
+
+        if isinstance(afils, Mapping):
+            afils = [afils]
+
         affiliations = [AffiliationData(
             catalog=CATALOG_SCOPUS,
             catalog_identifier=a.get('@id') or '',
-        ) for a in author_dict.get('affiliation') or [] if a.get('@id')]
+        ) for a in afils if a.get('@id')]
 
         logging.getLogger('query').warn(affiliations)
 
