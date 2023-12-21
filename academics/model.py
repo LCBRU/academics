@@ -591,3 +591,41 @@ class PublicationsSources(db.Model):
         ),
     )
     source: Mapped[Source] = relationship()
+
+
+catalog_publications_sources_affiliations = db.Table(
+    'catalog_publications_sources__affiliations',
+    db.Column(
+        'catalog_publications_sources_id',
+        db.Integer(),
+        db.ForeignKey('catalog_publications_sources.id'),
+        primary_key=True,
+    ),
+    db.Column(
+        'affiliation_id',
+        db.Integer(),
+        db.ForeignKey('affiliation.id'),
+        primary_key=True,
+    ),
+)
+
+
+class CatalogPublicationsSources(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id), index=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), index=True)
+    ordinal: Mapped[int] = mapped_column()
+
+    publication: Mapped[Publication] = relationship(
+        backref=backref(
+            "catalog_publication_sources",
+            order_by="CatalogPublicationsSources.ordinal",
+            collection_class=ordering_list('ordinal'),
+            cascade="all, delete, delete-orphan",
+        ),
+    )
+    source: Mapped[Source] = relationship()
+    affiliations = db.relationship(
+        Affiliation,
+        secondary=catalog_publications_sources_affiliations,
+    )
