@@ -108,7 +108,7 @@ def get_scopus_publication_data(identifier):
 
     id = a.data.get('coredata', {}).get(u'dc:identifier', ':').split(':')[1]
 
-    logging.getLogger('query').warn(json.dumps(a))
+    logging.getLogger('query').warn(json.dumps(a.data))
 
     return PublicationData(
             catalog='scopus',
