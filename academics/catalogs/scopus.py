@@ -109,8 +109,6 @@ def get_scopus_publication_data(identifier):
 
     id = a.data.get('coredata', {}).get(u'dc:identifier', ':').split(':')[1]
 
-    logging.getLogger('query').warn(json.dumps(a.data))
-
     return PublicationData(
             catalog='scopus',
             catalog_identifier=id,
@@ -208,13 +206,20 @@ def _translate_publication_affiliations(publication_dict):
 
 
 def _translate_publication_author(author_dict):
-    affiliations = author_dict.get('afid', None)
 
-    if affiliations:
-        affiliation = affiliations[0]
-        affiliation_identifier = affiliation.get('$', None)
-    else:
-        affiliation_identifier = None
+    afils = author_dict.get('afid') or []
+
+    if isinstance(afils, Mapping):
+        afils = [afils]
+
+    affiliations = [
+        AffiliationData(
+            catalog=CATALOG_SCOPUS,
+            catalog_identifier=a.get('$'),
+        ) for a in afils if a.get('$')
+    ]
+
+    logging.getLogger('query').warn(affiliations)
 
     result = AuthorData(
         catalog=CATALOG_SCOPUS,
@@ -225,13 +230,15 @@ def _translate_publication_author(author_dict):
         initials=author_dict.get('initials', None),
         author_name=author_dict.get('authname', None),
         href=author_dict.get('author-url', None),
-        affiliation_identifier=affiliation_identifier,
+        affiliation_identifier='',
         affiliation_name='',
         affiliation_address='',
         affiliation_country='',
+        affiliations=affiliations,
     )
 
     return result
+
 
 def get_scopus_author_data(identifier, get_extended_details=False):
     logging.debug(f'Getting Scopus Author Data {identifier}')
@@ -581,8 +588,6 @@ class Abstract(AbsDoc):
             catalog=CATALOG_SCOPUS,
             catalog_identifier=a.get('@id') or '',
         ) for a in afils if a.get('@id')]
-
-        logging.getLogger('query').warn(affiliations)
 
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
