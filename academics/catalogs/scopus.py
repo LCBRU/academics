@@ -108,6 +108,8 @@ def get_scopus_publication_data(identifier):
 
     id = a.data.get('coredata', {}).get(u'dc:identifier', ':').split(':')[1]
 
+    logging.getLogger('query').warn(json.dumps(a))
+
     return PublicationData(
             catalog='scopus',
             catalog_identifier=id,
@@ -151,6 +153,8 @@ def get_scopus_publications(identifier):
             # SCOPUS sends an "Empty Set" result as opposed to no results
             continue
 
+        logging.getLogger('query').warn(json.dumps(p))
+
         result.append(
             PublicationData(
                 catalog='scopus',
@@ -174,7 +178,9 @@ def get_scopus_publications(identifier):
                 is_open_access=p.get(u'openaccess', '0') == "1",
                 affiliations=_translate_publication_affiliations(p),
             ))
+
     
+
     return result
 
 
