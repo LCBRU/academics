@@ -286,10 +286,22 @@ def scopus_author_search(search_string):
 
         logging.getLogger('query').warn(json.dumps(r))
 
-        affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
+        afils = r.get('affiliation-current') or []
 
-        sa = ScopusAffiliation(affiliation_identifier)
-        sa.read(_client())
+        if isinstance(afils, Mapping):
+            afils = [afils]
+
+        affiliations = [
+            AffiliationData(
+                catalog=CATALOG_SCOPUS,
+                catalog_identifier=a.get('affiliation-id'),
+                name=a.get('affiliation-name'),
+                address=a.get('affiliation-city'),
+                country=a.get('affiliation-country'),
+            ) for a in afils if a.get('affiliation-id')
+        ]
+
+        logging.getLogger('query').warn(affiliations)
 
         a = AuthorData(
             catalog=CATALOG_SCOPUS,
@@ -299,11 +311,11 @@ def scopus_author_search(search_string):
             last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
             initials=r.get(u'preferred-name', {}).get('initials', None),
             href=href,
-            affiliation_identifier=affiliation_identifier,
-            affiliation_name=sa.name,
-            affiliation_address=sa.address,
-            affiliation_country=sa.country,
-            affiliations=[],
+            affiliation_identifier='',
+            affiliation_name='',
+            affiliation_address='',
+            affiliation_country='',
+            affiliations=affiliations,
         )
 
         if len(a.catalog_identifier) == 0:
