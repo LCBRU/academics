@@ -216,6 +216,10 @@ def get_scopus_author_data(identifier, get_extended_details=False):
     if not result.populate(_client(), get_extended_details):
         return None
 
+    print('a'*10)
+    print(result.data)
+    print('b'*10)
+
     return result.get_data()
 
 

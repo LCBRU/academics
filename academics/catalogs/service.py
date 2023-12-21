@@ -191,6 +191,10 @@ def refresh_source(s):
         if s.catalog == CATALOG_OPEN_ALEX:
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
+        print('A'*10)
+        print(author_data)
+        print('B'*10)
+
         if author_data:
             s = _get_or_create_source(author_data=author_data)
         else:
