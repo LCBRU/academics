@@ -34,7 +34,6 @@ def get_openalex_publications(identifier):
     pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
 
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        print(current_app.config['OPEN_ALEX_ENABLED'])
         logging.warn('OpenAlex Not Enabled')
         return []
     
@@ -48,12 +47,11 @@ def get_openalex_publications(identifier):
 
 
 def get_open_alex_publication_data(identifier):
-    logging.debug('get_openalex_publications: started')
+    logging.debug('get_open_alex_publication_data: started')
 
     pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
 
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        print(current_app.config['OPEN_ALEX_ENABLED'])
         logging.warn('OpenAlex Not Enabled')
         return None
     
@@ -61,6 +59,9 @@ def get_open_alex_publication_data(identifier):
 
 
 def _get_publication_data(pubdata):
+
+    logging.getLogger('query').warn(pubdata)
+
     pd = _diction_purge_none(pubdata)
     bib = pd.get('biblio', {})
     grants = pd.get('grants', [])
@@ -126,7 +127,6 @@ def _translate_publication_author(author_dict):
 
 def open_alex_similar_authors(academic: Academic):
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        print(current_app.config['OPEN_ALEX_ENABLED'])
         logging.warn('OpenAlex Not Enabled')
         return []
 
@@ -171,7 +171,6 @@ def abstract_from_inverted_index(inverted_index):
 
 def get_open_alex_author_data(identifier):
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        print(current_app.config['OPEN_ALEX_ENABLED'])
         logging.warn('OpenAlex Not Enabled')
         return None
 
