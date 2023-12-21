@@ -51,6 +51,14 @@ def _get_nihr_acknowledgement(pub):
         return NihrAcknowledgement.get_instance_by_name(NihrAcknowledgement.NIHR_ACKNOWLEDGED)
 
 
+def refresh():
+    logging.debug('refresh: started')
+
+    _process_updates.delay()
+
+    logging.debug('refresh: ended')
+
+
 def update_single_academic(academic: Academic):
     logging.debug('update_academic: started')
 
