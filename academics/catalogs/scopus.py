@@ -216,7 +216,7 @@ def get_scopus_author_data(identifier, get_extended_details=False):
     if not result.populate(_client(), get_extended_details):
         return None
 
-    logging.getLogger('query').info(json.dumps(result.data))
+    logging.getLogger('query').warn(json.dumps(result.data))
 
     return result.get_data()
 
