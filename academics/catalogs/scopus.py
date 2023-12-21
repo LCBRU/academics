@@ -531,6 +531,8 @@ class Abstract(AbsDoc):
                     country=a.get('affiliation-country') or '',
                 )
             )
+        
+        return result
 
 
     def _translate_publication_author(self, author_dict):
