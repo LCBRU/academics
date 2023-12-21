@@ -1,4 +1,4 @@
-import collections
+from collections.abc import Mapping
 from datetime import date, datetime
 import logging
 import requests
@@ -190,7 +190,7 @@ def _translate_publication_affiliations(publication_dict):
 
     afils = publication_dict.get('affiliation') or []
 
-    if isinstance(afils, collections.Mapping):
+    if isinstance(afils, Mapping):
         afils = [afils]
 
     for a in afils or []:
@@ -553,7 +553,7 @@ class Abstract(AbsDoc):
 
         afils = self.data.get('affiliation') or []
 
-        if isinstance(afils, collections.Mapping):
+        if isinstance(afils, Mapping):
             afils = [afils]
 
         for a in afils:
