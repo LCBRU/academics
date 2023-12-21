@@ -121,6 +121,7 @@ def _translate_publication_author(author_dict):
         affiliation_name=affiliation.get('display_name', None),
         affiliation_address='',
         affiliation_country=affiliation.get('country_code', None),
+        affiliations=[],
     )
 
 
@@ -208,6 +209,7 @@ def _get_author_datas(authors):
                 citation_count=a.get('cited_by_count', None),
                 document_count=a.get('works_count', None),
                 h_index=a.get('summary_stats', {}).get('h_index', None),
+                affiliations=[],
             )
         )
 
