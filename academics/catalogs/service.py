@@ -159,6 +159,9 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
     try:
         if catalog_publication.catalog == CATALOG_SCOPUS:
             pub_data = get_scopus_publication_data(catalog_publication.catalog_identifier)
+
+            logging.getLogger('query').warn(pub_data)
+
         if catalog_publication.catalog == CATALOG_OPEN_ALEX:
             pub_data = get_open_alex_publication_data(catalog_publication.catalog_identifier)
 
