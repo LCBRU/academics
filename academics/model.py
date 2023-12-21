@@ -139,6 +139,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     catalog: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
+    refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
     academic = db.relationship(Academic, backref=db.backref("sources", cascade="all,delete"))
