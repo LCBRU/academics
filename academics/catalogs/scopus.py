@@ -175,7 +175,7 @@ def get_scopus_publications(identifier):
                 affiliations=_translate_publication_affiliations(p),
             ))
     
-    logging.getLogger('query').warn(json.dumps(result))
+    logging.getLogger('query').warn(result)
 
     return result
 
