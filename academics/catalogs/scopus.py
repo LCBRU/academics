@@ -424,8 +424,6 @@ class Author(ElsAuthor):
         return True
 
     def get_data(self):
-        logging.getLogger('query').warn(json.dumps(self.data))
-
         afils = self.data.get('affiliation-current') or []
 
         if isinstance(afils, Mapping):
@@ -440,8 +438,6 @@ class Author(ElsAuthor):
                 country=a.get('@country'),
             ) for a in afils if a.get('@id')
         ]
-
-        logging.getLogger('query').warn(affiliations)
 
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
