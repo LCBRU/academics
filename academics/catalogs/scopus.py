@@ -284,8 +284,6 @@ def scopus_author_search(search_string):
             if h['@rel'] == 'scopus-author':
                 href = h['@href']
 
-        logging.getLogger('query').warn(json.dumps(r))
-
         afils = r.get('affiliation-current') or []
 
         if isinstance(afils, Mapping):
@@ -300,8 +298,6 @@ def scopus_author_search(search_string):
                 country=a.get('affiliation-country'),
             ) for a in afils if a.get('affiliation-id')
         ]
-
-        logging.getLogger('query').warn(affiliations)
 
         a = AuthorData(
             catalog=CATALOG_SCOPUS,
@@ -364,32 +360,12 @@ class Author(ElsAuthor):
     def _set_h_index(self):
         self.h_index = self.data.get(u'h-index', None)
 
-    def _set_affiliation_id(self):
-        self.affiliation_id = self.data.get(u'affiliation-current', {}).get(u'@id', '')
-
-    def _set_affiliation_name(self):
-        self.affiliation_name = self.data.get(u'affiliation-current', {}).get(u'@name', '')
-
-    def _set_affiliation_address(self):
-        self.affiliation_address = self.data.get(u'affiliation-current', {}).get(u'@city', '')
-
-    def _set_affiliation_country(self):
-        self.affiliation_country = self.data.get(u'affiliation-current', {}).get(u'@country', '')
-
     def populate(self, client, get_extended_details):
         result = self.read(client)
 
         if get_extended_details:
             self.read_metrics(client)
 
-            if self.affiliation_id:
-                sa = ScopusAffiliation(self.affiliation_id)
-                sa.read(client)
-
-                self.affiliation_name = sa.name
-                self.affiliation_address = sa.address
-                self.affiliation_country = sa.country
-        
         return result
 
     def read(self, client):
@@ -410,10 +386,6 @@ class Author(ElsAuthor):
         self._set_citation_count()
         self._set_document_count()
         self._set_h_index()
-        self._set_affiliation_id()
-        self._set_affiliation_name()
-        self._set_affiliation_address()
-        self._set_affiliation_country()
 
         return result
 
@@ -452,6 +424,25 @@ class Author(ElsAuthor):
         return True
 
     def get_data(self):
+        logging.getLogger('query').warn(json.dumps(self.data))
+
+        afils = self.data.get('affiliation-current') or []
+
+        if isinstance(afils, Mapping):
+            afils = [afils]
+
+        affiliations = [
+            AffiliationData(
+                catalog=CATALOG_SCOPUS,
+                catalog_identifier=a.get('@id'),
+                name=a.get('@name'),
+                address=a.get('@city'),
+                country=a.get('@country'),
+            ) for a in afils if a.get('@id')
+        ]
+
+        logging.getLogger('query').warn(affiliations)
+
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
             catalog_identifier=self.catalog_identifier,
@@ -467,22 +458,8 @@ class Author(ElsAuthor):
             citation_count=self.citation_count,
             document_count=self.document_count,
             h_index=self.h_index,
-            affiliations=[],
+            affiliations=affiliations,
         )
-
-        # HERERERERERE
-
-
-
-        if self.affiliation_id:
-            sa = ScopusAffiliation(self.affiliation_id)
-            sa.read(_client())
-
-            result.affiliation_name=sa.name,
-            result.affiliation_address=sa.address
-            result.affiliation_country=sa.country
-        else:
-            logging.warn('No error affiliation ID')
 
         return result
 
