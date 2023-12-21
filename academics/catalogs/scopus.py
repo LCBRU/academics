@@ -288,6 +288,8 @@ def scopus_author_search(search_string):
             if h['@rel'] == 'scopus-author':
                 href = h['@href']
 
+        logging.getLogger('query').warn(json.dumps(r))
+
         affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
 
         sa = ScopusAffiliation(affiliation_identifier)
@@ -305,6 +307,7 @@ def scopus_author_search(search_string):
             affiliation_name=sa.name,
             affiliation_address=sa.address,
             affiliation_country=sa.country,
+            affiliations=[],
         )
 
         if len(a.catalog_identifier) == 0:
