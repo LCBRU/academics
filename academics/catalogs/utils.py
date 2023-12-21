@@ -127,3 +127,13 @@ class PublicationData():
     authors: list
     keywords: str
     is_open_access : bool = False
+    affiliations: list
+
+
+@dataclass
+class AffiliationData():
+    catalog: str
+    catalog_identifier: str
+    name: str
+    address: str
+    country: str

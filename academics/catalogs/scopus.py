@@ -6,7 +6,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.catalogs.utils import AuthorData, PublicationData
+from academics.catalogs.utils import AffiliationData, AuthorData, PublicationData
 from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
@@ -106,9 +106,6 @@ def get_scopus_publication_data(identifier):
     a = Abstract(identifier)
     a.read(_client())
 
-    print('A'*3000)
-    logging.getLogger('query').warn(json.dumps(a.data))
-
     id = a.data.get('coredata', {}).get(u'dc:identifier', ':').split(':')[1]
 
     return PublicationData(
@@ -131,6 +128,7 @@ def get_scopus_publication_data(identifier):
             authors=a.authors,
             keywords=list(filter(None, set([k.get('$', '') for k in (a.data.get(u'authkeywords') or {}).get('author-keywords', [])]))),
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
+            affiliations=a.affiliations,
         )
 
 
@@ -174,6 +172,7 @@ def get_scopus_publications(identifier):
                 authors=[_translate_publication_author(a) for a in p.get('author', [])],
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
+                affiliations=[],
             ))
     return result
 
@@ -516,6 +515,22 @@ class Abstract(AbsDoc):
     @property
     def authors(self):
         return [self._translate_publication_author(a) for a in self.data.get('authors', {}).get('author', [])]
+
+
+    @property
+    def affiliations(self):
+        result = []
+
+        for a in self.data.get('affiliation') or []:
+            result.append(
+                AffiliationData(
+                    catalog=CATALOG_SCOPUS,
+                    catalog_identifier=a.get('@id') or '',
+                    name=a.get('affilname') or '',
+                    address=a.get('affiliation-city') or '',
+                    country=a.get('affiliation-country') or '',
+                )
+            )
 
 
     def _translate_publication_author(self, author_dict):
