@@ -546,6 +546,8 @@ class Abstract(AbsDoc):
         result = []
 
         for a in self.data.get('affiliation') or []:
+            print('@'*10)
+            print(a)
             result.append(
                 AffiliationData(
                     catalog=CATALOG_SCOPUS,
