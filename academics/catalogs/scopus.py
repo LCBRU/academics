@@ -145,6 +145,9 @@ def get_scopus_publications(identifier):
     result = []
 
     for p in search_results.results:
+
+        logging.getLogger('query').warn(json.dumps(p))
+
         id = p.get(u'dc:identifier', ':').split(':')[1]
 
         if not id:
