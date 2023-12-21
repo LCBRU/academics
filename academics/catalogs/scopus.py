@@ -575,7 +575,7 @@ class Abstract(AbsDoc):
         affiliations = [AffiliationData(
             catalog=CATALOG_SCOPUS,
             catalog_identifier=a.get('@id') or '',
-        ) for a in author_dict.get('afid') or [] if a.get('@id')]
+        ) for a in author_dict.get('affiliation') or [] if a.get('@id')]
 
         logging.getLogger('query').warn(affiliations)
 
