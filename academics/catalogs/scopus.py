@@ -152,8 +152,6 @@ def get_scopus_publications(identifier):
             # SCOPUS sends an "Empty Set" result as opposed to no results
             continue
 
-        logging.getLogger('query').warn(json.dumps(p))
-
         result.append(
             PublicationData(
                 catalog='scopus',
@@ -218,8 +216,6 @@ def _translate_publication_author(author_dict):
             catalog_identifier=a.get('$'),
         ) for a in afils if a.get('$')
     ]
-
-    logging.getLogger('query').warn(affiliations)
 
     result = AuthorData(
         catalog=CATALOG_SCOPUS,
