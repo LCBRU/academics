@@ -459,7 +459,12 @@ class Author(ElsAuthor):
             citation_count=self.citation_count,
             document_count=self.document_count,
             h_index=self.h_index,
+            affiliations=[],
         )
+
+        # HERERERERERE
+
+
 
         if self.affiliation_id:
             sa = ScopusAffiliation(self.affiliation_id)
