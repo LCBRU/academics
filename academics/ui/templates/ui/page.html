@@ -35,8 +35,8 @@
 {% block adminlinks %}
     {% if not updating %}
         {{ render_dropdown_item('ui.update_all_academics', 'Update All', icon='fas fa-recycle') }}
-        {{ render_dropdown_item('ui.trigger_refresh', 'Refresh', icon='fas fa-fish') }}
     {% endif %}
+    {{ render_dropdown_item('ui.trigger_refresh', 'Refresh', icon='fas fa-fish') }}
     {{ render_dropdown_item('ui.publication_auto_validate', 'Auto-validate', icon='far fa-check-circle') }}
 {% endblock %}
 
