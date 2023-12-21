@@ -65,6 +65,7 @@ class AuthorData():
     affiliation_name: str
     affiliation_address: str
     affiliation_country: str
+    affiliations: list
     author_name: str = None
     citation_count: str = None
     document_count: str = None
@@ -134,6 +135,6 @@ class PublicationData():
 class AffiliationData():
     catalog: str
     catalog_identifier: str
-    name: str
-    address: str
-    country: str
+    name: str = ''
+    address: str = ''
+    country: str = ''

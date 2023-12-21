@@ -571,13 +571,13 @@ class Abstract(AbsDoc):
 
 
     def _translate_publication_author(self, author_dict):
-        affiliations = author_dict.get('afid', None)
 
-        if affiliations:
-            affiliation = affiliations[0]
-            affiliation_identifier = affiliation.get('@id', None)
-        else:
-            affiliation_identifier = None
+        affiliations = [AffiliationData(
+            catalog=CATALOG_SCOPUS,
+            catalog_identifier=a.get('@id') or '',
+        ) for a in author_dict.get('afid') or [] if a.get('@id')]
+
+        logging.getLogger('query').warn(affiliations)
 
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
@@ -588,10 +588,11 @@ class Abstract(AbsDoc):
             initials=author_dict.get('ce:initials', None),
             author_name=author_dict.get('ce:indexed-name', None),
             href=author_dict.get('author-url', None),
-            affiliation_identifier=affiliation_identifier,
+            affiliation_identifier='',
             affiliation_name='',
             affiliation_address='',
             affiliation_country='',
+            affiliations=affiliations,
         )
 
         return result
