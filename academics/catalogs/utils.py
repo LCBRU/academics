@@ -126,8 +126,8 @@ class PublicationData():
     cited_by_count: int
     authors: list
     keywords: str
+    affiliations: list
     is_open_access : bool = False
-    affiliations: list = []
 
 
 @dataclass
