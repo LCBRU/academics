@@ -1,3 +1,4 @@
+import json
 import pyalex
 import logging
 
@@ -60,7 +61,7 @@ def get_open_alex_publication_data(identifier):
 
 def _get_publication_data(pubdata):
 
-    logging.getLogger('query').warn(pubdata)
+    logging.getLogger('query').warn(json.dumps(pubdata))
 
     pd = _diction_purge_none(pubdata)
     bib = pd.get('biblio', {})
