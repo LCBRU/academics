@@ -1,3 +1,4 @@
+import collections
 from datetime import date, datetime
 import logging
 import requests
@@ -187,7 +188,12 @@ def get_scopus_publications(identifier):
 def _translate_publication_affiliations(publication_dict):
     result = []
 
-    for a in publication_dict.get('affiliation') or []:
+    afils = publication_dict.get('affiliation') or []
+
+    if isinstance(afils, collections.Mapping):
+        afils = [afils]
+
+    for a in afils or []:
         result.append(
             AffiliationData(
                 catalog=CATALOG_SCOPUS,
@@ -545,9 +551,12 @@ class Abstract(AbsDoc):
     def affiliations(self):
         result = []
 
-        for a in self.data.get('affiliation') or []:
-            print('@'*10)
-            print(a)
+        afils = self.data.get('affiliation') or []
+
+        if isinstance(afils, collections.Mapping):
+            afils = [afils]
+
+        for a in afils:
             result.append(
                 AffiliationData(
                     catalog=CATALOG_SCOPUS,
