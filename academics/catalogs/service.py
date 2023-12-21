@@ -59,7 +59,7 @@ def update_single_academic(academic: Academic):
     db.session.add(academic)
     db.session.commit()
 
-    _process_academics_who_need_an_update.delay()
+    _process_updates.delay()
 
     logging.debug('update_academic: ended')
 
@@ -76,33 +76,33 @@ def update_academics():
 
         db.session.commit()
 
-        _process_academics_who_need_an_update.delay()
+        _process_updates.delay()
 
     logging.debug('update_academics: ended')
 
 
 @celery.task()
-def _process_academics_who_need_an_update():
-    logging.debug('_process_academics_who_need_an_update: started')
+def _process_updates():
+    logging.debug('_process_updates: started')
 
     while True:
         a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
 
         if not a:
-            logging.info(f'_process_academics_who_need_an_update: No more academics to update')
+            logging.info(f'_process_updates: No more academics to update')
             break
 
         _update_academic(a)
 
         db.session.commit()
 
-    logging.debug('_process_academics_who_need_an_update: Start doing the publications')
+    logging.debug('_process_updates: Start doing the publications')
 
     while True:
         p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
 
         if not p:
-            logging.info(f'_process_academics_who_need_an_update: No more catalog publications to refresh')
+            logging.info(f'_process_updates: No more catalog publications to refresh')
             break
 
         _update_catalog_publication(p)
@@ -113,7 +113,7 @@ def _process_academics_who_need_an_update():
         p = Publication.query.filter(Publication.vancouver == None).first()
 
         if not p:
-            logging.info(f'_process_academics_who_need_an_update: No more publications to refresh')
+            logging.info(f'_process_updates: No more publications to refresh')
             break
 
         _update_publication(p)
@@ -123,7 +123,7 @@ def _process_academics_who_need_an_update():
     delete_orphan_publications()
     auto_validate()
 
-    logging.debug('_process_academics_who_need_an_update: Ended')
+    logging.debug('_process_updates: Ended')
 
 
 def _update_academic(academic: Academic):
@@ -303,7 +303,7 @@ def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None)
 
     db.session.commit()
 
-    _process_academics_who_need_an_update.delay()
+    _process_updates.delay()
 
 
 def delete_orphan_publications():
