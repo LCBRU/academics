@@ -146,7 +146,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     affiliation_id = db.Column(db.Integer, db.ForeignKey(Affiliation.id))
     affiliation = db.relationship(Affiliation, backref=db.backref("sources", cascade="all,delete"))
 
-    affiliations = db.relationship("affiliations", secondary='sources__affiliations', cascade="all,delete")
+    affiliations = db.relationship(Affiliation, secondary='sources__affiliations', cascade="all,delete")
 
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
