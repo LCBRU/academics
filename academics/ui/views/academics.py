@@ -109,7 +109,7 @@ def academic_edit(id):
 @blueprint.route("/update_all_academics")
 def update_all_academics():
     if not updating():
-        refresh()
+        update_academics()
 
     return redirect(url_for('ui.index'))
 
@@ -117,7 +117,7 @@ def update_all_academics():
 @blueprint.route("/trigger_refresh")
 def trigger_refresh():
     if not updating():
-        update_academics()
+        refresh()
 
     return redirect(url_for('ui.index'))
 
