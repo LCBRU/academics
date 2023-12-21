@@ -100,12 +100,13 @@ def get_scopus_publication_data(identifier):
     logging.debug('get_scopus_publication_data: started')
 
     if not current_app.config['SCOPUS_ENABLED']:
-        print(current_app.config['SCOPUS_ENABLED'])
         logging.warn('SCOPUS Not Enabled')
         return []
     
     a = Abstract(identifier)
     a.read(_client())
+
+    logging.getLogger('query').warn(json.dumps(a.data))
 
     id = a.data.get('coredata', {}).get(u'dc:identifier', ':').split(':')[1]
 
@@ -136,7 +137,6 @@ def get_scopus_publications(identifier):
     logging.debug('get_scopus_publications: started')
 
     if not current_app.config['SCOPUS_ENABLED']:
-        print(current_app.config['SCOPUS_ENABLED'])
         logging.warn('SCOPUS Not Enabled')
         return []
     
@@ -207,7 +207,6 @@ def get_scopus_author_data(identifier, get_extended_details=False):
     logging.debug(f'Getting Scopus Author Data {identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
-        print(current_app.config['SCOPUS_ENABLED'])
         logging.warn('SCOPUS Not Enabled')
         return None
 
@@ -215,8 +214,6 @@ def get_scopus_author_data(identifier, get_extended_details=False):
 
     if not result.populate(_client(), get_extended_details):
         return None
-
-    logging.getLogger('query').warn(json.dumps(result.data))
 
     return result.get_data()
 
@@ -227,7 +224,6 @@ def scopus_similar_authors(academic: Academic):
 
 def scopus_author_search(search_string):
     if not current_app.config['SCOPUS_ENABLED']:
-        print(current_app.config['SCOPUS_ENABLED'])
         logging.warn('SCOPUS Not Enabled')
         return []
 
