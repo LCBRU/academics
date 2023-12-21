@@ -172,11 +172,28 @@ def get_scopus_publications(identifier):
                 authors=[_translate_publication_author(a) for a in p.get('author', [])],
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
-                affiliations=p.affiliations,
+                affiliations=_translate_publication_affiliations(p),
             ))
     
     logging.getLogger('query').warn(json.dumps(result))
 
+    return result
+
+
+def _translate_publication_affiliations(publication_dict):
+    result = []
+
+    for a in publication_dict.get('affiliation') or []:
+        result.append(
+            AffiliationData(
+                catalog=CATALOG_SCOPUS,
+                catalog_identifier=a.get('@id') or '',
+                name=a.get('affilname') or '',
+                address=a.get('affiliation-city') or '',
+                country=a.get('affiliation-country') or '',
+            )
+        )
+    
     return result
 
 
@@ -582,20 +599,3 @@ class DocumentSearch(ElsSearch):
         super().__init__(query=q, index='scopus')
         self._uri += '&view=complete'
 
-
-    @property
-    def affiliations(self):
-        result = []
-
-        for a in self.data.get('affiliation') or []:
-            result.append(
-                AffiliationData(
-                    catalog=CATALOG_SCOPUS,
-                    catalog_identifier=a.get('@id') or '',
-                    name=a.get('affilname') or '',
-                    address=a.get('affiliation-city') or '',
-                    country=a.get('affiliation-country') or '',
-                )
-            )
-        
-        return result
