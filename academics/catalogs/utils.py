@@ -98,6 +98,7 @@ class AuthorData():
         source.orcid = self.orcid
         source.first_name = self.first_name
         source.last_name = self.last_name
+        source.initials = self.initials
         source.display_name = self.display_name
         source.href = self.href
         source.citation_count = self.citation_count
