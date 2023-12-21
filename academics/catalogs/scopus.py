@@ -187,7 +187,7 @@ def _translate_publication_affiliations(publication_dict):
         result.append(
             AffiliationData(
                 catalog=CATALOG_SCOPUS,
-                catalog_identifier=a.get('@id') or '',
+                catalog_identifier=a.get('afid') or '',
                 name=a.get('affilname') or '',
                 address=a.get('affiliation-city') or '',
                 country=a.get('affiliation-country') or '',
