@@ -10,7 +10,7 @@ from academics.catalogs.utils import AuthorData, PublicationData
 from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
-from flask import current_app
+from flask import current_app, jsonify
 from sqlalchemy import select
 from lbrc_flask.database import db
 from lbrc_flask.logging import log_exception
@@ -216,6 +216,8 @@ def get_scopus_author_data(identifier, get_extended_details=False):
     if not result.populate(_client(), get_extended_details):
         return None
 
+    logging.getLogger('query').info(jsonify(result.data))
+
     return result.get_data()
 
 
@@ -252,7 +254,7 @@ def scopus_author_search(search_string):
         for h in r.get(u'coredata', {}).get(u'link', ''):
             if h['@rel'] == 'scopus-author':
                 href = h['@href']
-        
+
         affiliation_identifier = r.get(u'affiliation-current', {}).get(u'affiliation-id', '')
 
         sa = ScopusAffiliation(affiliation_identifier)
