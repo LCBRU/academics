@@ -88,7 +88,6 @@ def _get_publication_data(pubdata):
         authors=[_translate_publication_author(a) for a in pd.get('authorships', [])],
         keywords={k.get('keyword', None) for k in pd.get('keywords', {})},
         is_open_access=pd.get('open_access', {}).get('is_oa', False),
-        affiliations=[],
     )
 
 

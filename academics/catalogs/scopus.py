@@ -129,7 +129,6 @@ def get_scopus_publication_data(identifier):
             authors=a.authors,
             keywords=list(filter(None, set([k.get('$', '') for k in (a.data.get(u'authkeywords') or {}).get('author-keywords', [])]))),
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
-            affiliations=a.affiliations,
         )
 
 
@@ -173,33 +172,10 @@ def get_scopus_publications(identifier):
                 authors=[_translate_publication_author(a) for a in p.get('author', [])],
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
-                affiliations=_translate_publication_affiliations(p),
             ))
 
     
 
-    return result
-
-
-def _translate_publication_affiliations(publication_dict):
-    result = []
-
-    afils = publication_dict.get('affiliation') or []
-
-    if isinstance(afils, Mapping):
-        afils = [afils]
-
-    for a in afils or []:
-        result.append(
-            AffiliationData(
-                catalog=CATALOG_SCOPUS,
-                catalog_identifier=a.get('afid') or '',
-                name=a.get('affilname') or '',
-                address=a.get('affiliation-city') or '',
-                country=a.get('affiliation-country') or '',
-            )
-        )
-    
     return result
 
 
@@ -541,29 +517,6 @@ class Abstract(AbsDoc):
     @property
     def authors(self):
         return [self._translate_publication_author(a) for a in self.data.get('authors', {}).get('author', [])]
-
-
-    @property
-    def affiliations(self):
-        result = []
-
-        afils = self.data.get('affiliation') or []
-
-        if isinstance(afils, Mapping):
-            afils = [afils]
-
-        for a in afils:
-            result.append(
-                AffiliationData(
-                    catalog=CATALOG_SCOPUS,
-                    catalog_identifier=a.get('@id') or '',
-                    name=a.get('affilname') or '',
-                    address=a.get('affiliation-city') or '',
-                    country=a.get('affiliation-country') or '',
-                )
-            )
-        
-        return result
 
 
     def _translate_publication_author(self, author_dict):
