@@ -121,8 +121,6 @@ def _translate_publication_author(author_dict):
         ) for a in afils if a.get('id')
     ]
 
-    logging.getLogger('query').warn(affiliations)
-
     author = author_dict.get('author', {})
 
     return AuthorData(
@@ -202,6 +200,24 @@ def _get_author_datas(authors):
     result = []
 
     for a in authors:
+
+        # afils = author_dict.get('institutions') or []
+
+        # if isinstance(afils, Mapping):
+        #     afils = [afils]
+
+        # affiliations = [
+        #     AffiliationData(
+        #         catalog=CATALOG_OPEN_ALEX,
+        #         catalog_identifier=_get_id_from_href(a.get('id')),
+        #         name=a.get('display_name'),
+        #         address='',
+        #         country=a.get('country_code'),
+        #     ) for a in afils if a.get('id')
+        # ]
+
+        logging.getLogger('query').warn(a)
+
         institution_id = _get_id_from_href((a.get('last_known_institution') or {}).get('id', ''))
 
         if institution_id:
