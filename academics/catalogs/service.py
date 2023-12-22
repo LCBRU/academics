@@ -361,7 +361,7 @@ def _get_publication_xref(publication_datas):
 
     for cat, pubs in groupby(sorted(publication_datas, key=keyfunc), key=keyfunc):
         q = select(CatalogPublication).where(
-            CatalogPublication.catalog_identifier.in_(pubs.keys())
+            CatalogPublication.catalog_identifier.in_([p.catalog_identifier for p in pubs])
         ).where(
             CatalogPublication.catalog == cat
         )
