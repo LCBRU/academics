@@ -1,10 +1,11 @@
+from collections.abc import Mapping
 import json
 import pyalex
 import logging
 
 from datetime import date
 from sqlalchemy import select
-from academics.catalogs.utils import AuthorData, PublicationData
+from academics.catalogs.utils import AffiliationData, AuthorData, PublicationData
 from academics.config import Config
 from pyalex import Authors, Works, Institutions
 from itertools import chain
@@ -105,10 +106,24 @@ def _diction_purge_none(_dict):
 
 
 def _translate_publication_author(author_dict):
-    affiliation = next(iter(author_dict.get('institutions', [])), {})
-    author = author_dict.get('author', {})
+    afils = author_dict.get('institutions') or []
 
-    logging.getLogger('query').warn(json.dumps(author_dict))
+    if isinstance(afils, Mapping):
+        afils = [afils]
+
+    affiliations = [
+        AffiliationData(
+            catalog=CATALOG_OPEN_ALEX,
+            catalog_identifier=_get_id_from_href(a.get('id')),
+            name=a.get('display_name'),
+            address='',
+            country=a.get('country_code'),
+        ) for a in afils if a.get('id')
+    ]
+
+    logging.getLogger('query').warn(affiliations)
+
+    author = author_dict.get('author', {})
 
     return AuthorData(
         catalog=CATALOG_OPEN_ALEX,
@@ -119,11 +134,11 @@ def _translate_publication_author(author_dict):
         initials='',
         author_name=author.get('display_name', None),
         href=author.get('id', None),
-        affiliation_identifier=_get_id_from_href(affiliation.get('id', None)),
-        affiliation_name=affiliation.get('display_name', None),
+        affiliation_identifier='',
+        affiliation_name='',
         affiliation_address='',
-        affiliation_country=affiliation.get('country_code', None),
-        affiliations=[],
+        affiliation_country='',
+        affiliations=affiliations,
     )
 
 
