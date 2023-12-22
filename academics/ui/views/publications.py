@@ -179,8 +179,6 @@ def publication_full_export_xlsx():
         'sponsor': p['sponsors'],
     } for p in db.session.execute(q).unique().mappings())
 
-    logging.getLogger('query').info(q)
-
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
 

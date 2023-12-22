@@ -66,8 +66,6 @@ def _get_publication_data(pubdata):
     bib = pd.get('biblio', {})
     grants = pd.get('grants', [])
 
-    logging.getLogger('query').warn(json.dumps(pubdata))
-
     return PublicationData(
         catalog=CATALOG_OPEN_ALEX,
         catalog_identifier=_get_id_from_href(pd['id']),
