@@ -216,7 +216,7 @@ def _get_author_datas(authors):
         #     ) for a in afils if a.get('id')
         # ]
 
-        logging.getLogger('query').warn(a)
+        logging.getLogger('query').warn(json.dumps(a))
 
         institution_id = _get_id_from_href((a.get('last_known_institution') or {}).get('id', ''))
 
