@@ -237,7 +237,7 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    existing_sources = {CatalogRefernce(s): s.source for s in db.session.execute(
+    existing_sources = {CatalogRefernce(s.source): s.source for s in db.session.execute(
         select(AcademicPotentialSource)
         .where(AcademicPotentialSource.academic == academic)
     ).scalars()}
