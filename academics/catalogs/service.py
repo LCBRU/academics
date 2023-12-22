@@ -470,7 +470,7 @@ def _get_source_publication_xref(publication_datas):
     author_xref = _get_source_xref(authors.values())
 
     return {
-        CatalogReference(p): [author_xref[CatalogReference(a)] for a in p.authors.values()]
+        CatalogReference(p): [author_xref[CatalogReference(a)] for a in p.authors]
         for p in publication_datas
     }
 
