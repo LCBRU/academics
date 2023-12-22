@@ -200,7 +200,7 @@ def refresh_source(s):
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
-            s = _get_or_create_source(author_data=author_data)
+            a = _get_source_xref(s.catalog, [author_data])[0]
         else:
             logging.warn(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
@@ -457,10 +457,23 @@ def _get_affiliation_xref(catalog, author_datas):
     return {a.catalog_identifier.lower(): xref[a.affiliation_identifier.lower()] for a in author_datas if a.affiliation_identifier}
 
 
-def _get_source_xref(catalog, publication_datas):
+def _get_source_publication_xref(catalog, publication_datas):
     logging.debug('_get_source_xref: started')
 
     authors = {a.catalog_identifier.lower(): a for a in chain.from_iterable([p.authors for p in publication_datas])}
+
+    author_xref = _get_source_xref(catalog, authors)
+
+    return {
+        p.catalog_identifier.lower(): [author_xref[a.catalog_identifier.lower()] for a in p.authors]
+        for p in publication_datas
+    }
+
+
+def _get_source_xref(catalog, author_datas):
+    logging.debug('_get_author_xref: started')
+
+    authors = {a.catalog_identifier.lower(): a for a in author_datas}
 
     q = select(Source).where(
         Source.catalog_identifier.in_(authors.keys())
@@ -480,12 +493,42 @@ def _get_source_xref(catalog, publication_datas):
     db.session.add_all(new_sources)
     db.session.commit()
 
-    xref = xref | {s.catalog_identifier.lower(): s for s in new_sources}
+    return xref | {s.catalog_identifier.lower(): s for s in new_sources}
 
-    return {
-        p.catalog_identifier.lower(): [xref[a.catalog_identifier.lower()] for a in p.authors]
-        for p in publication_datas
-    }
+
+def _get_or_create_source(author_data):
+    s = None
+
+    s = db.session.execute(
+        select(Source)
+        .where(Source.catalog == author_data.catalog)
+        .where(Source.catalog_identifier == author_data.catalog_identifier)
+    ).scalar()
+
+    if not s:
+        s = author_data.get_new_source()
+    else:
+        author_data.update_source(s)
+    
+    db.session.add(s)
+
+    a = db.session.execute(
+        select(Affiliation)
+        .where(Affiliation.catalog_identifier == author_data.affiliation_identifier)
+        .where(Affiliation.catalog == author_data.catalog)
+    ).scalar()
+
+    if not a:
+        a = Affiliation(catalog_identifier=author_data.affiliation_identifier)
+    
+        a.name = author_data.affiliation_name
+        a.address = author_data.affiliation_address
+        a.country = author_data.affiliation_country
+        a.catalog = author_data.catalog
+    
+    s.affiliation = a
+
+    return s
 
 
 def add_catalog_publications(catalog, publication_datas):
@@ -512,7 +555,7 @@ def save_publications(catalog, new_pubs):
     subtype_xref = _get_subtype_xref(new_pubs)
     pubs_xref = _get_publication_xref(catalog, new_pubs)
     sponsor_xref = _get_sponsor_xref(new_pubs)
-    source_xref = _get_source_xref(catalog, new_pubs)
+    source_xref = _get_source_publication_xref(catalog, new_pubs)
     keyword_xref = _get_keyword_xref(new_pubs)
 
     for p in new_pubs:
@@ -565,38 +608,3 @@ def save_publications(catalog, new_pubs):
         db.session.add(cat_pub)
         db.session.add(pub)
         db.session.commit()
-
-
-def _get_or_create_source(author_data):
-    s = None
-
-    s = db.session.execute(
-        select(Source)
-        .where(Source.catalog == author_data.catalog)
-        .where(Source.catalog_identifier == author_data.catalog_identifier)
-    ).scalar()
-
-    if not s:
-        s = author_data.get_new_source()
-    else:
-        author_data.update_source(s)
-    
-    db.session.add(s)
-
-    a = db.session.execute(
-        select(Affiliation)
-        .where(Affiliation.catalog_identifier == author_data.affiliation_identifier)
-        .where(Affiliation.catalog == author_data.catalog)
-    ).scalar()
-
-    if not a:
-        a = Affiliation(catalog_identifier=author_data.affiliation_identifier)
-    
-        a.name = author_data.affiliation_name
-        a.address = author_data.affiliation_address
-        a.country = author_data.affiliation_country
-        a.catalog = author_data.catalog
-    
-    s.affiliation = a
-
-    return s
