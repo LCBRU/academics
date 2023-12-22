@@ -465,7 +465,7 @@ def _get_affiliation_xref(author_datas):
 def _get_source_publication_xref(publication_datas):
     logging.debug('_get_source_xref: started')
 
-    authors = {CatalogPublication(a): a for a in chain.from_iterable([p.authors for p in publication_datas])}
+    authors = {CatalogReference(a): a for a in chain.from_iterable([p.authors for p in publication_datas])}
 
     author_xref = _get_source_xref(authors.values())
 
