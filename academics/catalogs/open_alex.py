@@ -206,6 +206,8 @@ def _get_author_datas(authors):
         if isinstance(afils, Mapping):
             afils = [afils]
 
+        logging.getLogger('query').warn(afils)
+
         affiliations = [
             AffiliationData(
                 catalog=CATALOG_OPEN_ALEX,
