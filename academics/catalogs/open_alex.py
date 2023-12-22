@@ -66,6 +66,8 @@ def _get_publication_data(pubdata):
     bib = pd.get('biblio', {})
     grants = pd.get('grants', [])
 
+    logging.getLogger('query').warn(pubdata)
+
     return PublicationData(
         catalog=CATALOG_OPEN_ALEX,
         catalog_identifier=_get_id_from_href(pd['id']),
@@ -206,8 +208,6 @@ def _get_author_datas(authors):
         if isinstance(afils, Mapping):
             afils = [afils]
 
-        logging.getLogger('query').warn(afils)
-
         affiliations = [
             AffiliationData(
                 catalog=CATALOG_OPEN_ALEX,
@@ -217,8 +217,6 @@ def _get_author_datas(authors):
                 country=a.get('institution', {}).get('country_code'),
             ) for a in afils if a.get('institution', {}).get('id') and date.today().year in a.get('years', [])
         ]
-
-        logging.getLogger('query').warn(affiliations)
 
         result.append(
             AuthorData(
