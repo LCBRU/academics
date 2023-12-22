@@ -201,29 +201,22 @@ def _get_author_datas(authors):
 
     for a in authors:
 
-        # afils = author_dict.get('institutions') or []
+        afils = a.get('affiliations') or []
 
-        # if isinstance(afils, Mapping):
-        #     afils = [afils]
+        if isinstance(afils, Mapping):
+            afils = [afils]
 
-        # affiliations = [
-        #     AffiliationData(
-        #         catalog=CATALOG_OPEN_ALEX,
-        #         catalog_identifier=_get_id_from_href(a.get('id')),
-        #         name=a.get('display_name'),
-        #         address='',
-        #         country=a.get('country_code'),
-        #     ) for a in afils if a.get('id')
-        # ]
+        affiliations = [
+            AffiliationData(
+                catalog=CATALOG_OPEN_ALEX,
+                catalog_identifier=_get_id_from_href(a.get('institution', {}).get('id')),
+                name=a.get('institution', {}).get('display_name'),
+                address='',
+                country=a.get('institution', {}).get('country_code'),
+            ) for a in afils if a.get('id') and date.today().year in a.get('years', [])
+        ]
 
-        logging.getLogger('query').warn(json.dumps(a))
-
-        institution_id = _get_id_from_href((a.get('last_known_institution') or {}).get('id', ''))
-
-        if institution_id:
-            i = Institutions()[institution_id]
-        else:
-            i = {}
+        logging.getLogger('query').warn(affiliations)
 
         result.append(
             AuthorData(
@@ -235,14 +228,14 @@ def _get_author_datas(authors):
                 initials='',
                 author_name=a.get('display_name', ''),
                 href=a.get('id', ''),
-                affiliation_identifier=institution_id,
-                affiliation_name=i.get('display_name', ''),
-                affiliation_address=i.get('geo', {}).get('city', ''),
-                affiliation_country=i.get('geo', {}).get('country', ''),
+                affiliation_identifier='',
+                affiliation_name='',
+                affiliation_address='',
+                affiliation_country='',
                 citation_count=a.get('cited_by_count', None),
                 document_count=a.get('works_count', None),
                 h_index=a.get('summary_stats', {}).get('h_index', None),
-                affiliations=[],
+                affiliations=affiliations,
             )
         )
 
