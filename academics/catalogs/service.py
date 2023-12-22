@@ -6,7 +6,6 @@ from academics.catalogs.open_alex import get_open_alex_author_data, get_open_ale
 from academics.catalogs.utils import CatalogReference
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
-
 from academics.publication_searching import ValidationSearchForm, publication_search_query
 from .scopus import get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
@@ -483,10 +482,10 @@ def _get_source_xref(author_datas):
     keyfunc = lambda a: a.catalog
 
     for cat, authors in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
-        q = select(Affiliation).where(
-            Affiliation.catalog_identifier.in_([a.catalog_identifier for a in authors])
+        q = select(Source).where(
+            Source.catalog_identifier.in_([a.catalog_identifier for a in authors])
         ).where(
-            Affiliation.catalog == cat
+            Source.catalog == cat
         )
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
@@ -530,6 +529,8 @@ def save_publications(new_pubs):
     sponsor_xref = _get_sponsor_xref(new_pubs)
     source_xref = _get_source_publication_xref(new_pubs)
     keyword_xref = _get_keyword_xref(new_pubs)
+
+    affiliation_xref = _get_affiliation_xref(chain.from_iterable([p.authors for p in new_pubs]))
 
     for p in new_pubs:
         cpr = CatalogReference(p)
