@@ -502,7 +502,7 @@ def _get_source_xref(author_datas):
 def add_catalog_publications(publication_datas):
     logging.debug('add_catalog_publications: started')
 
-    existing = {}
+    existing = set()
 
     keyfunc = lambda a: a.catalog
 
