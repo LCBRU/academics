@@ -3,6 +3,7 @@ import logging
 from flask import current_app
 from sqlalchemy import select
 from academics.catalogs.open_alex import get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
+from academics.catalogs.utils import CatalogRefernce
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
 
@@ -236,31 +237,30 @@ def _find_new_scopus_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    existing_sources = {(s.source.catalog, s.source.catalog_identifier): s.source for s in db.session.execute(
+    existing_sources = {CatalogRefernce(s): s.source for s in db.session.execute(
         select(AcademicPotentialSource)
         .where(AcademicPotentialSource.academic == academic)
     ).scalars()}
 
-    new_sources = scopus_similar_authors(academic)
-    new_sources.extend(open_alex_similar_authors(academic))
+    scopus_new_sources = filter(lambda s: s.is_leicester, scopus_similar_authors(academic))
+    open_alex_new_sources = filter(lambda s: s.is_leicester, open_alex_similar_authors(academic))
 
-    new_sources = [
-        a for a in new_sources
-        if a.is_leicester and
-            (a.catalog, a.catalog_identifier) not in existing_sources
+    scopus_sources = _get_source_xref(CATALOG_SCOPUS, scopus_new_sources).values()
+    open_alex_sources = _get_source_xref(CATALOG_OPEN_ALEX, open_alex_new_sources).values()
+
+    potentials = [
+        AcademicPotentialSource(academic=academic, source=s)
+        for s in scopus_sources | open_alex_sources
+        if CatalogRefernce(s) not in existing_sources
     ]
 
-    for new_source in new_sources:
-        logging.info(f'New potential source {new_source.catalog_identifier} from catalog {new_source.catalog} is not currently known')
+    print('A'*10)
+    print(potentials)
+    print('B'*10)
+    print(existing_sources)
+    print('C'*10)
 
-        s = _get_or_create_source(new_source)
-        db.session.add(s)
-
-        db.session.add(AcademicPotentialSource(
-            academic=academic,
-            source=s,
-        ))
-   
+    db.session.add_all(potentials)
     db.session.commit()
 
 

@@ -53,6 +53,16 @@ def _add_sponsors_to_publications(publication, sponsor_names):
 
 
 @dataclass
+class CatalogRefernce():
+    catalog: str
+    catalog_identifier: str
+
+    def __init__(self, catalog_item):
+        self.catalog = catalog_item.catalog.lower()
+        self.catalog_identifier = catalog_item.catalog_identifier.lower()
+
+
+@dataclass
 class AuthorData():
     catalog: str
     catalog_identifier: str
