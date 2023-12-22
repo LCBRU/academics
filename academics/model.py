@@ -612,11 +612,11 @@ catalog_publications_sources_affiliations = db.Table(
 
 class CatalogPublicationsSources(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id), index=True)
+    catalog_publication_id: Mapped[int] = mapped_column(ForeignKey(CatalogPublication.id), index=True)
     source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), index=True)
     ordinal: Mapped[int] = mapped_column()
 
-    publication: Mapped[Publication] = relationship(
+    publication: Mapped[CatalogPublication] = relationship(
         backref=backref(
             "catalog_publication_sources",
             order_by="CatalogPublicationsSources.ordinal",
