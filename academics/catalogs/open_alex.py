@@ -108,6 +108,8 @@ def _translate_publication_author(author_dict):
     affiliation = next(iter(author_dict.get('institutions', [])), {})
     author = author_dict.get('author', {})
 
+    logging.getLogger('query').warn(json.dumps(author_dict))
+
     return AuthorData(
         catalog=CATALOG_OPEN_ALEX,
         catalog_identifier=_get_id_from_href(author.get('id', None)),
