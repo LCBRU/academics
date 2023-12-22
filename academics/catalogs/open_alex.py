@@ -215,7 +215,7 @@ def _get_author_datas(authors):
                 name=a.get('institution', {}).get('display_name'),
                 address='',
                 country=a.get('institution', {}).get('country_code'),
-            ) for a in afils if a.get('id') and date.today().year in a.get('years', [])
+            ) for a in afils if a.get('institution', {}).get('id') and date.today().year in a.get('years', [])
         ]
 
         logging.getLogger('query').warn(affiliations)
