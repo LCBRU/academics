@@ -496,7 +496,7 @@ def _get_source_xref(author_datas):
     db.session.add_all(new_sources)
     db.session.commit()
 
-    return xref | {s.catalog_identifier.lower(): s for s in new_sources}
+    return xref | {CatalogReference(s): s for s in new_sources}
 
 
 def add_catalog_publications(publication_datas):
