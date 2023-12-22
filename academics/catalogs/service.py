@@ -200,7 +200,7 @@ def refresh_source(s):
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
-            a = _get_source_xref(s.catalog, [author_data])[s.catalog_identifier]
+            a = _get_source_xref(s.catalog, [author_data])[s.catalog_identifier.lower()]
         else:
             logging.warn(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
