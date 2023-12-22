@@ -201,7 +201,7 @@ def refresh_source(s):
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
-            a = _get_source_xref(s.catalog, [author_data])[s.catalog_identifier.lower()]
+            a = _get_source_xref([author_data])[CatalogReference(s)]
         else:
             logging.warn(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
@@ -245,8 +245,8 @@ def _find_new_scopus_sources(academic):
     scopus_new_sources = filter(lambda s: s.is_leicester, scopus_similar_authors(academic))
     open_alex_new_sources = filter(lambda s: s.is_leicester, open_alex_similar_authors(academic))
 
-    scopus_sources = _get_source_xref(CATALOG_SCOPUS, scopus_new_sources).values()
-    open_alex_sources = _get_source_xref(CATALOG_OPEN_ALEX, open_alex_new_sources).values()
+    scopus_sources = _get_source_xref(scopus_new_sources).values()
+    open_alex_sources = _get_source_xref(open_alex_new_sources).values()
 
     potentials = [
         AcademicPotentialSource(academic=academic, source=s)
