@@ -52,7 +52,7 @@ def _add_sponsors_to_publications(publication, sponsor_names):
         publication.sponsors.add(sponsor)
 
 
-@dataclass(init=False, frozen=True)
+@dataclass(init=False, unsafe_hash=True)
 class CatalogRefernce():
     catalog: str
     catalog_identifier: str
