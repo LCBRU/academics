@@ -172,7 +172,7 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
             pub_data = get_open_alex_publication_data(catalog_publication.catalog_identifier)
 
         if pub_data:
-            save_publications(pub_data.catalog, [pub_data])
+            save_publications([pub_data])
 
     except Exception as e:
         log_exception(e)
