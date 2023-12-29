@@ -298,11 +298,9 @@ def get_publication_by_academic(search_form):
         publications.c.id.label('publication_id'),
         func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
     ).join(
-        Publication, Publication.id == publications.c.id
+        CatalogPublication.catalog_publication_sources
     ).join(
-        Publication.publication_sources
-    ).join(
-        PublicationsSources.source
+        CatalogPublicationsSources.source
     ).join(
         Source.academic
     ).order_by(
