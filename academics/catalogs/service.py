@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import select
 from academics.catalogs.open_alex import get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.utils import CatalogReference
-from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
+from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
 from academics.publication_searching import ValidationSearchForm, publication_search_query
 from .scopus import get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
@@ -577,7 +577,17 @@ def save_publications(new_pubs):
             for i, s in enumerate(source_xref[cpr])
         ]
 
+        catalog_publication_sources = [
+            CatalogPublicationsSources(
+                source=s,
+                catalog_publication=cat_pub,
+                ordinal=i,
+            ) 
+            for i, s in enumerate(source_xref[cpr])
+        ]
+
         pub.publication_sources = publication_sources
+        pub.catalog_publication_sources = catalog_publication_sources
         pub.validation_historic = (parse_date(p.publication_cover_date) < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
         db.session.add(cat_pub)
