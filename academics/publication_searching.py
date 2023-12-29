@@ -140,7 +140,7 @@ def publication_search_query(search_form):
     return q
 
 def catalog_publication_search_query(search_form):
-    logging.info(f'publication_search_query started')
+    logging.debug(f'publication_search_query started')
 
     bcp = best_catalog_publications()
 
@@ -228,13 +228,13 @@ def catalog_publication_search_query(search_form):
         q = q.where(Publication.folders.any(Folder.id == search_form.folder_id.data))
 
     if search_form.supress_validation_historic.data == True:
-        logging.info(f'Supressing Historic Publications')
+        logging.debug(f'Supressing Historic Publications')
         q = q.where(or_(
             Publication.validation_historic == False,
             Publication.validation_historic == None,
         ))
 
-    logging.info(f'publication_search_query ended')
+    logging.debug(f'publication_search_query ended')
 
     return q
 
