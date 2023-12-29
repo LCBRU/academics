@@ -438,14 +438,12 @@ def _get_affiliation_xref(author_datas):
 
     keyfunc = lambda a: a.catalog
 
-    for cat, affiliations in groupby(sorted(affiliations, key=keyfunc), key=keyfunc):
+    for cat, afils in groupby(sorted(affiliations, key=keyfunc), key=keyfunc):
         print('B1'*10)
-        print(list(affiliations))
-
-
+        print(list(afils))
 
         q = select(Affiliation).where(
-            Affiliation.catalog_identifier.in_([a.catalog_identifier for a in affiliations])
+            Affiliation.catalog_identifier.in_([a.catalog_identifier for a in afils])
         ).where(
             Affiliation.catalog == cat
         )
@@ -463,7 +461,7 @@ def _get_affiliation_xref(author_datas):
                 address=a.affiliation_address,
                 country=a.affiliation_country,
             )
-            for a in affiliations if CatalogReference(a) not in xref.keys()
+            for a in afils if CatalogReference(a) not in xref.keys()
         ]
 
         print('C'*10)
