@@ -460,9 +460,9 @@ def _get_affiliation_xref(author_datas):
             Affiliation(
                 catalog=cat,
                 catalog_identifier=a.catalog_identifier,
-                name=a.affiliation_name,
-                address=a.affiliation_address,
-                country=a.affiliation_country,
+                name=a.name,
+                address=a.address,
+                country=a.country,
             )
             for a in afils if CatalogReference(a) not in xref.keys()
         ]
