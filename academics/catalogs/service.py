@@ -429,7 +429,7 @@ def _get_affiliation_xref(author_datas):
     print('A'*10)
     print(author_datas)
 
-    affiliations = {af for af in chain.from_iterable([a.affiliations for a in author_datas])}
+    affiliations = {CatalogReference(af): af for af in chain.from_iterable([a.affiliations for a in author_datas])}
 
     print('B'*10)
     print(affiliations)
@@ -438,7 +438,7 @@ def _get_affiliation_xref(author_datas):
 
     keyfunc = lambda a: a.catalog
 
-    for cat, afils in groupby(sorted(affiliations, key=keyfunc), key=keyfunc):
+    for cat, afils in groupby(sorted(affiliations.values(), key=keyfunc), key=keyfunc):
 
         afils = list(afils)
         print('B1'*10)
