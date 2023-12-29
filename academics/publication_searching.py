@@ -352,7 +352,7 @@ def by_acknowledge_status(publications):
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
     )
 
-    # logging.getLogger('query').warn(q)
+    logging.getLogger('query').warn(q)
 
     return db.session.execute(q).mappings().all()
 
