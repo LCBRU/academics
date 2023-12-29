@@ -594,5 +594,4 @@ def save_publications(new_pubs):
 
         db.session.add(cat_pub)
         db.session.add(pub)
-        # db.session.add_all(catalog_publication_sources)
         db.session.commit()
