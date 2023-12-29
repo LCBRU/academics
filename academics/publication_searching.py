@@ -2,7 +2,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, CatalogPublicationsSources, Folder, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Subtype, Theme, CatalogPublication
+from academics.model import Academic, CatalogPublicationsSources, Folder, Journal, Keyword, NihrAcknowledgement, Publication, Source, Subtype, Theme, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField

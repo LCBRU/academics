@@ -4,7 +4,7 @@ from flask import current_app
 from sqlalchemy import select
 from academics.catalogs.open_alex import get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.utils import CatalogReference
-from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
+from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, Journal, Keyword, NihrAcknowledgement, Publication, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
 from academics.publication_searching import ValidationSearchForm, publication_search_query
 from .scopus import get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
@@ -565,15 +565,6 @@ def save_publications(new_pubs):
         cat_pub.subtype_id = subtype_xref[cpr]
         cat_pub.sponsors = sponsor_xref[cpr]
         cat_pub.keywords = keyword_xref[cpr]
-
-        publication_sources = [
-            PublicationsSources(
-                source_id=s.id,
-                publication_id=pub.id,
-                ordinal=i,
-            ) 
-            for i, s in enumerate(source_xref[cpr])
-        ]
 
         catalog_publication_sources = [
             CatalogPublicationsSources(
