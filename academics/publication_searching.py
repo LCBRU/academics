@@ -261,7 +261,7 @@ def get_publication_by_theme(search_form):
     ).join(
         CatalogPublication, CatalogPublication.id == cat_pubs.c.id
     ).join(
-        CatalogPublicationsSources, CatalogPublicationsSources.catalog_publication_id == CatalogPublication.id
+        CatalogPublication.catalog_publication_sources
     ).join(
         CatalogPublicationsSources.source
     ).join(
