@@ -261,8 +261,6 @@ def publication_summary(search_form):
 def get_publication_by_theme(search_form):
     publications = publication_search_query(search_form).alias()
 
-    logging.getLogger('query').warn(publications)
-
     pub_themes = select(
         publications.c.id.label('publication_id'),
         Theme.name.label('bucket')
@@ -349,6 +347,8 @@ def by_acknowledge_status(publications):
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
     )
+
+    logging.getLogger('query').warn(q)
 
     return db.session.execute(q).mappings().all()
 
