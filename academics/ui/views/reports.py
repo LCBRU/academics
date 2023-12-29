@@ -50,15 +50,6 @@ def get_report_defs(search_form):
 
         q = (
             select(distinct(Academic.id).label('academic_id'))
-            .select_from(
-                publications
-            ).join(
-                CatalogPublication.catalog_publication_sources
-            ).join(
-                CatalogPublicationsSources.source
-            ).join(
-                Source.academic
-            )
         )
 
         for a in db.session.execute(q).mappings().all():
