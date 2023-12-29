@@ -135,7 +135,7 @@ def publication_search_query(search_form):
 
     bcp = best_catalog_publications()
 
-    q = select(Publication).join(
+    q = select(Publication, CatalogPublication).join(
         bcp, bcp.c.id == Publication.id
     ).join(
         CatalogPublication, CatalogPublication.id == bcp.c.id
