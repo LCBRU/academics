@@ -231,6 +231,9 @@ def publication_search_query(search_form):
 
     logging.info(f'publication_search_query ended')
 
+
+    logging.getLogger('query').warn(q)
+
     return q
 
 
