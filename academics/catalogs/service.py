@@ -424,7 +424,13 @@ def _get_keyword_xref(publication_datas):
 def _get_affiliation_xref(author_datas):
     logging.debug('_get_affiliation_xref: started')
 
+    print('A'*10)
+    print(author_datas)
+
     affiliations = {CatalogReference(af) for af in chain.from_iterable([a.affiliations for a in author_datas])}
+
+    print('B'*10)
+    print(affiliations)
 
     xref = {}
 
@@ -450,10 +456,19 @@ def _get_affiliation_xref(author_datas):
             for a in affiliations if CatalogReference(a) not in xref.keys()
         ]
 
+        print('C'*10)
+        print(new_affiliations)
+
         db.session.add_all(new_affiliations)
         db.session.commit()
 
         xref = xref | {CatalogReference(a): a for a in new_affiliations}
+
+        print('D'*10)
+        print(xref)
+
+    print('E'*10)
+    print(xref)
 
     return {
         CatalogReference(a): [xref[CatalogReference(af)] for af in a.affiliations]
