@@ -101,7 +101,7 @@ def report_image():
     if search_form.measure.data == 'Percentage':
         bc.value_formatter = lambda x: f'{x}%'
 
-    return bc.send_as_attachment()
+    return bc.send()
 
 
 @blueprint.route("/academics/export/csv")
