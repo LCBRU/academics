@@ -131,6 +131,10 @@ def publication_search_query(search_form):
 
     bcp = best_catalog_publications()
 
+    logging.getLogger('query').warn(bcp)
+
+    return None
+
     q = select(CatalogPublication).select_from(bcp).join(CatalogPublication.publication)
 
     logging.getLogger('query').warn(q)
