@@ -147,16 +147,16 @@ def publication_search_query(search_form):
         ))
 
     if search_form.has_value('academic_id'):
-        q = q.where(Publication.id.in_(
-            select(PublicationsSources.publication_id)
-            .join(PublicationsSources.source)
+        q = q.where(CatalogPublication.id.in_(
+            select(CatalogPublicationsSources.catalog_publication_id)
+            .join(CatalogPublicationsSources.source)
             .where(Source.academic_id == search_form.academic_id.data)
         ))
 
     if search_form.has_value('theme_id'):
-        q = q.where(Publication.id.in_(
-            select(PublicationsSources.publication_id)
-            .join(PublicationsSources.source)
+        q = q.where(CatalogPublication.id.in_(
+            select(CatalogPublicationsSources.catalog_publication_id)
+            .join(CatalogPublicationsSources.source)
             .join(Source.academic)
             .where(Academic.theme_id == search_form.theme_id.data)
         ))
