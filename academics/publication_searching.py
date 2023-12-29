@@ -133,15 +133,6 @@ def publication_search_query(search_form):
 
     q = select(CatalogPublication).where(CatalogPublication.id.in_(bcp))
 
-    logging.getLogger('query').warn(q)
-
-    # q = select(CatalogPublication).select_from(bcp.alias()).join(CatalogPublication.publication)
-
-    # logging.getLogger('query').warn(q)
-
-    return None
-
-
     if search_form.has_value('author_id'):
         q = q.where(CatalogPublication.catalog_publication_sources.any(
             CatalogPublicationsSources.source_id == search_form.author_id.data
@@ -231,6 +222,8 @@ def publication_search_query(search_form):
         ))
 
     logging.info(f'publication_search_query ended')
+
+    logging.getLogger('query').warn(q)
 
     return q
 
