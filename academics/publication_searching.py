@@ -135,7 +135,7 @@ def publication_search_query(search_form):
 
     bcp = best_catalog_publications()
 
-    q = select(Publication, CatalogPublication).join(
+    q = select(Publication).join(
         bcp, bcp.c.id == Publication.id
     ).join(
         CatalogPublication, CatalogPublication.id == bcp.c.id
@@ -264,6 +264,8 @@ def get_publication_by_theme(search_form):
     pub_themes = select(
         publications.c.id.label('publication_id'),
         Theme.name.label('bucket')
+    ).select_from(
+        publications
     ).join(
         CatalogPublicationsSources, CatalogPublicationsSources.catalog_publication_id == CatalogPublication.id
     ).join(
