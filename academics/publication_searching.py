@@ -126,6 +126,19 @@ def best_catalog_publications():
     )
 
 
+def publication_search_query(search_form):
+    cat_pubs = catalog_publication_search_query(search_form)
+
+    q = (
+        select(Publication)
+        .select_from(cat_pubs)
+        .join(CatalogPublication, CatalogPublication.id == cat_pubs.c.id)
+        .join(CatalogPublication.publication)
+        .distinct()
+    )
+
+    return q
+
 def catalog_publication_search_query(search_form):
     logging.info(f'publication_search_query started')
 
@@ -254,7 +267,7 @@ def get_publication_by_theme(search_form):
     cat_pubs = catalog_publication_search_query(search_form).alias()
 
     pub_themes = select(
-        cat_pubs.c.id.label('publication_id'),
+        CatalogPublication.publication_id,
         Theme.name.label('bucket')
     ).select_from(
         cat_pubs
@@ -269,8 +282,6 @@ def get_publication_by_theme(search_form):
     ).join(
         Academic.theme
     ).distinct()
-
-    logging.getLogger('query').warn(pub_themes)
 
     if search_form.has_value('theme_id'):
         pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
@@ -290,35 +301,36 @@ def get_publication_by_theme(search_form):
 
 
 def get_publication_by_academic(search_form):
-    publications = catalog_publication_search_query(search_form).alias()
+    cat_pubs = catalog_publication_search_query(search_form).alias()
 
     q = select(
-        publications.c.id.label('publication_id'),
+        CatalogPublication.publication_id,
         func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
+    ).select_from(
+        cat_pubs
+    ).join(
+        CatalogPublication, CatalogPublication.id == cat_pubs.c.id
     ).join(
         CatalogPublication.catalog_publication_sources
     ).join(
         CatalogPublicationsSources.source
     ).join(
         Source.academic
-    ).order_by(
+    ).distinct().order_by(
         Academic.last_name,
         Academic.first_name,
     )
-
-    if search_form.has_value('academic_id'):
-        q = q.where(Academic.id == search_form.academic_id.data)
     
     return q.cte()
 
 
 def get_publication_by_brc(search_form):
-    publications = catalog_publication_search_query(search_form).alias()
+    cat_pubs = catalog_publication_search_query(search_form).alias()
 
     return select(
-        publications.c.id.label('publication_id'),
+        CatalogPublication.publication_id,
         literal('brc').label('bucket')
-    ).cte()
+    ).where(CatalogPublication.id.in_(cat_pubs)).cte()
 
 
 def by_acknowledge_status(publications):
