@@ -582,8 +582,6 @@ def save_publications(new_pubs):
             for i, s in enumerate(source_xref[cpr])
         ]
 
-        print(affiliation_xref)
-
         catalog_publication_sources = [
             CatalogPublicationsSources(
                 source=s,
