@@ -450,6 +450,9 @@ def _get_affiliation_xref(author_datas):
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
 
+        print('B2'*10)
+        print(xref)
+
         new_affiliations = [
             Affiliation(
                 catalog=cat,
