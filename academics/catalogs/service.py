@@ -424,8 +424,10 @@ def _get_keyword_xref(publication_datas):
 def _get_affiliation_xref(author_datas):
     logging.debug('_get_affiliation_xref: started')
 
+    author_datas = list(author_datas)
+
     print('A'*10)
-    print(list(author_datas))
+    print(author_datas)
 
     affiliations = {CatalogReference(af) for af in chain.from_iterable([a.affiliations for a in author_datas])}
 
