@@ -126,12 +126,12 @@ def best_catalog_publications():
     )
 
 
-def publication_search_query(search_form):
+def catalog_publication_search_query(search_form):
     logging.info(f'publication_search_query started')
 
     bcp = best_catalog_publications()
 
-    q = select(CatalogPublication).join(CatalogPublication.publication).where(CatalogPublication.id.in_(bcp))
+    q = select(CatalogPublication.id).join(CatalogPublication.publication).where(CatalogPublication.id.in_(bcp))
 
     if search_form.has_value('author_id'):
         q = q.where(CatalogPublication.catalog_publication_sources.any(
@@ -227,7 +227,7 @@ def publication_search_query(search_form):
 
 
 def publication_count(search_form):
-    pubs = publication_search_query(search_form).alias()
+    pubs = catalog_publication_search_query(search_form).alias()
     q = select(func.count()).select_from(pubs)
     return db.session.execute(q).scalar()
 
@@ -251,13 +251,15 @@ def publication_summary(search_form):
 
 
 def get_publication_by_theme(search_form):
-    publications = publication_search_query(search_form).alias()
+    cat_pubs = catalog_publication_search_query(search_form).alias()
 
     pub_themes = select(
-        publications.c.id.label('publication_id'),
+        cat_pubs.c.id.label('publication_id'),
         Theme.name.label('bucket')
     ).select_from(
-        publications
+        cat_pubs
+    ).join(
+        CatalogPublication, CatalogPublication.id == cat_pubs.c.id
     ).join(
         CatalogPublicationsSources, CatalogPublicationsSources.catalog_publication_id == CatalogPublication.id
     ).join(
@@ -288,7 +290,7 @@ def get_publication_by_theme(search_form):
 
 
 def get_publication_by_academic(search_form):
-    publications = publication_search_query(search_form).alias()
+    publications = catalog_publication_search_query(search_form).alias()
 
     q = select(
         publications.c.id.label('publication_id'),
@@ -311,7 +313,7 @@ def get_publication_by_academic(search_form):
 
 
 def get_publication_by_brc(search_form):
-    publications = publication_search_query(search_form).alias()
+    publications = catalog_publication_search_query(search_form).alias()
 
     return select(
         publications.c.id.label('publication_id'),
@@ -342,8 +344,6 @@ def by_acknowledge_status(publications):
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
     )
-
-    logging.getLogger('query').warn(q)
 
     return db.session.execute(q).mappings().all()
 

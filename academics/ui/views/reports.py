@@ -8,7 +8,7 @@ from lbrc_flask.export import csv_download
 from sqlalchemy import select
 
 from academics.model import Academic, CatalogPublication, CatalogPublicationsSources, Publication, PublicationsSources, Source
-from academics.publication_searching import nihr_acknowledgement_select_choices, publication_count, publication_search_query, publication_summary, theme_select_choices
+from academics.publication_searching import nihr_acknowledgement_select_choices, publication_count, catalog_publication_search_query, publication_summary, theme_select_choices
 
 from .. import blueprint
 
@@ -46,7 +46,7 @@ def get_report_defs(search_form):
     report_defs = []
 
     if search_form.total.data == 'Academic':
-        publications = publication_search_query(search_form).alias()
+        publications = catalog_publication_search_query(search_form).alias()
 
         q = (
             select(distinct(Academic.id).label('academic_id'))

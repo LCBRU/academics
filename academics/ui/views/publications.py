@@ -16,7 +16,7 @@ from academics.model import (CatalogPublication, Folder, Journal, Keyword,
                              NihrAcknowledgement, Publication, Source, Sponsor,
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
-from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
+from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query
 from sqlalchemy import select, func, and_
 
 from .. import blueprint
@@ -36,7 +36,7 @@ class PublicationFolderForm(FlashingForm):
 def publications():
     search_form = PublicationSearchForm(formdata=request.args)
     
-    q = publication_search_query(search_form)
+    q = catalog_publication_search_query(search_form)
 
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
@@ -73,7 +73,7 @@ def validation():
     search_form = ValidationSearchForm(theme_id=current_user.theme_id, formdata=request.args)
     search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     
-    q = publication_search_query(search_form)
+    q = catalog_publication_search_query(search_form)
 
     q = q.order_by(CatalogPublication.publication_cover_date.asc())
 
@@ -138,7 +138,7 @@ def publication_full_export_xlsx():
 
     search_form = PublicationSearchForm(formdata=request.args)
 
-    q = publication_search_query(search_form)
+    q = catalog_publication_search_query(search_form)
     q = q.join(CatalogPublication.journal, isouter=True)
     q = q.join(CatalogPublication.subtype, isouter=True)
     q = q.join(Publication.sponsors, isouter=True)
@@ -192,7 +192,7 @@ def publication_full_annual_report_xlsx():
 
     search_form = PublicationSearchForm(formdata=request.args)
 
-    q = publication_search_query(search_form)
+    q = catalog_publication_search_query(search_form)
     q = q.join(CatalogPublication.journal, isouter=True)
 
     q = q.with_only_columns(
@@ -226,7 +226,7 @@ def publication_full_annual_report_xlsx():
 def publication_export_pdf():
     search_form = PublicationSearchForm(formdata=request.args)
     
-    q = publication_search_query(search_form)
+    q = catalog_publication_search_query(search_form)
 
     parameters = []
 

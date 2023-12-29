@@ -6,7 +6,7 @@ from academics.catalogs.open_alex import get_open_alex_author_data, get_open_ale
 from academics.catalogs.utils import CatalogReference
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Sponsor, Subtype, Affiliation
 from lbrc_flask.celery import celery
-from academics.publication_searching import ValidationSearchForm, publication_search_query
+from academics.publication_searching import ValidationSearchForm, catalog_publication_search_query
 from .scopus import get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
@@ -26,7 +26,7 @@ def auto_validate():
     form.supress_validation_historic.data = False
     form.nihr_acknowledgement_id.data = -1
 
-    q = publication_search_query(form)
+    q = catalog_publication_search_query(form)
 
     amended_count = 0
 
