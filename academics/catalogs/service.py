@@ -439,6 +439,8 @@ def _get_affiliation_xref(author_datas):
     keyfunc = lambda a: a.catalog
 
     for cat, afils in groupby(sorted(affiliations, key=keyfunc), key=keyfunc):
+
+        afils = list(afils)
         print('B1'*10)
         print(list(afils))
         print([a.catalog_identifier for a in afils])
