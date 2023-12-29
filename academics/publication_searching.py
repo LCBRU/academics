@@ -320,6 +320,9 @@ def get_publication_by_academic(search_form):
         Academic.last_name,
         Academic.first_name,
     )
+
+    if search_form.has_value('academic_id'):
+        q = q.where(Academic.id == search_form.academic_id.data)
     
     return q.cte()
 
