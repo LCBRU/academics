@@ -426,13 +426,7 @@ def _get_affiliation_xref(author_datas):
 
     author_datas = list(author_datas)
 
-    print('A'*10)
-    print(author_datas)
-
     affiliations = {CatalogReference(af): af for af in chain.from_iterable([a.affiliations for a in author_datas])}
-
-    print('B'*10)
-    print(affiliations)
 
     xref = {}
 
@@ -441,9 +435,6 @@ def _get_affiliation_xref(author_datas):
     for cat, afils in groupby(sorted(affiliations.values(), key=keyfunc), key=keyfunc):
 
         afils = list(afils)
-        print('B1'*10)
-        print(list(afils))
-        print([a.catalog_identifier for a in afils])
 
         q = select(Affiliation).where(
             Affiliation.catalog_identifier.in_([a.catalog_identifier for a in afils])
@@ -452,9 +443,6 @@ def _get_affiliation_xref(author_datas):
         )
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
-
-        print('B2'*10)
-        print(xref)
 
         new_affiliations = [
             Affiliation(
@@ -467,19 +455,10 @@ def _get_affiliation_xref(author_datas):
             for a in afils if CatalogReference(a) not in xref.keys()
         ]
 
-        print('C'*10)
-        print(new_affiliations)
-
         db.session.add_all(new_affiliations)
         db.session.commit()
 
         xref = xref | {CatalogReference(a): a for a in new_affiliations}
-
-        print('D'*10)
-        print(xref)
-
-    print('E'*10)
-    print(xref)
 
     return {
         CatalogReference(a): [xref[CatalogReference(af)] for af in a.affiliations]
