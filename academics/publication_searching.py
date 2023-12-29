@@ -327,6 +327,8 @@ def get_publication_by_brc(search_form):
 
 
 def by_acknowledge_status(publications):
+    logging.getLogger('query').warn(q_total)
+
     q_total = (
         select(
             publications.c.bucket,
