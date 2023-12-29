@@ -582,22 +582,6 @@ class CatalogPublication(db.Model, AuditMixin):
     authors: AssociationProxy[List[Source]] = association_proxy("catalog_publication_sources", "source")
 
 
-class PublicationsSources(db.Model):
-    publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id), primary_key=True)
-    source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), primary_key=True)
-    ordinal: Mapped[int] = mapped_column(primary_key=True)
-
-    publication: Mapped[Publication] = relationship(
-        backref=backref(
-            "publication_sources",
-            order_by="PublicationsSources.ordinal",
-            collection_class=ordering_list('ordinal'),
-            cascade="all, delete, delete-orphan",
-        ),
-    )
-    source: Mapped[Source] = relationship()
-
-
 catalog_publications_sources_affiliations = db.Table(
     'catalog_publications_sources__affiliations',
     db.Column(
