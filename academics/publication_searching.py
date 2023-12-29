@@ -131,7 +131,7 @@ def publication_search_query(search_form):
 
     bcp = best_catalog_publications()
 
-    q = select(CatalogPublication).select_from(bcp.alias())
+    q = select(CatalogPublication).where(CatalogPublication.id.in_(bcp.c.id))
 
     logging.getLogger('query').warn(q)
 
