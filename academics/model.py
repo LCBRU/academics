@@ -102,8 +102,9 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def publication_count(self):
         q =  (
             select(func.count(distinct(Publication.id)))
-            .join(Publication.publication_sources)
-            .join(PublicationsSources.source)
+            .join(Publication.catalog_publications)
+            .join(CatalogPublication.catalog_publication_sources)
+            .join(CatalogPublicationsSources.source)
             .where(Source.academic_id == self.id)
         )
 
@@ -171,8 +172,10 @@ class Source(AuditMixin, CommonMixin, db.Model):
     @property
     def publication_count(self):
         q =  (
-            select(func.count(Publication.id))
-            .where(Publication.publication_sources.any(PublicationsSources.source_id == self.id))
+            select(func.count(distinct(Publication.id)))
+            .join(Publication.catalog_publications)
+            .join(CatalogPublication.catalog_publication_sources)
+            .where(CatalogPublicationsSources.source_id == self.id)
         )
 
         return db.session.execute(q).scalar()
@@ -390,8 +393,6 @@ class Publication(db.Model, AuditMixin):
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
 
-    authors: AssociationProxy[List[Source]] = association_proxy("publication_sources", "source")
-
     keywords = db.relationship("Keyword", lazy="joined", secondary=publications__keywords, back_populates="publicationses", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__publications, back_populates="publicationses", collection_class=set)
     sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__publications, back_populates="publicationses", collection_class=set)
@@ -485,6 +486,10 @@ class Publication(db.Model, AuditMixin):
         return self.best_catalog_publication.subtype
 
     @property
+    def authors(self) -> Subtype:
+        return self.best_catalog_publication.authors
+
+    @property
     def issue_volume(self):
         return '/'.join(filter(None, [self.issue, self.volume]))
 
@@ -494,7 +499,6 @@ class Publication(db.Model, AuditMixin):
             return f'pp{self.pages}'
         else:
             return ''
-
 
     def set_vancouver(self):
         author_list = ', '.join([a.reference_name for a in self.authors[0:6]])
@@ -519,7 +523,6 @@ class Publication(db.Model, AuditMixin):
         parts.append(f'({self.publication_cover_date:%B %y}{issue_volume}{pp})')
 
         self.vancouver = '. '.join(parts)
-
 
     @property
     def folder_ids(self):
@@ -575,6 +578,8 @@ class CatalogPublication(db.Model, AuditMixin):
 
     subtype_id = mapped_column(ForeignKey(Subtype.id))
     subtype: Mapped[Subtype] = relationship(lazy="joined")
+
+    authors: AssociationProxy[List[Source]] = association_proxy("catalog_publication_sources", "source")
 
 
 class PublicationsSources(db.Model):

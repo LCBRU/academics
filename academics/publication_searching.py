@@ -2,7 +2,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, Folder, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Subtype, Theme, CatalogPublication
+from academics.model import Academic, CatalogPublicationsSources, Folder, Journal, Keyword, NihrAcknowledgement, Publication, PublicationsSources, Source, Subtype, Theme, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from sqlalchemy import literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
@@ -142,8 +142,8 @@ def publication_search_query(search_form):
     )
 
     if search_form.has_value('author_id'):
-        q = q.where(Publication.publication_sources.any(
-            PublicationsSources.source_id == search_form.author_id.data
+        q = q.where(CatalogPublication.catalog_publication_sources.any(
+            CatalogPublicationsSources.source_id == search_form.author_id.data
         ))
 
     if search_form.has_value('academic_id'):
@@ -265,11 +265,9 @@ def get_publication_by_theme(search_form):
         publications.c.id.label('publication_id'),
         Theme.name.label('bucket')
     ).join(
-        Publication, Publication.id == publications.c.id
+        CatalogPublication.catalog_publication_sources
     ).join(
-        Publication.publication_sources
-    ).join(
-        PublicationsSources.source
+        CatalogPublicationsSources.source
     ).join(
         Source.academic
     ).join(
