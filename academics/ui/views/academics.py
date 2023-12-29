@@ -4,7 +4,7 @@ from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField
 from academics.catalogs.scopus import scopus_author_search
-from academics.catalogs.service import add_sources_to_academic, delete_orphan_publications, refresh, update_academics, update_single_academic, updating
+from academics.catalogs.service import add_sources_to_academic, refresh, update_academics, update_single_academic, updating
 from academics.model import Academic, AcademicPotentialSource, Source, Theme
 from wtforms.validators import Length
 from .. import blueprint
@@ -162,8 +162,6 @@ def delete_academic():
         db.session.delete(a)
         db.session.commit()
 
-        delete_orphan_publications()
-
     return redirect(url_for('ui.index'))
 
 
@@ -175,8 +173,6 @@ def delete_author():
         s = db.get_or_404(Source, form.id.data)
         db.session.delete(s)
         db.session.commit()
-
-        delete_orphan_publications()
 
     return redirect(url_for('ui.index'))
 
