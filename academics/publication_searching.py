@@ -133,7 +133,7 @@ def publication_search_query(search_form):
 
     q = select(CatalogPublication).select_from(bcp).join(CatalogPublication.publication)
 
-    print(q)
+    logging.getLogger('query').warn(q)
 
     return None
 
