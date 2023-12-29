@@ -332,7 +332,6 @@ def by_acknowledge_status(publications):
             publications.c.bucket,
             func.count().label('total_count'),
         )
-        .select_from(publications)
         .group_by(publications.c.bucket)
     ).alias()
 
