@@ -439,21 +439,21 @@ def _get_affiliation_xref(author_datas):
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
 
-    new_affiliations = [
-        Affiliation(
-            catalog=cat,
-            catalog_identifier=a.affiliation_identifier,
-            name=a.affiliation_name,
-            address=a.affiliation_address,
-            country=a.affiliation_country,
-        )
-        for a in affiliations if CatalogReference(a) not in xref.keys()
-    ]
+        new_affiliations = [
+            Affiliation(
+                catalog=cat,
+                catalog_identifier=a.affiliation_identifier,
+                name=a.affiliation_name,
+                address=a.affiliation_address,
+                country=a.affiliation_country,
+            )
+            for a in affiliations if CatalogReference(a) not in xref.keys()
+        ]
 
-    db.session.add_all(new_affiliations)
-    db.session.commit()
+        db.session.add_all(new_affiliations)
+        db.session.commit()
 
-    xref = xref | {CatalogReference(a): a for a in new_affiliations}
+        xref = xref | {CatalogReference(a): a for a in new_affiliations}
 
     return {
         CatalogReference(a): [xref[CatalogReference(af)] for af in a.affiliations]
