@@ -440,7 +440,7 @@ def _get_affiliation_xref(author_datas):
 
     for cat, affiliations in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
         print('B1'*10)
-        print(affiliations)
+        print(list(affiliations))
 
         q = select(Affiliation).where(
             Affiliation.catalog_identifier.in_([a.catalog_identifier for a in affiliations])
