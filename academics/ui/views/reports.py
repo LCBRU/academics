@@ -83,12 +83,10 @@ def report_image():
     if search_form.measure.data == 'Publications':
         title += " Count"
         y_title = 'Publications'
-        show_total = True
     else:
         title += " Percentage"
         y_title = 'Percentage'
-        show_total = False
-    
+
     c = publication_count(search_form)
 
     bc: BarChart = BarChart(
