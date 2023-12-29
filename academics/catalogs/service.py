@@ -429,7 +429,7 @@ def _get_affiliation_xref(author_datas):
     print('A'*10)
     print(author_datas)
 
-    affiliations = {CatalogReference(af) for af in chain.from_iterable([a.affiliations for a in author_datas])}
+    affiliations = {af for af in chain.from_iterable([a.affiliations for a in author_datas])}
 
     print('B'*10)
     print(affiliations)
@@ -459,7 +459,7 @@ def _get_affiliation_xref(author_datas):
         new_affiliations = [
             Affiliation(
                 catalog=cat,
-                catalog_identifier=a.affiliation_identifier,
+                catalog_identifier=a.catalog_identifier,
                 name=a.affiliation_name,
                 address=a.affiliation_address,
                 country=a.affiliation_country,
