@@ -114,17 +114,13 @@ class ValidationSearchForm(SearchForm):
 def best_catalog_publications():
     catalog_publications = (
         select(
-            CatalogPublication.id.label('id'),
-            CatalogPublication.publication_id.label('publication_id'),
+            CatalogPublication,
             func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
         )
     ).alias()
 
     return (
-        select(
-            catalog_publications.c.id,
-            catalog_publications.c.publication_id,
-        )
+        select(CatalogPublication)
         .select_from(catalog_publications)
         .where(catalog_publications.c.priority == 1)
     ).alias()
@@ -135,11 +131,7 @@ def publication_search_query(search_form):
 
     bcp = best_catalog_publications()
 
-    q = select(Publication).join(
-        bcp, bcp.c.id == Publication.id
-    ).join(
-        CatalogPublication, CatalogPublication.id == bcp.c.id
-    )
+    q = select(CatalogPublication).select_from(bcp)
 
     if search_form.has_value('author_id'):
         q = q.where(CatalogPublication.catalog_publication_sources.any(
