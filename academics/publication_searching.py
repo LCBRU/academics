@@ -133,6 +133,11 @@ def publication_search_query(search_form):
 
     q = select(CatalogPublication).select_from(bcp).join(CatalogPublication.publication)
 
+    print(q)
+
+    return None
+
+
     if search_form.has_value('author_id'):
         q = q.where(CatalogPublication.catalog_publication_sources.any(
             CatalogPublicationsSources.source_id == search_form.author_id.data
