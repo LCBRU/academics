@@ -261,7 +261,7 @@ def publication_summary(search_form):
 def get_publication_by_theme(search_form):
     publications = publication_search_query(search_form).alias()
 
-    print(publications)
+    logging.getLogger('query').warn(publications)
 
     pub_themes = select(
         publications.c.id.label('publication_id'),
