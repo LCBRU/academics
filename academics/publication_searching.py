@@ -114,16 +114,16 @@ class ValidationSearchForm(SearchForm):
 def best_catalog_publications():
     catalog_publications = (
         select(
-            CatalogPublication,
+            CatalogPublication.id,
             func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
         )
     ).alias()
 
     return (
-        select(CatalogPublication)
+        select(catalog_publications.c.id)
         .select_from(catalog_publications)
         .where(catalog_publications.c.priority == 1)
-    ).alias()
+    )
 
 
 def publication_search_query(search_form):
@@ -135,7 +135,7 @@ def publication_search_query(search_form):
 
     return None
 
-    q = select(CatalogPublication).select_from(bcp).join(CatalogPublication.publication)
+    q = select(CatalogPublication).select_from(bcp.alias()).join(CatalogPublication.publication)
 
     logging.getLogger('query').warn(q)
 
