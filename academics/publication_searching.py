@@ -231,9 +231,6 @@ def publication_search_query(search_form):
 
     logging.info(f'publication_search_query ended')
 
-
-    logging.getLogger('query').warn(q)
-
     return q
 
 
@@ -268,7 +265,7 @@ def get_publication_by_theme(search_form):
         publications.c.id.label('publication_id'),
         Theme.name.label('bucket')
     ).join(
-        CatalogPublication.catalog_publication_sources
+        CatalogPublicationsSources, CatalogPublicationsSources.catalog_publication_id == CatalogPublication.id
     ).join(
         CatalogPublicationsSources.source
     ).join(
@@ -276,6 +273,8 @@ def get_publication_by_theme(search_form):
     ).join(
         Academic.theme
     ).distinct()
+
+    logging.getLogger('query').warn(pub_themes)
 
     if search_form.has_value('theme_id'):
         pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
@@ -327,8 +326,6 @@ def get_publication_by_brc(search_form):
 
 
 def by_acknowledge_status(publications):
-    logging.getLogger('query').warn(q_total)
-
     q_total = (
         select(
             publications.c.bucket,
@@ -336,8 +333,6 @@ def by_acknowledge_status(publications):
         )
         .group_by(publications.c.bucket)
     ).alias()
-
-    logging.getLogger('query').warn(q_total)
 
     q = (
         select(
