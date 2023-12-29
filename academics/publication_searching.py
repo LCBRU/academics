@@ -131,7 +131,7 @@ def publication_search_query(search_form):
 
     bcp = best_catalog_publications()
 
-    q = select(CatalogPublication).where(CatalogPublication.id.in_(bcp))
+    q = select(CatalogPublication).join(CatalogPublication.publication).where(CatalogPublication.id.in_(bcp))
 
     if search_form.has_value('author_id'):
         q = q.where(CatalogPublication.catalog_publication_sources.any(
