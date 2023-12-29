@@ -128,7 +128,6 @@ def _process_updates():
 
         db.session.commit()
 
-    delete_orphan_publications()
     auto_validate()
 
     logging.debug('_process_updates: Ended')
@@ -305,12 +304,6 @@ def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None)
     db.session.commit()
 
     _process_updates.delay()
-
-
-def delete_orphan_publications():
-    for p in Publication.query.filter(~Publication.publication_sources.any()):
-        db.session.delete(p)
-        db.session.commit()
 
 
 def _get_journal_xref(publication_datas):
