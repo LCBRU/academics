@@ -616,7 +616,7 @@ class CatalogPublicationsSources(db.Model):
     source_id: Mapped[int] = mapped_column(ForeignKey(Source.id), index=True)
     ordinal: Mapped[int] = mapped_column()
 
-    publication: Mapped[CatalogPublication] = relationship(
+    catalog_publication: Mapped[CatalogPublication] = relationship(
         backref=backref(
             "catalog_publication_sources",
             order_by="CatalogPublicationsSources.ordinal",
