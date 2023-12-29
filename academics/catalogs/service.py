@@ -425,7 +425,7 @@ def _get_affiliation_xref(author_datas):
     logging.debug('_get_affiliation_xref: started')
 
     print('A'*10)
-    print(author_datas)
+    print(list(author_datas))
 
     affiliations = {CatalogReference(af) for af in chain.from_iterable([a.affiliations for a in author_datas])}
 
