@@ -76,7 +76,7 @@ def update_academics():
     logging.debug('update_academics: started')
     if not updating():
         for academic in Academic.query.all():
-            logging.info(f'Setting academic {academic.full_name} to be updated')
+            logging.debug(f'Setting academic {academic.full_name} to be updated')
 
             academic.mark_for_update()
 
@@ -265,7 +265,7 @@ def _ensure_all_academic_sources_are_proposed(academic):
         .where(Source.academic == academic)
     ).scalars())
 
-    logging.info(f'Missing proposed sources found: {missing_proposed_sources}')
+    logging.debug(f'Missing proposed sources found: {missing_proposed_sources}')
 
     for source in missing_proposed_sources:
         aps = AcademicPotentialSource(
