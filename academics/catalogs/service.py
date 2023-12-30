@@ -601,8 +601,8 @@ def save_publications(new_pubs):
         cat_pub.cited_by_count = p.cited_by_count
         cat_pub.journal_id = journal_xref[cpr]
         cat_pub.subtype_id = subtype_xref[cpr]
-        cat_pub.sponsors = sponsor_xref[cpr]
-        cat_pub.keywords = keyword_xref[cpr]
+        cat_pub.sponsors = set(sponsor_xref[cpr])
+        cat_pub.keywords = set(keyword_xref[cpr])
 
         catalog_publication_sources = [
             CatalogPublicationsSources(
