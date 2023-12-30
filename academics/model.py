@@ -1,4 +1,5 @@
 from datetime import date
+import logging
 from typing import List
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
@@ -505,6 +506,10 @@ class Publication(db.Model, AuditMixin):
             return ''
 
     def set_vancouver(self):
+        if not self.best_catalog_publication:
+            logging.warn(f'No best catalog publication for publication {self.id}')
+            return
+
         author_list = ', '.join([a.reference_name for a in self.authors[0:6]])
 
         if len(self.authors) > 6:

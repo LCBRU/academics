@@ -326,7 +326,7 @@ class Author(ElsAuthor):
                 self.href = h['@href']
 
     def _set_initials(self):
-        self.initials = self.data.get(u'author-profile', {}).get(u'preferred-name').get(u'initials', '')
+        self.initials = self.data.get(u'author-profile', {}).get(u'preferred-name', {}).get(u'initials', '')
 
     def _set_citation_count(self):
         self.citation_count = self.data.get(u'coredata', {}).get(u'citation-count', '')
