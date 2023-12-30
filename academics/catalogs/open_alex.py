@@ -1,11 +1,10 @@
 from collections.abc import Mapping
-import json
 import pyalex
 import logging
 
 from datetime import date
 from sqlalchemy import select
-from academics.catalogs.utils import AffiliationData, AuthorData, PublicationData
+from academics.catalogs.data_classes import AffiliationData, AuthorData, PublicationData
 from academics.config import Config
 from pyalex import Authors, Works, Institutions
 from itertools import chain

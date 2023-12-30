@@ -7,7 +7,7 @@ import re
 import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.catalogs.utils import AffiliationData, AuthorData, PublicationData
+from academics.catalogs.data_classes import AffiliationData, AuthorData, PublicationData
 from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
