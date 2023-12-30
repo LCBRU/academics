@@ -395,7 +395,7 @@ def _get_publication_xref(publication_datas):
             CatalogPublication.catalog == cat
         ).distinct()
 
-        xref = xref | {CatalogReference(cp): cp.publication for cp in db.session.execute(q).scalars()}
+        xref = xref | {CatalogReference(cp): cp.publication for cp in db.session.execute(q).unique().scalars()}
 
     new_pubs = {CatalogReference(p): Publication() for p in publication_datas if CatalogReference(p) not in xref.keys()}
 
