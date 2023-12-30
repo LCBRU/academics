@@ -243,23 +243,9 @@ class Journal(db.Model):
 
 
 
-publications__keywords = db.Table(
-    'publication__keyword',
-    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
-    db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
-)
-
-
 folders__publications = db.Table(
     'folders__publications',
     db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
-    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
-)
-
-
-sponsors__publications = db.Table(
-    'sponsors__publications',
-    db.Column('sponsor_id', db.Integer(), db.ForeignKey('sponsor.id'), primary_key=True),
     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
 )
 
@@ -315,7 +301,6 @@ class Sponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
 
-    publicationses = db.relationship("Publication", secondary=sponsors__publications, back_populates="sponsors", collection_class=set)
     catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_sponsors, back_populates="sponsors", collection_class=set)
 
     @property
@@ -360,7 +345,6 @@ class Keyword(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     keyword = db.Column(db.String(1000))
 
-    publicationses = db.relationship("Publication", secondary=publications__keywords, back_populates="keywords", collection_class=set)
     catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_keywords, back_populates="keywords", collection_class=set)
 
 
@@ -407,9 +391,15 @@ class Publication(db.Model, AuditMixin):
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
 
-    keywords = db.relationship("Keyword", lazy="joined", secondary=publications__keywords, back_populates="publicationses", collection_class=set)
     folders = db.relationship("Folder", lazy="joined", secondary=folders__publications, back_populates="publicationses", collection_class=set)
-    sponsors = db.relationship("Sponsor", lazy="joined", secondary=sponsors__publications, back_populates="publicationses", collection_class=set)
+
+    @property
+    def sponsors(self):
+        return self.best_catalog_publication.sponsors
+
+    @property
+    def keywords(self):
+        return self.best_catalog_publication.keywords
 
     @property
     def scopus_catalog_publication(self):
