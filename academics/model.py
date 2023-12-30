@@ -77,12 +77,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     def ensure_initialisation(self):
         if self.best_source.last_name:
-            self.first_name = self.best_source.first_name
-            self.last_name = self.best_source.last_name
+            self.first_name = self.best_source.first_name or ''
+            self.last_name = self.best_source.last_name or ''
         elif self.best_source.display_name:
             parts = self.best_source.display_name.strip().rsplit(maxsplit=1)
-            self.first_name = parts[0]
-            self.last_name = parts[-1]
+            self.first_name = parts[0] or ''
+            self.last_name = parts[-1] or ''
 
     @property
     def orcid_link(self):
