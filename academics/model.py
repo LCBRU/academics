@@ -264,6 +264,20 @@ sponsors__publications = db.Table(
 )
 
 
+catalog_publications_sponsors = db.Table(
+    'catalog_publications_sponsors',
+    db.Column('sponsor_id', db.Integer(), db.ForeignKey('sponsor.id'), primary_key=True),
+    db.Column('catalog_publication_id', db.Integer(), db.ForeignKey('catalog_publication.id'), primary_key=True),
+)
+
+
+catalog_publications_keywords = db.Table(
+    'catalog_publication__keyword',
+    db.Column('catalog_publication_id', db.Integer(), db.ForeignKey('catalog_publication.id'), primary_key=True),
+    db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
+)
+
+
 sources__affiliations = db.Table(
     'sources__affiliations',
     db.Column(
@@ -578,6 +592,8 @@ class CatalogPublication(db.Model, AuditMixin):
     subtype: Mapped[Subtype] = relationship(lazy="joined")
 
     authors: AssociationProxy[List[Source]] = association_proxy("catalog_publication_sources", "source")
+    sponsors = db.relationship("Sponsor", lazy="joined", secondary=catalog_publications_sponsors, back_populates="catalog_publications", collection_class=set)
+    keywords = db.relationship("Keyword", lazy="joined", secondary=catalog_publications_keywords, back_populates="catalog_publications", collection_class=set)
 
 
 catalog_publications_sources_affiliations = db.Table(
