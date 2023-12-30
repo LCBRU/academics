@@ -41,6 +41,7 @@ class Affiliation(db.Model):
     name = db.Column(db.String(1000))
     address = db.Column(db.String(1000))
     country = db.Column(db.String(100))
+    refresh_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     @property
     def line_summary(self):
