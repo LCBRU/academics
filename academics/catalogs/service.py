@@ -414,14 +414,14 @@ def _get_sponsor_xref(publication_datas):
 
     q = select(Sponsor.id, Sponsor.name).where(Sponsor.name.in_(names))
 
-    xref = {p['name'].lower(): p['id'] for p in db.session.execute(q).mappings()}
+    xref = {s['name'].lower(): s for s in db.session.execute(q).mappings()}
 
     new_sponsors = [Sponsor(name=n) for n in names - xref.keys()]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
 
-    xref = xref | {s.name.lower(): s.id for s in new_sponsors}
+    xref = xref | {s.name.lower(): s for s in new_sponsors}
 
     return {
         CatalogReference(p): [xref[n.lower()] for n in p.funding_list if n]
