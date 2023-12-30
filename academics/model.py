@@ -316,6 +316,7 @@ class Sponsor(db.Model):
     name = db.Column(db.String(255))
 
     publicationses = db.relationship("Publication", secondary=sponsors__publications, back_populates="sponsors", collection_class=set)
+    catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_sponsors, back_populates="sponsors", collection_class=set)
 
     @property
     def is_nihr(self):
@@ -360,6 +361,7 @@ class Keyword(db.Model):
     keyword = db.Column(db.String(1000))
 
     publicationses = db.relationship("Publication", secondary=publications__keywords, back_populates="keywords", collection_class=set)
+    catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_keywords, back_populates="keywords", collection_class=set)
 
 
 folders__shared_users = db.Table(
