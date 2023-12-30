@@ -152,3 +152,9 @@ class AffiliationData():
     def summary(self):
         return ', '.join(filter(None, [self.name, self.address, self.country]))
 
+    def update_affiliation(self, affiliation):
+        affiliation.catalog_identifier = self.catalog_identifier
+        affiliation.catalog = self.catalog
+        affiliation.name = self.name
+        affiliation.address = self.address
+        affiliation.country = self.country

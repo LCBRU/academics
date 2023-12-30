@@ -223,6 +223,18 @@ def get_scopus_author_data(identifier, get_extended_details=False):
     return result.get_data()
 
 
+def get_scopus_affiliation_data(identifier):
+    logging.debug(f'Getting Scopus Affiliation Data {identifier}')
+
+    if not current_app.config['SCOPUS_ENABLED']:
+        logging.warn('SCOPUS Not Enabled')
+        return None
+
+    result = ScopusAffiliation(identifier)
+
+    return result.get_data()
+
+
 def scopus_similar_authors(academic: Academic):
     return scopus_author_search(academic.last_name)
 
@@ -449,6 +461,15 @@ class ScopusAffiliation(ElsAffil):
             return self.data.get(u'country', '')
         else:
             return ''
+
+    def get_data(self):
+        return AffiliationData(
+            catalog=CATALOG_SCOPUS,
+            catalog_identifier=self.affiliation_id,
+            name=self.name,
+            address=self.address,
+            country=self.country,
+        )
 
 
 class Abstract(AbsDoc):
