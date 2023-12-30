@@ -86,11 +86,11 @@ class AuthorData():
 
     @property
     def is_leicester(self):
-        return 'leicester' in self.affiliation_summary.lower()
+        return any([a.is_leicester for a in self.affiliations])
 
     @property
     def affiliation_summary(self):
-        return ', '.join(filter(None, [self.affiliation_name, self.affiliation_address, self.affiliation_country]))
+        return '; '.join(a.summary for a in self.affiliations)
 
     def get_new_source(self):
         result = Source()
@@ -143,3 +143,12 @@ class AffiliationData():
     name: str = ''
     address: str = ''
     country: str = ''
+
+    @property
+    def is_leicester(self):
+        return 'leicester' in self.summary.lower()
+
+    @property
+    def summary(self):
+        return ', '.join(filter(None, [self.name, self.address, self.country]))
+
