@@ -393,7 +393,7 @@ def _get_publication_xref(publication_datas):
             CatalogPublication.catalog_identifier.in_([p.catalog_identifier for p in pubs])
         ).where(
             CatalogPublication.catalog == cat
-        )
+        ).distinct()
 
         xref = xref | {CatalogReference(cp): cp.publication for cp in db.session.execute(q).scalars()}
 
