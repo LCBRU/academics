@@ -491,10 +491,12 @@ def _get_affiliation_xref(author_datas):
 
         xref = xref | {CatalogReference(a): a for a in new_affiliations}
 
-    return {
-        CatalogReference(a): [xref[CatalogReference(af)] for af in a.affiliations]
-        for a in author_datas
-    }
+    results = {}
+
+    for a in author_datas:
+        results[CatalogReference(a)] = [xref[af] for af in {CatalogReference(af) for af in a.affiliations}]
+
+    return results
 
 
 def _get_source_xref_from_publications(publication_datas):
