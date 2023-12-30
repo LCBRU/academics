@@ -314,10 +314,6 @@ class Author(ElsAuthor):
         self.citation_count = None
         self.document_count = None
         self.h_index = None
-        self.affiliation_id = None
-        self.affiliation_name = None
-        self.affiliation_address = None
-        self.affiliation_country = None
 
         super().__init__(author_id=self.catalog_identifier)
 
