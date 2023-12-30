@@ -231,6 +231,7 @@ def get_scopus_affiliation_data(identifier):
         return None
 
     result = ScopusAffiliation(identifier)
+    result.read(_client())
 
     return result.get_data()
 
