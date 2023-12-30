@@ -200,9 +200,13 @@ def refresh_source(s):
 
         if author_data:
             a = _get_source_xref([author_data])[CatalogReference(s)]
+            affiliation_xref = _get_affiliation_xref([author_data])
+
+            s.affiliations = affiliation_xref[CatalogReference(s)]
         else:
             logging.warn(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
+
 
         if s.academic:
             publications = []
@@ -245,7 +249,11 @@ def _find_new_scopus_sources(academic):
         [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
     )
 
+    affiliation_xref = _get_affiliation_xref(new_source_datas)
     new_sources = _get_source_xref(new_source_datas).values()
+
+    for s in new_sources:
+        s.affiliations = affiliation_xref[CatalogReference(s)]
 
     potentials = [
         AcademicPotentialSource(academic=academic, source=s)
@@ -460,7 +468,7 @@ def _get_affiliation_xref(author_datas):
     }
 
 
-def _get_source_publication_xref(publication_datas):
+def _get_source_xref_from_publications(publication_datas):
     logging.debug('_get_source_publication_xref: started')
 
     authors = {CatalogReference(a): a for a in chain.from_iterable([p.authors for p in publication_datas])}
@@ -526,7 +534,7 @@ def save_publications(new_pubs):
     subtype_xref = _get_subtype_xref(new_pubs)
     pubs_xref = _get_publication_xref(new_pubs)
     sponsor_xref = _get_sponsor_xref(new_pubs)
-    source_xref = _get_source_publication_xref(new_pubs)
+    source_xref = _get_source_xref_from_publications(new_pubs)
     keyword_xref = _get_keyword_xref(new_pubs)
 
     affiliation_xref = _get_affiliation_xref(chain.from_iterable([p.authors for p in new_pubs]))
