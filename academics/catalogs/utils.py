@@ -1,55 +1,8 @@
 from dataclasses import dataclass
-from academics.model import CatalogPublication, FundingAcr, Journal, Keyword, Sponsor, Subtype
+from academics.model import Keyword, Sponsor
 from lbrc_flask.database import db
 from academics.model import Source
 from datetime import date
-
-
-def _get_sponsor(name):
-    if not name:
-        return None
-
-    result = Sponsor.query.filter(Sponsor.name == name).one_or_none()
-
-    if not result:
-        result = Sponsor(name=name)
-        db.session.add(result)
-
-    return result
-
-
-def  _add_keywords_to_publications(publication, keyword_list):
-    publication.keywords.clear()
-
-    for k in filter(None, keyword_list):
-        keyword_word = k.strip().lower()
-
-        if not keyword_word:
-            continue
-
-        keyword = Keyword.query.filter(Keyword.keyword == keyword_word).one_or_none()
-
-        if not keyword:
-            keyword = Keyword(keyword=keyword_word)
-            db.session.add(keyword)
-        
-        publication.keywords.add(keyword)
-
-
-def _add_sponsors_to_publications(publication, sponsor_names):
-    publication.keywords.clear()
-
-    for name in sponsor_names:
-        if not name:
-            continue
-
-        sponsor = Sponsor.query.filter(Sponsor.name == name).one_or_none()
-
-        if not sponsor:
-            sponsor = Sponsor(name=name)
-            db.session.add(sponsor)
-        
-        publication.sponsors.add(sponsor)
 
 
 @dataclass(init=False, unsafe_hash=True)
