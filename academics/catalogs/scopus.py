@@ -202,10 +202,6 @@ def _translate_publication_author(author_dict):
         initials=author_dict.get('initials', None),
         author_name=author_dict.get('authname', None),
         href=author_dict.get('author-url', None),
-        affiliation_identifier='',
-        affiliation_name='',
-        affiliation_address='',
-        affiliation_country='',
         affiliations=affiliations,
     )
 
@@ -283,10 +279,6 @@ def scopus_author_search(search_string):
             last_name=r.get(u'preferred-name', {}).get(u'surname', ''),
             initials=r.get(u'preferred-name', {}).get('initials', None),
             href=href,
-            affiliation_identifier='',
-            affiliation_name='',
-            affiliation_address='',
-            affiliation_country='',
             affiliations=affiliations,
         )
 
@@ -423,10 +415,6 @@ class Author(ElsAuthor):
             last_name=self.last_name,
             initials=self.initials,
             href=self.href,
-            affiliation_identifier=self.affiliation_id,
-            affiliation_name=None,
-            affiliation_address=None,
-            affiliation_country=None,
             citation_count=self.citation_count,
             document_count=self.document_count,
             h_index=self.h_index,
@@ -540,10 +528,6 @@ class Abstract(AbsDoc):
             initials=author_dict.get('ce:initials', None),
             author_name=author_dict.get('ce:indexed-name', None),
             href=author_dict.get('author-url', None),
-            affiliation_identifier='',
-            affiliation_name='',
-            affiliation_address='',
-            affiliation_country='',
             affiliations=affiliations,
         )
 

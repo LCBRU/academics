@@ -71,10 +71,6 @@ class AuthorData():
     last_name: str
     initials: str
     href: str
-    affiliation_identifier: str
-    affiliation_name: str
-    affiliation_address: str
-    affiliation_country: str
     affiliations: list
     author_name: str = None
     citation_count: str = None

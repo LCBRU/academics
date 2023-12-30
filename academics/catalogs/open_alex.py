@@ -131,10 +131,6 @@ def _translate_publication_author(author_dict):
         initials='',
         author_name=author.get('display_name', None),
         href=author.get('id', None),
-        affiliation_identifier='',
-        affiliation_name='',
-        affiliation_address='',
-        affiliation_country='',
         affiliations=affiliations,
     )
 
@@ -225,10 +221,6 @@ def _get_author_datas(authors):
                 initials='',
                 author_name=a.get('display_name', ''),
                 href=a.get('id', ''),
-                affiliation_identifier='',
-                affiliation_name='',
-                affiliation_address='',
-                affiliation_country='',
                 citation_count=a.get('cited_by_count', None),
                 document_count=a.get('works_count', None),
                 h_index=a.get('summary_stats', {}).get('h_index', None),
