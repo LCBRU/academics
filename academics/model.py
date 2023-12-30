@@ -508,6 +508,7 @@ class Publication(db.Model, AuditMixin):
     def set_vancouver(self):
         if not self.best_catalog_publication:
             logging.warn(f'No best catalog publication for publication {self.id}')
+            self.vancouver = '[No Best Catalog Publication]'
             return
 
         author_list = ', '.join([a.reference_name for a in self.authors[0:6]])
