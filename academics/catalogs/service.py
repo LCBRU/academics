@@ -240,15 +240,16 @@ def _find_new_scopus_sources(academic):
         .where(AcademicPotentialSource.academic == academic)
     ).scalars()}
 
-    scopus_new_sources = filter(lambda s: s.is_leicester, scopus_similar_authors(academic))
-    open_alex_new_sources = filter(lambda s: s.is_leicester, open_alex_similar_authors(academic))
+    new_source_datas = filter(
+        lambda s: s.is_leicester,
+        [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
+    )
 
-    scopus_sources = _get_source_xref(scopus_new_sources).values()
-    open_alex_sources = _get_source_xref(open_alex_new_sources).values()
+    new_sources = _get_source_xref(new_source_datas).values()
 
     potentials = [
         AcademicPotentialSource(academic=academic, source=s)
-        for s in [*scopus_sources, *open_alex_sources]
+        for s in new_sources
         if CatalogReference(s) not in existing_sources
     ]
 
