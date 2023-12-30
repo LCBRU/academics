@@ -179,6 +179,18 @@ def abstract_from_inverted_index(inverted_index):
     return ' '.join([w[1] for w in sorted(words.items(), key=lambda w: w[0])])
 
 
+def get_open_alex_affiliation_data(identifier):
+    if not current_app.config['OPEN_ALEX_ENABLED']:
+        logging.warn('OpenAlex Not Enabled')
+        return None
+
+    affiliation = Institutions()[identifier]
+
+    results = _get_affiliation_datas([affiliation])
+
+    return next(iter(results), None)
+
+
 def get_open_alex_author_data(identifier):
     if not current_app.config['OPEN_ALEX_ENABLED']:
         logging.warn('OpenAlex Not Enabled')
@@ -189,6 +201,24 @@ def get_open_alex_author_data(identifier):
     results = _get_author_datas([author])
 
     return next(iter(results), None)
+
+
+def _get_affiliation_datas(affiliations):
+    result = []
+
+    print(affiliations)
+
+    # result = [
+    #     AffiliationData(
+    #         catalog=CATALOG_OPEN_ALEX,
+    #         catalog_identifier=_get_id_from_href(a.get('institution', {}).get('id')),
+    #         name=a.get('institution', {}).get('display_name'),
+    #         address='',
+    #         country=a.get('institution', {}).get('country_code'),
+    #     ) for a in affiliations if a.get('institution', {}).get('id') and date.today().year in a.get('years', [])
+    # ]
+
+    return result
 
 
 def _get_author_datas(authors):

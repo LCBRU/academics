@@ -128,9 +128,35 @@ def _process_updates():
 
         db.session.commit()
 
+    while True:
+        a = Affiliation.query.filter(Affiliation.refresh_details == 1).first()
+
+        if not a:
+            logging.info(f'_process_updates: No more affiliations to refresh')
+            break
+
+        _update_affiliation(a)
+
+        db.session.commit()
+
     auto_validate()
 
     logging.debug('_process_updates: Ended')
+
+
+def _update_affiliation(affiliation: Affiliation):
+    logging.debug(f'Updating Affiliation {affiliation.line_summary}')
+
+    try:
+        if affiliation.catalog == CATALOG_SCOPUS:
+            pub_data = get_scopus_publication_data(affiliation.catalog_identifier)
+        if affiliation.catalog == CATALOG_OPEN_ALEX:
+            pub_data = get_open_alex_publication_data(affiliation.catalog_identifier)
+
+        affiliation.refresh_details = False
+
+    finally:
+        db.session.add(affiliation)
 
 
 def _update_academic(academic: Academic):
@@ -453,6 +479,7 @@ def _get_affiliation_xref(author_datas):
                 name=a.name,
                 address=a.address,
                 country=a.country,
+                refresh_details=True,
             )
             for a in afils if CatalogReference(a) not in xref.keys()
         ]
