@@ -204,21 +204,15 @@ def get_open_alex_author_data(identifier):
 
 
 def _get_affiliation_datas(affiliations):
-    result = []
-
-    print(affiliations)
-
-    # result = [
-    #     AffiliationData(
-    #         catalog=CATALOG_OPEN_ALEX,
-    #         catalog_identifier=_get_id_from_href(a.get('institution', {}).get('id')),
-    #         name=a.get('institution', {}).get('display_name'),
-    #         address='',
-    #         country=a.get('institution', {}).get('country_code'),
-    #     ) for a in affiliations if a.get('institution', {}).get('id') and date.today().year in a.get('years', [])
-    # ]
-
-    return result
+    return [
+        AffiliationData(
+            catalog=CATALOG_OPEN_ALEX,
+            catalog_identifier=_get_id_from_href(a.get('id')),
+            name=a.get('display_name'),
+            address=a.get('geo', {}).get('city'),
+            country=a.get('geo', {}).get('country'),
+        ) for a in affiliations
+    ]
 
 
 def _get_author_datas(authors):
