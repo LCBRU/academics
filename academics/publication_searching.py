@@ -174,7 +174,7 @@ def catalog_publication_search_query(search_form):
 
     if search_form.has_value('keywords'):
         for k in search_form.keywords.data:
-            q = q.where(Publication.keywords.any(Keyword.id == k))
+            q = q.where(CatalogPublication.keywords.any(Keyword.id == k))
 
     publication_start_date = None
 

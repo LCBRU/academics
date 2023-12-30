@@ -548,7 +548,7 @@ def add_catalog_publications(publication_datas):
             CatalogPublication.catalog == cat
         )
 
-        existing = existing | {CatalogReference(cp) for cp in db.session.execute(q).scalars()}
+        existing = existing | {CatalogReference(cp) for cp in db.session.execute(q).unique().scalars()}
 
 
     new_pubs = [p for p in publication_datas if CatalogReference(p) not in existing]
