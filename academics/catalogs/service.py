@@ -434,6 +434,9 @@ def _get_keyword_xref(publication_datas):
 
     keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
+    print('A'*10)
+    print(keywords)
+
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
     xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
