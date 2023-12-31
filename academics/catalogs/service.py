@@ -415,7 +415,7 @@ def _get_sponsor_xref(publication_datas):
     print('B'*10)
     print(names)
 
-    q = select(Sponsor).where(Sponsor.name.in_(list(names)))
+    q = select(Sponsor).where(Sponsor.name.in_(names))
 
     print('C'*10)
     print(q)
