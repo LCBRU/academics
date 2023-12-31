@@ -425,7 +425,7 @@ def _get_sponsor_xref(publication_datas):
 
     xref = {s.name.lower(): s for s in db.session.execute(q).scalars()}
 
-    new_sponsors = [Sponsor(name=n) for n in names - xref.keys()]
+    new_sponsors = [Sponsor(name=n) for n in names if n.lower() not in xref.keys()]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
