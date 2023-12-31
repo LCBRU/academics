@@ -588,6 +588,10 @@ class Publication(db.Model, AuditMixin):
 
 
 class CatalogPublication(db.Model, AuditMixin):
+    __table_args__ = (
+        UniqueConstraint("catalog", "catalog_identifier", name='ux__CatalogPublication__catalog__catalog_identifier'),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True)
     publication_id: Mapped[int] = mapped_column(ForeignKey(Publication.id))
     publication: Mapped[Publication] = relationship(
