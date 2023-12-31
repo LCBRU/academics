@@ -633,16 +633,17 @@ def save_publications(new_pubs):
         db.session.commit()
 
         print('N'*10)
-        catalog_publication_sources = [
-            CatalogPublicationsSources(
+        catalog_publication_sources = []
+
+        for i, s in enumerate(source_xref[cpr]):
+            cps = CatalogPublicationsSources(
                 source=s,
                 catalog_publication=cat_pub,
                 ordinal=i,
                 affiliations=[],
-                affiliations_delayed=affiliation_xref[CatalogReference(s)]
             ) 
-            for i, s in enumerate(source_xref[cpr])
-        ]
+            cps.affiliations_delayed=affiliation_xref[CatalogReference(s)]
+            catalog_publication_sources.append(cps)
 
         print('O'*10)
         print(catalog_publication_sources)
