@@ -237,13 +237,6 @@ class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
             return f"Assigned to {self.source.academic.full_name}"
 
 
-class Journal(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    # MariaDB backends need a VARChar variable, added 255 to set a max length
-    name = db.Column(db.String(255))
-
-
-
 folders__publications = db.Table(
     'folders__publications',
     db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
@@ -282,16 +275,6 @@ sources__affiliations = db.Table(
 )
 
 
-class Subtype(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(1000))
-    description = db.Column(db.String(10000))
-
-    @classmethod
-    def get_validation_types(cls):
-        return Subtype.query.filter(Subtype.description.in_(['article', 'book'])).all()
-
-
 class FundingAcr(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
@@ -322,6 +305,29 @@ class NihrAcknowledgement(db.Model):
     @classmethod
     def get_instance_by_name(cls, name):
         return NihrAcknowledgement.query.filter_by(name=name).one()
+
+
+class Subtype(db.Model):
+    __table_args__ = (
+        UniqueConstraint("description", name='ux__subtype__description'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(1000))
+    description: Mapped[str] = mapped_column(String(1000), nullable=False)
+
+    @classmethod
+    def get_validation_types(cls):
+        return Subtype.query.filter(Subtype.description.in_(['article', 'book'])).all()
+
+
+class Journal(db.Model):
+    __table_args__ = (
+        UniqueConstraint("name", name='ux__journal__name'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
 
 
 class Sponsor(db.Model):
