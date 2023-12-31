@@ -22,7 +22,7 @@ def upgrade() -> None:
                existing_type=mysql.VARCHAR(length=1000),
                nullable=True)
     op.alter_column('subtype', 'description',
-               existing_type=mysql.VARCHAR(length=10000),
+               existing_type=mysql.VARCHAR(length=1000),
                nullable=False)
     op.create_unique_constraint('ux__subtype__description', 'subtype', ['description'])
     # ### end Alembic commands ###
