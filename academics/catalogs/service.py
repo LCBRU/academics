@@ -414,22 +414,11 @@ def _get_sponsor_xref(publication_datas):
     all_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
     unique_names = {unidecode(n.lower()): n for n in all_names}
 
-    print('A'*10)
-    print([n.lower() for n in all_names])
-    print('A-'*10)
-    print([n for n in unique_names])
-
     q = select(Sponsor).where(Sponsor.name.in_(all_names))
-
-    print('B'*10)
-    print([s.name.lower() for s in db.session.execute(q).scalars()])
 
     xref = {unidecode(s.name.lower()): s for s in db.session.execute(q).scalars()}
 
-    new_sponsors = [Sponsor(name=n) for k, n in unique_names.items() if k not in xref.keys()]
-
-    print('C'*10)
-    print([s.name for s in new_sponsors])
+    new_sponsors = [Sponsor(name=n) for u, n in unique_names.items() if u not in xref.keys()]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
@@ -445,18 +434,19 @@ def _get_sponsor_xref(publication_datas):
 def _get_keyword_xref(publication_datas):
     logging.debug('_get_keyword_xref: started')
 
-    keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
+    all_keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
+    unique_keywords = {unidecode(k.lower()): k for k in all_keywords}
 
-    q = select(Keyword).where(Keyword.keyword.in_(keywords))
+    q = select(Keyword).where(Keyword.keyword.in_(all_keywords))
 
     xref = {unidecode(k.keyword.lower()): k for k in db.session.execute(q).scalars()}
 
-    new_keywords = [Keyword(keyword=k) for k in keywords if unidecode(k.lower()) not in xref.keys()]
+    new_keywords = [Keyword(keyword=kw) for u, kw in unique_keywords.items() if u not in xref.keys()]
 
     db.session.add_all(new_keywords)
     db.session.commit()
 
-    xref = xref | {k.keyword.lower(): k for k in new_keywords}
+    xref = xref | {unidecode(k.keyword.lower()): k for k in new_keywords}
 
     return {
         CatalogReference(p): [xref[unidecode(k.strip().lower())] for k in p.keywords if k]
