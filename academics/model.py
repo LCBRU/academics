@@ -19,6 +19,9 @@ ORCID_URL = 'orcid.org'
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):
+    __table_args__ = (
+        UniqueConstraint("name", name='ux__theme__name'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     # MariaDB backends need a VARChar variable, added 255 to set a max length
@@ -36,6 +39,10 @@ class User(BaseUser):
 
 
 class Affiliation(db.Model):
+    # __table_args__ = (
+    #     UniqueConstraint("catalog", "catalog_identifier", name='ux__affiliation__catalog__catalog_identifier'),
+    # )
+
     id = db.Column(db.Integer, primary_key=True)
     catalog = db.Column(db.String(100), index=True)
     catalog_identifier = db.Column(db.String(1000), index=True)
