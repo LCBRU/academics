@@ -641,8 +641,8 @@ def save_publications(new_pubs):
                 catalog_publication=cat_pub,
                 ordinal=i,
                 affiliations=[],
-            ) 
-            cps.affiliations_delayed=affiliation_xref[CatalogReference(s)]
+            )
+            # cps.affiliations_delayed=affiliation_xref[CatalogReference(s)]
             catalog_publication_sources.append(cps)
 
         print('O'*10)
