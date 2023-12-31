@@ -621,6 +621,7 @@ def save_publications(new_pubs):
         cat_pub.subtype_id = subtype_xref[cpr]
         cat_pub.sponsors = set(sponsor_xref[cpr])
         cat_pub.keywords = set(keyword_xref[cpr])
+        cat_pub.catalog_publication_sources = []
 
         print('P'*10)
         print(cat_pub)
@@ -642,13 +643,10 @@ def save_publications(new_pubs):
                 ordinal=i,
                 affiliations=[],
             )
-            # cps.affiliations_delayed=affiliation_xref[CatalogReference(s)]
             catalog_publication_sources.append(cps)
 
         print('O'*10)
         print(catalog_publication_sources)
-
-        cat_pub.catalog_publication_sources = catalog_publication_sources
 
         print('O-'*10)
         db.session.add_all(catalog_publication_sources)
