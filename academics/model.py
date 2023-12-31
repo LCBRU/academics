@@ -229,6 +229,10 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
 
 class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
+    __table_args__ = (
+        UniqueConstraint("academic_id", "source_id", name='ux__AcademicPotentialSource__academic_id__source_id'),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id), nullable=False)
     academic = db.relationship(Academic, backref=db.backref("potential_sources", cascade="all,delete"))
