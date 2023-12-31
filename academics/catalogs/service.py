@@ -421,7 +421,7 @@ def _get_sponsor_xref(publication_datas):
     print(q)
 
     print('D'*10)
-    print(list(db.session.execute(q).scalars()))
+    print(s.name for s in db.session.execute(q).scalars())
 
     xref = {s.name.lower(): s for s in db.session.execute(q).scalars()}
 
