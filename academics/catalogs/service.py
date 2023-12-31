@@ -639,7 +639,7 @@ def save_publications(new_pubs):
                 catalog_publication=cat_pub,
                 ordinal=i,
                 affiliations=[]
-                # affiliations=affiliation_xref[CatalogReference(s)]
+                affiliations_delayed=affiliation_xref[CatalogReference(s)]
             ) 
             for i, s in enumerate(source_xref[cpr])
         ]
@@ -656,7 +656,9 @@ def save_publications(new_pubs):
         print('S'*10)
 
         for c in catalog_publication_sources:
-            c.affiliations=affiliation_xref[CatalogReference(c.source)]
+            c.affiliations=c.affiliations_delayed
+
+            print(c.affiliations)
 
         print('T'*10)
 
