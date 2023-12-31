@@ -385,6 +385,10 @@ folders__shared_users = db.Table(
 
 
 class Folder(db.Model):
+    __table_args__ = (
+        UniqueConstraint("name", "owner_id", name='ux__folder__name__owner_id'),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000))
 
