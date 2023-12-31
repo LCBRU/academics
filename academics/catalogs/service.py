@@ -625,7 +625,7 @@ def save_publications(new_pubs):
         db.session.execute(
             delete(catalog_publications_sources_affiliations)
             .where(catalog_publications_sources_affiliations.c.catalog_publications_sources_id.in_(
-                select(CatalogPublicationsSources.catalog_publication_id)
+                select(CatalogPublicationsSources.id)
                 .where(CatalogPublicationsSources.catalog_publication_id == cat_pub.id)
             ))
         )
