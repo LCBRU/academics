@@ -650,7 +650,6 @@ catalog_publications_sources_affiliations = db.Table(
 class CatalogPublicationsSources(db.Model):
     __table_args__ = (
         UniqueConstraint("catalog_publication_id", "ordinal", name='ux__CatalogPublicationsSources__cat_pub_id__ordinal'),
-        UniqueConstraint("catalog_publication_id", "source_id", name='ux__CatalogPublicationsSources__cat_pub_id__source_id'),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
