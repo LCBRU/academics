@@ -642,5 +642,5 @@ class CatalogPublicationsSources(db.Model):
     affiliations = db.relationship(
         Affiliation,
         secondary=catalog_publications_sources_affiliations,
-        cascade="all, delete, delete-orphan",
+        cascade="all, delete",
     )
