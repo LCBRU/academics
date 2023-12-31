@@ -411,19 +411,22 @@ def _get_publication_xref(publication_datas):
 def _get_sponsor_xref(publication_datas):
     logging.debug('_get_sponsor_xref: started')
 
-    names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
+    all_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
+    unique_names = {unidecode(n.lower()): n for n in all_names}
 
     print('A'*10)
-    print([n.lower() for n in names])
+    print([n.lower() for n in all_names])
+    print('A-'*10)
+    print([n for n in unique_names])
 
-    q = select(Sponsor).where(Sponsor.name.in_(names))
+    q = select(Sponsor).where(Sponsor.name.in_(all_names))
 
     print('B'*10)
     print([s.name.lower() for s in db.session.execute(q).scalars()])
 
     xref = {unidecode(s.name.lower()): s for s in db.session.execute(q).scalars()}
 
-    new_sponsors = [Sponsor(name=n) for n in names if unidecode(n.lower()) not in xref.keys()]
+    new_sponsors = [Sponsor(name=n) for k, n in unique_names.items() if k not in xref.keys()]
 
     print('C'*10)
     print([s.name for s in new_sponsors])
