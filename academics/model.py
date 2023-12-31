@@ -139,6 +139,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
 
 class Source(AuditMixin, CommonMixin, db.Model):
+    __table_args__ = (
+        UniqueConstraint("catalog", "catalog_identifier", name='ux__source__catalog__catalog_identifier'),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
     catalog: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     catalog_identifier: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
@@ -313,7 +317,7 @@ class Subtype(db.Model):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    code: Mapped[str] = mapped_column(String(1000))
+    code: Mapped[str] = mapped_column(String(1000), nullable=True)
     description: Mapped[str] = mapped_column(String(1000), nullable=False)
 
     @classmethod
