@@ -414,8 +414,6 @@ def _get_sponsor_xref(publication_datas):
 
     q = select(Sponsor).where(Sponsor.name.in_(names))
 
-    print(q)
-
     xref = {s.name.lower(): s for s in db.session.execute(q).scalars()}
 
     new_sponsors = [Sponsor(name=n) for n in names - xref.keys()]
@@ -605,11 +603,6 @@ def save_publications(new_pubs):
         cat_pub.cited_by_count = p.cited_by_count
         cat_pub.journal_id = journal_xref[cpr]
         cat_pub.subtype_id = subtype_xref[cpr]
-
-        print('A'*10)
-        print(sponsor_xref[cpr])
-        print('A'*10)
-
         cat_pub.sponsors = set(sponsor_xref[cpr])
         cat_pub.keywords = set(keyword_xref[cpr])
 

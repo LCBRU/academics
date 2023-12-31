@@ -6,7 +6,7 @@ from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 from lbrc_flask.security import User as BaseUser
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, distinct, func, select
+from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, UniqueConstraint, distinct, func, select
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
@@ -292,23 +292,6 @@ class Subtype(db.Model):
         return Subtype.query.filter(Subtype.description.in_(['article', 'book'])).all()
 
 
-class Sponsor(db.Model):
-    NIHR_NAMES = [
-        'NIHR',
-        'National Institute for Health Research',
-        'National Institute for Health and Care Research',
-    ]
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-
-    catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_sponsors, back_populates="sponsors", collection_class=set)
-
-    @property
-    def is_nihr(self):
-        return any([n in self.name for n in self.NIHR_NAMES])
-
-
 class FundingAcr(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
@@ -341,10 +324,34 @@ class NihrAcknowledgement(db.Model):
         return NihrAcknowledgement.query.filter_by(name=name).one()
 
 
-class Keyword(db.Model):
+class Sponsor(db.Model):
+    __table_args__ = (
+        UniqueConstraint("name", name='ux__sponsor__name'),
+    )
 
-    id = db.Column(db.Integer, primary_key=True)
-    keyword = db.Column(db.String(1000))
+    NIHR_NAMES = [
+        'NIHR',
+        'National Institute for Health Research',
+        'National Institute for Health and Care Research',
+    ]
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_sponsors, back_populates="sponsors", collection_class=set)
+
+    @property
+    def is_nihr(self):
+        return any([n in self.name for n in self.NIHR_NAMES])
+
+
+class Keyword(db.Model):
+    __table_args__ = (
+        UniqueConstraint("keyword", name='ux__keyword__keyword'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    keyword: Mapped[str] = mapped_column(String(1000), nullable=False)
 
     catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_keywords, back_populates="keywords", collection_class=set)
 
