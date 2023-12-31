@@ -638,7 +638,8 @@ def save_publications(new_pubs):
                 source=s,
                 catalog_publication=cat_pub,
                 ordinal=i,
-                affiliations=affiliation_xref[CatalogReference(s)]
+                affiliations=[]
+                # affiliations=affiliation_xref[CatalogReference(s)]
             ) 
             for i, s in enumerate(source_xref[cpr])
         ]
