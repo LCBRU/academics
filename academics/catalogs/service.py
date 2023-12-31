@@ -352,7 +352,7 @@ def _get_journal_xref(publication_datas):
 
     xref = {j['name'].lower(): j['id'] for j in db.session.execute(q).mappings()}
 
-    new_journals = [Journal(name=n) for n in names - xref.keys()]
+    new_journals = [Journal(name=n) for n in names if n.lower() not in xref.keys()]
 
     db.session.add_all(new_journals)
     db.session.commit()
@@ -371,7 +371,7 @@ def _get_subtype_xref(publication_datas):
 
     xref = {st['description'].lower(): st['id'] for st in db.session.execute(q).mappings()}
 
-    new_subtypes = [Subtype(code=d, description=d) for d in descs - xref.keys()]
+    new_subtypes = [Subtype(code=d, description=d) for d in descs if d.lower() not in xref.keys()]
 
     db.session.add_all(new_subtypes)
     db.session.commit()
@@ -412,16 +412,7 @@ def _get_sponsor_xref(publication_datas):
 
     names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
 
-    print('B'*10)
-    print(names)
-
     q = select(Sponsor).where(Sponsor.name.in_(names))
-
-    print('C'*10)
-    print(q)
-
-    print('D'*10)
-    print([s.name for s in db.session.execute(q).scalars()])
 
     xref = {s.name.lower(): s for s in db.session.execute(q).scalars()}
 
@@ -443,14 +434,11 @@ def _get_keyword_xref(publication_datas):
 
     keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
-    print('A'*10)
-    print(keywords)
-
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
     xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
 
-    new_keywords = [Keyword(keyword=k) for k in keywords - xref.keys()]
+    new_keywords = [Keyword(keyword=k) for k in keywords if k.lower() not in xref.keys()]
 
     db.session.add_all(new_keywords)
     db.session.commit()
