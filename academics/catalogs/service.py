@@ -417,6 +417,12 @@ def _get_sponsor_xref(publication_datas):
 
     q = select(Sponsor).where(Sponsor.name.in_(list(names)))
 
+    print('C'*10)
+    print(q)
+
+    print('D'*10)
+    print(list(db.session.execute(q).scalars()))
+
     xref = {s.name.lower(): s for s in db.session.execute(q).scalars()}
 
     new_sponsors = [Sponsor(name=n) for n in names - xref.keys()]
