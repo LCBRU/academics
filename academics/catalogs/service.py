@@ -622,6 +622,15 @@ def save_publications(new_pubs):
         cat_pub.sponsors = set(sponsor_xref[cpr])
         cat_pub.keywords = set(keyword_xref[cpr])
 
+        print('P'*10)
+        print(cat_pub)
+        db.session.add(cat_pub)
+        print('Q'*10)
+        print(pub)
+        db.session.add(pub)
+        print('R'*10)
+        db.session.commit()
+
         print('N'*10)
         catalog_publication_sources = [
             CatalogPublicationsSources(
@@ -641,12 +650,6 @@ def save_publications(new_pubs):
 
         print('O-'*10)
         db.session.add_all(catalog_publication_sources)
-        print('P'*10)
-        print(cat_pub)
-        db.session.add(cat_pub)
-        print('Q'*10)
-        print(pub)
-        db.session.add(pub)
-        print('R'*10)
+        print('O--'*10)
         db.session.commit()
         print('S'*10)
