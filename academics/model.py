@@ -39,9 +39,9 @@ class User(BaseUser):
 
 
 class Affiliation(db.Model):
-    # __table_args__ = (
-    #     UniqueConstraint("catalog", "catalog_identifier", name='ux__affiliation__catalog__catalog_identifier'),
-    # )
+    __table_args__ = (
+        UniqueConstraint("catalog", "catalog_identifier", name='ux__affiliation__catalog__catalog_identifier'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     catalog = db.Column(db.String(100), index=True)
