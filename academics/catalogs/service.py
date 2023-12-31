@@ -654,3 +654,13 @@ def save_publications(new_pubs):
         print('O--'*10)
         db.session.commit()
         print('S'*10)
+
+        for c in catalog_publication_sources:
+            c.affiliations=affiliation_xref[CatalogReference(c.source)]
+
+        print('T'*10)
+
+        db.session.add_all(catalog_publication_sources)
+        print('U'*10)
+        db.session.commit()
+        print('V'*10)
