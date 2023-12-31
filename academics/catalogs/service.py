@@ -564,39 +564,27 @@ def add_catalog_publications(publication_datas):
 
 
 def save_publications(new_pubs):
-    print('A'*10)
     journal_xref = _get_journal_xref(new_pubs)
-    print('B'*10)
     subtype_xref = _get_subtype_xref(new_pubs)
-    print('C'*10)
     pubs_xref = _get_publication_xref(new_pubs)
-    print('D'*10)
     sponsor_xref = _get_sponsor_xref(new_pubs)
-    print('E'*10)
     source_xref = _get_source_xref_from_publications(new_pubs)
-    print('F'*10)
     keyword_xref = _get_keyword_xref(new_pubs)
-    print('G'*10)
 
     affiliation_xref = _get_affiliation_xref(chain.from_iterable([p.authors for p in new_pubs]))
-    print('H'*10)
 
     for p in new_pubs:
-        print('I'*10)
         cpr = CatalogReference(p)
         logging.info(f'Saving Publication {cpr}')
 
-        print('J'*10)
         pub = pubs_xref[cpr]
 
-        print('K'*10)
         cat_pub = db.session.execute(
             select(CatalogPublication)
             .where(CatalogPublication.catalog == p.catalog)
             .where(CatalogPublication.catalog_identifier == p.catalog_identifier)
         ).scalar()
 
-        print('L'*10)
         if not cat_pub:
             cat_pub = CatalogPublication(
                 catalog=p.catalog,
@@ -605,7 +593,6 @@ def save_publications(new_pubs):
                 refresh_full_details=True,
             )
 
-        print('M'*10)
         cat_pub.doi = p.doi or ''
         cat_pub.title = p.title or ''
         cat_pub.publication_cover_date = p.publication_cover_date
@@ -622,23 +609,18 @@ def save_publications(new_pubs):
         cat_pub.sponsors = set(sponsor_xref[cpr])
         cat_pub.keywords = set(keyword_xref[cpr])
 
-        print('P'*10)
-        print(cat_pub)
         db.session.add(cat_pub)
-        print('Q'*10)
-        print(pub)
+
         pub.validation_historic = (parse_date(p.publication_cover_date) < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
         db.session.add(pub)
-        print('R'*10)
+
         db.session.commit()
 
-        print('R-'*10)
         db.session.execute(
             delete(CatalogPublicationsSources)
             .where(CatalogPublicationsSources.catalog_publication_id == cat_pub.id)
         )
 
-        print('N'*10)
         catalog_publication_sources = []
 
         for i, s in enumerate(source_xref[cpr]):
@@ -651,23 +633,11 @@ def save_publications(new_pubs):
             cps.affiliations_delayed = affiliation_xref[CatalogReference(s)]
             catalog_publication_sources.append(cps)
 
-        print('O'*10)
-        print(catalog_publication_sources)
-
-        print('O-'*10)
         db.session.add_all(catalog_publication_sources)
-        print('O--'*10)
         db.session.commit()
-        print('S'*10)
 
         for c in catalog_publication_sources:
             c.affiliations=c.affiliations_delayed
 
-            print(c.affiliations)
-
-        print('T'*10)
-
         db.session.add_all(catalog_publication_sources)
-        print('U'*10)
         db.session.commit()
-        print('V'*10)
