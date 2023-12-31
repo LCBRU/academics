@@ -412,11 +412,20 @@ def _get_sponsor_xref(publication_datas):
 
     names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
 
+    print('A'*10)
+    print(names)
+
     q = select(Sponsor).where(Sponsor.name.in_(names))
+
+    print('B'*10)
+    print([s.name for s in db.session.execute(q).scalars()])
 
     xref = {s.name.lower(): s for s in db.session.execute(q).scalars()}
 
     new_sponsors = [Sponsor(name=n) for n in names if n.lower() not in xref.keys()]
+
+    print('C'*10)
+    print([s.name for s in new_sponsors])
 
     db.session.add_all(new_sponsors)
     db.session.commit()
