@@ -12,6 +12,7 @@ from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
+from unidecode import unidecode
 
 
 def updating():
@@ -350,16 +351,16 @@ def _get_journal_xref(publication_datas):
 
     q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
 
-    xref = {j['name'].lower(): j['id'] for j in db.session.execute(q).mappings()}
+    xref = {unidecode(j['name'].lower()): j['id'] for j in db.session.execute(q).mappings()}
 
-    new_journals = [Journal(name=n) for n in names if n.lower() not in xref.keys()]
+    new_journals = [Journal(name=n) for n in names if unidecode(n.lower()) not in xref.keys()]
 
     db.session.add_all(new_journals)
     db.session.commit()
 
     xref = xref | {j.name.lower(): j.id for j in new_journals}
 
-    return {CatalogReference(p): xref[p.journal_name.lower()] for p in publication_datas}
+    return {CatalogReference(p): xref[unidecode(p.journal_name.lower())] for p in publication_datas}
 
 
 def _get_subtype_xref(publication_datas):
@@ -420,9 +421,9 @@ def _get_sponsor_xref(publication_datas):
     print('B'*10)
     print([s.name.lower() for s in db.session.execute(q).scalars()])
 
-    xref = {s.name.lower(): s for s in db.session.execute(q).scalars()}
+    xref = {unidecode(s.name.lower()): s for s in db.session.execute(q).scalars()}
 
-    new_sponsors = [Sponsor(name=n) for n in names if n.lower() not in xref.keys()]
+    new_sponsors = [Sponsor(name=n) for n in names if unidecode(n.lower()) not in xref.keys()]
 
     print('C'*10)
     print([s.name for s in new_sponsors])
@@ -430,10 +431,10 @@ def _get_sponsor_xref(publication_datas):
     db.session.add_all(new_sponsors)
     db.session.commit()
 
-    xref = xref | {s.name.lower(): s for s in new_sponsors}
+    xref = xref | {unidecode(s.name.lower()): s for s in new_sponsors}
 
     return {
-        CatalogReference(p): [xref[n.lower()] for n in p.funding_list if n]
+        CatalogReference(p): [xref[unidecode(n.lower())] for n in p.funding_list if n]
         for p in publication_datas
     }
 
@@ -445,9 +446,9 @@ def _get_keyword_xref(publication_datas):
 
     q = select(Keyword).where(Keyword.keyword.in_(keywords))
 
-    xref = {k.keyword.lower(): k for k in db.session.execute(q).scalars()}
+    xref = {unidecode(k.keyword.lower()): k for k in db.session.execute(q).scalars()}
 
-    new_keywords = [Keyword(keyword=k) for k in keywords if k.lower() not in xref.keys()]
+    new_keywords = [Keyword(keyword=k) for k in keywords if unidecode(k.lower()) not in xref.keys()]
 
     db.session.add_all(new_keywords)
     db.session.commit()
@@ -455,7 +456,7 @@ def _get_keyword_xref(publication_datas):
     xref = xref | {k.keyword.lower(): k for k in new_keywords}
 
     return {
-        CatalogReference(p): [xref[k.strip().lower()] for k in p.keywords if k]
+        CatalogReference(p): [xref[unidecode(k.strip().lower())] for k in p.keywords if k]
         for p in publication_datas
     }
 
