@@ -1,7 +1,7 @@
 from itertools import chain, groupby
 import logging
 from flask import current_app
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.data_classes import CatalogReference
 from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, Journal, Keyword, NihrAcknowledgement, Publication, Source, Sponsor, Subtype, Affiliation
@@ -621,7 +621,6 @@ def save_publications(new_pubs):
         cat_pub.subtype_id = subtype_xref[cpr]
         cat_pub.sponsors = set(sponsor_xref[cpr])
         cat_pub.keywords = set(keyword_xref[cpr])
-        cat_pub.catalog_publication_sources = []
 
         print('P'*10)
         print(cat_pub)
@@ -632,6 +631,12 @@ def save_publications(new_pubs):
         db.session.add(pub)
         print('R'*10)
         db.session.commit()
+
+        print('R-'*10)
+        db.session.execute(
+            delete(CatalogPublicationsSources)
+            .where(CatalogPublicationsSources.catalog_publication_id == cat_pub.id)
+        )
 
         print('N'*10)
         catalog_publication_sources = []
