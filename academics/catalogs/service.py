@@ -634,12 +634,17 @@ def save_publications(new_pubs):
         ]
 
         print('O'*10)
+        print(catalog_publication_sources)
+
         cat_pub.catalog_publication_sources = catalog_publication_sources
         pub.validation_historic = (parse_date(p.publication_cover_date) < current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
         print('P'*10)
+        print(cat_pub)
         db.session.add(cat_pub)
         print('Q'*10)
+        print(pub)
         db.session.add(pub)
         print('R'*10)
         db.session.commit()
+        print('S'*10)
