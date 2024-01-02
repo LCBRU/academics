@@ -17,7 +17,7 @@ class AcademicEditForm(FlashingForm):
 
         academics = db.session.execute(
             select(Academic).order_by(Academic.last_name).order_by(Academic.first_name)
-        )
+        ).unique().scalars()
 
         self.academic_id.choices = [(0, '')] + [(a.id, a.full_name) for a in academics]
 
