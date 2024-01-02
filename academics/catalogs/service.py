@@ -620,8 +620,6 @@ def save_publications(new_pubs):
         # saving and deleting of these sources (and their associated affiliations)
         # causes SQLAlchemy to fall over, so I've split it up into different bits
 
-        print('A'*10)
-
         db.session.execute(
             delete(catalog_publications_sources_affiliations)
             .where(catalog_publications_sources_affiliations.c.catalog_publications_sources_id.in_(
@@ -630,14 +628,10 @@ def save_publications(new_pubs):
             ))
         )
 
-        print('B'*10)
-
         db.session.execute(
             delete(CatalogPublicationsSources)
             .where(CatalogPublicationsSources.catalog_publication_id == cat_pub.id)
         )
-
-        print('C'*10)
 
         catalog_publication_sources = []
 
@@ -651,21 +645,11 @@ def save_publications(new_pubs):
             cps.affiliations_delayed = affiliation_xref[CatalogReference(s)]
             catalog_publication_sources.append(cps)
 
-        print('D'*10)
-
         db.session.add_all(catalog_publication_sources)
         db.session.commit()
-
-        print('E'*10)
 
         for c in catalog_publication_sources:
             c.affiliations=c.affiliations_delayed
 
-        print('F'*10)
-
         db.session.add_all(catalog_publication_sources)
-        print('G'*10)
-
         db.session.commit()
-        print('H'*10)
-
