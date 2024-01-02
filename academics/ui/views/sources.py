@@ -1,4 +1,5 @@
 from flask import abort, jsonify, redirect, render_template, request, url_for
+from sqlalchemy import select
 from wtforms import SelectField
 from academics.catalogs.service import create_potential_sources, update_single_academic
 from academics.model import Academic, AcademicPotentialSource, Source
@@ -14,7 +15,11 @@ class AcademicEditForm(FlashingForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.academic_id.choices = [(0, '')] + [(a.id, a.full_name) for a in Academic.query.all()]
+        academics = db.session.execute(
+            select(Academic).order_by(Academic.last_name).order_by(Academic.first_name)
+        )
+
+        self.academic_id.choices = [(0, '')] + [(a.id, a.full_name) for a in academics]
 
 
 @blueprint.route("/sources/<int:id>/details", methods=['GET', 'POST'])
