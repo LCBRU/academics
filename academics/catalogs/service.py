@@ -3,8 +3,8 @@ import logging
 from flask import current_app
 from sqlalchemy import delete, select
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
-from academics.catalogs.data_classes import CatalogReference
-from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, Journal, Keyword, NihrAcknowledgement, Publication, Source, Sponsor, Subtype, Affiliation, catalog_publications_sources_affiliations
+from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
+from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, NihrAcknowledgement, Publication, Source, Subtype, Affiliation, catalog_publications_sources_affiliations
 from lbrc_flask.celery import celery
 from academics.publication_searching import ValidationSearchForm, publication_search_query
 from .scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
@@ -12,7 +12,6 @@ from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
-from unidecode import unidecode
 
 
 def updating():
@@ -60,6 +59,34 @@ def refresh():
     logging.debug('refresh: ended')
 
 
+def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None):
+    academic = None
+
+    if academic_id:
+        academic = db.session.get(Academic, academic_id)
+
+    if not academic:
+        academic = Academic(
+            theme_id=theme_id,
+        )
+    
+    academic.updating = True
+
+    db.session.add(academic)
+
+    for catalog_identifier in catalog_identifier:
+        sa = Source(
+            catalog_identifier=catalog_identifier,
+            catalog=CATALOG_SCOPUS,
+            academic=academic,
+        )
+        db.session.add(sa)
+
+    db.session.commit()
+
+    _process_updates.delay()
+
+
 def update_single_academic(academic: Academic):
     logging.debug('update_academic: started')
 
@@ -94,55 +121,30 @@ def update_academics():
 def _process_updates():
     logging.debug('_process_updates: started')
 
-    while True:
-        a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
+    refresh_Academics()
+    refresh_catalog_publications()
+    refresh_publications()
+    refresh_affiliations()
+    auto_validate()
 
-        if not a:
-            logging.info(f'_process_updates: No more academics to update')
-            break
+    logging.debug('_process_updates: Ended')
 
-        _update_academic(a)
 
-        db.session.commit()
-
-    logging.debug('_process_updates: Start doing the publications')
-
-    while True:
-        p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
-
-        if not p:
-            logging.info(f'_process_updates: No more catalog publications to refresh')
-            break
-
-        _update_catalog_publication(p)
-
-        db.session.commit()
-
-    while True:
-        p = Publication.query.filter(Publication.vancouver == None).first()
-
-        if not p:
-            logging.info(f'_process_updates: No more publications to refresh')
-            break
-
-        _update_publication(p)
-
-        db.session.commit()
+def refresh_affiliations():
+    logging.debug('refresh_affiliations: started')
 
     while True:
         a = Affiliation.query.filter(Affiliation.refresh_details == 1).first()
 
         if not a:
-            logging.info(f'_process_updates: No more affiliations to refresh')
+            logging.info(f'refresh_affiliations: No more affiliations to refresh')
             break
 
         _update_affiliation(a)
 
         db.session.commit()
 
-    auto_validate()
-
-    logging.debug('_process_updates: Ended')
+    logging.debug('refresh_affiliations: ended')
 
 
 def _update_affiliation(affiliation: Affiliation):
@@ -162,31 +164,46 @@ def _update_affiliation(affiliation: Affiliation):
         db.session.add(affiliation)
 
 
-def _update_academic(academic: Academic):
-    logging.debug(f'Updating Academic {academic.full_name}')
+def refresh_publications():
+    logging.debug('refresh_publications: started')
 
-    try:
-        s: Source
+    while True:
+        p = Publication.query.filter(Publication.vancouver == None).first()
 
-        for s in academic.sources:
-            if s.error:
-                logging.warn(f'Source in ERROR')
-            else:
-                refresh_source(s)
+        if not p:
+            logging.info(f'refresh_publications: No more publications to refresh')
+            break
 
-        _find_new_scopus_sources(academic)
+        _update_publication(p)
 
-        _ensure_all_academic_sources_are_proposed(academic)
+        db.session.commit()
 
-        academic.ensure_initialisation()
-        academic.updating = False
+    logging.debug('refresh_publications: ended')
 
-    except Exception as e:
-        log_exception(e)
-        academic.error = True
 
-    finally:
-        db.session.add(academic)
+def _update_publication(publication: Publication):
+    logging.debug(f'Updating publication {publication.id}')
+
+    publication.set_vancouver()
+
+    db.session.add(publication)
+
+
+def refresh_catalog_publications():
+    logging.debug('refresh_catalog_publications: started')
+
+    while True:
+        p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
+
+        if not p:
+            logging.info(f'refresh_catalog_publications: No more catalog publications to refresh')
+            break
+
+        _update_catalog_publication(p)
+
+        db.session.commit()
+
+    logging.debug('refresh_catalog_publications: ended')
 
 
 def _update_catalog_publication(catalog_publication: CatalogPublication):
@@ -210,15 +227,50 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
         db.session.add(catalog_publication)
 
 
-def _update_publication(publication: Publication):
-    logging.debug(f'Updating publication {publication.id}')
+def refresh_Academics():
+    logging.debug('refresh_Academics: started')
 
-    publication.set_vancouver()
+    while True:
+        a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
 
-    db.session.add(publication)
+        if not a:
+            logging.info(f'refresh_Academics: No more academics to update')
+            break
+
+        _update_academic(a)
+
+        db.session.commit()
+
+    logging.debug('refresh_Academics: started')
 
 
-def refresh_source(s):
+def _update_academic(academic: Academic):
+    logging.debug(f'Updating Academic {academic.full_name}')
+
+    try:
+        s: Source
+
+        for s in academic.sources:
+            if s.error:
+                logging.warn(f'Source in ERROR')
+            else:
+                _update_source(s)
+
+        _find_new_potential_sources(academic)
+        _ensure_all_academic_sources_are_proposed(academic)
+
+        academic.ensure_initialisation()
+        academic.updating = False
+
+    except Exception as e:
+        log_exception(e)
+        academic.error = True
+
+    finally:
+        db.session.add(academic)
+
+
+def _update_source(s):
     try:
         author_data = None
 
@@ -228,14 +280,13 @@ def refresh_source(s):
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
-            a = _get_source_xref([author_data])[CatalogReference(s)]
-            affiliation_xref = _get_affiliation_xref([author_data])
+            a = _source_xref_for_author_data_list([author_data])[CatalogReference(s)]
+            affiliation_xref = _affiliation_xref_for_author_data_list([author_data])
 
             s.affiliations = affiliation_xref[CatalogReference(s)]
         else:
             logging.warn(f'Source {s.full_name} not found so setting it to be in error')
             s.error = True
-
 
         if s.academic:
             publications = []
@@ -262,7 +313,7 @@ def refresh_source(s):
         db.session.commit()
 
 
-def _find_new_scopus_sources(academic):
+def _find_new_potential_sources(academic):
     logging.debug(f'Finding new sources for {academic.full_name}')
 
     if len(academic.last_name.strip()) < 1:
@@ -278,8 +329,8 @@ def _find_new_scopus_sources(academic):
         [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
     )
 
-    affiliation_xref = _get_affiliation_xref(new_source_datas)
-    new_sources = _get_source_xref(new_source_datas).values()
+    affiliation_xref = _affiliation_xref_for_author_data_list(new_source_datas)
+    new_sources = _source_xref_for_author_data_list(new_source_datas).values()
 
     for s in new_sources:
         s.affiliations = affiliation_xref[CatalogReference(s)]
@@ -316,229 +367,6 @@ def _ensure_all_academic_sources_are_proposed(academic):
     db.session.commit()
 
 
-def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None):
-    academic = None
-
-    if academic_id:
-        academic = db.session.get(Academic, academic_id)
-
-    if not academic:
-        academic = Academic(
-            theme_id=theme_id,
-        )
-    
-    academic.updating = True
-
-    db.session.add(academic)
-
-    for catalog_identifier in catalog_identifier:
-        sa = Source(
-            catalog_identifier=catalog_identifier,
-            catalog=CATALOG_SCOPUS,
-            academic=academic,
-        )
-        db.session.add(sa)
-
-    db.session.commit()
-
-    _process_updates.delay()
-
-
-def _get_journal_xref(publication_datas):
-    logging.debug('_get_journal_xref: started')
-
-    names = {p.journal_name for p in publication_datas}
-
-    q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
-
-    xref = {unidecode(j['name'].lower()): j['id'] for j in db.session.execute(q).mappings()}
-
-    new_journals = [Journal(name=n) for n in names if unidecode(n.lower()) not in xref.keys()]
-
-    db.session.add_all(new_journals)
-    db.session.commit()
-
-    xref = xref | {j.name.lower(): j.id for j in new_journals}
-
-    return {CatalogReference(p): xref[unidecode(p.journal_name.lower())] for p in publication_datas}
-
-
-def _get_subtype_xref(publication_datas):
-    logging.debug('_get_subtype_xref: started')
-
-    descs = {p.subtype_description for p in publication_datas}
-
-    q = select(Subtype.id, Subtype.description).where(Subtype.description.in_(descs))
-
-    xref = {st['description'].lower(): st['id'] for st in db.session.execute(q).mappings()}
-
-    new_subtypes = [Subtype(code=d, description=d) for d in descs if d.lower() not in xref.keys()]
-
-    db.session.add_all(new_subtypes)
-    db.session.commit()
-
-    xref = xref | {st.description.lower(): st.id for st in new_subtypes}
-
-    return {CatalogReference(p): xref[p.subtype_description.lower()] for p in publication_datas}
-
-
-def _get_publication_xref(publication_datas):
-    logging.debug('_get_publication_xref: started')
-
-    xref = {}
-
-    keyfunc = lambda a: a.catalog
-
-    for cat, pubs in groupby(sorted(publication_datas, key=keyfunc), key=keyfunc):
-        q = select(CatalogPublication).where(
-            CatalogPublication.catalog_identifier.in_([p.catalog_identifier for p in pubs])
-        ).where(
-            CatalogPublication.catalog == cat
-        ).distinct()
-
-        xref = xref | {CatalogReference(cp): cp.publication for cp in db.session.execute(q).unique().scalars()}
-
-    new_pubs = {CatalogReference(p): Publication() for p in publication_datas if CatalogReference(p) not in xref.keys()}
-
-    db.session.add_all(new_pubs.values())
-    db.session.commit()
-
-    xref = xref | new_pubs
-
-    return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
-
-
-def _get_sponsor_xref(publication_datas):
-    logging.debug('_get_sponsor_xref: started')
-
-    all_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
-    unique_names = {unidecode(n.lower()): n for n in all_names}
-
-    q = select(Sponsor).where(Sponsor.name.in_(all_names))
-
-    xref = {unidecode(s.name.lower()): s for s in db.session.execute(q).scalars()}
-
-    new_sponsors = [Sponsor(name=n) for u, n in unique_names.items() if u not in xref.keys()]
-
-    db.session.add_all(new_sponsors)
-    db.session.commit()
-
-    xref = xref | {unidecode(s.name.lower()): s for s in new_sponsors}
-
-    return {
-        CatalogReference(p): [xref[unidecode(n.lower())] for n in p.funding_list if n]
-        for p in publication_datas
-    }
-
-
-def _get_keyword_xref(publication_datas):
-    logging.debug('_get_keyword_xref: started')
-
-    all_keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
-    unique_keywords = {unidecode(k.lower()): k for k in all_keywords}
-
-    q = select(Keyword).where(Keyword.keyword.in_(all_keywords))
-
-    xref = {unidecode(k.keyword.lower()): k for k in db.session.execute(q).scalars()}
-
-    new_keywords = [Keyword(keyword=kw) for u, kw in unique_keywords.items() if u not in xref.keys()]
-
-    db.session.add_all(new_keywords)
-    db.session.commit()
-
-    xref = xref | {unidecode(k.keyword.lower()): k for k in new_keywords}
-
-    return {
-        CatalogReference(p): [xref[unidecode(k.strip().lower())] for k in p.keywords if k]
-        for p in publication_datas
-    }
-
-
-def _get_affiliation_xref(author_datas):
-    logging.debug('_get_affiliation_xref: started')
-
-    author_datas = list(author_datas)
-
-    affiliations = {CatalogReference(af): af for af in chain.from_iterable([a.affiliations for a in author_datas])}
-
-    xref = {}
-
-    keyfunc = lambda a: a.catalog
-
-    for cat, afils in groupby(sorted(affiliations.values(), key=keyfunc), key=keyfunc):
-
-        afils = list(afils)
-
-        q = select(Affiliation).where(
-            Affiliation.catalog_identifier.in_([a.catalog_identifier for a in afils])
-        ).where(
-            Affiliation.catalog == cat
-        )
-
-        xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
-
-        new_affiliations = [
-            Affiliation(
-                catalog=cat,
-                catalog_identifier=a.catalog_identifier,
-                name=a.name,
-                address=a.address,
-                country=a.country,
-                refresh_details=True,
-            )
-            for a in afils if CatalogReference(a) not in xref.keys()
-        ]
-
-        db.session.add_all(new_affiliations)
-        db.session.commit()
-
-        xref = xref | {CatalogReference(a): a for a in new_affiliations}
-
-    results = {}
-
-    for a in author_datas:
-        results[CatalogReference(a)] = [xref[af] for af in {CatalogReference(af) for af in a.affiliations}]
-
-    return results
-
-
-def _get_source_xref_from_publications(publication_datas):
-    logging.debug('_get_source_publication_xref: started')
-
-    authors = {CatalogReference(a): a for a in chain.from_iterable([p.authors for p in publication_datas])}
-
-    author_xref = _get_source_xref(authors.values())
-
-    return {
-        CatalogReference(p): [author_xref[CatalogReference(a)] for a in p.authors]
-        for p in publication_datas
-    }
-
-
-def _get_source_xref(author_datas):
-    logging.debug('_get_author_xref: started')
-
-    xref = {}
-
-    keyfunc = lambda a: a.catalog
-
-    for cat, authors in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
-        q = select(Source).where(
-            Source.catalog_identifier.in_([a.catalog_identifier for a in authors])
-        ).where(
-            Source.catalog == cat
-        )
-
-        xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
-
-    new_sources = [a.get_new_source() for a in author_datas if CatalogReference(a) not in xref.keys()]
-
-    db.session.add_all(new_sources)
-    db.session.commit()
-
-    return xref | {CatalogReference(s): s for s in new_sources}
-
-
 def add_catalog_publications(publication_datas):
     logging.debug('add_catalog_publications: started')
 
@@ -564,14 +392,14 @@ def add_catalog_publications(publication_datas):
 
 
 def save_publications(new_pubs):
-    journal_xref = _get_journal_xref(new_pubs)
-    subtype_xref = _get_subtype_xref(new_pubs)
-    pubs_xref = _get_publication_xref(new_pubs)
-    sponsor_xref = _get_sponsor_xref(new_pubs)
-    source_xref = _get_source_xref_from_publications(new_pubs)
-    keyword_xref = _get_keyword_xref(new_pubs)
+    journal_xref = _journal_xref_for_publication_data_list(new_pubs)
+    subtype_xref = _subtype_xref_for_publication_data_list(new_pubs)
+    pubs_xref = _publication_xref_for_publication_data_list(new_pubs)
+    sponsor_xref = _sponsor_xref_for_publication_data_list(new_pubs)
+    source_xref = _source_xref_for_publication_data_list(new_pubs)
+    keyword_xref = _keyword_xref_for_publication_data_list(new_pubs)
 
-    affiliation_xref = _get_affiliation_xref(chain.from_iterable([p.authors for p in new_pubs]))
+    affiliation_xref = _affiliation_xref_for_author_data_list(chain.from_iterable([p.authors for p in new_pubs]))
 
     for p in new_pubs:
         cpr = CatalogReference(p)

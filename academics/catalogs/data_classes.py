@@ -1,8 +1,13 @@
 from dataclasses import dataclass
-from academics.model import Keyword, Sponsor
+from itertools import chain, groupby
+import logging
+
+from sqlalchemy import select
+from academics.model import Affiliation, CatalogPublication, Journal, Keyword, Publication, Sponsor, Subtype
 from lbrc_flask.database import db
 from academics.model import Source
 from datetime import date
+from unidecode import unidecode
 
 
 @dataclass(init=False, unsafe_hash=True)
@@ -111,3 +116,198 @@ class AffiliationData():
         affiliation.name = self.name
         affiliation.address = self.address
         affiliation.country = self.country
+
+
+def _journal_xref_for_publication_data_list(publication_datas):
+    logging.debug('_get_journal_xref: started')
+
+    names = {p.journal_name for p in publication_datas}
+
+    q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
+
+    xref = {unidecode(j['name'].lower()): j['id'] for j in db.session.execute(q).mappings()}
+
+    new_journals = [Journal(name=n) for n in names if unidecode(n.lower()) not in xref.keys()]
+
+    db.session.add_all(new_journals)
+    db.session.commit()
+
+    xref = xref | {j.name.lower(): j.id for j in new_journals}
+
+    return {CatalogReference(p): xref[unidecode(p.journal_name.lower())] for p in publication_datas}
+
+
+def _subtype_xref_for_publication_data_list(publication_datas):
+    logging.debug('_get_subtype_xref: started')
+
+    descs = {p.subtype_description for p in publication_datas}
+
+    q = select(Subtype.id, Subtype.description).where(Subtype.description.in_(descs))
+
+    xref = {st['description'].lower(): st['id'] for st in db.session.execute(q).mappings()}
+
+    new_subtypes = [Subtype(code=d, description=d) for d in descs if d.lower() not in xref.keys()]
+
+    db.session.add_all(new_subtypes)
+    db.session.commit()
+
+    xref = xref | {st.description.lower(): st.id for st in new_subtypes}
+
+    return {CatalogReference(p): xref[p.subtype_description.lower()] for p in publication_datas}
+
+
+def _publication_xref_for_publication_data_list(publication_datas):
+    logging.debug('_get_publication_xref: started')
+
+    xref = {}
+
+    keyfunc = lambda a: a.catalog
+
+    for cat, pubs in groupby(sorted(publication_datas, key=keyfunc), key=keyfunc):
+        q = select(CatalogPublication).where(
+            CatalogPublication.catalog_identifier.in_([p.catalog_identifier for p in pubs])
+        ).where(
+            CatalogPublication.catalog == cat
+        ).distinct()
+
+        xref = xref | {CatalogReference(cp): cp.publication for cp in db.session.execute(q).unique().scalars()}
+
+    new_pubs = {CatalogReference(p): Publication() for p in publication_datas if CatalogReference(p) not in xref.keys()}
+
+    db.session.add_all(new_pubs.values())
+    db.session.commit()
+
+    xref = xref | new_pubs
+
+    return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
+
+
+def _sponsor_xref_for_publication_data_list(publication_datas):
+    logging.debug('_get_sponsor_xref: started')
+
+    all_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
+    unique_names = {unidecode(n.lower()): n for n in all_names}
+
+    q = select(Sponsor).where(Sponsor.name.in_(all_names))
+
+    xref = {unidecode(s.name.lower()): s for s in db.session.execute(q).scalars()}
+
+    new_sponsors = [Sponsor(name=n) for u, n in unique_names.items() if u not in xref.keys()]
+
+    db.session.add_all(new_sponsors)
+    db.session.commit()
+
+    xref = xref | {unidecode(s.name.lower()): s for s in new_sponsors}
+
+    return {
+        CatalogReference(p): [xref[unidecode(n.lower())] for n in p.funding_list if n]
+        for p in publication_datas
+    }
+
+
+def _keyword_xref_for_publication_data_list(publication_datas):
+    logging.debug('_get_keyword_xref: started')
+
+    all_keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
+    unique_keywords = {unidecode(k.lower()): k for k in all_keywords}
+
+    q = select(Keyword).where(Keyword.keyword.in_(all_keywords))
+
+    xref = {unidecode(k.keyword.lower()): k for k in db.session.execute(q).scalars()}
+
+    new_keywords = [Keyword(keyword=kw) for u, kw in unique_keywords.items() if u not in xref.keys()]
+
+    db.session.add_all(new_keywords)
+    db.session.commit()
+
+    xref = xref | {unidecode(k.keyword.lower()): k for k in new_keywords}
+
+    return {
+        CatalogReference(p): [xref[unidecode(k.strip().lower())] for k in p.keywords if k]
+        for p in publication_datas
+    }
+
+
+def _affiliation_xref_for_author_data_list(author_datas):
+    logging.debug('_get_affiliation_xref: started')
+
+    author_datas = list(author_datas)
+
+    affiliations = {CatalogReference(af): af for af in chain.from_iterable([a.affiliations for a in author_datas])}
+
+    xref = {}
+
+    keyfunc = lambda a: a.catalog
+
+    for cat, afils in groupby(sorted(affiliations.values(), key=keyfunc), key=keyfunc):
+
+        afils = list(afils)
+
+        q = select(Affiliation).where(
+            Affiliation.catalog_identifier.in_([a.catalog_identifier for a in afils])
+        ).where(
+            Affiliation.catalog == cat
+        )
+
+        xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
+
+        new_affiliations = [
+            Affiliation(
+                catalog=cat,
+                catalog_identifier=a.catalog_identifier,
+                name=a.name,
+                address=a.address,
+                country=a.country,
+                refresh_details=True,
+            )
+            for a in afils if CatalogReference(a) not in xref.keys()
+        ]
+
+        db.session.add_all(new_affiliations)
+        db.session.commit()
+
+        xref = xref | {CatalogReference(a): a for a in new_affiliations}
+
+    results = {}
+
+    for a in author_datas:
+        results[CatalogReference(a)] = [xref[af] for af in {CatalogReference(af) for af in a.affiliations}]
+
+    return results
+
+
+def _source_xref_for_publication_data_list(publication_datas):
+    logging.debug('_get_source_publication_xref: started')
+
+    authors = {CatalogReference(a): a for a in chain.from_iterable([p.authors for p in publication_datas])}
+
+    author_xref = _source_xref_for_author_data_list(authors.values())
+
+    return {
+        CatalogReference(p): [author_xref[CatalogReference(a)] for a in p.authors]
+        for p in publication_datas
+    }
+
+
+def _source_xref_for_author_data_list(author_datas):
+    logging.debug('_get_author_xref: started')
+
+    xref = {}
+
+    keyfunc = lambda a: a.catalog
+
+    for cat, authors in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
+        q = select(Source).where(
+            Source.catalog_identifier.in_([a.catalog_identifier for a in authors])
+        ).where(
+            Source.catalog == cat
+        )
+
+        xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
+
+    new_sources = [a.get_new_source() for a in author_datas if CatalogReference(a) not in xref.keys()]
+
+    db.session.add_all(new_sources)
+    db.session.commit()
+
+    return xref | {CatalogReference(s): s for s in new_sources}

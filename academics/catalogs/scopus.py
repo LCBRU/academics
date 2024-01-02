@@ -302,6 +302,9 @@ def scopus_author_search(search_string):
 
         result.append(a)
 
+
+    print('B'*10)
+    print(result)
     return result
 
 

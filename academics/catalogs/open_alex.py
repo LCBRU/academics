@@ -165,6 +165,9 @@ def open_alex_similar_authors(academic: Academic):
 
     new_authors = [a for a in authors.values() if _get_id_from_href(a.get('id', '')) not in existing]
 
+    print('A'*100)
+    print(new_authors)
+
     return _get_author_datas(new_authors)
 
 
