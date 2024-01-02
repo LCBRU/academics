@@ -36,7 +36,17 @@
                     <a href="{{ url_for('ui.publications', academic_id=a.academic_id ) }}">{{ a.full_name }}</a>
                 </li>
             {% else %}
-                <li class="not_academic">{{ a.full_name }}</li>
+                <li class="not_academic">
+                    <a
+                        data-toggle="modal"
+                        data-id="{{ a.id }}"
+                        data-name="{{ a.full_name }}"
+                        data-modal-content-url="{{ url_for('ui.academics_potential_sources', id=a.id) }}",
+                        title="View Source {{ a.full_name }}"
+                        data-title="Source Details for {{ a.full_name }}"
+                        data-target="#source_details"
+                        href="#">{{ a.full_name }}</a>
+                </li>
             {% endif %}
         {% endfor%}
     </ol>
