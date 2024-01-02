@@ -1,5 +1,3 @@
-{% from "lbrc_flask/modal_macros.html" import render_url_modal %}
-
 {% macro render_publication_title(publication) %}
 <div class='row'>
     <div class="col-9">
@@ -32,32 +30,28 @@
             {% set cls = 'not_academic' %}
 
             {% if a.has_left_brc %}
-                <li class="text-danger">{{ a.full_name }}</li>
+                {% set cls = 'text-danger' %}
             {% elif a.is_academic %}
-                <li class="is_academic">
-                    <a href="{{ url_for('ui.publications', academic_id=a.academic_id ) }}">{{ a.full_name }}</a>
-                </li>
-            {% else %}
-                <li class="not_academic">
-                    <a
-                        data-toggle="modal"
-                        data-id="{{ a.id }}"
-                        data-name="{{ a.full_name }}"
-                        data-modal-content-url="{{ url_for('ui.academics_potential_sources', id=a.id) }}",
-                        title="View Source {{ a.full_name }}"
-                        data-title="Source Details for {{ a.full_name }}"
-                        data-target="#source_details"
-                        href="#">{{ a.full_name }}</a>
-                </li>
+                {% set cls = 'text-is_academic' %}
             {% endif %}
+
+            <li class="{{cls}}">
+                <a
+                    data-toggle="modal"
+                    data-id="{{ a.id }}"
+                    data-name="{{ a.full_name }}"
+                    data-modal-content-url="{{ url_for('ui.source_details', id=a.id, prev=request.full_path) }}",
+                    title="View Source {{ a.full_name }}"
+                    data-title="Source Details for {{ a.full_name }}"
+                    data-target="#source_details"
+                    href="#">{{ a.full_name }}</a>
+            </li>
         {% endfor%}
     </ol>
     {% if publication.all_academics_left_brc %}
         <div class="text-danger">All authors have left the BRC</div>
     {% endif %}
 </h4>
-
-{{ render_url_modal('source_details', 'Source Details') }}
 
 {% endmacro %}
 

@@ -416,7 +416,7 @@ class Publication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     validation_historic: Mapped[bool] = mapped_column(default=False, nullable=True)
     not_brc: Mapped[bool] = mapped_column(default=False, nullable=True)
-    vancouver: Mapped[str] = mapped_column(nullable=True)
+    vancouver: Mapped[str] = mapped_column(String(1000), nullable=True)
 
     auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[auto_nihr_acknowledgement_id])

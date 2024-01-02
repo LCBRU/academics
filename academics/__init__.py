@@ -25,7 +25,7 @@ def create_app(config=Config):
         init_security(app, user_class=User, role_class=Role)
         init_admin(app, TITLE)
         init_celery(app, TITLE)
-        init_roles(get_roles())
+        # init_roles(get_roles())
 
         db.session.commit()
 

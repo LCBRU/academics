@@ -1,4 +1,3 @@
-import logging
 from flask import (abort, flash, jsonify, redirect, render_template, request,
                    url_for)
 from flask_login import current_user
@@ -9,15 +8,13 @@ from lbrc_flask.forms import FlashingForm, MultiCheckboxField
 from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
-from sqlalchemy import or_
 from wtforms import HiddenField
-
 from academics.model import (CatalogPublication, Folder, Journal, Keyword,
                              NihrAcknowledgement, Publication, Source, Sponsor,
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, or_
 
 from .. import blueprint
 

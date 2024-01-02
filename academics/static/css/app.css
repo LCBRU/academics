@@ -40,6 +40,10 @@ ol.author_list li.is_academic {
     font-weight: bold;
 }
 
+ol.author_list li.not_academic a {
+    color: var(--color-subheader);
+}
+
 dl.publication_details {
     display: grid;
     grid-template-columns: 1fr 1fr;

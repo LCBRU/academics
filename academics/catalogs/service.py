@@ -59,7 +59,7 @@ def refresh():
     logging.debug('refresh: ended')
 
 
-def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None):
+def add_sources_to_academic(catalog, catalog_identifiers, academic_id=None, theme_id=None):
     academic = None
 
     if academic_id:
@@ -74,17 +74,52 @@ def add_sources_to_academic(catalog_identifier, academic_id=None, theme_id=None)
 
     db.session.add(academic)
 
-    for catalog_identifier in catalog_identifier:
-        sa = Source(
-            catalog_identifier=catalog_identifier,
-            catalog=CATALOG_SCOPUS,
-            academic=academic,
-        )
-        db.session.add(sa)
+    sources = [
+        get_or_create_source(catalog=catalog, catalog_identifier=ci)
+        for ci in catalog_identifiers
+    ]
+
+    create_potential_sources(sources, academic, not_match=False)
 
     db.session.commit()
 
     _process_updates.delay()
+
+
+def create_potential_sources(sources, academic, not_match=True):
+    existing_sources = {CatalogReference(s.source) for s in db.session.execute(
+        select(AcademicPotentialSource)
+        .where(AcademicPotentialSource.academic == academic)
+    ).scalars()}
+
+    for s in sources:
+        s.academic = academic
+
+    potentials = [
+        AcademicPotentialSource(academic=academic, source=s, not_match=not_match)
+        for s in sources
+        if CatalogReference(s) not in existing_sources
+    ]
+
+    db.session.add_all(sources)
+    db.session.add_all(potentials)
+    db.session.commit()
+
+
+def get_or_create_source(catalog, catalog_identifier):
+    result = db.session.execute(
+        select(Source)
+        .where(Source.catalog == catalog)
+        .where(Source.catalog_identifier == catalog_identifier)
+    ).unique().scalar()
+
+    if not result:
+        result = Source(
+            catalog=catalog,
+            catalog_identifier=catalog_identifier,
+        )
+
+    return result
 
 
 def update_single_academic(academic: Academic):
@@ -319,11 +354,6 @@ def _find_new_potential_sources(academic):
     if len(academic.last_name.strip()) < 1:
         return
 
-    existing_sources = {CatalogReference(s.source) for s in db.session.execute(
-        select(AcademicPotentialSource)
-        .where(AcademicPotentialSource.academic == academic)
-    ).scalars()}
-
     new_source_datas = filter(
         lambda s: s.is_leicester,
         [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
@@ -335,14 +365,7 @@ def _find_new_potential_sources(academic):
     for s in new_sources:
         s.affiliations = affiliation_xref[CatalogReference(s)]
 
-    potentials = [
-        AcademicPotentialSource(academic=academic, source=s)
-        for s in new_sources
-        if CatalogReference(s) not in existing_sources
-    ]
-
-    db.session.add_all(potentials)
-    db.session.commit()
+    create_potential_sources(new_sources, academic, not_match=True)
 
 
 def _ensure_all_academic_sources_are_proposed(academic):

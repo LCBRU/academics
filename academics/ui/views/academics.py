@@ -1,14 +1,13 @@
-from flask import abort, jsonify, render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField
 from academics.catalogs.scopus import scopus_author_search
 from academics.catalogs.service import add_sources_to_academic, refresh, update_academics, update_single_academic, updating
-from academics.model import Academic, AcademicPotentialSource, Source, Theme
+from academics.model import CATALOG_SCOPUS, Academic, Theme
 from wtforms.validators import Length
 from .. import blueprint
-from lbrc_flask.json import validate_json
 
 
 def _get_academic_choices():
@@ -145,9 +144,10 @@ def add_author():
     form = AddAuthorForm()
 
     add_sources_to_academic(
-        request.form.getlist('catalog_identifier'),
-        form.academic_id.data,
-        form.theme_id.data,
+        catalog=CATALOG_SCOPUS,
+        catalog_identifiers=request.form.getlist('catalog_identifier'),
+        academic_id=form.academic_id.data,
+        theme_id=form.theme_id.data,
     )
 
     return redirect(url_for('ui.index'))
@@ -165,18 +165,6 @@ def delete_academic():
     return redirect(url_for('ui.index'))
 
 
-@blueprint.route("/delete_author", methods=['POST'])
-def delete_author():
-    form = ConfirmForm()
-
-    if form.validate_on_submit():
-        s = db.get_or_404(Source, form.id.data)
-        db.session.delete(s)
-        db.session.commit()
-
-    return redirect(url_for('ui.index'))
-
-
 @blueprint.route("/update_academic", methods=['POST'])
 def update_academic():
     form = ConfirmForm()
@@ -187,61 +175,3 @@ def update_academic():
         update_single_academic(academic)
 
     return redirect(url_for('ui.index'))
-
-
-@blueprint.route("/academics/<int:id>/potential_sources")
-def academics_potential_sources(id):
-    a = db.session.get(Academic, id)
-
-    if not a:
-        abort(404)
-
-    return render_template(
-        "ui/potential_sources.html",
-        academic=a,
-    )
-
-
-@blueprint.route("/academics/amend_potential_sources", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'integer'},
-        'academic_id': {'type': 'integer'},
-        'status': {'type': 'string'},
-    },
-    "required": ["id", "academic_id", "status"]
-})
-def academics_amend_potential_sources():
-    ps : AcademicPotentialSource = db.get_or_404(AcademicPotentialSource, request.json.get('id'))
-    a : Academic = db.get_or_404(Academic, request.json.get('academic_id'))
-    status = request.json.get('status').lower()
-
-    UNASSIGNED = 'unassigned'
-    NO_MATCH = 'no match'
-    MATCH = 'match'
-
-    ALL_STATUSES = {UNASSIGNED, NO_MATCH, MATCH}
-
-    if status not in ALL_STATUSES:
-        abort(406, f"Status not recognised should be {ALL_STATUSES}, but is {status}")
-
-    if ps.source.academic and ps.source.academic != a:
-        abort(406, f"Academic does not match source academic of {ps.source.academic.full_name}, but is {a.full_name}")
-
-    match request.json.get('status').lower():
-        case 'unassigned':
-            ps.source.academic = None
-            ps.not_match = False
-        case 'no match':
-            ps.source.academic = None
-            ps.not_match = True
-        case 'match':
-            ps.source.academic = a
-            ps.not_match = False
-            update_single_academic(a)
-    
-    db.session.add(ps)
-    db.session.commit()
-
-    return jsonify({'status': request.json.get('status')}), 200
