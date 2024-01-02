@@ -302,6 +302,10 @@ def scopus_author_search(search_string):
 
         result.append(a)
 
+    for a in result:
+        if a.catalog_identifier == '58188019200':
+            print('AB'*10)
+            print(a)
 
     print('B'*10)
     print(result)
