@@ -93,6 +93,7 @@ class Sponsor(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    industry: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_sponsors, back_populates="sponsors", collection_class=set)
 

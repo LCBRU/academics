@@ -3,7 +3,9 @@
 from dotenv import load_dotenv
 from lbrc_flask.database import db
 from lbrc_flask.security import init_roles, init_users
+from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.publication import *
+from academics.model.theme import Theme
 from academics.security import get_roles
 
 
@@ -345,3 +347,8 @@ for pd in [
 db.session.commit()
 
 db.session.close()
+
+from alembic.config import Config
+from alembic import command
+alembic_cfg = Config("alembic.ini")
+command.stamp(alembic_cfg, "head")
