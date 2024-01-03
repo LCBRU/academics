@@ -7,7 +7,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from academics.model import db
+from academics.model.publication import db
 import academics.catalogs.scopus
 
 # this is the Alembic Config object, which provides

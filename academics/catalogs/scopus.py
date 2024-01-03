@@ -7,7 +7,6 @@ import json
 from elsapy.elssearch import ElsSearch
 from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.catalogs.data_classes import AffiliationData, AuthorData, PublicationData
-from academics.model import CATALOG_SCOPUS, Academic, Source
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
 from flask import current_app
@@ -19,6 +18,9 @@ from lbrc_flask.data_conversions import ensure_list
 from elsapy import version
 from functools import cache
 from cachetools import cached, TTLCache
+from academics.model.academic import Academic, Source
+
+from academics.model.catalog import CATALOG_SCOPUS
 
 
 class ResourceNotFoundException(Exception):

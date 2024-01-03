@@ -2,7 +2,9 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model import Academic, CatalogPublicationsSources, Folder, Journal, Keyword, NihrAcknowledgement, Publication, Source, Subtype, Theme, CatalogPublication
+from academics.model.academic import Academic, CatalogPublicationsSources, Source
+from academics.model.folder import Folder
+from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
 from sqlalchemy import literal, literal_column, or_
@@ -12,6 +14,8 @@ from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem
 from lbrc_flask.database import db
 from cachetools import cached, TTLCache
+
+from academics.model.theme import Theme
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))

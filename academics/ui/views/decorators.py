@@ -1,8 +1,10 @@
 from functools import wraps
-from flask import flash, abort
+from flask import abort
 from flask_login import current_user
-from academics.model import Folder
 from lbrc_flask.requests import get_value_from_all_arguments
+from lbrc_flask.database import db
+
+from academics.model.folder import Folder
 
 
 def assert_folder_user():

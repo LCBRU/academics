@@ -4,9 +4,9 @@ from lbrc_flask.database import db
 from lbrc_flask.security import Role
 from lbrc_flask.admin import AdminCustomView, init_admin as flask_init_admin
 from lbrc_flask.api import ApiKey
-from flask_login import current_user
 
-from academics.model import Theme, User
+from academics.model.security import User
+from academics.model.theme import Theme
 
 
 class QuerySelectMultipleFieldSet(fields.QuerySelectMultipleField):

@@ -1,11 +1,10 @@
+import logging
 from dataclasses import dataclass
 from itertools import chain, groupby
-import logging
-
 from sqlalchemy import select
-from academics.model import Affiliation, CatalogPublication, Journal, Keyword, Publication, Sponsor, Subtype
+from academics.model.academic import Affiliation, Source
+from academics.model.publication import CatalogPublication, Journal, Keyword, Publication, Sponsor, Subtype
 from lbrc_flask.database import db
-from academics.model import Source
 from datetime import date
 from unidecode import unidecode
 

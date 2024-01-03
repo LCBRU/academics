@@ -10,7 +10,7 @@ from lbrc_flask.emailing import email
 from lbrc_flask.security import get_users_for_role
 from academics.security import ROLE_NEW_PUBLICATION_RECIPIENT
 
-from academics.model import Publication
+from academics.model.publication import Publication
 from academics import create_app
 
 # Load environment variables from '.env' file.

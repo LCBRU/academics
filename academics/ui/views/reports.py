@@ -6,7 +6,7 @@ from sqlalchemy import distinct, select
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 from lbrc_flask.export import csv_download
 from sqlalchemy import select
-from academics.model import Academic
+from academics.model.academic import Academic
 from academics.publication_searching import nihr_acknowledgement_select_choices, publication_count, publication_search_query, publication_summary, theme_select_choices
 
 from .. import blueprint

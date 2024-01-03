@@ -3,7 +3,7 @@
 from dotenv import load_dotenv
 from lbrc_flask.database import db
 from lbrc_flask.security import init_roles, init_users
-from academics.model import *
+from academics.model.publication import *
 from academics.security import get_roles
 
 

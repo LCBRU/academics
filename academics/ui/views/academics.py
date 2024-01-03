@@ -5,8 +5,11 @@ from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField
 from academics.catalogs.scopus import scopus_author_search
 from academics.catalogs.service import add_sources_to_academic, refresh, update_academics, update_single_academic, updating
-from academics.model import CATALOG_SCOPUS, Academic, Theme
+from academics.model.academic import Academic
+from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length
+
+from academics.model.theme import Theme
 from .. import blueprint
 
 

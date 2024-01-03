@@ -2,8 +2,10 @@ from flask import request
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import select
 from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
+from academics.model.academic import Academic
 
-from academics.model import (Academic, NihrAcknowledgement, Theme)
+from academics.model.publication import NihrAcknowledgement
+from academics.model.theme import Theme
 from academics.publication_searching import publication_summary
 from lbrc_flask.database import db
 

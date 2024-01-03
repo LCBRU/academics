@@ -1,5 +1,5 @@
 from flask import Flask
-from academics.model import User
+from academics.model.security import User
 from academics.security import get_roles
 
 from .ui import blueprint as ui_blueprint

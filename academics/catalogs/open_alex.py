@@ -9,7 +9,8 @@ from pyalex import Authors, Works, Institutions
 from itertools import chain
 from flask import current_app
 from lbrc_flask.database import db
-from academics.model import CATALOG_OPEN_ALEX, DOI_URL, ORCID_URL, Academic, Source
+from academics.model.academic import Academic, Source
+from academics.model.publication import CATALOG_OPEN_ALEX, DOI_URL, ORCID_URL
 from lbrc_flask.validators import parse_date
 from lbrc_flask.data_conversions import ensure_list
 

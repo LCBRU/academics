@@ -4,7 +4,8 @@ from flask import current_app
 from sqlalchemy import delete, select
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
-from academics.model import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, Academic, AcademicPotentialSource, CatalogPublication, CatalogPublicationsSources, NihrAcknowledgement, Publication, Source, Subtype, Affiliation, catalog_publications_sources_affiliations
+from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source, catalog_publications_sources_affiliations
+from academics.model.publication import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, CatalogPublication, NihrAcknowledgement, Publication, Subtype
 from lbrc_flask.celery import celery
 from academics.publication_searching import ValidationSearchForm, publication_search_query
 from .scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors

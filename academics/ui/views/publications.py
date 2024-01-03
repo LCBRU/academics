@@ -9,10 +9,14 @@ from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from wtforms import HiddenField
-from academics.model import (Academic, CatalogPublication, Folder, Journal, Keyword,
-                             NihrAcknowledgement, Publication, Source, Sponsor,
-                             Subtype, Theme, User)
+from academics.model.academic import Academic, Source
+from academics.model.folder import Folder
+from academics.model.publication import (CatalogPublication, Journal, Keyword,
+                             NihrAcknowledgement, Publication, Sponsor,
+                             Subtype)
 from academics.catalogs.service import auto_validate
+from academics.model.security import User
+from academics.model.theme import Theme
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, academic_select_choices, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
 from sqlalchemy import alias, select, func, or_
 

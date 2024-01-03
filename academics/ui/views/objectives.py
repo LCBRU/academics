@@ -1,11 +1,12 @@
-from os import abort
-from flask import jsonify, redirect, render_template, request
+from flask import redirect, render_template, request
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from academics.model import Objective, User, Theme
+from academics.model.objective import Objective
+from academics.model.security import User
+
+from academics.model.theme import Theme
 from .. import blueprint
-from wtforms import HiddenField, StringField, TextAreaField
+from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
-from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id, system_user_id
 from wtforms import SelectField
 from wtforms.validators import Length, DataRequired
