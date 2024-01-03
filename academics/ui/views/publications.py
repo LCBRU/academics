@@ -14,7 +14,7 @@ from academics.model import (Academic, CatalogPublication, Folder, Journal, Keyw
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
 from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, academic_select_choices, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
-from sqlalchemy import select, func, or_
+from sqlalchemy import alias, select, func, or_
 
 from .. import blueprint
 
@@ -250,10 +250,10 @@ def publication_export_pdf():
     if publication_end_date:
         parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 
-    publications = list(db.session.execute(q.order_by(CatalogPublication.publication_cover_date.desc())).unique().scalars())
-
-    if len(publications) > 100:
+    if db.session.execute(select(func.count('*')).select_from(alias(q))).scalar() > 100:
         abort(413)
+
+    publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
 
     return pdf_download(
         'ui/publications_pdf.html',
