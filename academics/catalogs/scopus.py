@@ -1,4 +1,3 @@
-from collections.abc import Mapping
 from datetime import date, datetime
 import logging
 import requests
@@ -16,6 +15,7 @@ from sqlalchemy import select
 from lbrc_flask.database import db
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
+from lbrc_flask.data_conversions import ensure_list
 from elsapy import version
 from functools import cache
 from cachetools import cached, TTLCache
@@ -181,10 +181,7 @@ def get_scopus_publications(identifier):
 
 def _translate_publication_author(author_dict):
 
-    afils = author_dict.get('afid') or []
-
-    if isinstance(afils, Mapping):
-        afils = [afils]
+    afils = ensure_list(author_dict.get('afid'))
 
     affiliations = [
         AffiliationData(
@@ -269,10 +266,7 @@ def scopus_author_search(search_string):
             if h['@rel'] == 'scopus-author':
                 href = h['@href']
 
-        afils = r.get('affiliation-current') or []
-
-        if isinstance(afils, Mapping):
-            afils = [afils]
+        afils = ensure_list(r.get('affiliation-current'))
 
         affiliations = [
             AffiliationData(
@@ -408,10 +402,7 @@ class Author(ElsAuthor):
         return True
 
     def get_data(self):
-        afils = self.data.get('affiliation-current') or []
-
-        if isinstance(afils, Mapping):
-            afils = [afils]
+        afils = ensure_list(self.data.get('affiliation-current'))
 
         affiliations = [
             AffiliationData(
@@ -534,10 +525,7 @@ class Abstract(AbsDoc):
 
     def _translate_publication_author(self, author_dict):
 
-        afils = self.data.get('affiliation') or []
-
-        if isinstance(afils, Mapping):
-            afils = [afils]
+        afils = ensure_list(self.data.get('affiliation'))
 
         affiliations = [AffiliationData(
             catalog=CATALOG_SCOPUS,

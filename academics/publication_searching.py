@@ -4,6 +4,7 @@ from flask import url_for
 from flask_login import current_user
 from academics.model import Academic, CatalogPublicationsSources, Folder, Journal, Keyword, NihrAcknowledgement, Publication, Source, Subtype, Theme, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
+from lbrc_flask.data_conversions import ensure_list
 from sqlalchemy import literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm
@@ -19,16 +20,20 @@ def theme_select_choices():
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
-def academic_select_choices():
+def academic_select_choices(search_string=None):
     q = (
         select(Academic)
         .where(Academic.initialised == True)
         .order_by(Academic.last_name, Academic.first_name)
     )
 
-    return [('', '')] + [
+    if search_string:
+        q = q.filter((Academic.first_name + ' ' + Academic.last_name).like("%{}%".format(search_string)))
+
+    return [
         (a.id, f'{a.full_name}')
-        for a in db.session.execute(q).scalars()]
+        for a in db.session.execute(q).scalars()
+    ]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
@@ -72,7 +77,7 @@ class PublicationSearchForm(SearchForm):
     nihr_acknowledgement_ids = SelectMultipleField('Acknowledgement')
     keywords = SelectMultipleField('Keywords')
     author_id = HiddenField('Author')
-    academic_id = SelectField('Academic')
+    academic_id = SelectMultipleField('Academic')
     folder_id = SelectField('Folder')
     supress_validation_historic = SelectField(
         'Suppress Historic',
@@ -85,12 +90,12 @@ class PublicationSearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
-        self.subtype_id.choices = [('', '')] + [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
+        self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
         self.folder_id.choices = [('', '')] + folder_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
-        self.academic_id.choices = academic_select_choices()
+        self.academic_id.render_kw={'data-options-href': url_for('ui.publication_author_options'), 'style': 'width: 300px'}
 
 
 class ValidationSearchForm(SearchForm):
@@ -155,7 +160,7 @@ def catalog_publication_search_query(search_form):
         q = q.where(CatalogPublication.id.in_(
             select(CatalogPublicationsSources.catalog_publication_id)
             .join(CatalogPublicationsSources.source)
-            .where(Source.academic_id == search_form.academic_id.data)
+            .where(Source.academic_id.in_(ensure_list(search_form.academic_id.data)))
         ))
 
     if search_form.has_value('theme_id'):

@@ -9,11 +9,11 @@ from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from wtforms import HiddenField
-from academics.model import (CatalogPublication, Folder, Journal, Keyword,
+from academics.model import (Academic, CatalogPublication, Folder, Journal, Keyword,
                              NihrAcknowledgement, Publication, Source, Sponsor,
                              Subtype, Theme, User)
 from academics.catalogs.service import auto_validate
-from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
+from academics.publication_searching import PublicationSearchForm, ValidationSearchForm, academic_select_choices, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
 from sqlalchemy import select, func, or_
 
 from .. import blueprint
@@ -45,6 +45,7 @@ def publications():
 
     search_form.keywords.choices = [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
     search_form.journal_id.choices = [(j.id, j.name.title()) for j in Journal.query.filter(Journal.id.in_(search_form.journal_id.data)).all()]
+    search_form.academic_id.choices = [(a.id, a.full_name) for a in Academic.query.filter(Academic.id.in_(search_form.academic_id.data)).all()]
 
     folder_query = Folder.query
 
@@ -286,6 +287,11 @@ def publication_nihr_acknowledgement():
         db.session.commit()
 
     return jsonify({'status': 'reload'}), 205
+
+
+@blueprint.route("/publication/author/options")
+def publication_author_options():
+    return jsonify({'results': [{'id': id, 'text': text} for id, text in academic_select_choices(request.args.get('q'))]})
 
 
 @blueprint.route("/publication/keywords/options")

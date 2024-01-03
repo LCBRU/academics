@@ -1,4 +1,3 @@
-from collections.abc import Mapping
 import pyalex
 import logging
 
@@ -12,6 +11,7 @@ from flask import current_app
 from lbrc_flask.database import db
 from academics.model import CATALOG_OPEN_ALEX, DOI_URL, ORCID_URL, Academic, Source
 from lbrc_flask.validators import parse_date
+from lbrc_flask.data_conversions import ensure_list
 
 
 def get_open_alex():
@@ -104,10 +104,7 @@ def _diction_purge_none(_dict):
 
 
 def _translate_publication_author(author_dict):
-    afils = author_dict.get('institutions') or []
-
-    if isinstance(afils, Mapping):
-        afils = [afils]
+    afils = ensure_list(author_dict.get('institutions'))
 
     affiliations = [
         AffiliationData(
@@ -219,10 +216,7 @@ def _get_author_datas(authors):
 
     for a in authors:
 
-        afils = a.get('affiliations') or []
-
-        if isinstance(afils, Mapping):
-            afils = [afils]
+        afils = ensure_list(a.get('affiliations'))
 
         affiliations = [
             AffiliationData(

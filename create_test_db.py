@@ -43,8 +43,9 @@ for n, a in NihrAcknowledgement.all_details.items():
 db.session.commit()
 
 # Keyword
-for k in ['Keyword 1', 'Keyword 2']:
+for k in ['Keyword 1', 'Keyword 2', 'Keyword 3']:
     db.session.add(Keyword(keyword=k))
+
 db.session.commit()
 
 # Academic
@@ -66,6 +67,7 @@ for a in [
     },
 ]:
     db.session.add(Academic(**a, initialised=True))
+
 db.session.commit()
 
 for a in [
@@ -129,6 +131,8 @@ for pd in [
         'publication_cover_date': '2023-01-01',
         'catalog_identifier': '111',
         'doi': '10.10.01',
+        'journal_id': 1,
+        'keywords': [1],
     },
     {
         'sources': [2, 7],
@@ -136,6 +140,8 @@ for pd in [
         'publication_cover_date': '2023-01-02',
         'catalog_identifier': '112',
         'doi': '10.10.02',
+        'journal_id': 1,
+        'keywords': [1,2],
     },
     {
         'sources': [2, 7],
@@ -143,6 +149,8 @@ for pd in [
         'publication_cover_date': '2023-01-03',
         'catalog_identifier': '113',
         'doi': '10.10.03',
+        'journal_id': 1,
+        'keywords': [2],
     },
     {
         'sources': [3, 7],
@@ -150,6 +158,8 @@ for pd in [
         'publication_cover_date': '2023-01-04',
         'catalog_identifier': '114',
         'doi': '10.10.04',
+        'journal_id': 1,
+        'keywords': [2,3],
     },
     {
         'sources': [3, 7],
@@ -157,6 +167,8 @@ for pd in [
         'publication_cover_date': '2023-01-05',
         'catalog_identifier': '115',
         'doi': '10.10.05',
+        'journal_id': 1,
+        'keywords': [3],
     },
     {
         'sources': [3, 7],
@@ -164,6 +176,8 @@ for pd in [
         'publication_cover_date': '2023-01-06',
         'catalog_identifier': '116',
         'doi': '10.10.06',
+        'journal_id': 1,
+        'keywords': [1,2,3],
     },
     {
         'sources': [4, 7],
@@ -171,6 +185,8 @@ for pd in [
         'publication_cover_date': '2023-01-07',
         'catalog_identifier': '117',
         'doi': '10.10.07',
+        'journal_id': 1,
+        'keywords': [1],
     },
     {
         'sources': [4, 7],
@@ -178,6 +194,8 @@ for pd in [
         'publication_cover_date': '2023-01-08',
         'catalog_identifier': '118',
         'doi': '10.10.08',
+        'journal_id': 1,
+        'keywords': [1,2],
     },
     {
         'sources': [4, 7],
@@ -185,6 +203,8 @@ for pd in [
         'publication_cover_date': '2023-01-09',
         'catalog_identifier': '119',
         'doi': '10.10.09',
+        'journal_id': 1,
+        'keywords': [2],
     },
     {
         'sources': [4, 7],
@@ -192,6 +212,8 @@ for pd in [
         'publication_cover_date': '2023-01-10',
         'catalog_identifier': '121',
         'doi': '10.10.10',
+        'journal_id': 1,
+        'keywords': [2,3],
     },
     {
         'sources': [5, 7],
@@ -199,6 +221,8 @@ for pd in [
         'publication_cover_date': '2023-02-01',
         'catalog_identifier': '131',
         'doi': '10.10.11',
+        'journal_id': 1,
+        'keywords': [3],
     },
     {
         'sources': [5, 7],
@@ -206,6 +230,8 @@ for pd in [
         'publication_cover_date': '2023-02-03',
         'catalog_identifier': '141',
         'doi': '10.10.12',
+        'journal_id': 1,
+        'keywords': [1,2,3],
     },
     {
         'sources': [5, 7],
@@ -213,6 +239,8 @@ for pd in [
         'publication_cover_date': '2023-03-01',
         'catalog_identifier': '151',
         'doi': '10.10.13',
+        'journal_id': 1,
+        'keywords': [1],
     },
     {
         'sources': [5, 7],
@@ -220,6 +248,8 @@ for pd in [
         'publication_cover_date': '2023-03-02',
         'catalog_identifier': '161',
         'doi': '10.10.14',
+        'journal_id': 2,
+        'keywords': [1,2],
     },
     {
         'sources': [5, 7],
@@ -227,6 +257,8 @@ for pd in [
         'publication_cover_date': '2023-03-03',
         'catalog_identifier': '171',
         'doi': '10.10.15',
+        'journal_id': 2,
+        'keywords': [1,3],
     },
     {
         'sources': [6, 7],
@@ -234,6 +266,8 @@ for pd in [
         'publication_cover_date': '2023-01-11',
         'catalog_identifier': '181',
         'doi': '10.10.16',
+        'journal_id': 2,
+        'keywords': [2],
     },
     {
         'sources': [6, 7],
@@ -241,6 +275,8 @@ for pd in [
         'publication_cover_date': '2023-01-12',
         'catalog_identifier': '191',
         'doi': '10.10.17',
+        'journal_id': 2,
+        'keywords': [2,3],
     },
     {
         'sources': [6, 7],
@@ -248,6 +284,8 @@ for pd in [
         'publication_cover_date': '2023-01-13',
         'catalog_identifier': '211',
         'doi': '10.10.18',
+        'journal_id': 2,
+        'keywords': [3],
     },
     {
         'sources': [6, 7],
@@ -255,6 +293,8 @@ for pd in [
         'publication_cover_date': '2023-01-14',
         'catalog_identifier': '311',
         'doi': '10.10.19',
+        'journal_id': 2,
+        'keywords': [1,2,3],
     },
     {
         'sources': [6, 7],
@@ -262,6 +302,8 @@ for pd in [
         'publication_cover_date': '2023-01-15',
         'catalog_identifier': '411',
         'doi': '10.10.20',
+        'journal_id': 2,
+        'keywords': [1],
     },
     {
         'sources': [6, 7],
@@ -269,6 +311,8 @@ for pd in [
         'publication_cover_date': '2023-01-16',
         'catalog_identifier': '511',
         'doi': '10.10.21',
+        'journal_id': 2,
+        'keywords': [1,2],
     },
 ]:
 
@@ -286,7 +330,10 @@ for pd in [
         pages='',
         funding_text='',
         href='',
+        journal_id=pd['journal_id'],
     )
+
+    cp.keywords = {Keyword.query.get(k) for k in pd['keywords']}
 
     for s in pd['sources']:
         cp.catalog_publication_sources.append(CatalogPublicationsSources(
