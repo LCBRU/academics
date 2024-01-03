@@ -26,6 +26,23 @@ sources__affiliations = db.Table(
 )
 
 
+academics_themes = db.Table(
+    'academics_themes',
+    db.Column(
+        'academic_id',
+        db.Integer(),
+        db.ForeignKey('academic.id'),
+        primary_key=True,
+    ),
+    db.Column(
+        'theme_id',
+        db.Integer(),
+        db.ForeignKey('theme.id'),
+        primary_key=True,
+    ),
+)
+
+
 class Affiliation(db.Model):
     __table_args__ = (
         UniqueConstraint("catalog", "catalog_identifier", name='ux__affiliation__catalog__catalog_identifier'),
@@ -63,6 +80,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
     theme = db.relationship(Theme)
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
+
+    themes = db.relationship(Theme, secondary='academics_themes', cascade="all,delete")
 
     @property
     def full_name(self):
