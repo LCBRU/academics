@@ -62,6 +62,8 @@ def get_open_alex_publication_data(identifier):
 
 def _get_publication_data(pubdata):
 
+    print(pubdata)
+
     pd = _diction_purge_none(pubdata)
     bib = pd.get('biblio', {})
     grants = pd.get('grants', [])
