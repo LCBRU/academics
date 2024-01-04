@@ -295,9 +295,9 @@ def publication_count(search_form):
 
 
 def publication_summary(search_form):
-    if search_form.has_value('academic_id') or search_form.total.data == "Academic":
+    if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
         publications = get_publication_by_academic(search_form)
-    elif search_form.has_value('theme_id') or search_form.total.data == "Theme":
+    elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
         publications = get_publication_by_theme(search_form)
     else:
         publications = get_publication_by_brc(search_form)
