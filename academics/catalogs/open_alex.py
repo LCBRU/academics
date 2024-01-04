@@ -41,12 +41,14 @@ def get_openalex_publications(identifier):
 
     result = []
 
-    for w in chain(*Works().filter(**{"author.id": identifier}).paginate(per_page=200)):
-        result.append(_get_publication_data(w))
+    q = (
+        Works()
+            .filter(**{"author.id": identifier})
+            .filter(publication_year=f'{date.today().year - 2}')
+        )
 
-    print('A'*10)
-    print(len(result))
-    print('B'*10)
+    for w in chain(*q.paginate(per_page=200)):
+        result.append(_get_publication_data(w))
 
     return result
 

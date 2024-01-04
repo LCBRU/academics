@@ -418,6 +418,8 @@ def add_catalog_publications(publication_datas):
 
 
 def save_publications(new_pubs):
+    logging.info(f'save_publications start')
+
     journal_xref = _journal_xref_for_publication_data_list(new_pubs)
     subtype_xref = _subtype_xref_for_publication_data_list(new_pubs)
     pubs_xref = _publication_xref_for_publication_data_list(new_pubs)
