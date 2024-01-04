@@ -172,7 +172,7 @@ def catalog_publication_search_query(search_form):
             select(CatalogPublicationsSources.catalog_publication_id)
             .join(CatalogPublicationsSources.source)
             .join(Source.academic)
-            .where(Academic.theme_id == search_form.theme_id.data)
+            .where(Academic.themes.any(Theme.id == search_form.theme_id.data))
         ))
 
     if  search_form.has_value('journal_id'):
@@ -289,7 +289,7 @@ def get_publication_by_theme(search_form):
     ).join(
         Source.academic
     ).join(
-        Academic.theme
+        Academic.themes
     ).distinct()
 
     if search_form.has_value('theme_id'):

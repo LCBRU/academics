@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
-from wtforms import SelectField
+from wtforms import SelectField, SelectMultipleField
 from academics.catalogs.scopus import scopus_author_search
 from academics.catalogs.service import add_sources_to_academic, refresh, update_academics, update_single_academic, updating
 from academics.model.academic import Academic
@@ -23,26 +23,26 @@ def _get_academic_choices():
 class AddAuthorForm(FlashingForm):
     catalog_identifier = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
-    theme_id = SelectField('Theme', coerce=int)
+    themes = SelectMultipleField('Theme', coerce=int)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.academic_id.choices = _get_academic_choices()
-        self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
 
 
 class AcademicEditForm(FlashingForm):
     first_name = StringField("First Name", validators=[Length(max=500)])
     last_name = StringField("Last Name", validators=[Length(max=500)])
     orcid = StringField("ORCID", validators=[Length(max=255)])
-    theme_id = SelectField('Theme', coerce=int)
+    themes = SelectMultipleField('Theme', coerce=int)
     has_left_brc = BooleanField('Has Left BRC', default=False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme_id.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
 
 
 class AcademicSearchForm(SearchForm):
@@ -66,9 +66,9 @@ def index():
 
     if search_form.theme_id.data:
         if search_form.theme_id.data == -1:
-            q = q.filter(Academic.theme_id == None)
+            q = q.filter(~Academic.themes.any())
         else:
-            q = q.filter(Academic.theme_id == search_form.theme_id.data)
+            q = q.filter(Academic.themes.any(Theme.id == search_form.theme_id.data))
     
     q = q.order_by(Academic.last_name).order_by(Academic.first_name)
 
@@ -91,13 +91,19 @@ def index():
 def academic_edit(id):
     academic = db.get_or_404(Academic, id)
 
-    form = AcademicEditForm(obj=academic)
+    form = AcademicEditForm(data={
+        'first_name': academic.first_name,
+        'last_name': academic.last_name,
+        'orcid': academic.orcid,
+        'has_left_brc': academic.has_left_brc,
+        'themes': [t.id for t in academic.themes]
+    })
 
     if form.validate_on_submit():
         academic.first_name = form.first_name.data
         academic.last_name = form.last_name.data
         academic.orcid = form.orcid.data
-        academic.theme_id = form.theme_id.data
+        academic.themes = [db.session.get(Theme, t) for t in form.themes.data]
         academic.has_left_brc = form.has_left_brc.data
 
         db.session.add(academic)
@@ -150,7 +156,7 @@ def add_author():
         catalog=CATALOG_SCOPUS,
         catalog_identifiers=request.form.getlist('catalog_identifier'),
         academic_id=form.academic_id.data,
-        theme_id=form.theme_id.data,
+        themes = [db.session.get(Theme, t) for t in form.themes.data],
     )
 
     return redirect(url_for('ui.index'))

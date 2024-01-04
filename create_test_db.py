@@ -55,20 +55,22 @@ for a in [
     {
         'first_name': 'Fred',
         'last_name': 'Hoyle',
-        'theme_id': 1,
+        'themes': [1],
     },
     {
         'first_name': 'Richard',
         'last_name': 'Feynman',
-        'theme_id': 1,
+        'themes': [1,2],
     },
     {
         'first_name': 'Peter',
         'last_name': 'Faulk',
-        'theme_id': 2,
+        'themes': [2],
     },
 ]:
-    db.session.add(Academic(**a, initialised=True))
+    aca = Academic(first_name=a['first_name'], last_name=a['last_name'], initialised=True)
+    aca.themes = [Theme.query.get(t) for t in a['themes']]
+    db.session.add(aca)
 
 db.session.commit()
 
