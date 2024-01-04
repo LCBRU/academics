@@ -416,11 +416,6 @@ class Author(ElsAuthor):
             ) for a in afils if a.get('@id')
         ]
 
-        print(self.data)
-        print('A'*10)
-        print(self.first_name)
-        print('B'*10)
-
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
             catalog_identifier=self.catalog_identifier,

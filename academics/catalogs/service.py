@@ -315,6 +315,9 @@ def _update_source(s):
         if s.catalog == CATALOG_OPEN_ALEX:
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
+        print('Q'*10)
+        print(author_data)
+
         if author_data:
             a = _source_xref_for_author_data_list([author_data])[CatalogReference(s)]
             affiliation_xref = _affiliation_xref_for_author_data_list([author_data])

@@ -306,6 +306,9 @@ def _source_xref_for_author_data_list(author_datas):
 
     new_sources = [a.get_new_source() for a in author_datas if CatalogReference(a) not in xref.keys()]
 
+    print('R'*10)
+    print(new_sources)
+
     db.session.add_all(new_sources)
     db.session.commit()
 
