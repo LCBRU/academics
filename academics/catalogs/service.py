@@ -22,7 +22,7 @@ def updating():
 
 
 def auto_validate():
-    form = ValidationSearchForm(meta={'csrf': False})
+    form = ValidationSearchForm()
     form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
     form.supress_validation_historic.data = False
     form.nihr_acknowledgement_id.data = -1
