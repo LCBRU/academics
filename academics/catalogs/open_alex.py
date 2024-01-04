@@ -38,14 +38,17 @@ def get_openalex_publications(identifier):
     if not current_app.config['OPEN_ALEX_ENABLED']:
         logging.warn('OpenAlex Not Enabled')
         return []
-    
-    return [
-        _get_publication_data(w)
-        for w in Works()
-            .filter(**{"author.id": identifier})
-            # .filter(publication_year=f'{date.today().year - 1}')
-            .get()
-    ]
+
+    result = []
+
+    for w in chain(*Works().filter(**{"author.id": identifier}).paginate(per_page=200)):
+        result.append(_get_publication_data(w))
+
+    print('A'*10)
+    print(len(result))
+    print('B'*10)
+
+    return result
 
 
 def get_open_alex_publication_data(identifier):
@@ -61,10 +64,6 @@ def get_open_alex_publication_data(identifier):
 
 
 def _get_publication_data(pubdata):
-
-    print('A'*10)
-    print(pubdata)
-    print('B'*10)
 
     pd = _diction_purge_none(pubdata)
     bib = pd.get('biblio', {})
