@@ -13,7 +13,8 @@ from .. import blueprint
 
 
 class PublicationSearchForm(SearchForm):
-    total = SelectField('Total', choices=[('BRC', 'BRC'), ('Theme', 'Theme'), ('Academic', 'Academic')])
+    total = SelectField('Total By', choices=[('BRC', 'BRC'), ('Theme', 'Theme'), ('Academic', 'Academic')])
+    group = SelectField('Group By', choices=[('Total', 'Total'), ('Validation Status', 'Validation Status')])
     measure = SelectField('Measure', choices=[('Percentage', 'Percentage'), ('Publications', 'Publications')])
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
