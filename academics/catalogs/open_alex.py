@@ -62,7 +62,9 @@ def get_open_alex_publication_data(identifier):
 
 def _get_publication_data(pubdata):
 
+    print('A'*10)
     print(pubdata)
+    print('B'*10)
 
     pd = _diction_purge_none(pubdata)
     bib = pd.get('biblio', {})
