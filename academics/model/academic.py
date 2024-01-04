@@ -94,6 +94,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     def ensure_initialisation(self):
         print('C'*10)
+        print(self.best_source.first_name)
         print(self.best_source.last_name)
 
         if self.best_source.last_name:
