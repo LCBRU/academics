@@ -240,6 +240,10 @@ def scopus_similar_authors(academic: Academic):
 
 
 def scopus_author_search(search_string):
+
+    print('A'*10)
+    print(search_string)
+
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')
         return []
