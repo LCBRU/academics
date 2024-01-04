@@ -242,7 +242,7 @@ class Publication(db.Model, AuditMixin):
             self.vancouver = '[No Best Catalog Publication]'
             return
 
-        author_list = ', '.join([a.reference_name for a in self.authors[0:6]])
+        author_list = ', '.join([a.source.reference_name for a in self.best_catalog_publication.catalog_publication_sources[0:6]])
 
         if len(self.authors) > 6:
             author_list = f'{author_list}, et al'
