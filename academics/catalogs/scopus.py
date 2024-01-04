@@ -255,7 +255,7 @@ def scopus_author_search(search_string):
     else:
         q = f'AUTHLASTNAME({search_string})'
 
-    auth_srch = ElsSearch(q,'author')
+    auth_srch = ElsSearch(f'{q} AND affil(leicester)','author')
     auth_srch.execute(_client(), get_all=True)
 
     existing_catalog_identifiers = set(db.session.execute(
