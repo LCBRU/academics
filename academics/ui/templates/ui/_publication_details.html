@@ -26,7 +26,8 @@
 {% macro render_publication_authors(publication) %}
 <h4>
     <ol class="author_list">
-        {% for a in publication.authors %}
+        {% for cps in publication.best_catalog_publication.catalog_publication_sources %}
+            {% set a = cps.source %}
             {% set cls = 'not_academic' %}
 
             {% if a.has_left_brc %}

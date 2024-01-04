@@ -270,20 +270,12 @@ class Publication(db.Model, AuditMixin):
         return ','.join([str(f.id) for f in self.folders])
 
     @property
-    def academics(self):
-        return {a.academic for a in self.authors}
-
-    @property
     def is_nihr_acknowledged(self):
         return any([s.is_nihr for s in self.sponsors])
 
     @property
-    def all_nihr_acknowledged(self):
-        return len(self.sponsors) > 0 and all([s.is_nihr for s in self.sponsors])
-
-    @property
     def all_academics_left_brc(self):
-        return all(a.has_left_brc for a in self.academics)
+        return self.best_catalog_publication.all_academics_left_brc
 
 
 class CatalogPublication(db.Model, AuditMixin):
@@ -327,4 +319,6 @@ class CatalogPublication(db.Model, AuditMixin):
     sponsors = db.relationship("Sponsor", lazy="joined", secondary=catalog_publications_sponsors, back_populates="catalog_publications", collection_class=set)
     keywords = db.relationship("Keyword", lazy="joined", secondary=catalog_publications_keywords, back_populates="catalog_publications", collection_class=set)
 
-
+    @property
+    def all_academics_left_brc(self):
+        return all(cps.source.academic.has_left_brc for cps in self.catalog_publication_sources)

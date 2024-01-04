@@ -241,9 +241,6 @@ def scopus_similar_authors(academic: Academic):
 
 def scopus_author_search(search_string):
 
-    print('A'*10)
-    print(search_string)
-
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')
         return []
@@ -265,10 +262,6 @@ def scopus_author_search(search_string):
     ).scalars())
 
     result = []
-
-    print('B'*10)
-    print(auth_srch.results)
-    print('C'*10)
 
     for r in auth_srch.results:
         href = ''
@@ -305,10 +298,6 @@ def scopus_author_search(search_string):
         a.existing = a.catalog_identifier in existing_catalog_identifiers
 
         result.append(a)
-
-        if a.catalog_identifier == '58188019200':
-            print('AB'*10)
-            print(a)
 
     return result
 
