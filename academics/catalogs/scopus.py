@@ -266,6 +266,9 @@ def scopus_author_search(search_string):
 
     result = []
 
+
+    print(auth_srch.results)
+
     for r in auth_srch.results:
         href = ''
         for h in r.get(u'coredata', {}).get(u'link', ''):
