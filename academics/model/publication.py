@@ -244,7 +244,7 @@ class Publication(db.Model, AuditMixin):
 
         author_list = ', '.join([a.source.reference_name for a in self.best_catalog_publication.catalog_publication_sources[0:6]])
 
-        if len(self.authors) > 6:
+        if len(self.best_catalog_publication.catalog_publication_sources) > 6:
             author_list = f'{author_list}, et al'
 
         parts = []
