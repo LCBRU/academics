@@ -266,8 +266,9 @@ def scopus_author_search(search_string):
 
     result = []
 
-
+    print('B'*10)
     print(auth_srch.results)
+    print('C'*10)
 
     for r in auth_srch.results:
         href = ''
