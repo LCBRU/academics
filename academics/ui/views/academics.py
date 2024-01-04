@@ -10,6 +10,7 @@ from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length
 
 from academics.model.theme import Theme
+from academics.services.academic_searching import AcademicSearchForm, academic_search_query
 from .. import blueprint
 
 
@@ -45,34 +46,14 @@ class AcademicEditForm(FlashingForm):
         self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
 
 
-class AcademicSearchForm(SearchForm):
-    theme_id = SelectField('Theme', coerce=int)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.theme_id.choices = [(0, ''), (-1, '[Unset]')] + [(t.id, t.name) for t in Theme.query.all()]
-
-
 @blueprint.route("/")
 def index():
     search_form = AcademicSearchForm(formdata=request.args)
 
-    q = Academic.query
-    q = q.filter(Academic.initialised == True)
+    q = academic_search_query(search_form)
 
-    if search_form.search.data:
-        q = q.filter((Academic.first_name + ' ' + Academic.last_name).like("%{}%".format(search_form.search.data)))
-
-    if search_form.theme_id.data:
-        if search_form.theme_id.data == -1:
-            q = q.filter(~Academic.themes.any())
-        else:
-            q = q.filter(Academic.themes.any(Theme.id == search_form.theme_id.data))
-    
-    q = q.order_by(Academic.last_name).order_by(Academic.first_name)
-
-    academics = q.paginate(
+    academics = db.paginate(
+        select=q,
         page=search_form.page.data,
         per_page=5,
         error_out=False,

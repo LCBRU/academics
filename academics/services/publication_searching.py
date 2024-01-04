@@ -102,6 +102,46 @@ class PublicationSearchForm(SearchForm):
         self.academic_id.render_kw={'data-options-href': url_for('ui.publication_author_options'), 'style': 'width: 300px'}
 
 
+class PublicationSummarySearchForm(SearchForm):
+    SUMMARY_TYPE__ACADEMIC = 'ACADEMIC'
+    SUMMARY_TYPE__THEME = 'THEME'
+    SUMMARY_TYPE__BRC = 'BRC'
+
+    total = SelectField('Total By', choices=[
+        (SUMMARY_TYPE__BRC, 'BRC'),
+        (SUMMARY_TYPE__THEME, 'Theme'),
+        (SUMMARY_TYPE__ACADEMIC, 'Academic')
+    ], default='BRC')
+    group_by = SelectField('Group By', choices=[('total', 'Total'), ('acknowledgement', 'Acknowledgement Status')], default='total')
+    measure = SelectField('Measure', choices=[('percentage', 'Percentage'), ('publications', 'Publications')], default='publications')
+    theme_id = SelectField('Theme')
+    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
+    academic_id = HiddenField()
+    publication_start_month = MonthField('Publication Start Month')
+    publication_end_date = MonthField('Publication End Month')
+    supress_validation_historic = SelectField(
+        'Suppress Historic',
+        choices=[(True, 'Yes'), (False, 'No')],
+        coerce=lambda x: x == 'True',
+        default='True',
+    )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.theme_id.choices = theme_select_choices()
+        self.nihr_acknowledgement_id.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
+    
+    @property
+    def summary_type(self):
+        if self.has_value('academic_id') or self.total.data == self.SUMMARY_TYPE__ACADEMIC:
+            return self.SUMMARY_TYPE__ACADEMIC
+        elif self.has_value('theme_id') or self.total.data == self.SUMMARY_TYPE__THEME:
+            return self.SUMMARY_TYPE__THEME
+        else:
+            return self.SUMMARY_TYPE__BRC
+
+
 class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
     theme_id = SelectField('Theme')
@@ -262,9 +302,12 @@ def publication_summary(search_form):
     else:
         publications = get_publication_by_brc(search_form)
 
-    results = by_acknowledge_status(publications)
+    if search_form.group_by.data == "acknowledgement":
+        results = by_acknowledge_status(publications)
+    else:
+        results = by_total(publications)
 
-    if search_form.measure.data == 'Publications':
+    if search_form.measure.data == 'publications':
         items = publication_count_value(results)
     else:
         items = percentage_value(results)
@@ -357,7 +400,7 @@ def by_acknowledge_status(publications):
     q = (
         select(
             publications.c.bucket,
-            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('acknowledgement_name'),
+            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('series'),
             func.count().label('publications'),
             q_total.c.total_count
         )
@@ -372,9 +415,23 @@ def by_acknowledge_status(publications):
     return db.session.execute(q).mappings().all()
 
 
+def by_total(publications):
+    q = (
+        select(
+            publications.c.bucket,
+            literal('').label('series'),
+            func.count().label('publications'),
+            func.count().label('total_count'),
+        )
+        .group_by(publications.c.bucket)
+    )
+
+    return db.session.execute(q).mappings().all()
+
+
 def publication_count_value(results):
     return [BarChartItem(
-        series=p['acknowledgement_name'],
+        series=p['series'],
         bucket=p['bucket'],
         count=p['publications']
     ) for p in results]
@@ -382,7 +439,7 @@ def publication_count_value(results):
 
 def percentage_value(results):
     return [BarChartItem(
-        series=p['acknowledgement_name'],
+        series=p['series'],
         bucket=p['bucket'],
         count=round(p['publications'] * 100 / p['total_count'])
     ) for p in results]

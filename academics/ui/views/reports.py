@@ -1,43 +1,19 @@
 from flask import render_template, request
 from lbrc_flask.charting import BarChart
 from lbrc_flask.database import db
-from lbrc_flask.forms import SearchForm
 from sqlalchemy import distinct, select
-from wtforms import MonthField, SelectField, HiddenField, SelectMultipleField
 from lbrc_flask.export import csv_download
 from sqlalchemy import select
 from academics.model.academic import Academic
-from academics.publication_searching import nihr_acknowledgement_select_choices, publication_count, publication_search_query, publication_summary, theme_select_choices
+from academics.services.academic_searching import academic_search_query
+from academics.services.publication_searching import PublicationSummarySearchForm, publication_count, publication_summary
 
 from .. import blueprint
 
 
-class PublicationSearchForm(SearchForm):
-    total = SelectField('Total By', choices=[('BRC', 'BRC'), ('Theme', 'Theme'), ('Academic', 'Academic')])
-    group = SelectField('Group By', choices=[('Total', 'Total'), ('Validation Status', 'Validation Status')])
-    measure = SelectField('Measure', choices=[('Percentage', 'Percentage'), ('Publications', 'Publications')])
-    theme_id = SelectField('Theme')
-    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
-    academic_id = HiddenField()
-    publication_start_month = MonthField('Publication Start Month')
-    publication_end_date = MonthField('Publication End Month')
-    supress_validation_historic = SelectField(
-        'Suppress Historic',
-        choices=[(True, 'Yes'), (False, 'No')],
-        coerce=lambda x: x == 'True',
-        default='True',
-    )
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.theme_id.choices = theme_select_choices()
-        self.nihr_acknowledgement_id.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
-
-
 @blueprint.route("/reports", methods=['GET', 'POST'])
 def reports():
-    search_form = PublicationSearchForm(formdata=request.args)
+    search_form = PublicationSummarySearchForm(formdata=request.args)
 
     return render_template("ui/reports/reports.html", search_form=search_form, report_defs=get_report_defs(search_form))
 
@@ -45,16 +21,12 @@ def reports():
 def get_report_defs(search_form):
     report_defs = []
 
-    if search_form.total.data == 'Academic':
-        publications = publication_search_query(search_form).alias()
+    if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
+        q = academic_search_query(search_form).with_only_columns(Academic.id)
 
-        q = (
-            select(distinct(Academic.id).label('academic_id'))
-        )
-
-        for a in db.session.execute(q).mappings().all():
+        for academic_id in db.session.execute(q).scalars():
             x = search_form.raw_data_as_dict()
-            x['academic_id'] = a['academic_id']
+            x['academic_id'] = academic_id
             x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
     else:
@@ -67,34 +39,44 @@ def get_report_defs(search_form):
 
 @blueprint.route("/reports/image")
 def report_image():
-    search_form = PublicationSearchForm(formdata=request.args)
-    count_dups = ''
+    search_form = PublicationSummarySearchForm(formdata=request.args)
 
-    if search_form.has_value('academic_id'):
+    if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
         a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
-
-        title = f'{a.full_name} Publications by Acknowledgement Status'
-        count_dups = ' (NB: publications may be associated with multiple academics)'
-    elif search_form.has_value('theme_id') or search_form.total.data == "Theme":
-        title = 'Theme Publications by Acknowledgement Status'
-        count_dups = ' (NB: publications may be associated with multiple themes)'
+        type_title = a.full_name
+    elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
+        type_title = 'Theme'
     else:
-        title = 'BRC Publications by Acknowledgement Status'
+        type_title = 'BRC'
 
-    if search_form.measure.data == 'Publications':
-        title += " Count"
-        y_title = 'Publications'
-    else:
-        title += " Percentage"
-        y_title = 'Percentage'
+    type_duplicate_message = {
+        search_form.SUMMARY_TYPE__ACADEMIC: '(NB: publications may be associated with multiple academics)',
+        search_form.SUMMARY_TYPE__THEME: '(NB: publications may be associated with multiple themes)',
+        search_form.SUMMARY_TYPE__BRC: None,
+    }
+
+    group_by_title = {
+        'total': None,
+        'acknowledgement': 'by Acknowledgement Status',
+    }
+
+    measure_title = {
+        'publications': 'Count',
+        'percentage': 'Publications',
+    }
+
+    measure_y_title = {
+        'publications': 'Publications',
+        'percentage': 'Publications',
+    }
 
     c = publication_count(search_form)
 
     bc: BarChart = BarChart(
-        title=title,
+        title= ' '.join(filter(None, [type_title, 'Publications', group_by_title[search_form.group_by.data], measure_title[search_form.measure.data]])),
         items=publication_summary(search_form),
-        y_title=y_title,
-        x_title=f'Publication Count = {c}{count_dups}'
+        y_title=measure_y_title[search_form.measure.data],
+        x_title=f'Publication Count = {c}{type_duplicate_message[search_form.summary_type]}'
     )
 
     if search_form.measure.data == 'Percentage':
