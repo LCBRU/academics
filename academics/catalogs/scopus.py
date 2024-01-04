@@ -253,7 +253,7 @@ def scopus_author_search(search_string):
     if re_orcid.match(search_string):
         q = f'ORCID({search_string})'
     else:
-        q = f'authlast({search_string})'
+        q = f'AUTHLASTNAME({search_string})'
 
     auth_srch = ElsSearch(f'{q}','author')
     auth_srch.execute(_client())
