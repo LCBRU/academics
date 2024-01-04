@@ -417,6 +417,9 @@ class Author(ElsAuthor):
         ]
 
         print(self.data)
+        print('A'*10)
+        print(self.first_name)
+        print('B'*10)
 
         result = AuthorData(
             catalog=CATALOG_SCOPUS,
