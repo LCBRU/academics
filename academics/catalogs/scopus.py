@@ -9,7 +9,7 @@ from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.catalogs.data_classes import AffiliationData, AuthorData, PublicationData
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
-from flask import current_app
+from flask import current_app, jsonify
 from sqlalchemy import select
 from lbrc_flask.database import db
 from lbrc_flask.logging import log_exception
@@ -267,7 +267,7 @@ def scopus_author_search(search_string):
     result = []
 
     print('B'*10)
-    print(auth_srch.results)
+    print(jsonify(auth_srch.results))
     print('C'*10)
 
     for r in auth_srch.results:
