@@ -44,7 +44,7 @@ def get_openalex_publications(identifier):
     q = (
         Works()
             .filter(**{"author.id": identifier})
-            .filter(publication_year=f'{date.today().year - 2}')
+            # .filter(publication_year=f'{date.today().year - 2}')
         )
 
     for w in chain(*q.paginate(per_page=200)):
