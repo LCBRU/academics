@@ -181,6 +181,7 @@ def refresh_affiliations():
         except Exception as e:
             log_exception(e)
 
+            logging.warn('*'*50)
             logging.warn(f'Error updating affiliation "{a.id}"')
 
             db.session.execute(update(Affiliation).where(Affiliation.id == a.id).values(refresh_details=False))
