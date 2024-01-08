@@ -159,7 +159,7 @@ def _process_updates():
 
     refresh_Academics()
     refresh_catalog_publications()
-    refresh_publications()
+    # refresh_publications()
     refresh_affiliations()
     auto_validate()
 
