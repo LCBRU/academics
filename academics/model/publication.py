@@ -4,7 +4,7 @@ from typing import List
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 
 
@@ -297,7 +297,7 @@ class CatalogPublication(db.Model, AuditMixin):
     catalog_identifier: Mapped[str] = mapped_column(String(500), index=True)
 
     doi: Mapped[str] = mapped_column(String(1000), index=True)
-    title: Mapped[str] = mapped_column(String(1000))
+    title: Mapped[str] = mapped_column(Unicode(1000))
     publication_cover_date: Mapped[date]
 
     pubmed_id: Mapped[str] = mapped_column(String(50), index=True, nullable=True)
