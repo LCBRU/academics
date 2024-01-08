@@ -157,9 +157,9 @@ def update_academics():
 def _process_updates():
     logging.debug('_process_updates: started')
 
-    # refresh_Academics()
-    # refresh_catalog_publications()
-    # refresh_publications()
+    refresh_Academics()
+    refresh_catalog_publications()
+    refresh_publications()
     refresh_affiliations()
     auto_validate()
 
@@ -176,16 +176,7 @@ def refresh_affiliations():
             logging.info(f'refresh_affiliations: No more affiliations to refresh')
             break
 
-        try:
-            _update_affiliation(a)
-        except Exception as e:
-            log_exception(e)
-
-            logging.warn('*'*50)
-            logging.warn(f'Uncaught Error updating affiliation "{a.id}"')
-
-            db.session.execute(update(Affiliation).where(Affiliation.id == a.id).values(refresh_details=False))
-            db.session.commit()
+        _update_affiliation(a)
 
     logging.debug('refresh_affiliations: ended')
 
@@ -209,15 +200,10 @@ def _update_affiliation(affiliation: Affiliation):
     except Exception as e:
         log_exception(e)
 
-        logging.warn('*'*50)
+        logging.warn('Rolling back transaction')
 
         db.session.rollback()
         db.session.execute(update(Affiliation).where(Affiliation.id == affiliation.id).values(refresh_details=False))
-        db.session.commit()
-        logging.warn('-'*50)
-
-    finally:
-        db.session.add(affiliation)
         db.session.commit()
 
 
