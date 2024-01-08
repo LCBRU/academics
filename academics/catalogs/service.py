@@ -182,7 +182,7 @@ def refresh_affiliations():
             log_exception(e)
 
             logging.warn('*'*50)
-            logging.warn(f'Error updating affiliation "{a.id}"')
+            logging.warn(f'Uncaught Error updating affiliation "{a.id}"')
 
             db.session.execute(update(Affiliation).where(Affiliation.id == a.id).values(refresh_details=False))
             db.session.commit()
@@ -204,6 +204,9 @@ def _update_affiliation(affiliation: Affiliation):
         affiliation.refresh_details = False
     except Exception as e:
         log_exception(e)
+
+        logging.warn('*'*50)
+        logging.warn(f'Error updating affiliation "{affiliation.id}"')
 
         # stop it being processed repeatedly
         affiliation.refresh_details = False
