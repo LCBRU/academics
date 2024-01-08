@@ -197,6 +197,9 @@ def _update_affiliation(affiliation: Affiliation):
         affiliation.refresh_details = False
     except Exception as e:
         log_exception(e)
+
+        # stop it being processed repeatedly
+        affiliation.refresh_details = False
     finally:
         db.session.add(affiliation)
 
