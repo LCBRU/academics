@@ -1,7 +1,7 @@
 from itertools import chain, groupby
 import logging
 from flask import current_app
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source, catalog_publications_sources_affiliations
@@ -176,7 +176,11 @@ def refresh_affiliations():
             logging.info(f'refresh_affiliations: No more affiliations to refresh')
             break
 
-        _update_affiliation(a)
+        try:
+            _update_affiliation(a)
+        except Exception as e:
+            log_exception(e)
+            update(Affiliation).where(Affiliation.id == a.id).values(refresh_details=False)
 
     logging.debug('refresh_affiliations: ended')
 
