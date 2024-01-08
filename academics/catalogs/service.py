@@ -158,7 +158,7 @@ def _process_updates():
     logging.debug('_process_updates: started')
 
     refresh_Academics()
-    refresh_catalog_publications()
+    # refresh_catalog_publications()
     # refresh_publications()
     refresh_affiliations()
     auto_validate()
