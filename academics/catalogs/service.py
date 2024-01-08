@@ -180,7 +180,8 @@ def refresh_affiliations():
             _update_affiliation(a)
         except Exception as e:
             log_exception(e)
-            update(Affiliation).where(Affiliation.id == a.id).values(refresh_details=False)
+            db.session.execute(update(Affiliation).where(Affiliation.id == a.id).values(refresh_details=False))
+            db.session.commit()
 
     logging.debug('refresh_affiliations: ended')
 
