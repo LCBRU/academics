@@ -178,9 +178,7 @@ def refresh_affiliations():
 
         try:
             _update_affiliation(a)
-        except Exception as e:
-            log_exception(e)
-
+        except:
             logging.warn('*'*50)
             logging.warn(f'Uncaught Error updating affiliation "{a.id}"')
 
