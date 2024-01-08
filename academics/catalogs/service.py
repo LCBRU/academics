@@ -213,6 +213,7 @@ def _update_affiliation(affiliation: Affiliation):
 
         db.session.execute(update(Affiliation).where(Affiliation.id == a.id).values(refresh_details=False))
         db.session.commit()
+        logging.warn('-'*50)
 
     finally:
         db.session.add(affiliation)
