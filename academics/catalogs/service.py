@@ -178,8 +178,6 @@ def refresh_affiliations():
 
         _update_affiliation(a)
 
-        db.session.commit()
-
     logging.debug('refresh_affiliations: ended')
 
 
@@ -202,6 +200,7 @@ def _update_affiliation(affiliation: Affiliation):
         affiliation.refresh_details = False
     finally:
         db.session.add(affiliation)
+        db.session.commit()
 
 
 def refresh_publications():
