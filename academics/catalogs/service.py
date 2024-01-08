@@ -211,6 +211,7 @@ def _update_affiliation(affiliation: Affiliation):
 
         logging.warn('*'*50)
 
+        db.session.rollback()
         db.session.execute(update(Affiliation).where(Affiliation.id == affiliation.id).values(refresh_details=False))
         db.session.commit()
         logging.warn('-'*50)
