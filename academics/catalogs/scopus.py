@@ -109,7 +109,12 @@ def get_scopus_publication_data(identifier):
     a = Abstract(identifier)
     a.read(_client())
 
-    id = a.data.get('coredata', {}).get(u'dc:identifier', ':').split(':')[1]
+    id = ((a.data.get('coredata', {}) or {}).get(u'dc:identifier', ':') or ':').split(':')[1]
+
+    if not id:
+        logging.error('*** No ID found in the following response ***')
+        logging.error(a.data)
+        raise(ValueError(f'No ID found in publication result for scopus ID {identifier}'))
 
     return PublicationData(
             catalog='scopus',
@@ -313,6 +318,20 @@ class Author(ElsAuthor):
         self.h_index = None
 
         super().__init__(author_id=self.catalog_identifier)
+
+    @property
+    def first_name(self):
+        if self.data:
+            return self.data.get(u'author-profile', {}).get('preferred-name', {}).get('given-name', '')
+        else:
+            return ''
+
+    @property
+    def last_name(self):
+        if self.data:
+            return self.data.get(u'author-profile', {}).get('preferred-name', {}).get('surname', '')
+        else:
+            return ''
 
     def _set_orcid(self):
         self.orcid = self.data.get(u'coredata', {}).get(u'orcid', '')

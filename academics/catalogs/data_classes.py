@@ -124,16 +124,16 @@ def _journal_xref_for_publication_data_list(publication_datas):
 
     q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
 
-    xref = {unidecode(j['name'].lower()): j['id'] for j in db.session.execute(q).mappings()}
+    xref = {unidecode(j['name']).lower(): j['id'] for j in db.session.execute(q).mappings()}
 
-    new_journals = [Journal(name=n) for n in names if unidecode(n.lower()) not in xref.keys()]
+    new_journals = [Journal(name=n) for n in names if unidecode(n).lower() not in xref.keys()]
 
     db.session.add_all(new_journals)
     db.session.commit()
 
     xref = xref | {j.name.lower(): j.id for j in new_journals}
 
-    return {CatalogReference(p): xref[unidecode(p.journal_name.lower())] for p in publication_datas}
+    return {CatalogReference(p): xref[unidecode(p.journal_name).lower()] for p in publication_datas}
 
 
 def _subtype_xref_for_publication_data_list(publication_datas):
@@ -185,21 +185,21 @@ def _sponsor_xref_for_publication_data_list(publication_datas):
     logging.debug('_get_sponsor_xref: started')
 
     all_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
-    unique_names = {unidecode(n.lower()): n for n in all_names}
+    unique_names = {unidecode(n).lower(): n for n in all_names}
 
     q = select(Sponsor).where(Sponsor.name.in_(all_names))
 
-    xref = {unidecode(s.name.lower()): s for s in db.session.execute(q).scalars()}
+    xref = {unidecode(s.name).lower(): s for s in db.session.execute(q).scalars()}
 
     new_sponsors = [Sponsor(name=n) for u, n in unique_names.items() if u not in xref.keys()]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
 
-    xref = xref | {unidecode(s.name.lower()): s for s in new_sponsors}
+    xref = xref | {unidecode(s.name).lower(): s for s in new_sponsors}
 
     return {
-        CatalogReference(p): [xref[unidecode(n.lower())] for n in p.funding_list if n]
+        CatalogReference(p): [xref[unidecode(n).lower()] for n in p.funding_list if n]
         for p in publication_datas
     }
 
@@ -208,21 +208,21 @@ def _keyword_xref_for_publication_data_list(publication_datas):
     logging.debug('_get_keyword_xref: started')
 
     all_keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
-    unique_keywords = {unidecode(k.lower()): k for k in all_keywords}
+    unique_keywords = {unidecode(k).lower(): k for k in all_keywords}
 
     q = select(Keyword).where(Keyword.keyword.in_(all_keywords))
 
-    xref = {unidecode(k.keyword.lower()): k for k in db.session.execute(q).scalars()}
+    xref = {unidecode(k.keyword).lower(): k for k in db.session.execute(q).scalars()}
 
     new_keywords = [Keyword(keyword=kw) for u, kw in unique_keywords.items() if u not in xref.keys()]
 
     db.session.add_all(new_keywords)
     db.session.commit()
 
-    xref = xref | {unidecode(k.keyword.lower()): k for k in new_keywords}
+    xref = xref | {unidecode(k.keyword).lower(): k for k in new_keywords}
 
     return {
-        CatalogReference(p): [xref[unidecode(k.strip().lower())] for k in p.keywords if k]
+        CatalogReference(p): [xref[unidecode(k.strip()).lower()] for k in p.keywords if k]
         for p in publication_datas
     }
 
