@@ -219,17 +219,19 @@ def refresh_publications():
 
         _update_publication(p)
 
-        db.session.commit()
-
     logging.debug('refresh_publications: ended')
 
 
 def _update_publication(publication: Publication):
     logging.debug(f'Updating publication {publication.id}')
 
-    publication.set_vancouver()
+    try:
+        publication.set_vancouver()
 
-    db.session.add(publication)
+        db.session.add(publication)
+        db.session.commit()
+    except:
+        db.session.rollback()
 
 
 def refresh_catalog_publications():
@@ -243,8 +245,6 @@ def refresh_catalog_publications():
             break
 
         _update_catalog_publication(p)
-
-        db.session.commit()
 
     logging.debug('refresh_catalog_publications: ended')
 
@@ -261,13 +261,16 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
         if pub_data:
             save_publications([pub_data])
 
+        catalog_publication.refresh_full_details = False
+        db.session.add(catalog_publication)
+        db.session.commit()
+
     except Exception as e:
         log_exception(e)
 
-    finally:
-        catalog_publication.refresh_full_details = False
-
-        db.session.add(catalog_publication)
+        db.session.rollback()
+        db.session.execute(update(CatalogPublication).where(CatalogPublication.id == catalog_publication.id).values(refresh_full_details=False))
+        db.session.commit()
 
 
 def refresh_Academics():
@@ -281,8 +284,6 @@ def refresh_Academics():
             break
 
         _update_academic(a)
-
-        db.session.commit()
 
     logging.debug('refresh_Academics: started')
 
@@ -304,13 +305,15 @@ def _update_academic(academic: Academic):
 
         academic.ensure_initialisation()
         academic.updating = False
+        db.session.add(academic)
+        db.session.commit()
 
     except Exception as e:
         log_exception(e)
-        academic.error = True
 
-    finally:
-        db.session.add(academic)
+        db.session.rollback()
+        db.session.execute(update(Academic).where(Academic.id == academic.id).values(updating=False, error=True))
+        db.session.commit()
 
 
 def _update_source(s):
@@ -353,9 +356,12 @@ def _update_source(s):
         log_exception(e)
         logging.warn(f'Setting Source {s.full_name} to be in error')
         s.error = True
-    finally:
-        db.session.add(s)
-        db.session.commit()
+
+        db.session.rollback()
+
+        if s and s.id:
+            db.session.execute(update(Source).where(Source.id == s.id).values(error=True))
+            db.session.commit()
 
 
 def _find_new_potential_sources(academic):
