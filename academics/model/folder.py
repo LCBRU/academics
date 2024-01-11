@@ -29,7 +29,7 @@ class Folder(db.Model):
     name = db.Column(db.String(1000))
 
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
-    owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
+    owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete")) 
 
     publicationses = db.relationship(
         "Publication",
