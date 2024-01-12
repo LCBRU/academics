@@ -140,6 +140,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     def has_new_potential_sources(self):
         return any(p for p in self.potential_sources if not p.not_match and p.source.academic is None)
 
+    @property
+    def theme_summary(self):
+        return ', '.join([t.name for t in self.themes])
+
     def mark_for_update(self):
         for au in self.sources:
             au.error = False
