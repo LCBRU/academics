@@ -62,7 +62,7 @@
     <ul id="author_names"></ul>
 
     <div class="list-group">
-        <form id="add_author" action="{{ url_for('ui.add_author') }}" class="form list-group-item" method="POST" enctype="multipart/form-data">
+        <form id="add_author" action="{{ url_for('ui.add_author') }}" class="form" method="POST" enctype="multipart/form-data">
             <fieldset id="add_author_fieldset">
                 {{ add_author_form.csrf_token() }}
 
