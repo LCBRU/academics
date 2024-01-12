@@ -7,6 +7,7 @@ from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source, catalog_publications_sources_affiliations
 from academics.model.publication import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, CatalogPublication, NihrAcknowledgement, Publication, Subtype
 from lbrc_flask.celery import celery
+from academics.model.theme import Theme
 from academics.services.publication_searching import ValidationSearchForm, publication_search_query
 from .scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
@@ -70,6 +71,7 @@ def add_sources_to_academic(catalog, catalog_identifiers, academic_id=None, them
         academic = Academic(
             theme_id=theme_id,
         )
+        academic.themes = [db.session.get(Theme, theme_id)]
     
     academic.updating = True
 
