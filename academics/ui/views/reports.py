@@ -5,7 +5,8 @@ from sqlalchemy import distinct, select
 from lbrc_flask.export import csv_download
 from sqlalchemy import select
 from academics.model.academic import Academic
-from academics.services.academic_searching import academic_search_query
+from academics.model.theme import Theme
+from academics.services.academic_searching import academic_search_query, theme_search_query
 from academics.services.publication_searching import PublicationSummarySearchForm, publication_count, publication_summary
 
 from .. import blueprint
@@ -24,9 +25,17 @@ def get_report_defs(search_form):
     if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
         q = academic_search_query(search_form).with_only_columns(Academic.id)
 
-        for academic_id in db.session.execute(q).scalars():
+        for theme_id in db.session.execute(q).scalars():
             x = search_form.raw_data_as_dict()
-            x['academic_id'] = academic_id
+            x['academic_id'] = theme_id
+            x['supress_validation_historic'] = search_form.supress_validation_historic.data
+            report_defs.append(x)
+    elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
+        q = theme_search_query(search_form).with_only_columns(Theme.id)
+
+        for theme_id in db.session.execute(q).scalars():
+            x = search_form.raw_data_as_dict()
+            x['theme_id'] = theme_id
             x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
     else:
@@ -45,7 +54,8 @@ def report_image():
         a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
         type_title = a.full_name
     elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
-        type_title = 'Theme'
+        t : Theme = Theme.query.get_or_404(search_form.theme_id.data)
+        type_title = t.name
     else:
         type_title = 'BRC'
 

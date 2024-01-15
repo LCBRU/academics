@@ -194,6 +194,7 @@ def publication_search_query(search_form):
 
     return q
 
+
 def catalog_publication_search_query(search_form):
     logging.debug(f'publication_search_query started')
 
@@ -332,7 +333,8 @@ def get_publication_by_theme(search_form):
 
     pub_themes = select(
         CatalogPublication.publication_id,
-        Theme.name.label('bucket')
+        Theme.id.label('theme_id'),
+        Theme.name.label('bucket'),
     ).select_from(
         cat_pubs
     ).join(
@@ -347,8 +349,8 @@ def get_publication_by_theme(search_form):
         Academic.themes
     ).distinct()
 
-    if search_form.has_value('theme_id'):
-        pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
+    # if search_form.has_value('theme_id'):
+    #     pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
 
     pub_themes = pub_themes.cte('pubs')
 
@@ -360,7 +362,8 @@ def get_publication_by_theme(search_form):
     ).having(func.count() > 1)
 
     return multi_theme.union_all(
-        select(pub_themes)
+        select(pub_themes.c.publication_id, pub_themes.c.bucket)
+        .where(pub_themes.c.theme_id == search_form.theme_id.data)
     ).cte()
 
 
