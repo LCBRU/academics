@@ -59,6 +59,7 @@ def report_image():
         'total': None,
         'acknowledgement': 'by Acknowledgement Status',
         'industry_collaboration': 'by Industrial Collaboration',
+        'international_collaboration': 'by International Collaboration',
     }
 
     measure_title = {

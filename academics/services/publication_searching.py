@@ -116,6 +116,7 @@ class PublicationSummarySearchForm(SearchForm):
         ('total', 'Total'),
         ('acknowledgement', 'Acknowledgement Status'),
         ('industry_collaboration', 'Industrial Collaboration'),
+        ('international_collaboration', 'International Collaboration'),
     ], default='total')
     measure = SelectField('Measure', choices=[('percentage', 'Percentage'), ('publications', 'Publications')], default='publications')
     theme_id = SelectField('Theme')
@@ -422,19 +423,12 @@ def by_acknowledge_status(publications):
 
 
 def by_industrial_collaboration(publications):
-
     q_total = (
         select(
             publications.c.bucket,
             func.count().label('total_count'),
         )
         .group_by(publications.c.bucket)
-    ).alias()
-
-    industry_cat_pubs = (
-        select(distinct(CatalogPublicationsSources.catalog_publication_id).label("catalog_publication_id"))
-        .join(CatalogPublicationsSources.affiliations)
-        .where(Affiliation.industry == True)
     ).alias()
 
     industry = (
@@ -465,7 +459,45 @@ def by_industrial_collaboration(publications):
         .order_by(industry.c.publication_id, publications.c.bucket)
     )
 
-    logging.getLogger('query').warn(q)
+    return db.session.execute(q).mappings().all()
+
+
+def by_international_collaboration(publications):
+    q_total = (
+        select(
+            publications.c.bucket,
+            func.count().label('total_count'),
+        )
+        .group_by(publications.c.bucket)
+    ).alias()
+
+    industry = (
+        select(distinct(CatalogPublication.publication_id).label("publication_id"))
+        .select_from(CatalogPublication)
+        .join(CatalogPublication.catalog_publication_sources)
+        .join(CatalogPublicationsSources.affiliations)
+        .where(Affiliation.international == True)
+        .where(CatalogPublication.publication_id.in_(select(publications.c.publication_id)))
+    ).alias()
+
+    series_case = case(
+        (industry.c.publication_id == None, 'Not Collaboration'),
+        else_='Collaboration'
+    )
+
+    q = (
+        select(
+            publications.c.bucket,
+            series_case.label('series'),
+            func.count().label('publications'),
+            q_total.c.total_count
+        )
+        .select_from(publications)
+        .join(industry, industry.c.publication_id == publications.c.publication_id, isouter=True)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
+        .group_by(series_case, publications.c.bucket)
+        .order_by(industry.c.publication_id, publications.c.bucket)
+    )
 
     return db.session.execute(q).mappings().all()
 
