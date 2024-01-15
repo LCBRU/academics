@@ -442,8 +442,8 @@ def by_industrial_collaboration(publications):
             (func.sum(func.coalesce(Affiliation.industry, 0)) == 0, 'Not Collaboration'),
         ).label('series'))
         .select_from(CatalogPublication)
-        .join(CatalogPublication.catalog_publication_sources, isouter=True)
-        .join(CatalogPublicationsSources.affiliations, isouter=True)
+        .join(CatalogPublication.catalog_publication_sources)
+        .join(CatalogPublicationsSources.affiliations)
         .group_by(CatalogPublication.publication_id)
     ).alias()
 
