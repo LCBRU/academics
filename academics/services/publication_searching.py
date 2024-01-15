@@ -311,6 +311,8 @@ def publication_summary(search_form):
         results = by_acknowledge_status(publications)
     elif search_form.group_by.data == "industry_collaboration":
         results = by_industrial_collaboration(publications)
+    elif search_form.group_by.data == "international_collaboration":
+        results = by_international_collaboration(publications)
     else:
         results = by_total(publications)
 
