@@ -52,7 +52,7 @@ def report_image():
     type_duplicate_message = {
         search_form.SUMMARY_TYPE__ACADEMIC: '(NB: publications may be associated with multiple academics)',
         search_form.SUMMARY_TYPE__THEME: '(NB: publications may be associated with multiple themes)',
-        search_form.SUMMARY_TYPE__BRC: None,
+        search_form.SUMMARY_TYPE__BRC: '',
     }
 
     group_by_title = {
