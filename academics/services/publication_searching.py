@@ -435,28 +435,29 @@ def by_industrial_collaboration(publications):
         .group_by(publications.c.bucket)
     ).alias()
 
-    industry = (select(
-        CatalogPublication.publication_id,
-        case(
-            (func.sum(func.coalesce(Affiliation.industry, 0)) > 0, 'Collaboration'),
-            (func.sum(func.coalesce(Affiliation.industry, 0)) == 0, 'Not Collaboration'),
-        ).label('series'))
+    industry = (
+        select(CatalogPublication.publication_id)
         .select_from(CatalogPublication)
         .join(CatalogPublication.catalog_publication_sources)
         .join(CatalogPublicationsSources.affiliations)
+        .where(Affiliation.industry == True)
         .group_by(CatalogPublication.publication_id)
     ).alias()
 
     q = (
         select(
             publications.c.bucket,
+            case(
+                (industry.c.id == None, 'Not Collaboration'),
+                else_='Collaboration'
+            ).label('series'),
             industry.c.series,
             func.count().label('publications'),
             q_total.c.total_count
         )
         .select_from(publications)
-        .join(industry, industry.c.publication_id == publications.c.publication_id)
-        .group_by(industry.c.series, publications.c.bucket)
+        .join(industry, industry.c.publication_id == publications.c.publication_id, isouter=True)
+        .group_by(industry.c.id, publications.c.bucket)
         .order_by(industry.c.series, publications.c.bucket)
     )
 
