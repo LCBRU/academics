@@ -440,7 +440,9 @@ def by_industrial_collaboration(publications):
     industry = (
         select(distinct(CatalogPublication.publication_id).label("publication_id"))
         .select_from(CatalogPublication)
-        .where(CatalogPublication.id.in_(industry_cat_pubs))
+        .join(CatalogPublication.catalog_publication_sources)
+        .join(CatalogPublicationsSources.affiliations)
+        .where(Affiliation.industry == True)
         .where(CatalogPublication.publication_id.in_(select(publications.c.publication_id)))
     ).alias()
 
