@@ -441,6 +441,7 @@ def by_industrial_collaboration(publications):
         select(distinct(CatalogPublication.publication_id).label("publication_id"))
         .select_from(CatalogPublication)
         .where(CatalogPublication.id.in_(industry_cat_pubs))
+        .where(CatalogPublication.publication_id.in_(publications))
     ).alias()
 
     series_case = case(
