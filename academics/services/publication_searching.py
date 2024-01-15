@@ -2,12 +2,12 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model.academic import Academic, CatalogPublicationsSources, Source
+from academics.model.academic import Academic, Affiliation, CatalogPublicationsSources, Source
 from academics.model.folder import Folder
 from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
-from sqlalchemy import literal, literal_column, or_
+from sqlalchemy import case, literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
@@ -112,7 +112,11 @@ class PublicationSummarySearchForm(SearchForm):
         (SUMMARY_TYPE__THEME, 'Theme'),
         (SUMMARY_TYPE__ACADEMIC, 'Academic')
     ], default='BRC')
-    group_by = SelectField('Group By', choices=[('total', 'Total'), ('acknowledgement', 'Acknowledgement Status')], default='total')
+    group_by = SelectField('Group By', choices=[
+        ('total', 'Total'),
+        ('acknowledgement', 'Acknowledgement Status'),
+        ('industry_collaboration', 'Industrial Collaboration'),
+    ], default='total')
     measure = SelectField('Measure', choices=[('percentage', 'Percentage'), ('publications', 'Publications')], default='publications')
     theme_id = SelectField('Theme')
     nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
@@ -304,6 +308,8 @@ def publication_summary(search_form):
 
     if search_form.group_by.data == "acknowledgement":
         results = by_acknowledge_status(publications)
+    elif search_form.group_by.data == "industry_collaboration":
+        results = by_industrial_collaboration(publications)
     else:
         results = by_total(publications)
 
@@ -416,6 +422,11 @@ def by_acknowledge_status(publications):
 
 
 def by_industrial_collaboration(publications):
+
+    print('+'*10)
+    print(publications)
+    print('-'*10)
+
     q_total = (
         select(
             publications.c.bucket,
@@ -427,16 +438,24 @@ def by_industrial_collaboration(publications):
     q = (
         select(
             publications.c.bucket,
-            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('series'),
+            case(
+                (func.sum(func.coalesce(Affiliation.industry, 0)) > 0, 'Collaboration'),
+                (func.sum(func.coalesce(Affiliation.industry, 0)) == 0, 'Not Collaboration'),
+            ).label('series'),
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(Publication)
-        .join(publications, publications.c.publication_id == Publication.id)
-        .join(NihrAcknowledgement, NihrAcknowledgement.id == Publication.nihr_acknowledgement_id, isouter=True)
+        .select_from(publications)
+        .join(CatalogPublication, CatalogPublication.publication_id == publications.c.publication_id)
+        .join(CatalogPublication.catalog_publication_sources, isouter=True)
+        .join(CatalogPublicationsSources.affiliations, isouter=True)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
-        .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
-        .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
+        .group_by(func.coalesce(Affiliation.industry, 0), publications.c.bucket)
+        .order_by(
+            case(
+                (func.sum(func.coalesce(Affiliation.industry, 0)) > 0, 'Collaboration'),
+                (func.sum(func.coalesce(Affiliation.industry, 0)) == 0, 'Not Collaboration'),
+            ), publications.c.bucket)
     )
 
     return db.session.execute(q).mappings().all()
