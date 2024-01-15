@@ -423,10 +423,6 @@ def by_acknowledge_status(publications):
 
 def by_industrial_collaboration(publications):
 
-    print('+'*10)
-    print(publications)
-    print('-'*10)
-
     q_total = (
         select(
             publications.c.bucket,
@@ -462,6 +458,8 @@ def by_industrial_collaboration(publications):
         .group_by(industry.c.publication_id, publications.c.bucket)
         .order_by(industry.c.publication_id, publications.c.bucket)
     )
+
+    logging.getLogger('query').warn(q)
 
     return db.session.execute(q).mappings().all()
 
