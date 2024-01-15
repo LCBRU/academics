@@ -443,19 +443,22 @@ def by_industrial_collaboration(publications):
         .where(CatalogPublication.id.in_(industry_cat_pubs))
     ).alias()
 
+    series_case = case(
+        (industry.c.publication_id == None, 'Not Collaboration'),
+        else_='Collaboration'
+    )
+
     q = (
         select(
             publications.c.bucket,
-            case(
-                (industry.c.publication_id == None, 'Not Collaboration'),
-                else_='Collaboration'
-            ).label('series'),
+            series_case.label('series'),
             func.count().label('publications'),
             q_total.c.total_count
         )
         .select_from(publications)
         .join(industry, industry.c.publication_id == publications.c.publication_id, isouter=True)
-        .group_by(industry.c.publication_id, publications.c.bucket)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
+        .group_by(series_case, publications.c.bucket)
         .order_by(industry.c.publication_id, publications.c.bucket)
     )
 
