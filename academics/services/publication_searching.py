@@ -7,7 +7,7 @@ from academics.model.folder import Folder
 from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
-from sqlalchemy import case, literal, literal_column, or_
+from sqlalchemy import case, distinct, literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm
 from sqlalchemy import func, select
@@ -435,13 +435,16 @@ def by_industrial_collaboration(publications):
         .group_by(publications.c.bucket)
     ).alias()
 
-    industry = (
-        select(CatalogPublication.publication_id)
-        .select_from(CatalogPublication)
-        .join(CatalogPublication.catalog_publication_sources)
+    industry_cat_pubs = (
+        select(distinct(CatalogPublicationsSources.catalog_publication_id).label("catalog_publication_id"))
         .join(CatalogPublicationsSources.affiliations)
         .where(Affiliation.industry == True)
-        .group_by(CatalogPublication.publication_id)
+    ).alias()
+
+    industry = (
+        select(distinct(CatalogPublication.publication_id).label("publication_id"))
+        .select_from(CatalogPublication)
+        .where(CatalogPublication.id.in_(industry_cat_pubs))
     ).alias()
 
     q = (
