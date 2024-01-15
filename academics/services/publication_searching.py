@@ -415,6 +415,33 @@ def by_acknowledge_status(publications):
     return db.session.execute(q).mappings().all()
 
 
+def by_industrial_collaboration(publications):
+    q_total = (
+        select(
+            publications.c.bucket,
+            func.count().label('total_count'),
+        )
+        .group_by(publications.c.bucket)
+    ).alias()
+
+    q = (
+        select(
+            publications.c.bucket,
+            func.coalesce(NihrAcknowledgement.name, 'Unvalidated').label('series'),
+            func.count().label('publications'),
+            q_total.c.total_count
+        )
+        .select_from(Publication)
+        .join(publications, publications.c.publication_id == Publication.id)
+        .join(NihrAcknowledgement, NihrAcknowledgement.id == Publication.nihr_acknowledgement_id, isouter=True)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
+        .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
+        .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
+    )
+
+    return db.session.execute(q).mappings().all()
+
+
 def by_total(publications):
     q = (
         select(

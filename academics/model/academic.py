@@ -57,6 +57,7 @@ class Affiliation(db.Model):
     refresh_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
     home_organisation: Mapped[bool] = mapped_column(Boolean, nullable=True)
     international: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    industry: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     @property
     def line_summary(self):
