@@ -120,13 +120,14 @@ class AffiliationData():
 def _journal_xref_for_publication_data_list(publication_datas):
     logging.debug('_get_journal_xref: started')
 
-    names = {p.journal_name for p in publication_datas}
+    all_names = {p.journal_name for p in publication_datas}
+    unique_names = {unidecode(n).lower(): n for n in all_names}
 
-    q = select(Journal.id, Journal.name).where(Journal.name.in_(names))
+    q = select(Journal.id, Journal.name).where(Journal.name.in_(unique_names))
 
     xref = {unidecode(j['name']).lower(): j['id'] for j in db.session.execute(q).mappings()}
 
-    new_journals = [Journal(name=n) for n in names if unidecode(n).lower() not in xref.keys()]
+    new_journals = [Journal(name=n) for n in unique_names if unidecode(n).lower() not in xref.keys()]
 
     db.session.add_all(new_journals)
     db.session.commit()
@@ -187,7 +188,7 @@ def _sponsor_xref_for_publication_data_list(publication_datas):
     all_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
     unique_names = {unidecode(n).lower(): n for n in all_names}
 
-    q = select(Sponsor).where(Sponsor.name.in_(all_names))
+    q = select(Sponsor).where(Sponsor.name.in_(unique_names))
 
     xref = {unidecode(s.name).lower(): s for s in db.session.execute(q).scalars()}
 
