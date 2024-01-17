@@ -115,9 +115,10 @@ class PublicationSummarySearchForm(SearchForm):
     group_by = SelectField('Group By', choices=[
         ('total', 'Total'),
         ('acknowledgement', 'Acknowledgement Status'),
-        ('collaboration', 'Collaboration'),
+        ('external_collaboration', 'External Collaboration'),
         ('industry_collaboration', 'Industrial Collaboration'),
         ('international_collaboration', 'International Collaboration'),
+        ('theme_collaboration', 'Theme Collaboration'),
     ], default='total')
     measure = SelectField('Measure', choices=[('percentage', 'Percentage'), ('publications', 'Publications')], default='publications')
     theme_id = SelectField('Theme')
@@ -315,8 +316,10 @@ def publication_summary(search_form):
         results = by_industrial_collaboration(publications)
     elif search_form.group_by.data == "international_collaboration":
         results = by_international_collaboration(publications)
-    elif search_form.group_by.data == "collaboration":
-        results = by_collaboration(publications)
+    elif search_form.group_by.data == "external_collaboration":
+        results = by_external_collaboration(publications)
+    elif search_form.group_by.data == "theme_collaboration":
+        results = by_theme_collaboration(publications)
     else:
         results = by_total(publications)
 
@@ -333,8 +336,7 @@ def get_publication_by_theme(search_form):
 
     pub_themes = select(
         CatalogPublication.publication_id,
-        Theme.id.label('theme_id'),
-        Theme.name.label('bucket'),
+        Theme.name.label('bucket')
     ).select_from(
         cat_pubs
     ).join(
@@ -349,8 +351,8 @@ def get_publication_by_theme(search_form):
         Academic.themes
     ).distinct()
 
-    # if search_form.has_value('theme_id'):
-    #     pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
+    if search_form.has_value('theme_id'):
+        pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
 
     pub_themes = pub_themes.cte('pubs')
 
@@ -362,8 +364,7 @@ def get_publication_by_theme(search_form):
     ).having(func.count() > 1)
 
     return multi_theme.union_all(
-        select(pub_themes.c.publication_id, pub_themes.c.bucket)
-        .where(pub_themes.c.theme_id == search_form.theme_id.data)
+        select(pub_themes)
     ).cte()
 
 
@@ -510,7 +511,7 @@ def by_international_collaboration(publications):
     return db.session.execute(q).mappings().all()
 
 
-def by_collaboration(publications):
+def by_external_collaboration(publications):
     q_total = (
         select(
             publications.c.bucket,
@@ -545,6 +546,43 @@ def by_collaboration(publications):
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(series_case, publications.c.bucket)
         .order_by(not_collaboration.c.publication_id, publications.c.bucket)
+    )
+
+    return db.session.execute(q).mappings().all()
+
+
+def by_theme_collaboration(publications):
+    q_total = (
+        select(
+            publications.c.bucket,
+            func.count().label('total_count'),
+        )
+        .group_by(publications.c.bucket)
+    ).alias()
+
+    collaboration_theme = (
+        select(CatalogPublication.publication_id, Theme.name.label('theme_name'))
+        .select_from(CatalogPublication)
+        .join(CatalogPublication.catalog_publication_sources)
+        .join(CatalogPublicationsSources.source)
+        .join(Source.academic)
+        .join(Academic.themes)
+        .where(CatalogPublication.publication_id.in_(select(publications.c.publication_id)))
+        .group_by(CatalogPublication.publication_id, Theme.name)
+    ).alias()
+
+    q = (
+        select(
+            publications.c.bucket,
+            collaboration_theme.c.theme_name.label('series'),
+            func.count().label('publications'),
+            q_total.c.total_count
+        )
+        .select_from(publications)
+        .join(collaboration_theme, collaboration_theme.c.publication_id == publications.c.publication_id)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
+        .group_by(collaboration_theme.c.theme_name, publications.c.bucket)
+        .order_by(collaboration_theme.c.publication_id, publications.c.bucket)
     )
 
     return db.session.execute(q).mappings().all()
