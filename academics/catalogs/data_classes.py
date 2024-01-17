@@ -210,7 +210,7 @@ def _keyword_xref_for_publication_data_list(publication_datas):
     all_keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
     unique_keywords = {unidecode(k).lower(): k for k in all_keywords}
 
-    q = select(Keyword).where(Keyword.keyword.in_(all_keywords))
+    q = select(Keyword).where(Keyword.keyword.in_(unique_keywords))
 
     xref = {unidecode(k.keyword).lower(): k for k in db.session.execute(q).scalars()}
 
