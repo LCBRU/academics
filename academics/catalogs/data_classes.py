@@ -213,9 +213,15 @@ def _keyword_xref_for_publication_data_list(publication_datas):
 
     q = select(Keyword).where(Keyword.keyword.in_(unique_keywords))
 
+    print(unique_keywords)
+
     xref = {unidecode(k.keyword).lower(): k for k in db.session.execute(q).scalars()}
 
+    print(xref)
+
     new_keywords = [Keyword(keyword=kw) for u, kw in unique_keywords.items() if u not in xref.keys()]
+
+    print(new_keywords)
 
     db.session.add_all(new_keywords)
     db.session.commit()
