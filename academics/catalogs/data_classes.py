@@ -120,8 +120,7 @@ class AffiliationData():
 def _journal_xref_for_publication_data_list(publication_datas):
     logging.debug('_get_journal_xref: started')
 
-    all_names = {p.journal_name for p in publication_datas}
-    unique_names = {unidecode(n).lower(): n for n in all_names}
+    unique_names = {unidecode(p.journal_name).lower() for p in publication_datas}
 
     q = select(Journal.id, Journal.name).where(Journal.name.in_(unique_names))
 
@@ -185,14 +184,13 @@ def _publication_xref_for_publication_data_list(publication_datas):
 def _sponsor_xref_for_publication_data_list(publication_datas):
     logging.debug('_get_sponsor_xref: started')
 
-    all_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
-    unique_names = {unidecode(n).lower(): n for n in all_names}
+    unique_names = set(filter(None, [unidecode(n).lower() for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
 
     q = select(Sponsor).where(Sponsor.name.in_(unique_names))
 
     xref = {unidecode(s.name).lower(): s for s in db.session.execute(q).scalars()}
 
-    new_sponsors = [Sponsor(name=n) for u, n in unique_names.items() if u not in xref.keys()]
+    new_sponsors = [Sponsor(name=u) for u in unique_names if u not in xref.keys()]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
@@ -208,8 +206,7 @@ def _sponsor_xref_for_publication_data_list(publication_datas):
 def _keyword_xref_for_publication_data_list(publication_datas):
     logging.debug('_get_keyword_xref: started')
 
-    all_keywords = {k.strip() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
-    unique_keywords = {unidecode(k).lower(): k for k in all_keywords}
+    unique_keywords = {unidecode(k.strip()).lower() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
     q = select(Keyword).where(Keyword.keyword.in_(unique_keywords))
 
@@ -219,7 +216,7 @@ def _keyword_xref_for_publication_data_list(publication_datas):
 
     print(xref)
 
-    new_keywords = [Keyword(keyword=kw) for u, kw in unique_keywords.items() if u not in xref.keys()]
+    new_keywords = [Keyword(keyword=u) for u in unique_keywords if u not in xref.keys()]
 
     print(new_keywords)
 
