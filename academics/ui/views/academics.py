@@ -8,6 +8,7 @@ from academics.catalogs.service import add_sources_to_academic, refresh, update_
 from academics.model.academic import Academic
 from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length
+from sqlalchemy.orm import selectinload
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
@@ -52,6 +53,7 @@ def index():
     search_form = AcademicSearchForm(formdata=request.args)
 
     q = academic_search_query(search_form)
+    q = q.options(selectinload(Academic.sources))
 
     academics = db.paginate(
         select=q,

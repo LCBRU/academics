@@ -145,8 +145,6 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .where(Academic.id == self.id)
         )
 
-
-
         return db.session.execute(q).scalar() > 0
 
     @property
