@@ -44,6 +44,9 @@ def publications():
         .selectinload(CatalogPublicationsSources.source)
         .selectinload(Source.academic)
     )
+    q = q.options(
+        selectinload(Publication.folders)
+    )
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     publications = db.paginate(
