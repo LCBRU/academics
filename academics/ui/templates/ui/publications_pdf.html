@@ -39,6 +39,15 @@
             font-size: 2em;
         }
 
+        h2 {
+            margin: 0 ;
+        }
+
+        .vancouver {
+            font-style: italic;
+            margin: 0;
+        }
+
         span.param_head {
             font-weight: bold;
         }
@@ -52,7 +61,7 @@
             page-break-inside: avoid;
         }
 
-        .publications:nth-child(even){
+        .publications:nth-child(odd){
             background-color: #f2f2f2;
         }
 
@@ -74,7 +83,7 @@
     {% for p in publications %}
         <div class="publications">
             <h2>{{p.publication_cover_date | date_format}}: {{p.title}}</h2>
-            <p>{{p.vancouver | blank_if_none}}</p>
+            <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
         </div>
     {% endfor %}
 
