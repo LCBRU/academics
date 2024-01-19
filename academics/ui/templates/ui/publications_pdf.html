@@ -41,6 +41,11 @@
 
         h2 {
             margin: 0 ;
+            color: #193e72;
+        }
+
+        h3 {
+            margin: 0 ;
         }
 
         .vancouver {
@@ -82,7 +87,7 @@
 
     {% for year, year_group in publications | groupby('publication_cover_date.year') %}
         {% for month, list in year_group | groupby('publication_cover_date.month') %}
-            <h2>{{ month }} {{ year }}</h2>
+            <h2>{{ month | month_name }} {{ year }}</h2>
 
             {% for p in list %}
                 <div class="publications">
