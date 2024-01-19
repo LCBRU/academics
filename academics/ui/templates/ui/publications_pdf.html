@@ -53,6 +53,11 @@
             margin: 0;
         }
 
+        .academics {
+            color: #193e72;
+            margin: 0;
+        }
+
         span.param_head {
             font-weight: bold;
         }
@@ -92,6 +97,13 @@
             {% for p in list %}
                 <div class="publications">
                     <h3>{{p.title}}</h3>
+                    <p class="academics">
+                        BRC Authors:
+                        {% for a in p.academics | sort(attribute='last_name,first_name') %}
+                            <span>{{ a.full_name }}</span>
+                        {% endfor %}
+                    </p>
+
                     <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
                 </div>
             {% endfor %}

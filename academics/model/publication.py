@@ -134,6 +134,10 @@ class Publication(db.Model, AuditMixin):
         return self.best_catalog_publication.keywords
 
     @property
+    def academics(self):
+        return self.best_catalog_publication.academics
+
+    @property
     def scopus_catalog_publication(self):
         return next((cp for cp in self.catalog_publications if cp.catalog == CATALOG_SCOPUS), None)
 
@@ -322,3 +326,7 @@ class CatalogPublication(db.Model, AuditMixin):
     @property
     def all_academics_left_brc(self):
         return all(cps.source.academic.has_left_brc for cps in self.catalog_publication_sources)
+
+    @property
+    def academics(self):
+        return filter(None, (cps.source.academic for cps in self.catalog_publication_sources))
