@@ -244,6 +244,15 @@ def publication_export_pdf():
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = publication_search_query(search_form)
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.catalog_publication_sources)
+        .selectinload(CatalogPublicationsSources.source)
+        .selectinload(Source.academic)
+    )
+    q = q.options(
+        selectinload(Publication.folders)
+    )
 
     parameters = []
 
