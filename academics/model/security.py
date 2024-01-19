@@ -7,6 +7,6 @@ class User(BaseUser):
     __table_args__ = {'extend_existing': True}
 
     theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
-    theme = db.relationship(Theme)
+    theme = db.relationship(Theme, lazy='joined')
 
 

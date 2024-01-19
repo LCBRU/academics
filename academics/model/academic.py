@@ -8,7 +8,6 @@ from academics.model.catalog import CATALOG_SCOPUS
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.theme import Theme
 
-
 sources__affiliations = db.Table(
     'sources__affiliations',
     db.Column(
@@ -78,11 +77,9 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     updating = db.Column(db.Boolean, default=False)
     initialised = db.Column(db.Boolean, default=False)
     error = db.Column(db.Boolean, default=False)
-    theme_id = db.Column(db.Integer, db.ForeignKey(Theme.id))
-    theme = db.relationship(Theme)
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
 
-    themes = db.relationship(Theme, secondary='academics_themes', cascade="all,delete")
+    themes = db.relationship(Theme, secondary='academics_themes', lazy="selectin", cascade="all,delete")
 
     @property
     def full_name(self):
@@ -118,7 +115,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             return self._best_source
 
     @property
-    def publication_count(self):
+    def publication_count(self) -> int:
         q =  (
             select(func.count(distinct(Publication.id)))
             .join(Publication.catalog_publications)
@@ -139,7 +136,16 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def has_new_potential_sources(self):
-        return any(p for p in self.potential_sources if not p.not_match and p.source.academic is None)
+        q =  (
+            select(func.count(distinct(Academic.id)))
+            .join(Academic.potential_sources)
+            .join(AcademicPotentialSource.source)
+            .where(AcademicPotentialSource.not_match == False)
+            .where(Source.academic is None)
+        )
+
+        return db.session.execute(q).scalar() > 0
+
 
     @property
     def theme_summary(self):
