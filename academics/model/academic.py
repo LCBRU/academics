@@ -141,11 +141,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .join(Academic.potential_sources)
             .join(AcademicPotentialSource.source)
             .where(AcademicPotentialSource.not_match == False)
-            .where(Source.academic is None)
+            .where(Source.academic == None)
         )
 
-        return db.session.execute(q).scalar() > 0
-
+        return db.session.execute(q).scalar()
 
     @property
     def theme_summary(self):
