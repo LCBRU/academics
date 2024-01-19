@@ -18,8 +18,8 @@ from academics.catalogs.service import auto_validate
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.publication_searching import PublicationSearchForm, ValidationSearchForm, academic_select_choices, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
-from sqlalchemy import alias, select, func, or_
-
+from sqlalchemy import select, func, or_
+from sqlalchemy.orm import selectinload
 from .. import blueprint
 
 
@@ -256,6 +256,8 @@ def publication_export_pdf():
 
     # if db.session.execute(select(func.count('*')).select_from(alias(q))).scalar() > 100:
     #     abort(413)
+
+    q = q.options(selectinload(Publication.catalog_publications))
 
     publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
 

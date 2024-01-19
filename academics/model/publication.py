@@ -120,10 +120,10 @@ class Publication(db.Model, AuditMixin):
     vancouver: Mapped[str] = mapped_column(Unicode(1000), nullable=True)
 
     auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
-    auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[auto_nihr_acknowledgement_id])
+    auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[auto_nihr_acknowledgement_id])
 
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
-    nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="joined", foreign_keys=[nihr_acknowledgement_id])
+    nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[nihr_acknowledgement_id])
 
     @property
     def sponsors(self):
@@ -315,13 +315,13 @@ class CatalogPublication(db.Model, AuditMixin):
     href: Mapped[str] = mapped_column(UnicodeText)
 
     journal_id = mapped_column(ForeignKey(Journal.id))
-    journal: Mapped[Journal] = relationship(lazy="joined")
+    journal: Mapped[Journal] = relationship(lazy="selectin")
 
     subtype_id = mapped_column(ForeignKey(Subtype.id))
-    subtype: Mapped[Subtype] = relationship(lazy="joined")
+    subtype: Mapped[Subtype] = relationship(lazy="selectin")
 
-    sponsors = db.relationship("Sponsor", lazy="joined", secondary=catalog_publications_sponsors, back_populates="catalog_publications", collection_class=set)
-    keywords = db.relationship("Keyword", lazy="joined", secondary=catalog_publications_keywords, back_populates="catalog_publications", collection_class=set)
+    sponsors = db.relationship("Sponsor", lazy="selectin", secondary=catalog_publications_sponsors, back_populates="catalog_publications", collection_class=set)
+    keywords = db.relationship("Keyword", lazy="selectin", secondary=catalog_publications_keywords, back_populates="catalog_publications", collection_class=set)
 
     @property
     def all_academics_left_brc(self):
