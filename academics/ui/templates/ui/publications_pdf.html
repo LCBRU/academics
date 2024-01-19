@@ -80,8 +80,8 @@
         </p>
     </header>
 
-    {% for year, year_group in publications | groupby('date.year') %}
-        {% for month, list in year_group | groupby('date.month') %}
+    {% for year, year_group in publications | groupby('publication_cover_date.year') %}
+        {% for month, list in year_group | groupby('publication_cover_date.month') %}
             <h2>{{ month }} {{ year }}</h2>
 
             {% for p in list %}
