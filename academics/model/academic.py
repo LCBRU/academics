@@ -144,7 +144,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .where(Source.academic == None)
         )
 
-        return db.session.execute(q).scalar()
+        return db.session.execute(q).scalar() > 0
 
     @property
     def theme_summary(self):
