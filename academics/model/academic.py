@@ -142,7 +142,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .join(AcademicPotentialSource.source)
             .where(AcademicPotentialSource.not_match == False)
             .where(Source.academic == None)
+            .where(Academic.id == self.id)
         )
+
+
 
         return db.session.execute(q).scalar() > 0
 
