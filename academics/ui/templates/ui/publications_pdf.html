@@ -98,6 +98,8 @@
         {% for month, list in year_group | groupby('publication_cover_date.month') %}
             <h2>{{ month | month_name }} {{ year }}</h2>
 
+            <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
+
             {% for p in list %}
                 <div class="publications">
                     <h3>{{p.title}}</h3>
@@ -107,8 +109,6 @@
                             <span>{{ a.full_name }}</span>
                         {% endfor %}
                     </p>
-
-                    <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
                 </div>
             {% endfor %}
         {% endfor %}
