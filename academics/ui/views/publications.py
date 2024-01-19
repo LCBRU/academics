@@ -9,7 +9,7 @@ from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from wtforms import HiddenField
-from academics.model.academic import Academic, Source
+from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder
 from academics.model.publication import (CatalogPublication, Journal, Keyword,
                              NihrAcknowledgement, Publication, Sponsor,
@@ -38,6 +38,12 @@ def publications():
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = publication_search_query(search_form)
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.catalog_publication_sources)
+        .selectinload(CatalogPublicationsSources.source)
+        .selectinload(Source.academic)
+    )
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     publications = db.paginate(
