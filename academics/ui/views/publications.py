@@ -254,8 +254,8 @@ def publication_export_pdf():
     if publication_end_date:
         parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 
-    if db.session.execute(select(func.count('*')).select_from(alias(q))).scalar() > 100:
-        abort(413)
+    # if db.session.execute(select(func.count('*')).select_from(alias(q))).scalar() > 100:
+    #     abort(413)
 
     publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
 
