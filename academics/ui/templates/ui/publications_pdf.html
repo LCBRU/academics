@@ -80,11 +80,17 @@
         </p>
     </header>
 
-    {% for p in publications %}
-        <div class="publications">
-            <h2>{{p.publication_cover_date | date_format}}: {{p.title}}</h2>
-            <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
-        </div>
+    {% for year, year_group in publications | groupby('date.year') %}
+        {% for month, list in year_group | groupby('date.month') %}
+            <h2>{{ month }} {{ year }}</h2>
+
+            {% for p in list %}
+                <div class="publications">
+                    <h3>{{p.title}}</h3>
+                    <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
+                </div>
+            {% endfor %}
+        {% endfor %}
     {% endfor %}
 
 </body>
