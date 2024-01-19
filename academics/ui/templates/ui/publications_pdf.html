@@ -98,11 +98,12 @@
         {% for month, list in year_group | groupby('publication_cover_date.month') %}
             <h2>{{ month | month_name }} {{ year }}</h2>
 
-            <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
-
             {% for p in list %}
                 <div class="publications">
                     <h3>{{p.title}}</h3>
+
+                    <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
+
                     <p class="academics">
                         BRC Authors:
                         {% for a in p.academics | sort(attribute='last_name,first_name') %}
