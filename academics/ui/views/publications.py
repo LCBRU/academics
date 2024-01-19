@@ -257,7 +257,7 @@ def publication_export_pdf():
     # if db.session.execute(select(func.count('*')).select_from(alias(q))).scalar() > 100:
     #     abort(413)
 
-    q = q.options(selectinload(Publication.catalog_publications))
+    # q = q.options(selectinload(Publication.catalog_publications))
 
     publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
 
