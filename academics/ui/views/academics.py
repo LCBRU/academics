@@ -26,7 +26,6 @@ def _get_academic_choices():
 class AddAuthorForm(FlashingForm):
     catalog_identifier = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
-    # themes = SelectMultipleField('Theme', coerce=int)
     themes = SelectField('Theme', coerce=int)
 
     def __init__(self, **kwargs):
