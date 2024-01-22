@@ -176,7 +176,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
     catalog_identifier: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
 
     academic_id = db.Column(db.Integer, db.ForeignKey(Academic.id))
-    academic = db.relationship(Academic, backref=db.backref("sources", cascade="all,delete"))
+    academic = db.relationship(Academic, backref=db.backref("sources"))
 
     affiliations = db.relationship(Affiliation, secondary='sources__affiliations', cascade="all,delete")
 
