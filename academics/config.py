@@ -12,9 +12,5 @@ class Config(BaseConfig):
     LOAD_OLD_PUBLICATIONS = os.environ.get("LOAD_OLD_PUBLICATIONS", 'False').lower() == 'true'
 
 
-class CeleryConfig(Config):
-    LOG_DIRECTORY = os.environ.get("CELERY_LOG_DIRECTORY", '')
-
-
 class TestConfig(BaseTestConfig):
     pass
