@@ -13,7 +13,7 @@ class Config(BaseConfig):
 
 
 class CeleryConfig(Config):
-    LOG_DIRECTORY = os.environ["CELERY_LOG_DIRECTORY"]
+    LOG_DIRECTORY = os.environ.get("CELERY_LOG_DIRECTORY", '')
 
 
 class TestConfig(BaseTestConfig):
