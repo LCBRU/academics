@@ -1,11 +1,12 @@
 from flask import render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
+from sqlalchemy import delete
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
 from academics.catalogs.scopus import scopus_author_search
 from academics.catalogs.service import add_sources_to_academic, refresh, update_academics, update_single_academic, updating
-from academics.model.academic import Academic
+from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length
 from sqlalchemy.orm import selectinload
@@ -152,6 +153,12 @@ def delete_academic():
 
     if form.validate_on_submit():
         a = db.get_or_404(Academic, form.id.data)
+
+        db.session.execute(
+            delete(AcademicPotentialSource)
+            .where(AcademicPotentialSource.academic_id == a.id)
+        )
+
         db.session.delete(a)
         db.session.commit()
 
