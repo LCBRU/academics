@@ -8,6 +8,7 @@ from academics.model.catalog import CATALOG_SCOPUS
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.theme import Theme
 
+
 sources__affiliations = db.Table(
     'sources__affiliations',
     db.Column(
@@ -79,7 +80,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     error = db.Column(db.Boolean, default=False)
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
 
-    themes = db.relationship(Theme, secondary='academics_themes', lazy="selectin", cascade="all,delete")
+    themes = db.relationship(Theme, secondary='academics_themes', lazy="selectin")
 
     @property
     def full_name(self):
