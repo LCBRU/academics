@@ -18,6 +18,8 @@ application.app_context().push()
 
 application.config['SERVER_NAME'] = os.environ["CELERY_SERVER_NAME"]
 
+print('v'*10)
 print(application.config['LOG_DIRECTORY'])
+print('^'*10)
 
 from lbrc_flask.celery import celery
