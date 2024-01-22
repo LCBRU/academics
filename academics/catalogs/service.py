@@ -68,9 +68,7 @@ def add_sources_to_academic(catalog, catalog_identifiers, academic_id=None, them
         academic = db.session.get(Academic, academic_id)
 
     if not academic:
-        academic = Academic(
-            theme_id=theme_id,
-        )
+        academic = Academic()
         academic.themes = [db.session.get(Theme, theme_id)]
     
     academic.updating = True
