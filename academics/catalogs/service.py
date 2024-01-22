@@ -61,7 +61,7 @@ def refresh():
     logging.debug('refresh: ended')
 
 
-def add_sources_to_academic(catalog, catalog_identifiers, academic_id=None, theme_id=None):
+def add_sources_to_academic(catalog, catalog_identifiers, academic_id=None, themes=None):
     academic = None
 
     if academic_id:
@@ -69,7 +69,7 @@ def add_sources_to_academic(catalog, catalog_identifiers, academic_id=None, them
 
     if not academic:
         academic = Academic()
-        academic.themes = [db.session.get(Theme, theme_id)]
+        academic.themes = themes
     
     academic.updating = True
 
