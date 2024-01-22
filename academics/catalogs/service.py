@@ -1,7 +1,7 @@
 from itertools import chain, groupby
 import logging
 from pathlib import Path
-from flask import app, current_app
+from flask import current_app
 from sqlalchemy import delete, select, update
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
@@ -26,7 +26,7 @@ def setup_loggers(logger, *args, **kwargs):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # add filehandler
-    fh = logging.FileHandler(str(Path(app.config["CELERY_LOG_DIRECTORY"]) / 'service.log'))
+    fh = logging.FileHandler(str(Path(current_app.config["CELERY_LOG_DIRECTORY"]) / 'service.log'))
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
