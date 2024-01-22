@@ -100,7 +100,7 @@ def _get_scopus_publication_link(p):
 
 
 def get_scopus_publication_data(identifier):
-    logging.debug('get_scopus_publication_data: started')
+    logging.debug('started')
 
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')
@@ -140,7 +140,7 @@ def get_scopus_publication_data(identifier):
 
 
 def get_scopus_publications(identifier):
-    logging.debug('get_scopus_publications: started')
+    logging.debug('started')
 
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')

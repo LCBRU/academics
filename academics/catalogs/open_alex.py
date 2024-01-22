@@ -54,7 +54,7 @@ def get_openalex_publications(identifier):
 
 
 def get_open_alex_publication_data(identifier):
-    logging.debug('get_open_alex_publication_data: started')
+    logging.debug('started')
 
     pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
 

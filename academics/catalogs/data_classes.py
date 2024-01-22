@@ -118,7 +118,7 @@ class AffiliationData():
 
 
 def _journal_xref_for_publication_data_list(publication_datas):
-    logging.debug('_get_journal_xref: started')
+    logging.debug('started')
 
     unique_names = {unidecode(p.journal_name).lower() for p in publication_datas}
 
@@ -137,7 +137,7 @@ def _journal_xref_for_publication_data_list(publication_datas):
 
 
 def _subtype_xref_for_publication_data_list(publication_datas):
-    logging.debug('_get_subtype_xref: started')
+    logging.debug('started')
 
     descs = {p.subtype_description for p in publication_datas}
 
@@ -156,7 +156,7 @@ def _subtype_xref_for_publication_data_list(publication_datas):
 
 
 def _publication_xref_for_publication_data_list(publication_datas):
-    logging.debug('_get_publication_xref: started')
+    logging.debug('started')
 
     xref = {}
 
@@ -182,7 +182,7 @@ def _publication_xref_for_publication_data_list(publication_datas):
 
 
 def _sponsor_xref_for_publication_data_list(publication_datas):
-    logging.debug('_get_sponsor_xref: started')
+    logging.debug('started')
 
     unique_names = set(filter(None, [unidecode(n).lower() for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
 
@@ -204,7 +204,7 @@ def _sponsor_xref_for_publication_data_list(publication_datas):
 
 
 def _keyword_xref_for_publication_data_list(publication_datas):
-    logging.debug('_get_keyword_xref: started')
+    logging.debug('started')
 
     unique_keywords = {unidecode(k.strip()).lower() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
@@ -226,7 +226,7 @@ def _keyword_xref_for_publication_data_list(publication_datas):
 
 
 def _affiliation_xref_for_author_data_list(author_datas):
-    logging.debug('_get_affiliation_xref: started')
+    logging.debug('started')
 
     author_datas = list(author_datas)
 
@@ -274,7 +274,7 @@ def _affiliation_xref_for_author_data_list(author_datas):
 
 
 def _source_xref_for_publication_data_list(publication_datas):
-    logging.debug('_get_source_publication_xref: started')
+    logging.debug('started')
 
     authors = {CatalogReference(a): a for a in chain.from_iterable([p.authors for p in publication_datas])}
 
@@ -287,7 +287,7 @@ def _source_xref_for_publication_data_list(publication_datas):
 
 
 def _source_xref_for_author_data_list(author_datas):
-    logging.debug('_get_author_xref: started')
+    logging.debug('started')
 
     xref = {}
 

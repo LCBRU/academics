@@ -19,7 +19,7 @@ from lbrc_flask.validators import parse_date
 
 @after_setup_logger.connect
 def setup_loggers(logger, *args, **kwargs):
-    formatter = logging.Formatter('%(asctime)s (%(levelname)s) %(message)s')
+    formatter = logging.Formatter('%(asctime)s (%(levelname)s) %(module)s::%(funcName)s(%(lineno)d): %(message)s')
 
     # add filehandler
     fh = logging.FileHandler(str(Path(current_app.config["CELERY_LOG_DIRECTORY"]) / 'service.log'))
@@ -31,7 +31,7 @@ def setup_loggers(logger, *args, **kwargs):
 
 def updating():
     result = Academic.query.filter(Academic.updating == True).count() > 0
-    logging.info(f'updating: {result}')
+    logging.info(result)
     return result
 
 
@@ -67,11 +67,11 @@ def _get_nihr_acknowledgement(pub):
 
 
 def refresh():
-    logging.debug('refresh: started')
+    logging.debug('started')
 
     _process_updates.delay()
 
-    logging.debug('refresh: ended')
+    logging.debug('ended')
 
 
 def add_sources_to_academic(catalog, catalog_identifiers, academic_id=None, themes=None):
@@ -137,7 +137,7 @@ def get_or_create_source(catalog, catalog_identifier):
 
 
 def update_single_academic(academic: Academic):
-    logging.debug('update_academic: started')
+    logging.debug('started')
 
     academic.mark_for_update()
 
@@ -146,11 +146,11 @@ def update_single_academic(academic: Academic):
 
     _process_updates.delay()
 
-    logging.debug('update_academic: ended')
+    logging.debug('ended')
 
 
 def update_academics():
-    logging.debug('update_academics: started')
+    logging.debug('started')
     if not updating():
         for academic in Academic.query.all():
             logging.debug(f'Setting academic {academic.full_name} to be updated')
@@ -163,12 +163,12 @@ def update_academics():
 
         _process_updates.delay()
 
-    logging.debug('update_academics: ended')
+    logging.debug('ended')
 
 
 @celery.task()
 def _process_updates():
-    logging.debug('_process_updates: started')
+    logging.debug('started')
 
     refresh_Academics()
     refresh_catalog_publications()
@@ -176,26 +176,26 @@ def _process_updates():
     refresh_affiliations()
     auto_validate()
 
-    logging.debug('_process_updates: Ended')
+    logging.debug('Ended')
 
 
 def refresh_affiliations():
-    logging.debug('refresh_affiliations: started')
+    logging.debug('started')
 
     while True:
         a = Affiliation.query.filter(Affiliation.refresh_details == 1).first()
 
         if not a:
-            logging.info(f'refresh_affiliations: No more affiliations to refresh')
+            logging.info('No more affiliations to refresh')
             break
 
         _update_affiliation(a)
 
-    logging.debug('refresh_affiliations: ended')
+    logging.debug('ended')
 
 
 def _update_affiliation(affiliation: Affiliation):
-    logging.debug(f'Updating Affiliation {affiliation.line_summary}')
+    logging.debug(affiliation.line_summary)
 
     try:
         if affiliation.catalog == CATALOG_SCOPUS:
@@ -221,22 +221,22 @@ def _update_affiliation(affiliation: Affiliation):
 
 
 def refresh_publications():
-    logging.debug('refresh_publications: started')
+    logging.debug('started')
 
     while True:
         p = Publication.query.filter(Publication.vancouver == None).first()
 
         if not p:
-            logging.info(f'refresh_publications: No more publications to refresh')
+            logging.info('No more publications to refresh')
             break
 
         _update_publication(p)
 
-    logging.debug('refresh_publications: ended')
+    logging.debug('ended')
 
 
 def _update_publication(publication: Publication):
-    logging.debug(f'Updating publication {publication.id}')
+    logging.debug(publication.id)
 
     try:
         publication.set_vancouver()
@@ -248,18 +248,18 @@ def _update_publication(publication: Publication):
 
 
 def refresh_catalog_publications():
-    logging.debug('refresh_catalog_publications: started')
+    logging.debug('started')
 
     while True:
         p = CatalogPublication.query.filter(CatalogPublication.refresh_full_details == 1).first()
 
         if not p:
-            logging.info(f'refresh_catalog_publications: No more catalog publications to refresh')
+            logging.info('No more catalog publications to refresh')
             break
 
         _update_catalog_publication(p)
 
-    logging.debug('refresh_catalog_publications: ended')
+    logging.debug('ended')
 
 
 def _update_catalog_publication(catalog_publication: CatalogPublication):
@@ -287,18 +287,18 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
 
 
 def refresh_Academics():
-    logging.debug('refresh_Academics: started')
+    logging.debug('started')
 
     while True:
         a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
 
         if not a:
-            logging.info(f'refresh_Academics: No more academics to update')
+            logging.info('No more academics to update')
             break
 
         _update_academic(a)
 
-    logging.debug('refresh_Academics: started')
+    logging.debug('started')
 
 
 def _update_academic(academic: Academic):
@@ -420,7 +420,7 @@ def _ensure_all_academic_sources_are_proposed(academic):
 
 
 def add_catalog_publications(publication_datas):
-    logging.debug('add_catalog_publications: started')
+    logging.debug('started')
 
     existing = set()
 
@@ -440,11 +440,11 @@ def add_catalog_publications(publication_datas):
 
     save_publications(new_pubs)
 
-    logging.debug('add_publications: ended')
+    logging.debug('ended')
 
 
 def save_publications(new_pubs):
-    logging.info(f'save_publications: {len(new_pubs)}')
+    logging.info(len(new_pubs))
 
     journal_xref = _journal_xref_for_publication_data_list(new_pubs)
     subtype_xref = _subtype_xref_for_publication_data_list(new_pubs)
