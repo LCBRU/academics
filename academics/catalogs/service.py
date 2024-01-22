@@ -17,19 +17,16 @@ from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
 
 
-print('@'*10)
-print(__name__)
-print('^'*10)
-
 @after_setup_logger.connect
 def setup_loggers(logger, *args, **kwargs):
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s (%(levelname)s) %(message)s')
 
     # add filehandler
     fh = logging.FileHandler(str(Path(current_app.config["CELERY_LOG_DIRECTORY"]) / 'service.log'))
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
+    logger.propagate = False
 
 
 def updating():
