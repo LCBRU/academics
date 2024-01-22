@@ -140,7 +140,7 @@ def add_author():
         catalog=CATALOG_SCOPUS,
         catalog_identifiers=request.form.getlist('catalog_identifier'),
         academic_id=form.academic_id.data,
-        theme_id=form.themes.data,
+        themes = [db.session.get(Theme, t) for t in form.themes.data],
     )
 
     return redirect(url_for('ui.index'))
