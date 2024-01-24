@@ -30,7 +30,7 @@ q = (
     .order_by(Publication.created_date.asc())
 )
 
-publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start >= parse(p.publication_cover_date) < this_month_start])
+publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start >= parse(str(p.publication_cover_date)) < this_month_start])
 
 print(len(publications))
 
