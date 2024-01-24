@@ -32,16 +32,11 @@ q = (
 
 publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start <= p.publication_cover_date < this_month_start])
 
-print(len(publications))
-
-print(min([p.publication_cover_date for p in publications]))
-print(max([p.publication_cover_date for p in publications]))
-
-# email(
-#     subject='New Publications this Month',
-#     message=render_template('email/new_publications.txt', publications=publications),
-#     # recipients=[u.email for u in get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT)],
-#     recipients=['rabramley@gmail.com'],
-#     html_template='email/new_publications.html',
-#     publications=publications,
-# )
+email(
+    subject='New Publications this Month',
+    message=render_template('email/new_publications.txt', publications=publications),
+    # recipients=[u.email for u in get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT)],
+    recipients=['rabramley@gmail.com'],
+    html_template='email/new_publications.html',
+    publications=publications,
+)
