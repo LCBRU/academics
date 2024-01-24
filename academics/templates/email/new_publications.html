@@ -125,17 +125,15 @@
                         <div>
                             <h3><a href="http://doi.org/{{ p.doi }}">{{p.title}}</a></h3>
                             <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
-                            <h4>
-                                <p class="academics">
-                                    BRC Authors:
-                                    {% for a in p.academics | sort(attribute='last_name,first_name') %}
-                                        <span>{{ a.full_name }}</span>
-                                    {% endfor %}
-                                </p>
-                                {% if p.all_academics_left_brc %}
-                                    <div class="text-danger">All authors have left the BRC</div>
-                                {% endif %}
-                            </h4>
+                            <p class="academics">
+                                BRC Authors:
+                                {% for a in p.academics | sort(attribute='last_name,first_name') %}
+                                    <span>{{ a.full_name }}</span>
+                                {% endfor %}
+                            </p>
+                            {% if p.all_academics_left_brc %}
+                                <div class="text-danger">All authors have left the BRC</div>
+                            {% endif %}
                         </div>
                     </header>
                     <dl>
