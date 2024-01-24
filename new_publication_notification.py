@@ -25,6 +25,7 @@ last_month_start = this_month_start - relativedelta(months=1)
 q = (
     select(Publication)
     .where(Publication.created_date.between(last_month_start, this_month_start))
+    .where(Publication.publication_cover_date.between(last_month_start, this_month_start))
     .order_by(Publication.created_date.asc())
 )
 
