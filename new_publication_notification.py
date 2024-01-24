@@ -13,6 +13,8 @@ from academics.security import ROLE_NEW_PUBLICATION_RECIPIENT
 from academics.model.publication import Publication
 from academics import create_app
 
+from dateutil.parser import parse
+
 # Load environment variables from '.env' file.
 load_dotenv()
 application = create_app()
@@ -28,7 +30,7 @@ q = (
     .order_by(Publication.created_date.asc())
 )
 
-publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start >= p.publication_cover_date < this_month_start])
+publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start >= parse(p.publication_cover_date) < this_month_start])
 
 print(len(publications))
 
