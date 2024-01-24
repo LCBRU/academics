@@ -32,6 +32,8 @@ publications = list(db.session.execute(q).unique().scalars())
 
 print(len(publications))
 
+print(render_template('email/new_publications.txt', publications=publications))
+
 # email(
 #     subject='New Publications this Month',
 #     message=render_template('email/new_publications.txt', publications=publications),
