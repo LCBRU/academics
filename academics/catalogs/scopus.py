@@ -116,6 +116,10 @@ def get_scopus_publication_data(identifier):
         logging.error(a.data)
         raise(ValueError(f'No ID found in publication result for scopus ID {identifier}'))
 
+    r = requests.get(f'https://api.elsevier.com/analytics/scival/publication/{identifier}', params=dict(apiKey=current_app.config['SCOPUS_API_KEY']))
+    logging.info(f'************ {r.status_code} ************')
+    logging.info(r.text)
+
     return PublicationData(
             catalog='scopus',
             catalog_identifier=id,
@@ -220,10 +224,6 @@ def get_scopus_author_data(identifier):
         return None
 
     result = Author(identifier)
-
-    r = requests.get(f'https://api.elsevier.com/analytics/scival/author/{identifier}', params=dict(apiKey=current_app.config['SCOPUS_API_KEY']))
-    logging.info(f'************ {r.status_code} ************')
-    logging.info(r.text)
 
     if not result.populate(_client()):
         return None
