@@ -243,7 +243,7 @@ def remove_publication_without_catalog_entry():
     pubs_without_catalog = db.session.execute(
         select(Publication.id)
         .where(Publication.id.not_in(select(CatalogPublication.publication_id)))
-    )
+    ).scalars().all()
 
     db.session.execute(
         delete(folders__publications)
