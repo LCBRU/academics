@@ -237,7 +237,7 @@ def get_scopus_affiliation_data(identifier):
     result = ScopusAffiliation(identifier)
     result.read(_client())
 
-    logging.info(result.data())
+    logging.info(result.data)
 
     return result.get_data()
 
