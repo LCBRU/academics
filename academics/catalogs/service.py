@@ -245,6 +245,8 @@ def remove_publication_without_catalog_entry():
         .where(Publication.id.not_in(select(CatalogPublication.publication_id)))
     ).scalars()
 
+    logging.info(pubs_without_catalog)
+
     db.session.execute(
         delete(folders__publications)
         .where(folders__publications.c.publication_id.in_(pubs_without_catalog))
