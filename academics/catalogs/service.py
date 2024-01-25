@@ -173,6 +173,7 @@ def _process_updates():
     refresh_Academics()
     refresh_catalog_publications()
     refresh_publications()
+    remove_publication_without_catalog_entry()
     refresh_affiliations()
     auto_validate()
 
@@ -233,6 +234,31 @@ def refresh_publications():
         _update_publication(p)
 
     logging.debug('ended')
+
+
+def remove_publication_without_catalog_entry():
+    logging.debug('started')
+
+    pubs_without_catalog = db.session.execute(
+        select(Publication.id)
+        .where(Publication.id.not_in(select(CatalogPublication.publication_id)))
+    ).scalars()
+
+    logging.info(pubs_without_catalog)
+
+    # db.session.execute(
+    #     delete(catalog_publications_sources_affiliations)
+    #     .where(CatalogPublicationsSources.id == catalog_publications_sources_affiliations.c.catalog_publications_sources_id)
+    #     .where(CatalogPublicationsSources.catalog_publication_id == cat_pub.id)
+    # )
+
+    # db.session.execute(
+    #     delete(CatalogPublicationsSources)
+    #     .where(CatalogPublicationsSources.catalog_publication_id == cat_pub.id)
+    # )
+
+    logging.debug('ended')
+
 
 
 def _update_publication(publication: Publication):
