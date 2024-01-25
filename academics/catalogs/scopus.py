@@ -212,7 +212,7 @@ def _translate_publication_author(author_dict):
     return result
 
 
-def get_scopus_author_data(identifier, get_extended_details=False):
+def get_scopus_author_data(identifier):
     logging.debug(f'Getting Scopus Author Data {identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
@@ -221,9 +221,9 @@ def get_scopus_author_data(identifier, get_extended_details=False):
 
     result = Author(identifier)
 
-    if not result.populate(_client(), get_extended_details):
+    if not result.populate(_client()):
         return None
-
+    
     return result.get_data()
 
 
@@ -237,7 +237,9 @@ def get_scopus_affiliation_data(identifier):
     result = ScopusAffiliation(identifier)
     result.read(_client())
 
-    logging.info(result.data)
+    r = requests.get(f'https://api.elsevier.com/analytics/scival/institution/{identifier}', params=[dict(apiKey=current_app.config['SCOPUS_API_KEY'])])
+    logging.info(f'************ {r.status_code} ************')
+    logging.info(r.text)
 
     return result.get_data()
 
@@ -355,11 +357,9 @@ class Author(ElsAuthor):
     def _set_h_index(self):
         self.h_index = self.data.get(u'h-index', None)
 
-    def populate(self, client, get_extended_details):
+    def populate(self, client):
         result = self.read(client)
-
-        if get_extended_details:
-            self.read_metrics(client)
+        self.read_metrics(client)
 
         return result
 
