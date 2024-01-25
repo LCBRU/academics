@@ -255,6 +255,8 @@ def remove_publication_without_catalog_entry():
         .where(Publication.id.in_(pubs_without_catalog))
     )
 
+    db.session.commit()
+
     logging.debug('ended')
 
 
