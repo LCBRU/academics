@@ -8,6 +8,13 @@ from sqlalchemy import pool
 from alembic import context
 
 from academics.model.publication import db
+import academics.model.academic
+import academics.model.catalog
+import academics.model.folder
+import academics.model.objective
+import academics.model.publication
+import academics.model.security
+import academics.model.theme
 import academics.catalogs.scopus
 
 # this is the Alembic Config object, which provides
