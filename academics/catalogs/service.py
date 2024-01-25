@@ -250,10 +250,10 @@ def remove_publication_without_catalog_entry():
         .where(folders__publications.c.publication_id.in_(pubs_without_catalog))
     )
 
-    # db.session.execute(
-    #     delete(CatalogPublicationsSources)
-    #     .where(CatalogPublicationsSources.catalog_publication_id == cat_pub.id)
-    # )
+    db.session.execute(
+        delete(Publication)
+        .where(Publication.id.in_(pubs_without_catalog))
+    )
 
     logging.debug('ended')
 
