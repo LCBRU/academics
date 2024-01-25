@@ -237,7 +237,7 @@ def get_scopus_affiliation_data(identifier):
     result = ScopusAffiliation(identifier)
     result.read(_client())
 
-    r = requests.get(f'https://api.elsevier.com/analytics/scival/institution/{identifier}', params=[dict(apiKey=current_app.config['SCOPUS_API_KEY'])])
+    r = requests.get(f'https://api.elsevier.com/analytics/scival/institution/{identifier}', params=dict(apiKey=current_app.config['SCOPUS_API_KEY']))
     logging.info(f'************ {r.status_code} ************')
     logging.info(r.text)
 
