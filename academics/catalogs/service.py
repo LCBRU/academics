@@ -5,6 +5,7 @@ from flask import current_app
 from sqlalchemy import delete, select, update
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
+from academics.catalogs.scival import get_scival_publication_data
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source, catalog_publications_sources_affiliations
 from academics.model.publication import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, CatalogPublication, NihrAcknowledgement, Publication, Subtype
 from academics.model.folder import folders__publications
@@ -228,14 +229,13 @@ def refresh_publications():
 
     try:
         for p in db.session.execute(select(Publication).where(Publication.refresh_full_details == True)).unique().scalars():
-            # if not p.scopus_catalog_publication and p.doi:
-            if p.doi:
+            if not p.scopus_catalog_publication and p.doi:
                 if pub_data := get_scopus_publication_data(doi=p.doi):
                     save_publications([pub_data])
                     logging.info(pub_data)
 
             if not p.scopus_catalog_publication and p.institutions:
-                pass
+                get_scival_publication_data(p.scopus_catalog_publication.catalog_identifier)
 
             p.set_vancouver()
             p.refresh_full_details = False
