@@ -173,7 +173,8 @@ def _process_updates():
 
     refresh_Academics()
     refresh_catalog_publications()
-    refresh_publications()
+    set_publication_vancouvers()
+    set_publication_institutions()
     remove_publication_without_catalog_entry()
     refresh_affiliations()
     auto_validate()
@@ -222,17 +223,34 @@ def _update_affiliation(affiliation: Affiliation):
         db.session.commit()
 
 
-def refresh_publications():
+def set_publication_vancouvers():
     logging.debug('started')
 
     while True:
         p = Publication.query.filter(Publication.vancouver == None).first()
 
         if not p:
-            logging.info('No more publications to refresh')
+            logging.info('No more publications without Vancouver')
             break
 
         _update_publication(p)
+
+    logging.debug('ended')
+
+
+def set_publication_institutions():
+    logging.debug('started')
+
+    while True:
+        p = Publication.query.filter(Publication.institutions == None).first()
+
+        if not p:
+            logging.info('No more publications without institutions')
+            break
+
+        if not p.scopus_catalog_publication and p.doi:
+            if pub_data := get_scopus_publication_data(doi=p.doi):
+                save_publications([pub_data])
 
     logging.debug('ended')
 
@@ -258,7 +276,6 @@ def remove_publication_without_catalog_entry():
     db.session.commit()
 
     logging.debug('ended')
-
 
 
 def _update_publication(publication: Publication):
@@ -293,7 +310,7 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
 
     try:
         if catalog_publication.catalog == CATALOG_SCOPUS:
-            pub_data = get_scopus_publication_data(catalog_publication.catalog_identifier)
+            pub_data = get_scopus_publication_data(scopus_id=catalog_publication.catalog_identifier)
         if catalog_publication.catalog == CATALOG_OPEN_ALEX:
             pub_data = get_open_alex_publication_data(catalog_publication.catalog_identifier)
 
@@ -497,10 +514,10 @@ def save_publications(new_pubs):
             cat_pub = CatalogPublication(
                 catalog=p.catalog,
                 catalog_identifier=p.catalog_identifier,
-                publication_id=pub.id,
                 refresh_full_details=True,
             )
 
+        cat_pub.publication_id=pub.id
         cat_pub.doi = p.doi or ''
         cat_pub.title = p.title or ''
         cat_pub.publication_cover_date = p.publication_cover_date

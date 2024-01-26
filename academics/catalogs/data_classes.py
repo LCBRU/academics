@@ -171,7 +171,13 @@ def _publication_xref_for_publication_data_list(publication_datas):
 
         xref = xref | {CatalogReference(cp): cp.publication for cp in db.session.execute(q).unique().scalars()}
 
-    new_pubs = {CatalogReference(p): Publication() for p in publication_datas if CatalogReference(p) not in xref.keys()}
+    for p in (p for p in publication_datas if CatalogReference(p) not in xref.keys() and p.doi):
+        if pub := db.session.execute(
+            select(Publication).where(Publication.doi == p.doi)
+        ).scalar_one_or_none():
+            xref[CatalogReference(p)] = pub
+
+    new_pubs = {CatalogReference(p): Publication(p.doi) for p in publication_datas if CatalogReference(p) not in xref.keys()}
 
     db.session.add_all(new_pubs.values())
     db.session.commit()

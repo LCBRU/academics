@@ -99,27 +99,22 @@ def _get_scopus_publication_link(p):
             return h['@href']
 
 
-def get_scopus_publication_data(identifier):
+def get_scopus_publication_data(scopus_id=None, doi=None):
     logging.debug('started')
 
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')
         return []
     
-    a = Abstract(identifier)
+    a = Abstract(scopus_id, doi)
     a.read(_client())
 
     id = ((a.data.get('coredata', {}) or {}).get(u'dc:identifier', ':') or ':').split(':')[1]
 
     if not id:
-        logging.error('*** No ID found in the following response ***')
-        logging.error(a.data)
-        raise(ValueError(f'No ID found in publication result for scopus ID {identifier}'))
-
-    r = requests.get(f'https://api.elsevier.com/analytics/scival/publication/{identifier}', params=dict(apiKey=current_app.config['SCOPUS_API_KEY']))
-    logging.info(f'************ {r.status_code} ************')
-    logging.info(r.text)
-
+        logging.info(f'No publication for {scopus_id=}; {doi=}')
+        return None
+    
     return PublicationData(
             catalog='scopus',
             catalog_identifier=id,
@@ -184,8 +179,6 @@ def get_scopus_publications(identifier):
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
             ))
-
-    
 
     return result
 
@@ -485,9 +478,14 @@ class ScopusAffiliation(ElsAffil):
 
 
 class Abstract(AbsDoc):
-    def __init__(self, scopus_id):
+    def __init__(self, scopus_id=None, doi=None):
         self.scopus_id = scopus_id
-        super().__init__(scp_id=self.scopus_id)
+        self.doi = doi
+
+        if self.doi:
+            super().__init__(uri=f'{self.__uri_base}doi/{doi}')
+        else:
+            super().__init__(scp_id=self.scopus_id)
 
     @property
     def funding_list(self):
