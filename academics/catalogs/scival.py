@@ -32,10 +32,7 @@ class SciValClient:
     __ts_last_req = time.time()
 
     def __init__(self, api_key) -> None:
-        self.headers = {
-            "X-ELS-APIKey"  : api_key,
-            "Accept"        : 'application/json'
-        }        
+        self._api_key = api_key
 
     def _throttle(self):
         interval = time.time() - self.__ts_last_req
@@ -54,7 +51,7 @@ class SciValClient:
         self._throttle()
 
         logging.info('Sending GET request to ' + URL)
-        r = requests.get(URL, headers=self.headers)
+        r = requests.get(URL, headers=self.headers, params=dict(apiKey=self._api_key))
 
         if r.status_code == 200:
             next_allowed = datetime.fromtimestamp(int(r.headers.get("X-RateLimit-Reset", 0)))
