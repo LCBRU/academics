@@ -228,9 +228,14 @@ def refresh_publications():
 
     try:
         for p in db.session.execute(select(Publication).where(Publication.refresh_full_details == True)).unique().scalars():
-            if not p.scopus_catalog_publication and p.doi:
+            # if not p.scopus_catalog_publication and p.doi:
+            if p.doi:
                 if pub_data := get_scopus_publication_data(doi=p.doi):
                     save_publications([pub_data])
+                    logging.info(pub_data)
+
+            if not p.scopus_catalog_publication and p.institutions:
+                pass
 
             p.set_vancouver()
             p.refresh_full_details = False
