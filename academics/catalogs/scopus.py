@@ -483,7 +483,7 @@ class Abstract(AbsDoc):
         self.doi = doi
 
         if self.doi:
-            super().__init__(uri=f'{AbsDoc.__uri_base}doi/{doi}')
+            super().__init__(uri=f'https://api.elsevier.com/content/abstract/doi/{doi}')
         else:
             super().__init__(scp_id=self.scopus_id)
 
