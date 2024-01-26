@@ -51,7 +51,7 @@ class SciValClient:
         self._throttle()
 
         logging.info('Sending GET request to ' + URL)
-        r = requests.get(URL, headers=self.headers, params=dict(apiKey=self._api_key))
+        r = requests.get(URL, params=dict(apiKey=self._api_key))
 
         if r.status_code == 200:
             next_allowed = datetime.fromtimestamp(int(r.headers.get("X-RateLimit-Reset", 0)))
