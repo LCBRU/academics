@@ -227,7 +227,7 @@ def refresh_publications():
     logging.debug('started')
 
     try:
-        for p in db.session.execute(select(Publication).where(Publication.refresh_full_details == True)).scalars():
+        for p in db.session.execute(select(Publication).where(Publication.refresh_full_details == True)).unique().scalars():
             if not p.scopus_catalog_publication and p.doi:
                 if pub_data := get_scopus_publication_data(doi=p.doi):
                     save_publications([pub_data])
