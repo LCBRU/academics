@@ -109,6 +109,10 @@ def get_scopus_publication_data(scopus_id=None, doi=None):
     a = Abstract(scopus_id, doi)
     a.read(_client())
 
+    if not a.data:
+        logging.info(f'No publication for {scopus_id=}; {doi=}')
+        return None
+
     id = ((a.data.get('coredata', {}) or {}).get(u'dc:identifier', ':') or ':').split(':')[1]
 
     if not id:
