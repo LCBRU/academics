@@ -7,7 +7,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from academics.model.publication import db
+from lbrc_flask.database import db
+import academics.model.institutions
 import academics.model.academic
 import academics.model.catalog
 import academics.model.folder
