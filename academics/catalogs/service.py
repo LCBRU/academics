@@ -234,7 +234,7 @@ def refresh_publications():
                     save_publications([pub_data])
                     logging.info(pub_data)
 
-            if not p.scopus_catalog_publication and p.institutions:
+            if not p.scopus_catalog_publication and not p.institutions:
                 logging.warning("I'm doing it")
                 get_scival_publication_data(p.scopus_catalog_publication.catalog_identifier)
 
