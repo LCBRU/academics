@@ -119,6 +119,7 @@ class Publication(db.Model, AuditMixin):
     not_brc: Mapped[bool] = mapped_column(default=False, nullable=True)
     doi: Mapped[str] = mapped_column(Unicode(1000), nullable=True, unique=True)
     vancouver: Mapped[str] = mapped_column(Unicode(1000), nullable=True)
+    refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[auto_nihr_acknowledgement_id])

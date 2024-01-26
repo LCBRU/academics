@@ -174,8 +174,7 @@ def _process_updates():
 
     refresh_Academics()
     refresh_catalog_publications()
-    set_publication_vancouvers()
-    set_publication_institutions()
+    refresh_publications()
     remove_publication_without_catalog_entry()
     refresh_affiliations()
     auto_validate()
@@ -224,35 +223,27 @@ def _update_affiliation(affiliation: Affiliation):
         db.session.commit()
 
 
-def set_publication_vancouvers():
+def refresh_publications():
     logging.debug('started')
 
-    while True:
-        p = Publication.query.filter(Publication.vancouver == None).first()
+    try:
+        for p in db.session.execute(select(Publication).where(Publication.refresh_full_details == True)).scalars():
+            if not p.scopus_catalog_publication and p.doi:
+                if pub_data := get_scopus_publication_data(doi=p.doi):
+                    save_publications([pub_data])
 
-        if not p:
-            logging.info('No more publications without Vancouver')
-            break
+            p.set_vancouver()
+            p.refresh_full_details = False
 
-        _update_publication(p)
+            db.session.add(p)
 
-    logging.debug('ended')
+        db.session.commit()
 
+    except Exception as e:
+        log_exception(e)
+        db.session.rollback()
 
-def set_publication_institutions():
-    logging.debug('started')
-
-    while True:
-        p = Publication.query.filter(Publication.institutions == None).first()
-
-        if not p:
-            logging.info('No more publications without institutions')
-            break
-
-        if not p.scopus_catalog_publication and p.doi:
-            if pub_data := get_scopus_publication_data(doi=p.doi):
-                save_publications([pub_data])
-
+    logging.info('All publications refreshed')
     logging.debug('ended')
 
 
@@ -282,13 +273,6 @@ def remove_publication_without_catalog_entry():
 def _update_publication(publication: Publication):
     logging.debug(publication.id)
 
-    try:
-        publication.set_vancouver()
-
-        db.session.add(publication)
-        db.session.commit()
-    except:
-        db.session.rollback()
 
 
 def refresh_catalog_publications():
