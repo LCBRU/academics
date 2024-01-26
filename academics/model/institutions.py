@@ -21,8 +21,8 @@ class Institution(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     catalog: Mapped[str] = mapped_column(String(100), nullable=False)
-    catalog_identifier: Mapped[str] = mapped_column(String(1000), nullable=False)
-    name: Mapped[str] = mapped_column(String(1000), nullable=False)
+    catalog_identifier: Mapped[str] = mapped_column(String(500), nullable=False)
+    name: Mapped[str] = mapped_column(String(500), nullable=False)
     country_code: Mapped[str] = mapped_column(String(10), nullable=False)
     sector: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
