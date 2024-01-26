@@ -235,6 +235,7 @@ def refresh_publications():
                     logging.info(pub_data)
 
             if not p.scopus_catalog_publication and p.institutions:
+                logging.warning("I'm doing it")
                 get_scival_publication_data(p.scopus_catalog_publication.catalog_identifier)
 
             p.set_vancouver()
