@@ -5,8 +5,9 @@ from flask import current_app
 from sqlalchemy import delete, select, update
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _institutions, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
-from academics.catalogs.scival import get_scival_publication_institutions
+from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source, catalog_publications_sources_affiliations
+from academics.model.catalog import CATALOG_SCIVAL
 from academics.model.publication import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, CatalogPublication, NihrAcknowledgement, Publication, Subtype
 from academics.model.folder import folders__publications
 from academics.model.institutions import Institution
@@ -178,6 +179,7 @@ def _process_updates():
     refresh_publications()
     remove_publication_without_catalog_entry()
     refresh_affiliations()
+    refresh_institutions()
     auto_validate()
 
     logging.debug('Ended')
@@ -194,6 +196,21 @@ def refresh_affiliations():
             break
 
         _update_affiliation(a)
+
+    logging.debug('ended')
+
+
+def refresh_institutions():
+    logging.debug('started')
+
+    while True:
+        i = Institution.query.filter(Institution.refresh_full_details == 1).first()
+
+        if not i:
+            logging.info('No more institutions to refresh')
+            break
+
+        _update_institution(i)
 
     logging.debug('ended')
 
@@ -221,6 +238,35 @@ def _update_affiliation(affiliation: Affiliation):
 
         db.session.rollback()
         db.session.execute(update(Affiliation).where(Affiliation.id == affiliation.id).values(refresh_details=False))
+        db.session.commit()
+
+
+def _update_institution(institution: Institution):
+    logging.debug('started')
+
+    try:
+        if institution.catalog != CATALOG_SCIVAL:
+            logging.error(f'What?! Institution catalog is {institution.catalog}')
+            return
+
+        institution_data = get_scival_institution(institution.catalog_identifier)
+
+        if not institution_data:
+            logging.warning(f'Institution not found {institution.catalog_identifier}')
+
+        institution_data.update_affiliation(institution)
+        institution.refresh_details = False
+
+        db.session.add(institution)
+        db.session.commit()
+
+    except Exception as e:
+        log_exception(e)
+
+        logging.warn('Rolling back transaction')
+
+        db.session.rollback()
+        db.session.execute(update(Institution).where(Institution.id == institution.id).values(refresh_details=False))
         db.session.commit()
 
 

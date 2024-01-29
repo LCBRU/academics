@@ -94,3 +94,34 @@ def get_scival_publication_institutions(scopus_id=None):
 
         return []
 
+
+def get_scival_institution(institution_id=None):
+    logging.debug('started')
+
+    if not current_app.config['SCIVAL_ENABLED']:
+        logging.warn('SCIVAL Not Enabled')
+        return []
+
+    try:
+        result = _client().exec_request(f'https://api.elsevier.com/analytics/scival/institution/{institution_id}')
+        logging.info(f'Institution IS found for {institution_id}')
+
+        logging.info(result)
+
+        i = result.get('institution')
+
+        if not i:
+            return None
+
+        return InstitutionData(
+            catalog=CATALOG_SCIVAL,
+            catalog_identifier=i.get('id'),
+            name=i.get('name'),
+            country_code=i.get('countryCode'),
+            sector=i.get('sector'),
+        )
+
+    except Exception as e:
+        logging.warn(f'Institution NOT found for {institution_id}')
+
+        return None
