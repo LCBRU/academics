@@ -246,7 +246,7 @@ def _institutions(institution_datas):
         i.update_institution(new_i)
         i.refresh_full_details = True
 
-        xref[i.catalog_identifier] = i
+        xref[new_i.catalog_identifier] = new_i
 
         db.session.add(new_i)
     
