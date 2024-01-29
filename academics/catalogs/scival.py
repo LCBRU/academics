@@ -106,8 +106,6 @@ def get_scival_institution(institution_id=None):
         result = _client().exec_request(f'https://api.elsevier.com/analytics/scival/institution/{institution_id}')
         logging.info(f'Institution IS found for {institution_id}')
 
-        logging.info(result)
-
         i = result.get('institution')
 
         if not i:
