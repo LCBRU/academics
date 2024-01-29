@@ -244,7 +244,7 @@ def _institutions(institution_datas):
 
         new_i = Institution()
         i.update_institution(new_i)
-        i.refresh_full_details = True
+        new_i.refresh_full_details = True
 
         xref[new_i.catalog_identifier] = new_i
 
