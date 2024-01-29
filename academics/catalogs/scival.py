@@ -92,3 +92,5 @@ def get_scival_publication_institutions(scopus_id=None):
     except Exception as e:
         logging.warn(f'Scival NOT found for {scopus_id}')
 
+        return []
+
