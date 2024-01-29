@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from itertools import chain, groupby
 from sqlalchemy import select
 from academics.model.academic import Affiliation, Source
+from academics.model.catalog import CATALOG_SCIVAL
+from academics.model.institutions import Institution
 from academics.model.publication import CatalogPublication, Journal, Keyword, Publication, Sponsor, Subtype
 from lbrc_flask.database import db
 from datetime import date
@@ -117,6 +119,24 @@ class AffiliationData():
         affiliation.country = self.country
 
 
+@dataclass
+class InstitutionData():
+    catalog: str
+    catalog_identifier: str
+    name: str = ''
+    country_code: str = ''
+    sector: str = ''
+
+    def update_institution(self, institution):
+        institution.catalog_identifier = self.catalog_identifier
+        institution.catalog = self.catalog
+        institution.name = self.name
+        institution.country_code = self.country_code
+        institution.sector = self.sector
+
+        return institution
+
+
 def _journal_xref_for_publication_data_list(publication_datas):
     logging.debug('started')
 
@@ -207,6 +227,32 @@ def _sponsor_xref_for_publication_data_list(publication_datas):
         CatalogReference(p): [xref[unidecode(n).lower()] for n in p.funding_list if n]
         for p in publication_datas
     }
+
+
+def _institutions(institution_datas):
+    logging.debug('started')
+
+    q = select(Institution).where(
+        Institution.catalog_identifier.in_([i.catalog_identifier for i in institution_datas])
+    ).where(Institution.catalog == CATALOG_SCIVAL)
+
+    xref = {i.catalog_identifier: i for i in db.session.execute(q).scalars()}
+
+    for i in institution_datas:
+        if i.catalog_identifier in xref.keys():
+            continue
+
+        new_i = Institution()
+        i.update_institution(new_i)
+        i.refresh_full_details = True
+
+        xref[i.catalog_identifier] = i
+
+        db.session.add_all(new_i)
+    
+    db.session.commit()
+
+    return xref.values()
 
 
 def _keyword_xref_for_publication_data_list(publication_datas):

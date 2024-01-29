@@ -6,8 +6,9 @@ import json
 from flask import current_app
 from functools import cache
 from cachetools import cached, TTLCache
+from academics.catalogs.data_classes import InstitutionData
 
-from academics.model.catalog import CATALOG_SCOPUS
+from academics.model.catalog import CATALOG_SCIVAL
 
 
 class ResourceNotFoundException(Exception):
@@ -69,7 +70,7 @@ def _client():
     return SciValClient(current_app.config['SCOPUS_API_KEY'])
 
 
-def get_scival_publication_data(scopus_id=None):
+def get_scival_publication_institutions(scopus_id=None):
     logging.debug('started')
 
     if not current_app.config['SCIVAL_ENABLED']:
@@ -79,7 +80,15 @@ def get_scival_publication_data(scopus_id=None):
     try:
         result = _client().exec_request(f'https://api.elsevier.com/analytics/scival/publication/{scopus_id}')
         logging.info(f'Scival IS found for {scopus_id}')
-        logging.info(result)
+
+        return [InstitutionData(
+            catalog=CATALOG_SCIVAL,
+            catalog_identifier=i.get('id'),
+            name=i.get('name'),
+            country_code=i.get('countryCode'),
+            sector=None,
+        ) for i in result.get('publication', {}).get('institutions')]
+
     except Exception as e:
         logging.warn(f'Scival NOT found for {scopus_id}')
 
