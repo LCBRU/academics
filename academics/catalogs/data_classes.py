@@ -236,18 +236,10 @@ def _institutions(institution_datas):
         Institution.catalog_identifier.in_([i.catalog_identifier for i in institution_datas])
     ).where(Institution.catalog == CATALOG_SCIVAL)
 
-    print(q)
-
     xref = {i.catalog_identifier: i for i in db.session.execute(q).scalars()}
 
-    print(xref)
-    print(xref.keys())
-
     for i in institution_datas:
-        print(i.catalog_identifier)
-        print(i.catalog_identifier in xref.keys())
-        print(str(i.catalog_identifier) in xref.keys())
-        if i.catalog_identifier in xref.keys():
+        if str(i.catalog_identifier) in xref.keys():
             continue
 
         new_i = Institution()
