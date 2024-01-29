@@ -224,7 +224,7 @@ def _update_affiliation(affiliation: Affiliation):
         if affiliation.catalog == CATALOG_OPEN_ALEX:
             aff_data = get_open_alex_affiliation_data(affiliation.catalog_identifier)
 
-        aff_data.update_institution(affiliation)
+        aff_data.update_affiliation(affiliation)
 
         affiliation.refresh_details = False
 
@@ -254,7 +254,7 @@ def _update_institution(institution: Institution):
         if not institution_data:
             logging.warning(f'Institution not found {institution.catalog_identifier}')
 
-        institution_data.update_affiliation(institution)
+        institution_data.update_institution(institution)
         institution.refresh_full_details = False
 
         db.session.add(institution)
