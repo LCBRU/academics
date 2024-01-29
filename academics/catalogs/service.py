@@ -236,7 +236,7 @@ def refresh_publications():
 
             if p.scopus_catalog_publication and not p.institutions:
                 institutions = get_scival_publication_institutions(p.scopus_catalog_publication.catalog_identifier)
-                p.institutions = _institutions(institutions)
+                p.institutions = set(_institutions(institutions))
 
             p.set_vancouver()
             p.refresh_full_details = False
