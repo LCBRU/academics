@@ -278,7 +278,6 @@ def refresh_publications():
             if not p.scopus_catalog_publication and p.doi:
                 if pub_data := get_scopus_publication_data(doi=p.doi):
                     save_publications([pub_data])
-                    logging.info(pub_data)
 
             if p.scopus_catalog_publication and not p.institutions:
                 institutions = get_scival_publication_institutions(p.scopus_catalog_publication.catalog_identifier)
