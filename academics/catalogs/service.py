@@ -224,7 +224,7 @@ def _update_affiliation(affiliation: Affiliation):
         if affiliation.catalog == CATALOG_OPEN_ALEX:
             aff_data = get_open_alex_affiliation_data(affiliation.catalog_identifier)
 
-        aff_data.update_affiliation(affiliation)
+        aff_data.update_institution(affiliation)
 
         affiliation.refresh_details = False
 
