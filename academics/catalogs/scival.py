@@ -1,24 +1,11 @@
-from datetime import date, datetime
+from datetime import datetime
 import logging
 import requests
 import time
-import re
 import json
-from elsapy.elssearch import ElsSearch
-from elsapy.elsprofile import ElsAuthor, ElsAffil
-from academics.catalogs.data_classes import AffiliationData, AuthorData, PublicationData
-from elsapy.elsdoc import AbsDoc
-from elsapy.elsclient import ElsClient
-from flask import current_app, jsonify
-from sqlalchemy import select
-from lbrc_flask.database import db
-from lbrc_flask.logging import log_exception
-from lbrc_flask.validators import parse_date
-from lbrc_flask.data_conversions import ensure_list
-from elsapy import version
+from flask import current_app
 from functools import cache
 from cachetools import cached, TTLCache
-from academics.model.academic import Academic, Source
 
 from academics.model.catalog import CATALOG_SCOPUS
 
@@ -89,6 +76,10 @@ def get_scival_publication_data(scopus_id=None):
         logging.warn('SCIVAL Not Enabled')
         return []
 
-    result = _client().exec_request(f'https://api.elsevier.com/analytics/scival/publication/{scopus_id}')
+    try:
+        result = _client().exec_request(f'https://api.elsevier.com/analytics/scival/publication/{scopus_id}')
+        logging.info(f'Scival IS found for {scopus_id}')
+    except Exception as e:
+        logging.warn(f'Scival NOT found for {scopus_id}')
 
     logging.info(result)
