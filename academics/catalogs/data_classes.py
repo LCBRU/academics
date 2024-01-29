@@ -248,7 +248,7 @@ def _institutions(institution_datas):
 
         xref[i.catalog_identifier] = i
 
-        db.session.add_all(new_i)
+        db.session.add(new_i)
     
     db.session.commit()
 
