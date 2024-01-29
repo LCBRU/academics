@@ -255,7 +255,7 @@ def _update_institution(institution: Institution):
             logging.warning(f'Institution not found {institution.catalog_identifier}')
 
         institution_data.update_affiliation(institution)
-        institution.refresh_details = False
+        institution.refresh_full_details = False
 
         db.session.add(institution)
         db.session.commit()
@@ -266,7 +266,7 @@ def _update_institution(institution: Institution):
         logging.warn('Rolling back transaction')
 
         db.session.rollback()
-        db.session.execute(update(Institution).where(Institution.id == institution.id).values(refresh_details=False))
+        db.session.execute(update(Institution).where(Institution.id == institution.id).values(refresh_full_details=False))
         db.session.commit()
 
 
