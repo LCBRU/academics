@@ -533,17 +533,8 @@ def by_external_collaboration(publications):
         .group_by(publications.c.bucket)
     ).alias()
 
-    not_collaboration = (
-        select(distinct(CatalogPublication.publication_id).label("publication_id"))
-        .select_from(CatalogPublication)
-        .join(CatalogPublication.catalog_publication_sources)
-        .join(CatalogPublicationsSources.affiliations)
-        .where(Affiliation.home_organisation == True)
-        .where(CatalogPublication.publication_id.in_(select(publications.c.publication_id)))
-    ).alias()
-
     series_case = case(
-        (not_collaboration.c.publication_id == None, 'Collaboration'),
+        (Publication.is_external_collaboration == 1, 'Collaboration'),
         else_='Not Collaboration'
     )
 
@@ -554,11 +545,11 @@ def by_external_collaboration(publications):
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(publications)
-        .join(not_collaboration, not_collaboration.c.publication_id == publications.c.publication_id, isouter=True)
+        .select_from(Publication)
+        .join(publications, publications.c.publication_id == Publication.id)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(series_case, publications.c.bucket)
-        .order_by(not_collaboration.c.publication_id, publications.c.bucket)
+        .order_by(series_case, publications.c.bucket)
     )
 
     return db.session.execute(q).mappings().all()
