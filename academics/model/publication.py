@@ -160,7 +160,7 @@ class Publication(db.Model, AuditMixin):
             ))
             .where(institutions__publications.c.publication_id == cls.id)
             .where(Institution.id == institutions__publications.c.institution_id)
-            .where(Institution.sector == 'coroprate')
+            .where(Institution.sector == 'corporate')
             .label("is_industrial_collaboration")
         )
 
