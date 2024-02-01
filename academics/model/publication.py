@@ -166,6 +166,28 @@ class Publication(db.Model, AuditMixin):
             .label("is_industrial_collaboration")
         )
 
+    @hybrid_property
+    def is_international_collaboration(self):
+        if self.institutions:
+            return any([i.sector.lower() != 'gbr' for i in self.institutions])
+        else:
+            None
+
+    @is_international_collaboration.inplace.expression
+    @classmethod
+    def _is_international_collaboration_expression(cls) -> SQLColumnExpression[Optional[Boolean]]:
+        return (
+            case(
+                (
+                    select(func.sum(1))
+                    .where(institutions__publications.c.publication_id == cls.id)
+                    .where(Institution.id == institutions__publications.c.institution_id)
+                    .where(Institution.sector == 'gbr')
+                , 0),
+                else_=1
+            )
+            .label("is_international_collaboration")
+        )
 
     @property
     def sponsors(self):
