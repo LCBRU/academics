@@ -51,8 +51,10 @@ def publications():
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
     print('A'*10)
-    print(db.session.execute(select(func.count()).select_from(q)).scalar())
+    print(q)
     print('B'*10)
+    print(db.session.execute(select(func.count()).select_from(q)).scalar())
+    print('C'*10)
 
     publications = db.paginate(
         select=q,
