@@ -192,7 +192,7 @@ class Publication(db.Model, AuditMixin):
             (select(Institution.id)
             .where(institutions__publications.c.publication_id == cls.id)
             .where(Institution.id == institutions__publications.c.institution_id)
-            .where(or_(Institution.home_institution == 0, Institution.home_institution is None))).exists(),
+            .where(func.coalesce(Institution.home_institution, 0) == 0)).exists(),
             ).label("is_external_collaboration")
 
     @property
