@@ -38,6 +38,7 @@ def publications():
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = publication_search_query(search_form)
+
     q = q.options(
         selectinload(Publication.catalog_publications)
         .selectinload(CatalogPublication.catalog_publication_sources)
@@ -48,6 +49,8 @@ def publications():
         selectinload(Publication.folders)
     )
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
+
+    print(db.session.execute(q).scalars())
 
     publications = db.paginate(
         select=q,
