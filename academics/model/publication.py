@@ -154,15 +154,18 @@ class Publication(db.Model, AuditMixin):
     @classmethod
     def _is_industrial_collaboration_expression(cls) -> SQLColumnExpression[Optional[Boolean]]:
         return (
-            select(case(
-                (func.sum(1) > 0, 1),
-                (func.sum(1) == 0, 0),
-            ))
-            .where(institutions__publications.c.publication_id == cls.id)
-            .where(Institution.id == institutions__publications.c.institution_id)
-            .where(Institution.sector == 'corporate')
+            case(
+                (
+                    select(func.sum(1))
+                    .where(institutions__publications.c.publication_id == cls.id)
+                    .where(Institution.id == institutions__publications.c.institution_id)
+                    .where(Institution.sector == 'corporate')
+                , 1),
+                else_=0
+            )
             .label("is_industrial_collaboration")
         )
+
 
     @property
     def sponsors(self):
