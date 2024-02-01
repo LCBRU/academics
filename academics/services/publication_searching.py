@@ -310,8 +310,6 @@ def catalog_publication_search_query(search_form):
 
     if search_form.has_value('international_collaboration'):
         is_is = 1 if search_form.international_collaboration.data else 0
-        print('A'*10)
-        print(is_is)
         q = q.where(Publication.is_international_collaboration == is_is)
 
     logging.debug(f'publication_search_query ended')

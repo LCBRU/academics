@@ -16,3 +16,4 @@ class Institution(db.Model):
     country_code: Mapped[str] = mapped_column(String(10), nullable=False)
     sector: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    home_institution: Mapped[bool] = mapped_column(Boolean, nullable=True)
