@@ -4,7 +4,7 @@ from typing import Optional
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, case, func, select
+from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, and_, case, func, select
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
@@ -162,7 +162,7 @@ class Publication(db.Model, AuditMixin):
     @hybrid_property
     def is_international_collaboration(self):
         if self.institutions:
-            return any([i.sector.lower() != 'gbr' for i in self.institutions])
+            return any([i.country_code.lower() != 'gbr' for i in self.institutions])
         else:
             None
 
@@ -173,6 +173,27 @@ class Publication(db.Model, AuditMixin):
             .where(institutions__publications.c.publication_id == cls.id)
             .where(Institution.id == institutions__publications.c.institution_id)
             .where(Institution.country_code != 'GBR')).exists().label("is_international_collaboration")
+
+    @hybrid_property
+    def is_external_collaboration(self):
+        if self.institutions:
+            return any([i.home_organisation for i in self.institutions]) and any([not i.home_organisation for i in self.institutions])
+        else:
+            None
+
+    @is_external_collaboration.inplace.expression
+    @classmethod
+    def _is_external_collaboration_expression(cls) -> SQLColumnExpression[Optional[Boolean]]:
+        return and_(
+            (select(Institution.id)
+            .where(institutions__publications.c.publication_id == cls.id)
+            .where(Institution.id == institutions__publications.c.institution_id)
+            .where(Institution.home_institution)).exists(),
+            (select(Institution.id)
+            .where(institutions__publications.c.publication_id == cls.id)
+            .where(Institution.id == institutions__publications.c.institution_id)
+            .where(not Institution.home_institution)).exists(),
+            ).label("is_external_collaboration")
 
     @property
     def sponsors(self):

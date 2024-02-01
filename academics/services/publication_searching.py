@@ -101,6 +101,12 @@ class PublicationSearchForm(SearchForm):
         coerce=boolean_coerce,
         default=None,
     )
+    external_collaboration = SelectField(
+        'External Collabortaion',
+        choices=[('', ''), ('True', 'Yes'), ('False', 'No')],
+        coerce=boolean_coerce,
+        default=None,
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -311,6 +317,10 @@ def catalog_publication_search_query(search_form):
     if search_form.has_value('international_collaboration'):
         is_is = 1 if search_form.international_collaboration.data else 0
         q = q.where(Publication.is_international_collaboration == is_is)
+
+    if search_form.has_value('external_collaboration'):
+        is_is = 1 if search_form.external_collaboration.data else 0
+        q = q.where(Publication.is_external_collaboration == is_is)
 
     logging.debug(f'publication_search_query ended')
 
