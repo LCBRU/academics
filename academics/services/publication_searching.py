@@ -483,7 +483,8 @@ def by_industrial_collaboration(publications):
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(publications)
+        .select_from(Publication)
+        .join(publications, publications.c.publication_id == Publication.id)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(series_case, publications.c.bucket)
         .order_by(series_case, publications.c.bucket)
