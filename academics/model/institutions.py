@@ -1,16 +1,6 @@
 from sqlalchemy import Boolean, String, UniqueConstraint
-from sqlalchemy.orm import backref
 from lbrc_flask.database import db
-
-from academics.model.publication import Publication
-from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-
-
-institutions__publications = db.Table(
-    'institutions__publications',
-    db.Column('institution_id', db.Integer(), db.ForeignKey('institution.id'), primary_key=True),
-    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
-)
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Institution(db.Model):
@@ -26,13 +16,3 @@ class Institution(db.Model):
     country_code: Mapped[str] = mapped_column(String(10), nullable=False)
     sector: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
-
-    publications: Mapped[Publication] = relationship(
-        "Publication",
-        secondary=institutions__publications,
-        collection_class=set,
-        backref=backref(
-            "institutions",
-            collection_class=set,
-        )
-    )

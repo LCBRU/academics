@@ -1,11 +1,14 @@
 import logging
 from datetime import date
-from typing import List
+from typing import Optional
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, case, func, select
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
+from academics.model.institutions import Institution
 
 
 DOI_URL = 'doi.org'
@@ -113,6 +116,13 @@ class Keyword(db.Model):
     catalog_publications = db.relationship("CatalogPublication", secondary=catalog_publications_keywords, back_populates="keywords", collection_class=set)
 
 
+institutions__publications = db.Table(
+    'institutions__publications',
+    db.Column('institution_id', db.Integer(), db.ForeignKey('institution.id'), primary_key=True),
+    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
+)
+
+
 class Publication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     validation_historic: Mapped[bool] = mapped_column(default=False, nullable=True)
@@ -126,6 +136,33 @@ class Publication(db.Model, AuditMixin):
 
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[nihr_acknowledgement_id])
+
+    institutions: Mapped[Institution] = relationship(
+        "Institution",
+        secondary=institutions__publications,
+        collection_class=set,
+    )
+
+    @hybrid_property
+    def is_industrial_collaboration(self):
+        if self.institutions:
+            return any([i.sector.lower() == 'corporate' for i in self.institutions])
+        else:
+            None
+
+    @is_industrial_collaboration.inplace.expression
+    @classmethod
+    def _is_industrial_collaboration_expression(cls) -> SQLColumnExpression[Optional[Boolean]]:
+        return (
+            select(case(
+                (func.sum(1) > 0, 1),
+                (func.sum(1) == 0, 0),
+            ))
+            .where(institutions__publications.c.publication_id == cls.id)
+            .where(Institution.id == institutions__publications.c.institution_id)
+            .where(Institution.sector == 'coroprate')
+            .label("is_industrial_collaboration")
+        )
 
     @property
     def sponsors(self):

@@ -9,7 +9,7 @@ from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
 from sqlalchemy import case, distinct, literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
-from lbrc_flask.forms import SearchForm
+from lbrc_flask.forms import SearchForm, boolean_coerce
 from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem
 from lbrc_flask.database import db
@@ -88,6 +88,12 @@ class PublicationSearchForm(SearchForm):
         choices=[(True, 'Yes'), (False, 'No')],
         coerce=lambda x: x == 'True',
         default='False',
+    )
+    industrial_collaboration = SelectField(
+        'Industrial Collabortaion',
+        choices=[('', ''), ('True', 'Yes'), ('False', 'No')],
+        coerce=boolean_coerce,
+        default=None,
     )
 
     def __init__(self, **kwargs):
@@ -208,6 +214,7 @@ def catalog_publication_search_query(search_form):
             CatalogPublicationsSources.source_id == search_form.author_id.data
         ))
 
+    print('academic_id')
     if search_form.has_value('academic_id'):
         q = q.where(CatalogPublication.id.in_(
             select(CatalogPublicationsSources.catalog_publication_id)
@@ -290,6 +297,11 @@ def catalog_publication_search_query(search_form):
             Publication.validation_historic == False,
             Publication.validation_historic == None,
         ))
+
+    logging.warn(search_form.has_value('industrial_collaboration'))
+
+    if search_form.has_value('industrial_collaboration'):
+        q = q.where(Publication.is_industrial_collaboration == search_form.industrial_collaboration.data)
 
     logging.debug(f'publication_search_query ended')
 
