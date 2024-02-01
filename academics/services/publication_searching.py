@@ -301,7 +301,7 @@ def catalog_publication_search_query(search_form):
     logging.warn(search_form.has_value('industrial_collaboration'))
 
     if search_form.has_value('industrial_collaboration'):
-        q = q.where(Publication.is_industrial_collaboration == search_form.industrial_collaboration.data)
+        q = q.where(Publication.is_industrial_collaboration == 1 if search_form.industrial_collaboration.data else 0)
 
     logging.debug(f'publication_search_query ended')
 
