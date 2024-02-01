@@ -472,7 +472,7 @@ def by_industrial_collaboration(publications):
     ).alias()
 
     series_case = case(
-        (Publication.is_industrial_collaboration, 'Collaboration'),
+        (Publication.is_industrial_collaboration = 1, 'Collaboration'),
         else_='Not Collaboration'
     )
 
