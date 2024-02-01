@@ -4,7 +4,7 @@ from typing import Optional
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, and_, case, func, select
+from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, and_, case, func, or_, select
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
@@ -188,11 +188,11 @@ class Publication(db.Model, AuditMixin):
             (select(Institution.id)
             .where(institutions__publications.c.publication_id == cls.id)
             .where(Institution.id == institutions__publications.c.institution_id)
-            .where(Institution.home_institution)).exists(),
+            .where(Institution.home_institution == 1)).exists(),
             (select(Institution.id)
             .where(institutions__publications.c.publication_id == cls.id)
             .where(Institution.id == institutions__publications.c.institution_id)
-            .where(not Institution.home_institution)).exists(),
+            .where(or_(Institution.home_institution == 0, Institution.home_institution is None))).exists(),
             ).label("is_external_collaboration")
 
     @property
