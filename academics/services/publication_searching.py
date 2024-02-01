@@ -471,18 +471,9 @@ def by_industrial_collaboration(publications):
         .group_by(publications.c.bucket)
     ).alias()
 
-    industry = (
-        select(distinct(CatalogPublication.publication_id).label("publication_id"))
-        .select_from(CatalogPublication)
-        .join(CatalogPublication.catalog_publication_sources)
-        .join(CatalogPublicationsSources.affiliations)
-        .where(Affiliation.industry == True)
-        .where(CatalogPublication.publication_id.in_(select(publications.c.publication_id)))
-    ).alias()
-
     series_case = case(
-        (industry.c.publication_id == None, 'Not Collaboration'),
-        else_='Collaboration'
+        (Publication.is_industrial_collaboration, 'Collaboration'),
+        else_='Not Collaboration'
     )
 
     q = (
@@ -493,10 +484,9 @@ def by_industrial_collaboration(publications):
             q_total.c.total_count
         )
         .select_from(publications)
-        .join(industry, industry.c.publication_id == publications.c.publication_id, isouter=True)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(series_case, publications.c.bucket)
-        .order_by(industry.c.publication_id, publications.c.bucket)
+        .order_by(series_case, publications.c.bucket)
     )
 
     return db.session.execute(q).mappings().all()
