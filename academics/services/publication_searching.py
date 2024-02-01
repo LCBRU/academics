@@ -302,7 +302,6 @@ def catalog_publication_search_query(search_form):
 
     if search_form.has_value('industrial_collaboration'):
         is_is = 1 if search_form.industrial_collaboration.data else 0
-        print(f'^^^^^^^^ {is_is} ^^^^^^^^^^')
         q = q.where(Publication.is_industrial_collaboration == is_is)
 
     logging.debug(f'publication_search_query ended')
