@@ -50,7 +50,7 @@ def publications():
     )
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
-    print(db.session.execute(q).scalars())
+    print(db.session.execute(q).scalars().all())
 
     publications = db.paginate(
         select=q,
