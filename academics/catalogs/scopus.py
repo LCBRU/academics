@@ -539,7 +539,7 @@ class Abstract(AbsDoc):
 
     @property
     def authors(self):
-        return [self._translate_publication_author(a) for a in self.data.get('authors', {}).get('author', [])]
+        return [self._translate_publication_author(a) for a in ((self.data or {}).get('authors') or {}).get('author', [])]
 
 
     def _translate_publication_author(self, author_dict):
