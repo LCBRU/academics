@@ -14,7 +14,7 @@ from sqlalchemy import select
 from lbrc_flask.database import db
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
-from lbrc_flask.data_conversions import ensure_list
+from lbrc_flask.data_conversions import ensure_list, convert_int_nullable
 from elsapy import version
 from functools import cache
 from cachetools import cached, TTLCache
@@ -135,7 +135,7 @@ def get_scopus_publication_data(scopus_id=None, doi=None):
             pages=a.data.get('coredata', {}).get('prism:pageRange', ''),
             subtype_code=a.data.get('coredata', {}).get('subtype', ''),
             subtype_description=a.data.get('coredata', {}).get('subtypeDescription', ''),
-            cited_by_count=int(a.data.get('coredata', {}).get(u'citedby-count', '0')),
+            cited_by_count=convert_int_nullable(a.data.get('coredata', {}).get(u'citedby-count')),
             authors=a.authors,
             keywords=list(filter(None, set([k.get('$', '') for k in (a.data.get(u'authkeywords') or {}).get('author-keywords', [])]))),
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
