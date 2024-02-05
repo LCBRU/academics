@@ -210,7 +210,8 @@ def _publication_xref_for_publication_data_list(publication_datas):
 def _sponsor_xref_for_publication_data_list(publication_datas):
     logging.debug('started')
 
-    unique_names = set(filter(None, [unidecode(n).lower() for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
+    unique_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
+    unique_names = set([unidecode(n).lower() for n in unique_names])
 
     q = select(Sponsor).where(Sponsor.name.in_(unique_names))
 
