@@ -5,7 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 class Institution(db.Model):
     __table_args__ = (
-        UniqueConstraint("name", name='ux__institution__name'),
         UniqueConstraint("catalog", "catalog_identifier", name='ux__institution__catalog__catalog_identifier'),
     )
 
