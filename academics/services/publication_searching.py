@@ -2,12 +2,12 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import current_user
-from academics.model.academic import Academic, Affiliation, CatalogPublicationsSources, Source
+from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder
 from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
-from sqlalchemy import case, distinct, literal, literal_column, or_
+from sqlalchemy import case, literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm, boolean_coerce
 from sqlalchemy import func, select
@@ -140,7 +140,7 @@ class PublicationSummarySearchForm(SearchForm):
     ], default='total')
     measure = SelectField('Measure', choices=[('percentage', 'Percentage'), ('publications', 'Publications')], default='publications')
     theme_id = SelectField('Theme')
-    nihr_acknowledgement_id = SelectMultipleField('Acknowledgement')
+    nihr_acknowledgement_ids = SelectMultipleField('Acknowledgement')
     academic_id = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_date = MonthField('Publication End Month')
@@ -155,7 +155,7 @@ class PublicationSummarySearchForm(SearchForm):
         super().__init__(**kwargs)
 
         self.theme_id.choices = theme_select_choices()
-        self.nihr_acknowledgement_id.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
+        self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
     
     @property
     def summary_type(self):
