@@ -81,7 +81,7 @@ def report_image():
 
     measure_y_title = {
         'publications': 'Publications',
-        'percentage': 'Publications',
+        'percentage': 'Percentage',
     }
 
     c = publication_count(search_form)
