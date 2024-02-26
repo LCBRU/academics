@@ -152,7 +152,7 @@ def publication_full_export_xlsx():
     q = select(CatalogPublication).select_from(cat_pubs).join(CatalogPublication, CatalogPublication.id == cat_pubs.c.id)
     q = q.join(CatalogPublication.journal, isouter=True)
     q = q.join(CatalogPublication.subtype, isouter=True)
-    q = q.join(Publication.sponsors, isouter=True)
+    q = q.join(CatalogPublication.sponsors, isouter=True)
     q = q.group_by(CatalogPublication.id)
 
     q = q.with_only_columns(
