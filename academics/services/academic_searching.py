@@ -6,12 +6,12 @@ from academics.model.theme import Theme
 
 
 class AcademicSearchForm(SearchForm):
-    theme_id = SelectField('Theme', coerce=int)
+    theme_id = SelectField('Theme')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme_id.choices = [(0, ''), (-1, '[Unset]')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.theme_id.choices = [('', ''), (-1, '[Unset]')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 def academic_search_query(search_form):
