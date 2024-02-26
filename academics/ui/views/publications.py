@@ -216,24 +216,11 @@ def publication_full_annual_report_xlsx():
     q = q.with_only_columns(
         CatalogPublication.id,
         CatalogPublication.doi,
-        CatalogPublication.title,
-        CatalogPublication.publication_cover_date,
-        CatalogPublication.issue,
-        CatalogPublication.volume,
-        CatalogPublication.pages,
-        func.coalesce(Journal.name, '').label('journal_name'),
+        CatalogPublication.vancouver,
     )
 
     publication_details = ({
-        'Publication Reference': Publication.vancouver(
-            '',
-            p['title'],
-            p['journal_name'],
-            p['publication_cover_date'],
-            p['issue'],
-            p['volume'],
-            p['pages'],
-        ),
+        'Publication Reference': Publication.vancouver,
         'DOI': p.doi,
     } for p in db.session.execute(q).unique().mappings())
 
