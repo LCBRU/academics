@@ -44,8 +44,8 @@ class AuthorData():
             return ' '.join(filter(None, [self.first_name, self.last_name]))
 
     @property
-    def is_leicester(self):
-        return any([a.is_leicester for a in self.affiliations])
+    def is_local(self):
+        return any([a.is_local for a in self.affiliations])
 
     @property
     def affiliation_summary(self):
@@ -104,8 +104,8 @@ class AffiliationData():
     country: str = ''
 
     @property
-    def is_leicester(self):
-        return 'leicester' in self.summary.lower()
+    def is_local(self):
+        return 'leicester' in self.summary.lower() or 'loughborough' in self.summary.lower() or 'northampton' in self.summary.lower()
 
     @property
     def summary(self):

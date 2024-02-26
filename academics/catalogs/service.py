@@ -463,7 +463,7 @@ def _find_new_potential_sources(academic):
         return
 
     new_source_datas = filter(
-        lambda s: s.is_leicester,
+        lambda s: s.is_local,
         [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
     )
 
