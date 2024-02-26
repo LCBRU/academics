@@ -212,7 +212,7 @@ def publication_full_annual_report_xlsx():
     )
 
     publication_details = ({
-        'Publication Reference': Publication.vancouver,
+        'Publication Reference': p.vancouver,
         'DOI': p.doi,
     } for p in db.session.execute(q).unique().mappings())
 
