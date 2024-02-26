@@ -203,20 +203,12 @@ def publication_full_annual_report_xlsx():
 
     search_form = PublicationSearchForm(formdata=request.args)
 
-    cat_pubs = publication_search_query(search_form)
-
-    q = (
-        select(CatalogPublication)
-        .select_from(cat_pubs)
-        .join(CatalogPublication, CatalogPublication.id == cat_pubs.c.id)
-        .distinct()
-    )
-    q = q.join(CatalogPublication.journal, isouter=True)
+    q = publication_search_query(search_form)
 
     q = q.with_only_columns(
-        CatalogPublication.id,
-        CatalogPublication.doi,
-        CatalogPublication.vancouver,
+        Publication.id,
+        Publication.doi,
+        Publication.vancouver,
     )
 
     publication_details = ({
