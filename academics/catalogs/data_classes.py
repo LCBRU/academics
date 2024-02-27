@@ -197,7 +197,7 @@ def _publication_xref_for_publication_data_list(publication_datas):
         ).unique().scalar_one_or_none():
             xref[CatalogReference(p)] = pub
 
-    new_pubs = {CatalogReference(p): Publication(p.doi) for p in publication_datas if CatalogReference(p) not in xref.keys()}
+    new_pubs = {CatalogReference(p): Publication(doi=p.doi) for p in publication_datas if CatalogReference(p) not in xref.keys()}
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
