@@ -143,7 +143,7 @@ class PublicationSummarySearchForm(SearchForm):
     nihr_acknowledgement_ids = SelectMultipleField('Acknowledgement')
     academic_id = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
-    publication_end_date = MonthField('Publication End Month')
+    publication_end_month = MonthField('Publication End Month')
     supress_validation_historic = SelectField(
         'Suppress Historic',
         choices=[(True, 'Yes'), (False, 'No')],
@@ -226,7 +226,6 @@ def catalog_publication_search_query(search_form):
             CatalogPublicationsSources.source_id == search_form.author_id.data
         ))
 
-    print('academic_id')
     if search_form.has_value('academic_id'):
         q = q.where(CatalogPublication.id.in_(
             select(CatalogPublicationsSources.catalog_publication_id)
