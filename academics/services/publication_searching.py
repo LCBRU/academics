@@ -1,6 +1,6 @@
 import logging
 from dateutil.relativedelta import relativedelta
-from flask import url_for
+from flask import current_app, url_for
 from flask_login import current_user
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder
@@ -84,7 +84,7 @@ class PublicationSearchForm(SearchForm):
     academic_id = SelectMultipleField('Academic')
     folder_id = SelectField('Folder')
     supress_validation_historic = SelectField(
-        'Suppress Historic',
+        f'Suppress Historic',
         choices=[(True, 'Yes'), (False, 'No')],
         coerce=lambda x: x == 'True',
         default='False',
@@ -111,6 +111,7 @@ class PublicationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.supress_validation_historic.label.text = f'Suprress Historic (before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
         self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
@@ -154,6 +155,7 @@ class PublicationSummarySearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.supress_validation_historic.label.text = f'Suprress Historic (before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.theme_id.choices = theme_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
     
@@ -181,6 +183,7 @@ class ValidationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.supress_validation_historic.label.text = f'Suprress Historic (before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
         self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
 
@@ -304,10 +307,7 @@ def catalog_publication_search_query(search_form):
 
     if search_form.supress_validation_historic.data == True:
         logging.debug(f'Supressing Historic Publications')
-        q = q.where(or_(
-            Publication.validation_historic == False,
-            Publication.validation_historic == None,
-        ))
+        q = q.where(CatalogPublication.publication_cover_date >= current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
 
     if search_form.has_value('industrial_collaboration'):
         is_is = 1 if search_form.industrial_collaboration.data else 0
