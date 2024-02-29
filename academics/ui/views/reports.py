@@ -1,13 +1,13 @@
 from flask import render_template, request
-from lbrc_flask.charting import BarChart
+from lbrc_flask.charting import BarChart, SeriesConfig, default_series_colors
 from lbrc_flask.database import db
-from sqlalchemy import distinct, select
+from sqlalchemy import select
 from lbrc_flask.export import csv_download
 from sqlalchemy import select
 from academics.model.academic import Academic
 from academics.model.theme import Theme
 from academics.services.academic_searching import academic_search_query, theme_search_query
-from academics.services.publication_searching import PublicationSummarySearchForm, publication_count, publication_summary
+from academics.services.publication_searching import PublicationSummarySearchForm, publication_count, publication_summary, all_series
 
 from .. import blueprint
 
@@ -46,8 +46,8 @@ def get_report_defs(search_form):
     return report_defs
 
 
-@blueprint.route("/reports/image")
-def report_image():
+@blueprint.route("/reports/image/<string:type>")
+def report_image(type='png'):
     search_form = PublicationSummarySearchForm(formdata=request.args)
 
     if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
@@ -86,17 +86,30 @@ def report_image():
 
     c = publication_count(search_form)
 
+    items = publication_summary(search_form)
+    series = sorted(all_series(search_form))
+
+    series_config = [SeriesConfig(name=n, color=col) for n, col in zip(series, default_series_colors())]
+
     bc: BarChart = BarChart(
         title= ' '.join(filter(None, [type_title, 'Publications', group_by_title[search_form.group_by.data], measure_title[search_form.measure.data]])),
-        items=publication_summary(search_form),
+        items=items,
         y_title=measure_y_title[search_form.measure.data],
-        x_title=f'Publication Count = {c}{type_duplicate_message[search_form.summary_type]}'
+        x_title=f'Publication Count = {c}{type_duplicate_message[search_form.summary_type]}',
+        no_data_text='No publications found',
+        show_y_guides=False,
+        show_y_labels=False,
+        legend_at_bottom_columns=1,
+        tooltip_border_radius=10,
+        series_config=series_config,
     )
 
-    if search_form.measure.data == 'Percentage':
-        bc.value_formatter = lambda x: f'{x}%'
+    bc.value_formatter = lambda x: f'{x} ({round(x * 100/c)}%)'
 
-    return bc.send()
+    if type == 'svg':
+        return bc.send_svg()
+    else:
+        return bc.send()
 
 
 @blueprint.route("/academics/export/csv")

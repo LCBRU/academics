@@ -17,7 +17,7 @@
     <div id="chart">
         {% for r in report_defs %}
             <a href='{{ url_for("ui.publications", **r) }}''>
-                <img src='{{ url_for("ui.report_image", **r) }}' class="loading" width="1100" height="400" />
+                <img src="{{ url_for('ui.report_image', type='png', **r) }}" class="loading" width="1100" height="400" />
             </a>
         {% endfor %}
     </div>

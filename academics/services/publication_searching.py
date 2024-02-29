@@ -361,6 +361,21 @@ def publication_summary(search_form):
     return items
 
 
+def all_series(search_form):
+    if search_form.group_by.data == "acknowledgement":
+        results = db.session.execute(select(NihrAcknowledgement.name)).scalars().all()
+    elif search_form.group_by.data in ["industry_collaboration", "international_collaboration", "external_collaboration"]:
+        results = ['Collaboration','Not Collaboration']
+    elif search_form.group_by.data == "theme_collaboration":
+        results = db.session.execute(select(Theme.name)).scalars().all()
+    else:
+        results = ['']
+
+    print(search_form.group_by.data)
+
+    return results
+
+
 def get_publication_by_theme(search_form):
     cat_pubs = catalog_publication_search_query(search_form).alias()
 
@@ -426,7 +441,7 @@ def get_publication_by_academic(search_form):
 
 
 def get_publication_by_brc(search_form):
-    cat_pubs = catalog_publication_search_query(search_form).alias()
+    cat_pubs = catalog_publication_search_query(search_form)
 
     return select(
         CatalogPublication.publication_id,
