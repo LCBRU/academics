@@ -12,15 +12,21 @@
  
     <h1>Reports</h1>
 
-    {{ render_search(search_form, 'ui.reports') }}
+    {{ render_search(
+        search_form,
+        'ui.reports',
+    ) }}
 
-    <div id="chart">
-        {% for r in report_defs %}
-            <a href='{{ url_for("ui.publications", **r) }}''>
-                <img src="{{ url_for('ui.report_image', type='png', **r) }}" class="loading" width="1100" height="400" />
-            </a>
-        {% endfor %}
-    </div>
+    {% for r in report_defs %}
+        <div class="chart">
+            <div class="insert">
+                <a href='{{ url_for("ui.publications", **r) }}' class="btn btn-light btn-sm"><i class="far fa-newspaper"></i> Publications</a>
+                <a href="{{ url_for('ui.report_image', type='attachment', **r) }}" class="btn btn-light btn-sm"><i class="fas fa-cloud-download-alt"></i> Download</a>
+            </div>
+            <img src="{{ url_for('ui.report_image', **r) }}" class="loading" width="1100" height="400" />
+            <hr>
+        </div>
+    {% endfor %}
 
 </section>
 

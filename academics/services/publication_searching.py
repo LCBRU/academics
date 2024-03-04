@@ -78,7 +78,7 @@ class PublicationSearchForm(SearchForm):
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
     subtype_id = SelectMultipleField('Type')
-    nihr_acknowledgement_ids = SelectMultipleField('Acknowledgement')
+    nihr_acknowledgement_ids = SelectMultipleField('Acknowledgements')
     keywords = SelectMultipleField('Keywords')
     author_id = HiddenField('Author')
     academic_id = SelectMultipleField('Academic')
@@ -139,9 +139,8 @@ class PublicationSummarySearchForm(SearchForm):
         ('international_collaboration', 'International Collaboration'),
         ('theme_collaboration', 'Theme Collaboration'),
     ], default='total')
-    measure = SelectField('Measure', choices=[('percentage', 'Percentage'), ('publications', 'Publications')], default='publications')
     theme_id = SelectField('Theme')
-    nihr_acknowledgement_ids = SelectMultipleField('Acknowledgement')
+    nihr_acknowledgement_ids = SelectMultipleField('Acknowledgements')
     academic_id = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
@@ -353,12 +352,7 @@ def publication_summary(search_form):
     else:
         results = by_total(publications)
 
-    if search_form.measure.data == 'publications':
-        items = publication_count_value(results)
-    else:
-        items = percentage_value(results)
-
-    return items
+    return publication_count_value(results)
 
 
 def all_series(search_form):
@@ -370,8 +364,6 @@ def all_series(search_form):
         results = db.session.execute(select(Theme.name)).scalars().all()
     else:
         results = ['']
-
-    print(search_form.group_by.data)
 
     return results
 
@@ -625,12 +617,4 @@ def publication_count_value(results):
         series=p['series'],
         bucket=p['bucket'],
         count=p['publications']
-    ) for p in results]
-
-
-def percentage_value(results):
-    return [BarChartItem(
-        series=p['series'],
-        bucket=p['bucket'],
-        count=round(p['publications'] * 100 / p['total_count'])
     ) for p in results]

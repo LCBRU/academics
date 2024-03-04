@@ -7,7 +7,8 @@ from sqlalchemy import select
 from academics.model.academic import Academic
 from academics.model.theme import Theme
 from academics.services.academic_searching import academic_search_query, theme_search_query
-from academics.services.publication_searching import PublicationSummarySearchForm, publication_count, publication_summary, all_series
+from academics.services.publication_searching import PublicationSearchForm, PublicationSummarySearchForm, publication_count, publication_search_query, publication_summary, all_series
+from lbrc_flask.export import pdf_download
 
 from .. import blueprint
 
@@ -46,6 +47,7 @@ def get_report_defs(search_form):
     return report_defs
 
 
+@blueprint.route("/reports/image")
 @blueprint.route("/reports/image/<string:type>")
 def report_image(type='png'):
     search_form = PublicationSummarySearchForm(formdata=request.args)
@@ -74,16 +76,6 @@ def report_image(type='png'):
         'theme_collaboration': 'by Theme Collaboration',
     }
 
-    measure_title = {
-        'publications': 'Count',
-        'percentage': 'Publications',
-    }
-
-    measure_y_title = {
-        'publications': 'Publications',
-        'percentage': 'Percentage',
-    }
-
     c = publication_count(search_form)
 
     items = publication_summary(search_form)
@@ -92,9 +84,9 @@ def report_image(type='png'):
     series_config = [SeriesConfig(name=n, color=col) for n, col in zip(series, default_series_colors())]
 
     bc: BarChart = BarChart(
-        title= ' '.join(filter(None, [type_title, 'Publications', group_by_title[search_form.group_by.data], measure_title[search_form.measure.data]])),
+        title= ' '.join(filter(None, [type_title, 'Publications', group_by_title[search_form.group_by.data]])),
         items=items,
-        y_title=measure_y_title[search_form.measure.data],
+        y_title='Publications',
         x_title=f'Publication Count = {c}{type_duplicate_message[search_form.summary_type]}',
         no_data_text='No publications found',
         show_y_guides=False,
@@ -108,6 +100,8 @@ def report_image(type='png'):
 
     if type == 'svg':
         return bc.send_svg()
+    elif type == 'attachment':
+        return bc.send_as_attachment()
     else:
         return bc.send()
 
@@ -131,3 +125,49 @@ def academics_export_csv():
     } for a in db.session.scalars(q).all())
 
     return csv_download('Academics', headers.keys(), academic_details)
+
+
+@blueprint.route("/reports/pdf")
+def reports_pdf():
+    search_form = PublicationSearchForm(formdata=request.args)
+    
+    q = publication_search_query(search_form)
+
+    # q = q.options(
+    #     selectinload(Publication.catalog_publications)
+    #     .selectinload(CatalogPublication.catalog_publication_sources)
+    #     .selectinload(CatalogPublicationsSources.source)
+    #     .selectinload(Source.academic)
+    # )
+    # q = q.options(
+    #     selectinload(Publication.folders)
+    # )
+
+    # parameters = []
+
+    # if search_form.author_id.data:
+    #     author = db.get_or_404(Source, search_form.author_id.data)
+    #     parameters.append(('Author', author.full_name))
+
+    # if search_form.theme_id.data:
+    #     theme = db.get_or_404(Theme, search_form.theme_id.data)
+    #     parameters.append(('Theme', theme.name))
+
+    # publication_start_date = parse_date_or_none(search_form.publication_start_month.data)
+    # if publication_start_date:
+    #     parameters.append(('Start Publication Date', f'{publication_start_date:%b %Y}'))
+
+    # publication_end_date = parse_date_or_none(search_form.publication_end_month.data)
+    # if publication_end_date:
+    #     parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
+
+    publications = db.session.execute(q).unique().scalars()
+
+    return pdf_download(
+        'ui/reports/pdf.html',
+        title='Academics Publications',
+        publications=publications,
+        parameters=search_form.values_as_dict(),
+    )
+
+

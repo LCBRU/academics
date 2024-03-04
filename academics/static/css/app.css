@@ -79,3 +79,17 @@ dl.publication_details > div {
     content: "\f0d7";
 }
 
+.chart {
+    position: relative;
+    margin-top: 2rem;
+}
+
+.chart:hover .insert {
+    display: block;
+}
+
+.insert {
+    position: absolute;
+    display: none;
+    right: 0;
+}

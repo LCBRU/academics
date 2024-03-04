@@ -1,0 +1,119 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Academic Publications</title>
+
+    <style>
+        @page {
+            size: A4 portrait;
+            
+            @bottom-right {
+                content: "Page " counter(page)
+                            " of " counter(pages);
+                font-size: 10px;
+            }                 
+
+            @bottom-left {
+                content: "Downloaded: {{ current_date }}";
+                font-size: 10px;
+            }
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: x-small;
+        }
+
+        header {
+            margin-bottom: 10px;
+            border-bottom: 2px solid #222;
+        }
+
+        h1 {
+            margin: 0;
+            text-align: center;
+            font-style: italic;
+            font-size: 2em;
+        }
+
+        h2 {
+            margin: 0 ;
+            color: #193e72;
+        }
+
+        h3 {
+            margin: 0 ;
+        }
+
+        .vancouver {
+            font-style: italic;
+            margin: 0;
+        }
+
+        .academics {
+            color: #193e72;
+            margin: 0;
+        }
+
+        .academics span:not(:last-of-type)::after {
+            content: ', ';
+        }
+
+        span.param_head {
+            font-weight: bold;
+        }
+
+        span.param_data:not(:last-of-type)::after {
+            content: '; ';
+        }
+
+        .publications {
+            padding: 10px;
+            page-break-inside: avoid;
+        }
+
+        .publications:nth-child(even){
+            background-color: #f2f2f2;
+        }
+
+</style>
+</head>
+
+<body>
+    <header>
+        <h1>Academics Publication Search</h1>
+        <p>
+            Search filters:
+            {% for p,v in parameters.items() %}
+                <span class="param_head">{{p}}</span>
+                <span class="param_data">{{v}}</span>
+            {% endfor %}
+        </p>
+    </header>
+
+    {% for year, year_group in publications | groupby('publication_cover_date.year') %}
+        {% for month, list in year_group | groupby('publication_cover_date.month') %}
+            <h2>{{ month | month_name }} {{ year }}</h2>
+
+            {% for p in list %}
+                <div class="publications">
+                    <h3>{{p.title}}</h3>
+
+                    <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
+
+                    <p class="academics">
+                        BRC Authors:
+                        {% for a in p.academics | sort(attribute='last_name,first_name') %}
+                            <span>{{ a.full_name }}</span>
+                        {% endfor %}
+                    </p>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+
+</body>
+</html>
