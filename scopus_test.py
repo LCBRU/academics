@@ -12,5 +12,3 @@ application = create_app()
 application.app_context().push()
 
 out = get_scopus_publication_data(doi='10.1186/s12872-023-03623-y', log_data=True)
-
-print(out)
