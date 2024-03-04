@@ -70,7 +70,7 @@ def _client():
     return SciValClient(current_app.config['SCOPUS_API_KEY'])
 
 
-def get_scival_publication_institutions(scopus_id=None):
+def get_scival_publication_institutions(scopus_id=None, log_data=False):
     logging.debug('started')
 
     if not current_app.config['SCIVAL_ENABLED']:
@@ -80,6 +80,11 @@ def get_scival_publication_institutions(scopus_id=None):
     try:
         result = _client().exec_request(f'https://api.elsevier.com/analytics/scival/publication/{scopus_id}')
         logging.info(f'Scival IS found for {scopus_id}')
+
+        if log_data:
+            logging.info(result)
+            with open('rich_dump.json', 'w') as f:
+                f.write(json.dumps(result))
 
         return [InstitutionData(
             catalog=CATALOG_SCIVAL,
