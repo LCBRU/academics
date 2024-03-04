@@ -99,7 +99,7 @@ def _get_scopus_publication_link(p):
             return h['@href']
 
 
-def get_scopus_publication_data(scopus_id=None, doi=None):
+def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
     logging.debug('started')
 
     if not current_app.config['SCOPUS_ENABLED']:
@@ -112,6 +112,9 @@ def get_scopus_publication_data(scopus_id=None, doi=None):
     if not a.data:
         logging.info(f'No publication for {scopus_id=}; {doi=}')
         return None
+
+    if log_data:
+        logging.info(a.data)
 
     id = ((a.data.get('coredata', {}) or {}).get(u'dc:identifier', ':') or ':').split(':')[1]
 
