@@ -115,6 +115,8 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
 
     if log_data:
         logging.info(a.data)
+        with open('rich_dump.json', 'w') as f:
+            f.write(json.dumps(a.data))
 
     id = ((a.data.get('coredata', {}) or {}).get(u'dc:identifier', ':') or ':').split(':')[1]
 
