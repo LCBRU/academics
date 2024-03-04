@@ -39,6 +39,15 @@ for s in ['Sponsor 1', 'Sponsor 2']:
     db.session.add(Sponsor(name=s))
 db.session.commit()
 
+acknowledgement_details = {
+    'NIHR Acknowledged': True,
+    'BRC Investigators Not A Primary Author': False,
+    'Need Senior Review': False,
+    'NIHR Not Acknowledged': False,
+    'No BRC Investigator On Publication Or Not Relevanr': False,
+    'Unable To Check - Full Paper Not Available': False,    
+}
+
 # Acknowledgement
 for n, a in NihrAcknowledgement.all_details.items():
     db.session.add(NihrAcknowledgement(name=n, acknowledged=a))

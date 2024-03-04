@@ -67,7 +67,7 @@ def auto_validate():
 
 def _get_nihr_acknowledgement(pub):
     if pub.is_nihr_acknowledged:
-        return NihrAcknowledgement.get_instance_by_name(NihrAcknowledgement.NIHR_ACKNOWLEDGED)
+        return NihrAcknowledgement.get_acknowledged_status()
 
 
 def refresh():

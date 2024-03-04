@@ -34,30 +34,14 @@ class FundingAcr(db.Model):
 
 
 class NihrAcknowledgement(db.Model):
-    UKNOWN = 'unknown'
-    NIHR_ACKNOWLEDGED = 'NIHR Acknowledged'
-    NIHR_NOT_ACKNOWLEDGED = 'NIHR Not Acknowledged'
-    UNABLE_TO_CHECK = 'Unable to check - full paper not available'
-    NIHR_NOT_ACKNOWLEDGED_NO_BRC_INVESTIGATORS = 'BRC Investigator associated with study and NIHR not Acknowledged'
-    NIHR_NOT_ACKNOWLEDGED_WITH_BRC_INVESTIGATORS = 'No BRC Investigator associated with study and NIHR not Acknowledged'
-    NIHR_NOT_ACKNOWLEDGED_BRC_INVESTIGATORS_NOT_PRIMARY = 'BRC Investigators not a primary author'
-
-    all_details = {
-        NIHR_ACKNOWLEDGED: True,
-        NIHR_NOT_ACKNOWLEDGED: False,
-        UNABLE_TO_CHECK: False,
-        NIHR_NOT_ACKNOWLEDGED_NO_BRC_INVESTIGATORS: False,
-        NIHR_NOT_ACKNOWLEDGED_WITH_BRC_INVESTIGATORS: False,
-        NIHR_NOT_ACKNOWLEDGED_BRC_INVESTIGATORS_NOT_PRIMARY: False,
-    }
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000))
     acknowledged = db.Column(db.Boolean)
+    colour = db.Column(db.String(50))
 
     @classmethod
-    def get_instance_by_name(cls, name):
-        return NihrAcknowledgement.query.filter_by(name=name).one()
+    def get_acknowledged_status(cls):
+        return NihrAcknowledgement.query.filter_by(name='NIHR Acknowledged').one()
 
 
 class Subtype(db.Model):
