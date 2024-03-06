@@ -308,7 +308,12 @@ class CatalogPublicationsSources(db.Model):
             cascade="all, delete, delete-orphan",
         ),
     )
-    source: Mapped[Source] = relationship()
+    source: Mapped[Source] = relationship(
+        backref=backref(
+            'catalog_publication_sources',
+            cascade="all, delete, delete-orphan",
+        )
+    )
     affiliations = db.relationship(
         Affiliation,
         secondary=catalog_publications_sources_affiliations,

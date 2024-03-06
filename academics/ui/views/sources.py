@@ -109,11 +109,6 @@ def delete_author():
     if form.validate_on_submit():
         s = db.get_or_404(Source, form.id.data)
 
-        db.session.execute(
-            delete(CatalogPublicationsSources)
-            .where(CatalogPublicationsSources.source_id == form.id.data)
-        )
-
         db.session.delete(s)
         db.session.commit()
 
