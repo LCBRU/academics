@@ -1,8 +1,8 @@
 from flask import abort, jsonify, redirect, render_template, request, url_for
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from wtforms import SelectField
 from academics.catalogs.service import create_potential_sources, update_single_academic
-from academics.model.academic import Academic, AcademicPotentialSource, Source
+from academics.model.academic import Academic, AcademicPotentialSource, CatalogPublicationsSources, Source
 from .. import blueprint
 from lbrc_flask.database import db
 from lbrc_flask.json import validate_json
@@ -108,6 +108,12 @@ def delete_author():
 
     if form.validate_on_submit():
         s = db.get_or_404(Source, form.id.data)
+
+        db.session.execute(
+            delete(CatalogPublicationsSources)
+            .where(CatalogPublicationsSources.source_id == form.id.data)
+        )
+
         db.session.delete(s)
         db.session.commit()
 
