@@ -1,4 +1,4 @@
-from flask import (abort, flash, jsonify, redirect, render_template, request,
+from flask import (abort, flash, jsonify, redirect, render_template, render_template_string, request,
                    url_for)
 from flask_login import current_user
 from flask_security import roles_accepted
@@ -313,3 +313,20 @@ def publication_auto_validate():
     amended_count = auto_validate()
     flash(f'{amended_count} record(s) automatically updated')
     return redirect(url_for('ui.index'))
+
+
+@blueprint.route("/publication/authors/<int:id>/<string:author_selector>")
+def publication_authors(id, author_selector):
+    publication = db.get_or_404(Publication, id)
+
+    template = '''
+        {% from "ui/_publication_details.html" import render_publication_authors %}
+
+        {{ render_publication_authors(publication, author_selector) }}
+    '''
+
+    return render_template_string(
+        template,
+        publication=publication,
+        author_selector=author_selector,
+    )
