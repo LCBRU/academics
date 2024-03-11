@@ -170,21 +170,7 @@ class PublicationSummarySearchForm(SearchForm):
 
 class ValidationSearchForm(SearchForm):
     subtype_id = HiddenField()
-    theme_id = SelectField('Theme')
-    nihr_acknowledgement_id = SelectField('Acknowledgement', default="-1")
-    supress_validation_historic = SelectField(
-        'Suppress Historic',
-        choices=[(True, 'Yes'), (False, 'No')],
-        coerce=lambda x: x == 'True',
-        default='True',
-    )
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.supress_validation_historic.label.text = f'Suprress Historic (before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
-        self.nihr_acknowledgement_id.choices = [('0', ''), ('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
-        self.theme_id.choices = [('0', '')] + [(t.id, t.name) for t in Theme.query.all()]
+    supress_validation_historic = HiddenField()
 
 
 def best_catalog_publications():
