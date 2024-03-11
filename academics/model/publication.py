@@ -65,6 +65,7 @@ class Journal(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(500), nullable=False)
+    preprint: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
 
 class Sponsor(db.Model):
@@ -120,6 +121,8 @@ class Publication(db.Model, AuditMixin):
 
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[nihr_acknowledgement_id])
+
+    preprint: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     institutions: Mapped[Institution] = relationship(
         "Institution",
