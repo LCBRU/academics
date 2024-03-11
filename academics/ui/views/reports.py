@@ -7,7 +7,7 @@ from sqlalchemy import select
 from academics.model.academic import Academic
 from academics.model.theme import Theme
 from academics.services.academic_searching import academic_search_query, theme_search_query
-from academics.services.publication_searching import PublicationSearchForm, PublicationSummarySearchForm, publication_count, publication_search_query, publication_summary, all_series
+from academics.services.publication_searching import PublicationSearchForm, PublicationSummarySearchForm, publication_count, publication_search_query, publication_summary, all_series_configs
 from lbrc_flask.export import pdf_download
 
 from .. import blueprint
@@ -79,9 +79,7 @@ def report_image(type='png'):
     c = publication_count(search_form)
 
     items = publication_summary(search_form)
-    series = sorted(all_series(search_form))
-
-    series_config = [SeriesConfig(name=n, color=col) for n, col in zip(series, default_series_colors())]
+    series_config = all_series_configs(search_form)
 
     bc: BarChart = BarChart(
         title= ' '.join(filter(None, [type_title, 'Publications', group_by_title[search_form.group_by.data]])),

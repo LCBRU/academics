@@ -330,3 +330,19 @@ def publication_authors(id, author_selector):
         publication=publication,
         author_selector=author_selector,
     )
+
+@blueprint.route("/publication/details/<int:id>/<string:detail_selector>")
+def publication_details(id, detail_selector):
+    publication = db.get_or_404(Publication, id)
+
+    template = '''
+        {% from "ui/_publication_details.html" import render_publication_details %}
+
+        {{ render_publication_details(publication, detail_selector) }}
+    '''
+
+    return render_template_string(
+        template,
+        publication=publication,
+        detail_selector=detail_selector,
+    )

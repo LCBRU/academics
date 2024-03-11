@@ -11,7 +11,7 @@ from sqlalchemy import case, literal, literal_column, or_
 from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm, boolean_coerce
 from sqlalchemy import func, select
-from lbrc_flask.charting import BarChartItem
+from lbrc_flask.charting import BarChartItem, SeriesConfig, default_series_colors
 from lbrc_flask.database import db
 from cachetools import cached, TTLCache
 
@@ -355,15 +355,22 @@ def publication_summary(search_form):
     return publication_count_value(results)
 
 
-def all_series(search_form):
+def all_series_configs(search_form):
+    results = []
+
     if search_form.group_by.data == "acknowledgement":
-        results = db.session.execute(select(NihrAcknowledgement.name)).scalars().all()
+        for a in db.session.execute(select(NihrAcknowledgement)).scalars().all():
+            results.append(SeriesConfig(name=a.name, color=a.colour))
+
     elif search_form.group_by.data in ["industry_collaboration", "international_collaboration", "external_collaboration"]:
-        results = ['Collaboration','Not Collaboration']
+        cols = iter(default_series_colors())
+        results.append(SeriesConfig(name='Collaboration', color=next(cols)))
+        results.append(SeriesConfig(name='Not Collaboration', color=next(cols)))
     elif search_form.group_by.data == "theme_collaboration":
-        results = db.session.execute(select(Theme.name)).scalars().all()
+        for t, c in zip(db.session.execute(select(Theme.name)).scalars().all(), default_series_colors()):
+            results.append(SeriesConfig(name=t, color=c))
     else:
-        results = ['']
+        results.append(SeriesConfig(name='', color=default_series_colors()[0]))
 
     return results
 

@@ -1,7 +1,7 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
 {% from "lbrc_flask/modal_macros.html" import render_modal %}
-{% from "ui/_publication_details.html" import render_publication_title, render_publication_folders, render_publication_authors, render_publication_funding, render_publication_abstract, render_publication_keywords, render_publication_acknowledgements, render_publication_resources %}
+{% from "ui/_publication_details.html" import render_publication_title, render_publication_authors, render_publication_acknowledgements, render_publication_resources, render_publication_details %}
 {% from "lbrc_flask/modal_macros.html" import render_url_modal %}
 
 
@@ -47,12 +47,7 @@
                 <div>
                     {{ render_publication_title(p) }}
                     {{ render_publication_authors(p, 'brc') }}
-                    {{ render_publication_funding(p) }}
-                    {{ render_publication_abstract(p) }}
-                    {{ render_publication_keywords(p) }}
-                    <div id="publication_folders_{{p.id}}">
-                        {{ render_publication_folders(p, folders) }}
-                    </div>
+                    {{ render_publication_details(p, 'funding') }}
                 </div>
             </li>
         {% endfor %}

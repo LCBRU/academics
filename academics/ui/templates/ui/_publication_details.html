@@ -33,55 +33,47 @@
     </div>
     
     <div class="publication_links">
-        <div class="btn-group mr-1 mb-1" role="group">
-            {% if current_user.has_role('validator') %}
-                <button
-                    id="btnGroupAcknowledgement_{{publication.id}}"
-                    type="button"
-                    class="btn dropdown-toggle"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                        {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
-                </button>
-                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{publication.id}}">
-                    <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="-1">Unvalidated</a>
-                    {% for n in nihr_acknowledgements %}
-                        <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="{{ n.id }}">{{ n.name }}</a>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <button
-                    id="btnGroupAcknowledgement_{{publication.id}}"
-                    type="button"
-                    class="btn">
-                        {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
-                </button>
-            {% endif %}
-        </div>
+        {% if current_user.has_role('validator') %}
+            <button
+                id="btnGroupAcknowledgement_{{publication.id}}"
+                type="button"
+                class="btn dropdown-toggle"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+                    {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{publication.id}}">
+                <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="-1">Unvalidated</a>
+                {% for n in nihr_acknowledgements %}
+                    <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="{{ n.id }}">{{ n.name }}</a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <button
+                id="btnGroupAcknowledgement_{{publication.id}}"
+                type="button"
+                class="btn">
+                    {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
+            </button>
+        {% endif %}
 
-        <div class="btn-group mr-1 mb-1" role="group">
-            {% if publication.catalog %}
-                <a href="{{ publication.href }}" class="btn btn-primary" target="_blank" title="View on {{ publication.catalog | title_case}} ">
-                    {% if publication.catalog == 'scopus' %}
-                        <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg> Scopus
-                    {% elif publication.catalog == 'open alex' %}
-                        <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg> Open Alex
-                    {% endif %}
-                </a>
-            {% endif %}
-        </div>
+        {% if publication.catalog %}
+            <a href="{{ publication.href }}" class="btn" target="_blank" title="View on {{ publication.catalog | title_case}} ">
+                {% if publication.catalog == 'scopus' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg> Scopus
+                {% elif publication.catalog == 'open alex' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg> Open Alex
+                {% endif %}
+            </a>
+        {% endif %}
 
         {% if publication.doi %}
-            <div class="btn-group mr-1 mb-1" role="group">
-                <a href="http://doi.org/{{ publication.doi }}" class="btn" target="_blank" title="View publication">
-                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
-                    {{publication.doi}}
-                </a>
-            </div>
-            <div class="btn-group mr-1 mb-1" role="group">
-                <a href="https://google.com/search?q={{ publication.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
-            </div>
+            <a href="http://doi.org/{{ publication.doi }}" class="btn" target="_blank" title="View publication">
+                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
+                {{publication.doi}}
+            </a>
+            <a href="https://google.com/search?q={{ publication.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
         {% endif %}
     </div>
 </div>
@@ -89,23 +81,34 @@
 
 
 {% macro render_publication_authors(publication, author_selector) %}
-    <div id="authors_{{publication.id}}" class="authors">
-        <div class="author_list">
+    <div id="authors_{{publication.id}}" class="tabbed_display">
+
+        <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{publication.id}}">
+            {{ tabbed_display_tab(author_selector, 'brc', 'BRC Authors', url_for('ui.publication_authors', id=publication.id, author_selector='brc')) }}
+            {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=publication.id, author_selector='all')) }}
+            <span>{{publication.best_catalog_publication.author_count}} author(s)</span>
+        </div>
+        <div class="tabbed_display_content author_list">
             {% for cps in publication.best_catalog_publication.catalog_publication_sources %}
                 {% if cps.source.is_academic or author_selector == 'all' %}
                     {{ _render_publication_author(cps) }}
                 {% endif %}
             {% endfor%}
         </div>
-        <div class="author_list_selector {{author_selector}}" hx-target="#authors_{{publication.id}}">
-            <a class="brc_authors" href="#" hx-get="{{ url_for('ui.publication_authors', id=publication.id, author_selector='brc') }}">BRC Authors</a>
-            <a class="all_authors" href="#" hx-get="{{ url_for('ui.publication_authors', id=publication.id, author_selector='all') }}">All Authors</a>
-        </div>
 
         {% if publication.all_academics_left_brc %}
             <div class="text-danger">All authors have left the BRC</div>
         {% endif %}
     </div>
+{% endmacro %}
+
+
+{% macro tabbed_display_tab(selector, this_selector, name, url) %}
+    <a
+        class="{% if selector == this_selector %}selected{% endif %}"
+        href="#"
+        hx-get="{{ url }}"
+        >{{name}}</a>
 {% endmacro %}
 
 
@@ -127,90 +130,61 @@
         title="View author {{ author.full_name }}"
         data-title="Author Details for {{ author.full_name }}"
         data-target="#source_details"
-        href="#">{{ cps.ordinal + 1 }}: {{ author.full_name }}</a>
+        href="#"><span class="author_list_ordinal">{{ cps.ordinal + 1 }}</span><span>{{ author.full_name }}</span></a>
 {% endmacro %}
 
 
-{% macro render_publication_funding(publication, collapsed=True) %}
-    {% if publication.abstract %}
-        <div class="acordian">
-            <button
-                type="button"
-                class="btn btn-light btn-sm btn-block {% if collapsed %}collapsed{% endif %}"
-                data-toggle="collapse"
-                data-target="#funding_{{publication.id}}"
-                ><h3>Funding</h3></button>
+{% macro render_publication_details(publication, details_selector) %}
+    <div id="details_{{publication.id}}" class="tabbed_display">
+
+        <div class="tabbed_display_tabs {{detail_selector}}" hx-target="#details_{{publication.id}}">
+            {{ tabbed_display_tab(details_selector, 'funding', 'Funding Text', url_for('ui.publication_details', id=publication.id, detail_selector='funding')) }}
+            {{ tabbed_display_tab(details_selector, 'sponsors', 'Sponsors', url_for('ui.publication_details', id=publication.id, detail_selector='sponsors')) }}
+            {{ tabbed_display_tab(details_selector, 'abstract', 'Abstract', url_for('ui.publication_details', id=publication.id, detail_selector='abstract')) }}
+            {{ tabbed_display_tab(details_selector, 'keywords', 'Keywords', url_for('ui.publication_details', id=publication.id, detail_selector='keywords')) }}
+            {{ tabbed_display_tab(details_selector, 'folders', 'Folders', url_for('ui.publication_details', id=publication.id, detail_selector='folders')) }}
         </div>
-        <div id="funding_{{publication.id}}" class="collapse{% if not collapsed %} show{% endif %} row">
-            <div class="col">
-                <h3>Sponsors</h3>
+        <div class="tabbed_display_content">
+            {% if details_selector == 'funding' %}
+                {{ publication.funding_text | blank_if_none | paragraphs }}
+            {% elif details_selector == 'sponsors' %}
                 <ul class="list-group">
                     {% for s in publication.sponsors %}
                         <li class="list-group-item {% if s.is_nihr %} list-group-item-success{% endif %}">{{ s.name }}</li>
                     {% endfor %}
                 </ul>
-            </div>
-            <div class="col">
-                <h3>Funding text</h3>
-                {{ publication.funding_text | blank_if_none | paragraphs }}
-            </div>
+            {% elif details_selector == 'abstract' %}
+                {{publication.abstract | blank_if_none}}
+            {% elif details_selector == 'keywords' %}
+                {% for k in publication.keywords | sort(attribute='keyword')%}
+                    <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1">{{ k.keyword }}</a>
+                {% endfor %}
+            {% elif details_selector == 'folders' %}
+                {% for f in publication.folders | sort(attribute='name')%}
+                    <div class="btn-group mr-1 mb-1" role="group">
+                        <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ f.name }}</button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                            <a class="dropdown-item" href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications in this folder</a>
+                            <a class="dropdown-item" href="javascript://" data-folder-id="{{f.id}}" onclick="folder_remove_publication()" data-publication-id="{{publication.id}}">Remove</a>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% if folders | reject('in', publication.folders) | list | length > 0 %}
+                    <div class="btn-group mr-1 mb-1" role="group">
+                        <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                            {% for f in folders | reject('in', publication.folders) | sort(attribute='name') %}
+                                <a class="dropdown-item" href="javascript://" data-folder-id="{{f.id}}" onclick="folder_add_publication()" data-publication-id="{{publication.id}}">Add to '{{f.name}}' folder</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
         </div>
-    {% endif%}
+    </div>
 {% endmacro %}
 
-
-{% macro render_publication_abstract(publication) %}
-    {% if publication.abstract %}
-        <div class="acordian">
-            <button
-                type="button"
-                class="btn btn-light btn-sm btn-block collapsed"
-                data-toggle="collapse"
-                data-target="#abstract_{{publication.id}}"
-                ><h3>Abstract</h3></button>
-        </div>
-        <div id="abstract_{{publication.id}}" class="collapse">{{publication.abstract | blank_if_none}}</div>
-    {% endif%}
-{% endmacro %}
-
-
-{% macro render_publication_keywords(publication) %}
-    {% if publication.keywords | length > 0 %}
-        <div class="publication_keywords">
-            <span><i class="fas fa-key"></i> Keywords: </span>
-            {% for k in publication.keywords | sort(attribute='keyword')%}
-                <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1">{{ k.keyword }}</a>
-            {% endfor %}
-        </div>
-    {% endif %}
-{% endmacro %}
-
-
-{% macro render_publication_folders(publication, folders) %}
-    {% if folders | length > 0 %}
-        <h3>Folders</h3>
-        {% for f in publication.folders | sort(attribute='name')%}
-            <div class="btn-group mr-1 mb-1" role="group">
-                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ f.name }}</button>
-                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                    <a class="dropdown-item" href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications in this folder</a>
-                    <a class="dropdown-item" href="javascript://" data-folder-id="{{f.id}}" onclick="folder_remove_publication()" data-publication-id="{{publication.id}}">Remove</a>
-                </div>
-            </div>
-        {% endfor %}
-
-        {% if folders | reject('in', publication.folders) | list | length > 0 %}
-            <div class="btn-group mr-1 mb-1" role="group">
-                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
-                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                    {% for f in folders | reject('in', publication.folders) | sort(attribute='name') %}
-                        <a class="dropdown-item" href="javascript://" data-folder-id="{{f.id}}" onclick="folder_add_publication()" data-publication-id="{{publication.id}}">Add to '{{f.name}}' folder</a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-    {% endif %}
-{% endmacro %}
 
 {% macro render_publication_resources() %}
 <svg style="display: none" version="2.0">

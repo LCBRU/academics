@@ -1,6 +1,6 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
-{% from "ui/_publication_details.html" import render_publication_title, render_publication_folders, render_publication_authors, render_publication_attributes, render_publication_funding, render_publication_abstract, render_publication_keywords %}
+{% from "ui/_publication_details.html" import render_publication_title, render_publication_authors, render_publication_details %}
 {% from "lbrc_flask/modal_macros.html" import render_url_modal %}
 
 
@@ -23,9 +23,8 @@
         {% for p in publications.items %}
             <li class="list-group-item summary_details">
                 {{ render_publication_title(p) }}
-                {{ render_publication_authors(p) }}
-                {{ render_publication_attributes(p, current_user, nihr_acknowledgements) }}
-                {{ render_publication_funding(p, False) }}
+                {{ render_publication_authors(p, 'brc') }}
+                {{ render_publication_details(p, 'funding') }}
             </li>
         {% endfor %}
     </ul>

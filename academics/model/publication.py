@@ -380,3 +380,7 @@ class CatalogPublication(db.Model, AuditMixin):
     @property
     def academics(self):
         return filter(None, (cps.source.academic for cps in self.catalog_publication_sources))
+
+    @property
+    def author_count(self):
+        return len(self.catalog_publication_sources)
