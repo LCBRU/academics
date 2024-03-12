@@ -129,11 +129,8 @@
 
 
 {% macro tabbed_display_tab(selector, this_selector, name, url) %}
-    <a
-        class="{% if selector == this_selector %}selected{% endif %}"
-        href="#"
-        hx-get="{{ url }}"
-        >{{name}}</a>
+    <a class="{% if selector == this_selector %}selected{% endif %}"
+        href="#" hx-get="{{ url }}">{{name}}</a>
 {% endmacro %}
 
 
@@ -142,9 +139,9 @@
     {% set cls = 'not_academic' %}
 
     {% if author.has_left_brc %}
-        {% set cls = 'text-danger' %}
+        {% set cls = 'left_brc' %}
     {% elif author.is_academic %}
-        {% set cls = 'text-is_academic' %}
+        {% set cls = 'is_academic' %}
     {% endif %}
 
     <a class="{{cls}}"

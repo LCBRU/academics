@@ -187,6 +187,10 @@ dl.publication_details > div {
     font-weight: bold;
 }
 
+.author_list a.left_brc {
+    --_background-color: var(--color-light-red);
+}
+
 .author_list a.not_academic {
     --_background-color: var(--color-outline);
 }
