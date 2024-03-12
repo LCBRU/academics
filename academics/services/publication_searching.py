@@ -8,7 +8,7 @@ from academics.model.publication import Journal, Keyword, NihrAcknowledgement, P
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
 from sqlalchemy import case, literal, literal_column, or_
-from wtforms import HiddenField, MonthField, SelectField, SelectMultipleField
+from wtforms import BooleanField, HiddenField, MonthField, SelectField, SelectMultipleField
 from lbrc_flask.forms import SearchForm, boolean_coerce
 from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem, SeriesConfig, default_series_colors
@@ -83,35 +83,20 @@ class PublicationSearchForm(SearchForm):
     author_id = HiddenField('Author')
     academic_id = SelectMultipleField('Academic')
     folder_id = SelectField('Folder')
-    supress_validation_historic = SelectField(
-        f'Suppress Historic',
-        choices=[(True, 'Yes'), (False, 'No')],
-        coerce=lambda x: x == 'True',
-        default='False',
-    )
-    industrial_collaboration = SelectField(
-        'Industrial Collabortaion',
+    preprint = SelectField(
+        'Preprint',
         choices=[('', ''), ('True', 'Yes'), ('False', 'No')],
         coerce=boolean_coerce,
         default=None,
     )
-    international_collaboration = SelectField(
-        'International Collabortaion',
-        choices=[('', ''), ('True', 'Yes'), ('False', 'No')],
-        coerce=boolean_coerce,
-        default=None,
-    )
-    external_collaboration = SelectField(
-        'External Collabortaion',
-        choices=[('', ''), ('True', 'Yes'), ('False', 'No')],
-        coerce=boolean_coerce,
-        default=None,
-    )
+    supress_validation_historic = BooleanField('Suppress Historic')
+    industrial_collaboration = BooleanField('Industrial\nCollabortaion')
+    external_collaboration = BooleanField('External\nCollabortaion')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.supress_validation_historic.label.text = f'Suprress Historic (before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
+        self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
         self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
         self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
@@ -144,17 +129,12 @@ class PublicationSummarySearchForm(SearchForm):
     academic_id = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
-    supress_validation_historic = SelectField(
-        'Suppress Historic',
-        choices=[(True, 'Yes'), (False, 'No')],
-        coerce=lambda x: x == 'True',
-        default='True',
-    )
+    supress_validation_historic = BooleanField('Suppress Historic')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.supress_validation_historic.label.text = f'Suprress Historic (before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
+        self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.theme_id.choices = theme_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
     
@@ -293,6 +273,10 @@ def catalog_publication_search_query(search_form):
     if search_form.supress_validation_historic.data == True:
         logging.debug(f'Supressing Historic Publications')
         q = q.where(CatalogPublication.publication_cover_date >= current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
+
+    if search_form.has_value('preprint'):
+        is_is = 1 if search_form.preprint.data else 0
+        q = q.where(func.coalesce(Publication.preprint, 0) == is_is)
 
     if search_form.has_value('industrial_collaboration'):
         is_is = 1 if search_form.industrial_collaboration.data else 0

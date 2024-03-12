@@ -111,7 +111,8 @@ dl.publication_details > div {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    padding-inline: 1rem;
+    padding-inline: 0.5rem;
+    gap: 0.5em;
 
     --_forground_color: color-mix(in srgb, var(--_color) 20%, white);
     --_background_color: var(--_color);
@@ -135,8 +136,14 @@ dl.publication_details > div {
 .publication_access {
     flex-grow: 1;
     display: flex;
-    gap: 1rem;
+    gap: 0.5rem;
     justify-content: center;
+}
+
+.preprint {
+    border-radius: var(--border-radius);
+    background-color: var(--color-red);
+    color: var(--color-white);
 }
 
 .publication_links {
@@ -194,6 +201,7 @@ dl.publication_details > div {
 
 .tabbed_display_tabs {
     display: flex;
+    gap: 0.25em;
 }
 
 .tabbed_display_tabs span:last-child {

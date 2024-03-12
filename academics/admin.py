@@ -4,6 +4,7 @@ from lbrc_flask.database import db
 from lbrc_flask.security import Role
 from lbrc_flask.admin import AdminCustomView, init_admin as flask_init_admin
 from lbrc_flask.api import ApiKey
+from academics.model.publication import Journal
 
 from academics.model.security import User
 from academics.model.theme import Theme
@@ -27,8 +28,12 @@ class UserView(AdminCustomView):
 
 
 class ThemeView(AdminCustomView):
-    column_list = ['name']
-    form_columns = ["name"]
+    form_columns = column_list = ['name']
+
+
+class JournalView(AdminCustomView):
+    column_list = form_columns = ["name", 'preprint']
+    
 
 
 class ApiKeyView(AdminCustomView):
@@ -43,6 +48,7 @@ def init_admin(app, title):
         [
             UserView(User, db.session),
             ThemeView(Theme, db.session),
+            JournalView(Journal, db.session),
             ApiKeyView(ApiKey, db.session),
         ]
     )

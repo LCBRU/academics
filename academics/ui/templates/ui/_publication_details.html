@@ -24,7 +24,32 @@
     {% endif %}
 
     <div class="publication_access">
+        {% if current_user.has_role('validator') %}
+            <button
+                id="btnPreprint_{{publication.id}}"
+                type="button"
+                class="btn dropdown-toggle"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+                    {% if publication.preprint %}
+                        Preprint
+                    {% else %}
+                        Not Preprint
+                    {% endif %}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="btnPreprint_{{publication.id}}">
+                <a class="dropdown-item" href="#" hx="nihr_acknowledgement()" data-id="{{publication.id}}">Preprint</a>
+                <a class="dropdown-item" href="#" hx_="nihr_acknowledgement()" data-id="{{publication.id}}">Not Preprint</a>
+            </div>
+        {% else %}
+            {% if publication.preprint %}
+                <button id="btnPreprint_{{publication.id}}" type="button" class="btn">Preprint</button>
+            {% endif %}
+        {% endif %}
+
         <span>{{ publication.subtype.description | blank_if_none | title_case}}:</span>
+
         {% if publication.is_open_access %}
             <span class="open_access">Open Access</span>
         {% else%}
