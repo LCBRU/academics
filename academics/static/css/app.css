@@ -196,7 +196,7 @@ dl.publication_details > div {
 }
 
 .author_list a.not_academic .author_list_ordinal {
-    opacity: 0;
+    display: None;
 }
 
 .author_list_ordinal {
