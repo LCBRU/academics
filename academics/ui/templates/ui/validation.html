@@ -12,11 +12,11 @@
 
     {{ pagination_summary(publications, 'publication') }}
 
-    <ul class="list-group">
+    <ul class="publications">
         {{ render_publication_resources() }}
 
         {% for p in publications.items %}
-            <li class="list-group-item summary_details">
+            <li>
                 {{ render_publication_acknowledgements(p, current_user, nihr_acknowledgements) }}
                 <div>
                     {{ render_publication_title(p) }}
