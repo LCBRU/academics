@@ -171,6 +171,7 @@ dl.publication_details > div {
 .author_list a {
     border-radius: var(--border-radius);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.25rem;
     padding-left: 0.25rem;
