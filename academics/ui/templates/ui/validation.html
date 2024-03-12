@@ -18,9 +18,11 @@
         {% for p in publications.items %}
             <li class="list-group-item summary_details">
                 {{ render_publication_acknowledgements(p, current_user, nihr_acknowledgements) }}
-                {{ render_publication_title(p) }}
-                {{ render_publication_authors(p, 'brc') }}
-                {{ render_publication_details(p, 'funding') }}
+                <div>
+                    {{ render_publication_title(p) }}
+                    {{ render_publication_authors(p, 'brc') }}
+                    {{ render_publication_details(p, 'funding') }}    
+                </div>
             </li>
         {% endfor %}
     </ul>
