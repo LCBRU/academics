@@ -1,6 +1,5 @@
-from flask import (abort, flash, jsonify, redirect, render_template, render_template_string, request,
-                   url_for)
-from flask_login import current_user
+from time import sleep
+from flask import (flash, jsonify, redirect, render_template, render_template_string, request, url_for)
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
@@ -325,6 +324,9 @@ def publication_authors(id, author_selector):
 
         {{ render_publication_authors(publication, author_selector) }}
     '''
+
+    sleep(2)
+
 
     return render_template_string(
         template,
