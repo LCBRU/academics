@@ -1,3 +1,7 @@
+:root {
+    --color-preprint: #fdcb14;
+  }
+
 a.source {
     background-color: transparent;
     border: none;
@@ -141,9 +145,13 @@ dl.publication_details > div {
 }
 
 .preprint {
-    border-radius: var(--border-radius);
-    background-color: var(--color-red);
-    color: var(--color-white);
+    --_background_color: var(--color-preprint);
+    --_forground_color: var(--color-black);
+}
+
+.not_preprint {
+    --_background_color: var( --color-light-grey);
+    --_forground_color: var(--color-subheader);
 }
 
 .publication_links {

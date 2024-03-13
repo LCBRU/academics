@@ -6,7 +6,7 @@
 {% endmacro %}
 
 
-{% macro render_publication_acknowledgements(publication, current_user, nihr_acknowledgements) %}
+{% macro render_publication_bar(publication, current_user, nihr_acknowledgements) %}
 
 {% set col = '#03A9F4' %}
 {% if publication.nihr_acknowledgement.name | default_if_none('Unvalidated') == 'Unvalidated' %}
@@ -15,36 +15,31 @@
     {% set col = publication.nihr_acknowledgement.colour %}
 {% endif %}
 
-<div class="publication_bar" style="--_color: {{col}};">
-    {% set col = '#03A9F4' %}
-    {% if publication.nihr_acknowledgement.name | default_if_none('Unvalidated') == 'Unvalidated' %}
-        {% set col = '#03A9F4' %}
-    {% else%}
-        {% set col = publication.nihr_acknowledgement.colour %}
-    {% endif %}
-
+<div id="publication_bar_{{publication.id}}" class="publication_bar" style="--_color: {{col}};"  hx-target="#publication_bar_{{publication.id}}" hx-swap="outerHTML">
     <div class="publication_access">
         {% if current_user.has_role('validator') %}
+            {% if publication.preprint %}
+                {% set pp_cls = 'preprint' %}
+                {% set pp_name = 'Preprint' %}
+            {% else %}
+                {% set pp_cls = 'not_preprint' %}
+                {% set pp_name = 'Not Preprint' %}
+            {% endif %}
+
             <button
                 id="btnPreprint_{{publication.id}}"
                 type="button"
-                class="btn dropdown-toggle"
+                class="btn dropdown-toggle {{pp_cls}}"
                 data-toggle="dropdown"
                 aria-haspopup="true"
-                aria-expanded="false">
-                    {% if publication.preprint %}
-                        Preprint
-                    {% else %}
-                        Not Preprint
-                    {% endif %}
-            </button>
+                aria-expanded="false">{{pp_name}}</button>
             <div class="dropdown-menu" aria-labelledby="btnPreprint_{{publication.id}}">
-                <a class="dropdown-item" href="#" hx="nihr_acknowledgement()" data-id="{{publication.id}}">Preprint</a>
-                <a class="dropdown-item" href="#" hx_="nihr_acknowledgement()" data-id="{{publication.id}}">Not Preprint</a>
+                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_preprint', id=publication.id, is_preprint=1)}}">Preprint</a>
+                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_preprint', id=publication.id, is_preprint=0)}}">Not Preprint</a>
             </div>
         {% else %}
             {% if publication.preprint %}
-                <button id="btnPreprint_{{publication.id}}" type="button" class="btn">Preprint</button>
+                <button id="btnPreprint_{{publication.id}}" type="button" class="btn preprint">Preprint</button>
             {% endif %}
         {% endif %}
 
@@ -69,9 +64,9 @@
                     {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
             </button>
             <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{publication.id}}">
-                <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="-1">Unvalidated</a>
+                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_nihr_acknowledgement', id=publication.id, nihr_acknowledgement_id=0)}}">Unvalidated</a>
                 {% for n in nihr_acknowledgements %}
-                    <a class="dropdown-item" href="Javascript://" onclick="nihr_acknowledgement()" data-id="{{publication.id}}" data-nihr_acknowledgement_id="{{ n.id }}">{{ n.name }}</a>
+                    <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_nihr_acknowledgement', id=publication.id, nihr_acknowledgement_id=n.id)}}">{{ n.name }}</a>
                 {% endfor %}
             </div>
         {% else %}

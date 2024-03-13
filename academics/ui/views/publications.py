@@ -252,11 +252,6 @@ def publication_export_pdf():
     if publication_end_date:
         parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 
-    # if db.session.execute(select(func.count('*')).select_from(alias(q))).scalar() > 100:
-    #     abort(413)
-
-    # q = q.options(selectinload(Publication.catalog_publications))
-
     publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
 
     return pdf_download(
@@ -325,9 +320,6 @@ def publication_authors(id, author_selector):
         {{ render_publication_authors(publication, author_selector) }}
     '''
 
-    sleep(2)
-
-
     return render_template_string(
         template,
         publication=publication,
@@ -348,4 +340,49 @@ def publication_details(id, detail_selector):
         template,
         publication=publication,
         detail_selector=detail_selector,
+    )
+
+@blueprint.route("/publication/update_preprint/<int:id>/<int:is_preprint>", methods=['POST'])
+@roles_accepted('validator')
+def publication_update_preprint(id, is_preprint):
+    publication = db.get_or_404(Publication, id)
+    publication.preprint = is_preprint
+    db.session.add(publication)
+    db.session.commit()
+
+    return request_publication_bar(publication)
+
+
+@blueprint.route("/publication/update_nihr_acknowledgement/<int:id>/<int:nihr_acknowledgement_id>", methods=['POST'])
+@roles_accepted('validator')
+def publication_update_nihr_acknowledgement(id, nihr_acknowledgement_id):
+    publication = db.get_or_404(Publication, id)
+
+    print(nihr_acknowledgement_id)
+    print(id)
+
+    print('@'*50)
+
+    if nihr_acknowledgement_id == 0:
+        publication.nihr_acknowledgement = None
+        db.session.commit()
+    else:
+        publication.nihr_acknowledgement = db.get_or_404(NihrAcknowledgement, nihr_acknowledgement_id)
+        db.session.commit()
+
+    return request_publication_bar(publication)
+
+
+def request_publication_bar(publication):
+
+    template = '''
+        {% from "ui/_publication_details.html" import render_publication_bar %}
+
+        {{ render_publication_bar(publication, current_user, nihr_acknowledgements) }}
+    '''
+
+    return render_template_string(
+        template,
+        publication=publication,
+        nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
