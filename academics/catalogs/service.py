@@ -52,14 +52,13 @@ def auto_validate():
     print(q)
 
     for p, i in enumerate(db.session.execute(q).unique().scalars().all()):
-        pass
-        # auto_ack = _get_nihr_acknowledgement(p)
+        auto_ack = _get_nihr_acknowledgement(p)
 
-        # if auto_ack:
-        #     p.auto_nihr_acknowledgement = auto_ack
-        #     p.nihr_acknowledgement = auto_ack
+        if auto_ack:
+            p.auto_nihr_acknowledgement = auto_ack
+            p.nihr_acknowledgement = auto_ack
 
-        #     db.session.add(p)
+            db.session.add(p)
 
     db.session.commit()
 
