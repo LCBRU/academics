@@ -12,7 +12,6 @@ from academics.model.folder import Folder
 from academics.model.publication import (CatalogPublication, Journal, Keyword,
                              NihrAcknowledgement, Publication, Sponsor,
                              Subtype)
-from academics.catalogs.service import auto_validate
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.publication_searching import PublicationSearchForm, ValidationSearchForm, academic_select_choices, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
@@ -305,13 +304,6 @@ def publication_keyword_options():
 @blueprint.route("/publication/journal/options")
 def publication_journal_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in journal_select_choices(request.args.get('q'))]})
-
-
-@blueprint.route("/publication/auto_validate")
-def publication_auto_validate():
-    amended_count = auto_validate()
-    flash(f'{amended_count} record(s) automatically updated')
-    return redirect(url_for('ui.index'))
 
 
 @blueprint.route("/publication/authors/<int:id>/<string:author_selector>")
