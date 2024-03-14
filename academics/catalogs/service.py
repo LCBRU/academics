@@ -39,37 +39,6 @@ def updating():
     return result
 
 
-def auto_validate():
-    validation_type_ids = [s.id for s in Subtype.get_validation_types()]
-
-    q = (
-        select(Publication)
-        .where(Publication.nihr_acknowledgement_id == None)
-        .where(Publication.auto_nihr_acknowledgement_id == None)
-        .join(Publication.catalog_publications)
-        .where(CatalogPublication.subtype_id.in_(validation_type_ids))
-    )
-
-    print(q)
-
-    for p in db.session.execute(q).unique().scalars().all():
-        pass
-        # auto_ack = _get_nihr_acknowledgement(p)
-
-        # if auto_ack:
-        #     p.auto_nihr_acknowledgement = auto_ack
-        #     p.nihr_acknowledgement = auto_ack
-
-        #     db.session.add(p)
-
-    db.session.commit()
-
-
-def _get_nihr_acknowledgement(pub):
-    if pub.is_nihr_acknowledged:
-        return NihrAcknowledgement.get_acknowledged_status()
-
-
 def refresh():
     logging.debug('started')
 
@@ -174,13 +143,12 @@ def update_academics():
 def _process_updates():
     logging.debug('started')
 
-    # refresh_Academics()
-    # refresh_catalog_publications()
-    # refresh_publications()
-    # remove_publication_without_catalog_entry()
-    # refresh_affiliations()
-    # refresh_institutions()
-    auto_validate()
+    refresh_Academics()
+    refresh_catalog_publications()
+    refresh_publications()
+    remove_publication_without_catalog_entry()
+    refresh_affiliations()
+    refresh_institutions()
 
     logging.debug('Ended')
 
@@ -284,9 +252,14 @@ def refresh_publications():
                 p.institutions = set(_institutions(institutions))
 
             p.set_vancouver()
-            p.refresh_full_details = False
 
-            db.session.add(p)
+            if p.journal and p.journal.preprint and p.preprint is None:
+                p.preprint = True
+
+            if p.is_nihr_acknowledged and p.auto_nihr_acknowledgement is None and p.nihr_acknowledgement is None:
+                p.nihr_acknowledgement = p.auto_nihr_acknowledgement = NihrAcknowledgement.get_acknowledged_status()
+
+            p.refresh_full_details = False
 
         db.session.commit()
 
