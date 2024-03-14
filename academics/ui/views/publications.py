@@ -1,4 +1,4 @@
-from flask import (flash, jsonify, redirect, render_template, render_template_string, request, url_for)
+from flask import (abort, flash, jsonify, redirect, render_template, render_template_string, request, url_for)
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
@@ -316,7 +316,19 @@ def publication_auto_validate():
 
 @blueprint.route("/publication/authors/<int:id>/<string:author_selector>")
 def publication_authors(id, author_selector):
-    publication = db.get_or_404(Publication, id)
+    q = select(Publication).where(Publication.id == id)
+
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.catalog_publication_sources)
+        .selectinload(CatalogPublicationsSources.source)
+        .selectinload(Source.academic)
+    )
+
+    publication = db.session.execute(q).scalar_one_or_none()
+
+    if not publication_author_options:
+        abort(403)
 
     template = '''
         {% from "ui/_publication_details.html" import render_publication_authors %}
@@ -354,7 +366,7 @@ def publication_update_preprint(id, is_preprint):
     db.session.add(publication)
     db.session.commit()
 
-    return request_publication_bar(publication)
+    return request_publication_bar(publication.id)
 
 
 @blueprint.route("/publication/update_nihr_acknowledgement/<int:id>/<int:nihr_acknowledgement_id>", methods=['POST'])
@@ -369,10 +381,21 @@ def publication_update_nihr_acknowledgement(id, nihr_acknowledgement_id):
         publication.nihr_acknowledgement = db.get_or_404(NihrAcknowledgement, nihr_acknowledgement_id)
         db.session.commit()
 
-    return request_publication_bar(publication)
+    return request_publication_bar(publication.id)
 
 
-def request_publication_bar(publication):
+def request_publication_bar(publication_id):
+    q = select(Publication).where(Publication.id == publication_id)
+
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+    )
+
+    publication = db.session.execute(q).scalar_one_or_none()
+
+    if not publication_author_options:
+        abort(403)
+
     template = '''
         {% from "ui/_publication_details.html" import render_publication_bar %}
 
