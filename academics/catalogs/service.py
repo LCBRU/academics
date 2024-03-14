@@ -40,12 +40,14 @@ def updating():
 
 
 def auto_validate():
+    validation_type_ids = [s.id for s in Subtype.get_validation_types()]
+
     q = (
         select(Publication)
         .where(Publication.nihr_acknowledgement_id == None)
         .where(Publication.auto_nihr_acknowledgement_id == None)
         .join(Publication.catalog_publications)
-        .where(CatalogPublication.subtype.in_(Subtype.get_validation_types()))
+        .where(CatalogPublication.subtype.in_(validation_type_ids))
     )
 
     for p in db.session.execute(q).all():
