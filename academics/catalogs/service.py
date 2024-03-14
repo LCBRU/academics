@@ -47,7 +47,7 @@ def auto_validate():
         .where(Publication.nihr_acknowledgement_id == None)
         .where(Publication.auto_nihr_acknowledgement_id == None)
         .join(Publication.catalog_publications)
-        .where(CatalogPublication.subtype.has(Subtype.id.in_(validation_type_ids)))
+        .where(CatalogPublication.subtype_id.in_(validation_type_ids))
     )
 
     print(q)
