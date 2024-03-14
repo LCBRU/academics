@@ -50,7 +50,7 @@ def auto_validate():
         .where(CatalogPublication.subtype.has(Subtype.id.in_(validation_type_ids)))
     )
 
-    for p in db.session.execute(q).all():
+    for p in db.session.execute(q).unique().scalars().all():
         print(p)
         # auto_ack = _get_nihr_acknowledgement(p)
 
