@@ -40,29 +40,25 @@ def updating():
 
 
 def auto_validate():
-    form = ValidationSearchForm()
-    form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
-    form.supress_validation_historic.data = False
-    form.nihr_acknowledgement_id.data = -1
-
-    q = publication_search_query(form)
-
-    amended_count = 0
+    q = (
+        select(Publication)
+        .where(Publication.nihr_acknowledgement_id == None)
+        .where(Publication.auto_nihr_acknowledgement_id == None)
+        .join(Publication.catalog_publications)
+        .where(CatalogPublication.subtype.in_(Subtype.get_validation_types()))
+    )
 
     for p in db.session.execute(q).all():
-        auto_ack = _get_nihr_acknowledgement(p)
+        print(p)
+        # auto_ack = _get_nihr_acknowledgement(p)
 
-        if auto_ack:
-            amended_count += 1
+        # if auto_ack:
+        #     p.auto_nihr_acknowledgement = auto_ack
+        #     p.nihr_acknowledgement = auto_ack
 
-            p.auto_nihr_acknowledgement = auto_ack
-            p.nihr_acknowledgement = auto_ack
-
-            db.session.add(p)
+        #     db.session.add(p)
 
     db.session.commit()
-
-    return amended_count
 
 
 def _get_nihr_acknowledgement(pub):
@@ -174,12 +170,12 @@ def update_academics():
 def _process_updates():
     logging.debug('started')
 
-    refresh_Academics()
-    refresh_catalog_publications()
-    refresh_publications()
-    remove_publication_without_catalog_entry()
-    refresh_affiliations()
-    refresh_institutions()
+    # refresh_Academics()
+    # refresh_catalog_publications()
+    # refresh_publications()
+    # remove_publication_without_catalog_entry()
+    # refresh_affiliations()
+    # refresh_institutions()
     auto_validate()
 
     logging.debug('Ended')
