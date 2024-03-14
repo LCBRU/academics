@@ -19,6 +19,10 @@
         {{ render_nav_item('ui.objectives', 'Objectives', 'fas fa-tasks') }}
     {% endif %}
 
+    {% if current_user.is_admin %}
+        {{ render_nav_item('ui.journals', 'Journals', 'fas fa-book') }}
+    {% endif %}
+
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-download"></i> Downloads</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">

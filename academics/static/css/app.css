@@ -127,7 +127,7 @@ dl.publication_details > div {
     line-height: 2.5rem;
 }
 
-.publication_bar .btn {
+.publication_bar .btn, .journal_bar .btn {
     display: flex;
     align-items: center;
     gap: 0.25rem;

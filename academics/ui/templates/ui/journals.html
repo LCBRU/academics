@@ -1,0 +1,32 @@
+{% extends "ui/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
+{% from "ui/_journal_details.html" import render_journal %}
+
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>Folders</h1>
+
+        {{ render_search(
+            search_form,
+            'ui.journals',
+            placeholder='enter search text - searches name',
+        ) }}
+
+    </div>
+
+    {{ pagination_summary(journals, 'journal') }}
+
+    <ul class="list-group">
+        {% for j in journals.items %}
+            <li class="list-group-item summary_details">
+                {{ render_journal(j, current_user) }}
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{{ render_pagination(journals, 'ui.journals', form=search_form) }}
+
+{% endblock %}

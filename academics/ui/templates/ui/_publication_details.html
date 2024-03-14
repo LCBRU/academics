@@ -15,7 +15,7 @@
     {% set col = publication.nihr_acknowledgement.colour %}
 {% endif %}
 
-<div id="publication_bar_{{publication.id}}" class="publication_bar" style="--_color: {{col}};"  hx-target="#publication_bar_{{publication.id}}" hx-swap="outerHTML">
+<div id="publication_bar_{{publication.id}}" class="publication_bar" style="--_color: {{col}};" hx-target="#publication_bar_{{publication.id}}" hx-swap="outerHTML">
     <div class="publication_access">
         {% if current_user.has_role('validator') %}
             {% if publication.preprint %}

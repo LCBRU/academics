@@ -5,4 +5,5 @@ __all__ = [
     "objectives",
     "reports",
     "sources",
+    "journals",
 ]

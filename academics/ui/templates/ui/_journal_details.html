@@ -1,0 +1,34 @@
+{% macro render_journal(journal, current_user) %}
+<div id="journal_{{journal.id}}" class='row journal_bar' hx-target="#journal_{{journal.id}}" hx-swap="outerHTML">
+    <div class="col-7">
+        <h3>{{journal.name}}</h3>
+    </div>
+    <div class="col-5">
+        {% if current_user.has_role('validator') %}
+            {% if journal.preprint %}
+                {% set pp_cls = 'preprint' %}
+                {% set pp_name = 'Preprint' %}
+            {% else %}
+                {% set pp_cls = 'not_preprint' %}
+                {% set pp_name = 'Not Preprint' %}
+            {% endif %}
+
+            <button
+                id="btnPreprint_{{journal.id}}"
+                type="button"
+                class="btn dropdown-toggle {{pp_cls}}"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">{{pp_name}}</button>
+            <div class="dropdown-menu" aria-labelledby="btnPreprint_{{journal.id}}">
+                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.journal_update_preprint', id=journal.id, is_preprint=1)}}">Preprint</a>
+                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.journal_update_preprint', id=journal.id, is_preprint=0)}}">Not Preprint</a>
+            </div>
+        {% else %}
+            {% if journal.preprint %}
+                <button id="btnPreprint_{{journal.id}}" type="button" class="btn preprint">Preprint</button>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}

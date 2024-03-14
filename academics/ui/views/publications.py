@@ -1,4 +1,3 @@
-from time import sleep
 from flask import (flash, jsonify, redirect, render_template, render_template_string, request, url_for)
 from flask_security import roles_accepted
 from lbrc_flask.database import db
@@ -144,6 +143,7 @@ def publication_full_export_xlsx():
         'open access': None,
         'citations': None,
         'sponsor': None,
+        'nihr acknowledgement': None,
     }
 
     search_form = PublicationSearchForm(formdata=request.args)
@@ -153,6 +153,8 @@ def publication_full_export_xlsx():
     q = q.join(CatalogPublication.journal, isouter=True)
     q = q.join(CatalogPublication.subtype, isouter=True)
     q = q.join(CatalogPublication.sponsors, isouter=True)
+    q = q.join(CatalogPublication.publication)
+    q = q.join(Publication.nihr_acknowledgement, isouter=True)
     q = q.group_by(CatalogPublication.id)
 
     q = q.with_only_columns(
@@ -168,6 +170,7 @@ def publication_full_export_xlsx():
         CatalogPublication.abstract,
         CatalogPublication.is_open_access,
         CatalogPublication.cited_by_count,
+        func.coalesce(NihrAcknowledgement.name, '').label('nihr_acknowledgement_name'),
         func.coalesce(Journal.name, '').label('journal_name'),
         func.coalesce(Subtype.description, '').label('subtype_description'),
         func.group_concat(Sponsor.name.distinct()).label('sponsors')        
@@ -188,6 +191,7 @@ def publication_full_export_xlsx():
         'open access': p['is_open_access'],
         'citations': p['cited_by_count'],
         'sponsor': p['sponsors'],
+        'nihr acknowledgement': p['nihr_acknowledgement_name'],
     } for p in db.session.execute(q).unique().mappings())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
@@ -358,11 +362,6 @@ def publication_update_preprint(id, is_preprint):
 def publication_update_nihr_acknowledgement(id, nihr_acknowledgement_id):
     publication = db.get_or_404(Publication, id)
 
-    print(nihr_acknowledgement_id)
-    print(id)
-
-    print('@'*50)
-
     if nihr_acknowledgement_id == 0:
         publication.nihr_acknowledgement = None
         db.session.commit()
@@ -374,7 +373,6 @@ def publication_update_nihr_acknowledgement(id, nihr_acknowledgement_id):
 
 
 def request_publication_bar(publication):
-
     template = '''
         {% from "ui/_publication_details.html" import render_publication_bar %}
 
