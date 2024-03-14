@@ -46,13 +46,13 @@ def auto_validate():
         select(Publication)
         .where(Publication.nihr_acknowledgement_id == None)
         .where(Publication.auto_nihr_acknowledgement_id == None)
-        .where(Publication.catalog_publications.any(CatalogPublication.subtype_id.has(Subtype.id.in_(validation_type_ids))))
+        .join(Publication.catalog_publications)
+        .where(CatalogPublication.subtype.has(Subtype.id.in_(validation_type_ids)))
     )
 
     print(q)
 
     for p, i in enumerate(db.session.execute(q).unique().scalars().all()):
-        pass
         # auto_ack = _get_nihr_acknowledgement(p)
 
         # if auto_ack:
