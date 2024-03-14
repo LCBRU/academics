@@ -51,7 +51,8 @@ def auto_validate():
     )
 
     for p, i in enumerate(db.session.execute(q).unique().scalars().all()):
-        print(i, p)
+        print(p)
+        print(i)
         # auto_ack = _get_nihr_acknowledgement(p)
 
         # if auto_ack:
