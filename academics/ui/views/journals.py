@@ -33,7 +33,7 @@ def journals():
     journals = db.paginate(
         select=q,
         page=search_form.page.data,
-        per_page=5,
+        per_page=20,
         error_out=False,
     )
 
