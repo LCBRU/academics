@@ -71,6 +71,7 @@ def report_image(type='png'):
         'industry_collaboration': 'by Industrial Collaboration',
         'international_collaboration': 'by International Collaboration',
         'theme_collaboration': 'by Theme Collaboration',
+        'catalog': 'by Catalog',
     }
 
     c = publication_count(search_form)
@@ -127,34 +128,6 @@ def reports_pdf():
     search_form = PublicationSearchForm(formdata=request.args)
     
     q = publication_search_query(search_form)
-
-    # q = q.options(
-    #     selectinload(Publication.catalog_publications)
-    #     .selectinload(CatalogPublication.catalog_publication_sources)
-    #     .selectinload(CatalogPublicationsSources.source)
-    #     .selectinload(Source.academic)
-    # )
-    # q = q.options(
-    #     selectinload(Publication.folders)
-    # )
-
-    # parameters = []
-
-    # if search_form.author_id.data:
-    #     author = db.get_or_404(Source, search_form.author_id.data)
-    #     parameters.append(('Author', author.full_name))
-
-    # if search_form.theme_id.data:
-    #     theme = db.get_or_404(Theme, search_form.theme_id.data)
-    #     parameters.append(('Theme', theme.name))
-
-    # publication_start_date = parse_date_or_none(search_form.publication_start_month.data)
-    # if publication_start_date:
-    #     parameters.append(('Start Publication Date', f'{publication_start_date:%b %Y}'))
-
-    # publication_end_date = parse_date_or_none(search_form.publication_end_month.data)
-    # if publication_end_date:
-    #     parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
 
     publications = db.session.execute(q).unique().scalars()
 

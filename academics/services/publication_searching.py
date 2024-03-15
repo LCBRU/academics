@@ -5,6 +5,7 @@ from flask_login import current_user
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder
 from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
+from academics.model.catalog import primary_catalogs
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
 from sqlalchemy import case, literal, literal_column, or_
@@ -123,6 +124,7 @@ class PublicationSummarySearchForm(SearchForm):
         ('industry_collaboration', 'Industrial Collaboration'),
         ('international_collaboration', 'International Collaboration'),
         ('theme_collaboration', 'Theme Collaboration'),
+        ('catalog', 'Catalog'),
     ], default='total')
     theme_id = SelectField('Theme')
     nihr_acknowledgement_ids = SelectMultipleField('Acknowledgements')
@@ -319,6 +321,8 @@ def publication_summary(search_form):
         results = by_external_collaboration(publications)
     elif search_form.group_by.data == "theme_collaboration":
         results = by_theme_collaboration(publications)
+    elif search_form.group_by.data == "catalog":
+        results = by_catalog(publications)
     else:
         results = by_total(publications)
 
@@ -338,6 +342,9 @@ def all_series_configs(search_form):
         results.append(SeriesConfig(name='Not Collaboration', color=next(cols)))
     elif search_form.group_by.data == "theme_collaboration":
         for t, c in zip(db.session.execute(select(Theme.name)).scalars().all(), default_series_colors()):
+            results.append(SeriesConfig(name=t, color=c))
+    elif search_form.group_by.data == "catalog":
+        for t, c in zip(primary_catalogs, default_series_colors()):
             results.append(SeriesConfig(name=t, color=c))
     else:
         results.append(SeriesConfig(name='', color=default_series_colors()[0]))
@@ -570,6 +577,33 @@ def by_theme_collaboration(publications):
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(collaboration_theme.c.theme_name, publications.c.bucket)
         .order_by(collaboration_theme.c.publication_id, publications.c.bucket)
+    )
+
+    return db.session.execute(q).mappings().all()
+
+
+def by_catalog(publications):
+    print(publications)
+    q_total = (
+        select(
+            publications.c.bucket,
+            func.count().label('total_count'),
+        )
+        .group_by(publications.c.bucket)
+    ).alias()
+
+    q = (
+        select(
+            publications.c.bucket,
+            CatalogPublication.catalog.label('series'),
+            func.count().label('publications'),
+            q_total.c.total_count
+        )
+        .select_from(CatalogPublication)
+        .join(publications, publications.c.publication_id == CatalogPublication.publication_id)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
+        .group_by(CatalogPublication.catalog, publications.c.bucket)
+        .order_by(CatalogPublication.catalog, publications.c.bucket)
     )
 
     return db.session.execute(q).mappings().all()
