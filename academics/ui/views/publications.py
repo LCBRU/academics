@@ -1,4 +1,4 @@
-from flask import (abort, flash, jsonify, redirect, render_template, render_template_string, request, url_for)
+from flask import (abort, current_app, flash, jsonify, redirect, render_template, render_template_string, request, url_for)
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
@@ -14,7 +14,7 @@ from academics.model.publication import (CatalogPublication, Journal, Keyword,
                              Subtype)
 from academics.model.security import User
 from academics.model.theme import Theme
-from academics.services.publication_searching import PublicationSearchForm, ValidationSearchForm, academic_select_choices, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
+from academics.services.publication_searching import PublicationSearchForm, ValidationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import selectinload
 from .. import blueprint
@@ -76,18 +76,22 @@ def publications():
 
 
 @blueprint.route("/validation/")
+@blueprint.route("/validation/<int:page>")
 @roles_accepted('validator')
-def validation():
-    search_form = ValidationSearchForm()
-    search_form.subtype_id.data = [s.id for s in Subtype.get_validation_types()]
-    search_form.supress_validation_historic.data = True
-    
-    q = publication_search_query(search_form)
-    q = q.order_by(CatalogPublication.publication_cover_date.asc())
+def validation(page=1):
+    q = (
+        select(Publication)
+        .join(Publication.catalog_publications)
+        .where(CatalogPublication.id.in_(best_catalog_publications()))
+        .where(CatalogPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
+        .where(CatalogPublication.publication_cover_date >= current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
+        .where(Publication.nihr_acknowledgement_id == None)
+        .order_by(CatalogPublication.publication_cover_date.asc())
+    )
 
     publications = db.paginate(
         select=q,
-        page=search_form.page.data,
+        page=page,
         per_page=5,
         error_out=False,
     )
@@ -95,7 +99,6 @@ def validation():
     return render_template(
         "ui/validation.html",
         publications=publications,
-        search_form=search_form,
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
 
@@ -265,32 +268,6 @@ def publication_export_pdf():
     )
 
 
-@blueprint.route("/publications/nihr_acknowledgement", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'integer'},
-        'nihr_acknowledgement_id': {'type': 'integer'},
-    },
-    "required": ["id", "nihr_acknowledgement_id"]
-})
-@roles_accepted('validator')
-def publication_nihr_acknowledgement():
-    p = db.get_or_404(Publication, request.json.get('id'))
-
-    if request.json.get('nihr_acknowledgement_id') == -1:
-        p.nihr_acknowledgement = None
-        db.session.commit()
-    else:
-        n = db.get_or_404(NihrAcknowledgement, request.json.get('nihr_acknowledgement_id'))
-
-        p.nihr_acknowledgement = n
-
-        db.session.commit()
-
-    return jsonify({'status': 'reload'}), 205
-
-
 @blueprint.route("/publication/author/options")
 def publication_author_options():
     return jsonify({'results': [{'id': id, 'text': text} for id, text in academic_select_choices(request.args.get('q'))]})
@@ -319,8 +296,8 @@ def publication_authors(id, author_selector):
 
     publication = db.session.execute(q).scalar_one_or_none()
 
-    if not publication_author_options:
-        abort(403)
+    if not publication:
+        abort(404)
 
     template = '''
         {% from "ui/_publication_details.html" import render_publication_authors %}
@@ -385,8 +362,8 @@ def request_publication_bar(publication_id):
 
     publication = db.session.execute(q).scalar_one_or_none()
 
-    if not publication_author_options:
-        abort(403)
+    if not publication:
+        abort(404)
 
     template = '''
         {% from "ui/_publication_details.html" import render_publication_bar %}
