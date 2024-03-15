@@ -280,11 +280,6 @@ def catalog_publication_search_query(search_form):
         is_is = 1 if search_form.preprint.data else 0
         q = q.where(func.coalesce(Publication.preprint, 0) == is_is)
 
-    print('*'*50)
-    print(search_form.values_as_dict())
-    print(search_form.industrial_collaboration)
-    print(search_form.has_value('industrial_collaboration'))
-
     if search_form.has_value('industrial_collaboration'):
         is_is = 1 if search_form.industrial_collaboration.data else 0
         q = q.where(Publication.is_industrial_collaboration == is_is)
