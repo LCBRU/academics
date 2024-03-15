@@ -27,21 +27,18 @@ def get_report_defs(search_form):
         q = academic_search_query(search_form).with_only_columns(Academic.id)
 
         for theme_id in db.session.execute(q).scalars():
-            x = search_form.raw_data_as_dict()
+            x = search_form.values_as_dict()
             x['academic_id'] = theme_id
-            x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
     elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
         q = theme_search_query(search_form).with_only_columns(Theme.id)
 
         for theme_id in db.session.execute(q).scalars():
-            x = search_form.raw_data_as_dict()
+            x = search_form.values_as_dict()
             x['theme_id'] = theme_id
-            x['supress_validation_historic'] = search_form.supress_validation_historic.data
             report_defs.append(x)
     else:
-        x = search_form.raw_data_as_dict()
-        x['supress_validation_historic'] = search_form.supress_validation_historic.data
+        x = search_form.values_as_dict()
         report_defs.append(x)
 
     return report_defs
