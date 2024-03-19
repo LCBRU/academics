@@ -179,7 +179,7 @@ def publication_full_export_xlsx():
         'abstract': p.best_catalog_publication.abstract,
         'open access': p.best_catalog_publication.is_open_access,
         'citations': p.best_catalog_publication.cited_by_count,
-        'sponsor': '; '.join(p.best_catalog_publication.sponsors),
+        'sponsor': '; '.join([s.name for s in p.best_catalog_publication.sponsors]),
         'nihr acknowledgement': '' if p.nihr_acknowledgement is None else p.nihr_acknowledgement.name,
     } for p in db.session.execute(q).scalars())
 
