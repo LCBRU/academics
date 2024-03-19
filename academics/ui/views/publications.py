@@ -145,6 +145,7 @@ def publication_full_export_xlsx():
         'open access': None,
         'citations': None,
         'sponsor': None,
+        'author_count': None,
         'nihr acknowledgement': None,
     }
 
@@ -180,6 +181,7 @@ def publication_full_export_xlsx():
         'open access': p.best_catalog_publication.is_open_access,
         'citations': p.best_catalog_publication.cited_by_count,
         'sponsor': '; '.join([s.name for s in p.best_catalog_publication.sponsors]),
+        'author_count': len(p.best_catalog_publication.catalog_publication_sources),
         'nihr acknowledgement': '' if p.nihr_acknowledgement is None else p.nihr_acknowledgement.name,
     } for p in db.session.execute(q).scalars())
 
