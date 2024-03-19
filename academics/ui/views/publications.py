@@ -148,53 +148,40 @@ def publication_full_export_xlsx():
         'nihr acknowledgement': None,
     }
 
+
     search_form = PublicationSearchForm(formdata=request.args)
 
-    cat_pubs = catalog_publication_search_query(search_form)
-    q = select(CatalogPublication).select_from(cat_pubs).join(CatalogPublication, CatalogPublication.id == cat_pubs.c.id)
-    q = q.join(CatalogPublication.journal, isouter=True)
-    q = q.join(CatalogPublication.subtype, isouter=True)
-    q = q.join(CatalogPublication.sponsors, isouter=True)
-    q = q.join(CatalogPublication.publication)
-    q = q.join(Publication.nihr_acknowledgement, isouter=True)
-    q = q.group_by(CatalogPublication.id)
-
-    q = q.with_only_columns(
-        CatalogPublication.id,
-        CatalogPublication.catalog,
-        CatalogPublication.catalog_identifier,
-        CatalogPublication.doi,
-        CatalogPublication.title,
-        CatalogPublication.publication_cover_date,
-        CatalogPublication.issue,
-        CatalogPublication.volume,
-        CatalogPublication.pages,
-        CatalogPublication.abstract,
-        CatalogPublication.is_open_access,
-        CatalogPublication.cited_by_count,
-        func.coalesce(NihrAcknowledgement.name, '').label('nihr_acknowledgement_name'),
-        func.coalesce(Journal.name, '').label('journal_name'),
-        func.coalesce(Subtype.description, '').label('subtype_description'),
-        func.group_concat(Sponsor.name.distinct()).label('sponsors')        
+    q = publication_search_query(search_form)
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.catalog_publication_sources)
+        .selectinload(CatalogPublicationsSources.source)
+    )
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.sponsors)
+    )
+    q = q.options(
+        selectinload(Publication.nihr_acknowledgement)
     )
 
     publication_details = ({
-        'catalog': p['catalog'],
-        'catalog_identifier': p['catalog_identifier'],
-        'doi': p['doi'],
-        'journal': p['journal_name'],
-        'type': p['subtype_description'],
-        'volume': p['volume'],
-        'issue': p['issue'],
-        'pages': p['pages'],
-        'publication_cover_date': p['publication_cover_date'],
-        'title': p['title'],
-        'abstract': p['abstract'],
-        'open access': p['is_open_access'],
-        'citations': p['cited_by_count'],
-        'sponsor': p['sponsors'],
-        'nihr acknowledgement': p['nihr_acknowledgement_name'],
-    } for p in db.session.execute(q).unique().mappings())
+        'catalog': p.best_catalog_publication.catalog,
+        'catalog_identifier': p.best_catalog_publication.catalog_identifier,
+        'doi': p.doi,
+        'journal': p.best_catalog_publication.journal.name,
+        'type': p.best_catalog_publication.subtype.description,
+        'volume': p.best_catalog_publication.volume,
+        'issue': p.best_catalog_publication.issue,
+        'pages': p.best_catalog_publication.pages,
+        'publication_cover_date': p.best_catalog_publication.publication_cover_date,
+        'title': p.best_catalog_publication.title,
+        'abstract': p.best_catalog_publication.abstract,
+        'open access': p.best_catalog_publication.is_open_access,
+        'citations': p.best_catalog_publication.cited_by_count,
+        'sponsor': '; '.join(p.best_catalog_publication.sponsors),
+        'nihr acknowledgement': '' if p.nihr_acknowledgement is None else p.nihr_acknowledgement.name,
+    } for p in db.session.execute(q).scalars())
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 
@@ -318,13 +305,21 @@ def publication_details(id, detail_selector):
     template = '''
         {% from "ui/_publication_details.html" import render_publication_details %}
 
-        {{ render_publication_details(publication, detail_selector) }}
+        {{ render_publication_details(publication, detail_selector, folders) }}
     '''
+
+    folder_query = Folder.query
+
+    folder_query = folder_query.filter(or_(
+        Folder.owner_id == current_user_id(),
+        Folder.shared_users.any(User.id == current_user_id()),
+    ))
 
     return render_template_string(
         template,
         publication=publication,
         detail_selector=detail_selector,
+        folders=folder_query.all(),
     )
 
 @blueprint.route("/publication/update_preprint/<int:id>/<int:is_preprint>", methods=['POST'])
@@ -351,6 +346,30 @@ def publication_update_nihr_acknowledgement(id, nihr_acknowledgement_id):
         db.session.commit()
 
     return request_publication_bar(publication.id)
+
+
+@blueprint.route("/publication/<int:id>/add_folder/<int:folder_id>", methods=['POST'])
+def publication_add_folder(id, folder_id):
+    publication = db.get_or_404(Publication, id)
+    folder = db.get_or_404(Folder, folder_id)
+
+    publication.folders.add(folder)
+    db.session.add(publication)
+    db.session.commit()
+
+    return publication_details(publication.id, 'folders')
+
+
+@blueprint.route("/publication/<int:id>/remove/<int:folder_id>", methods=['POST'])
+def publication_remove_folder(id, folder_id):
+    publication = db.get_or_404(Publication, id)
+    folder = db.get_or_404(Folder, folder_id)
+
+    publication.folders.remove(folder)
+    db.session.add(publication)
+    db.session.commit()
+
+    return publication_details(publication.id, 'folders')
 
 
 def request_publication_bar(publication_id):

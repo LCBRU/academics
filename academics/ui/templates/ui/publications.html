@@ -73,49 +73,7 @@
             f.classList.add("disabled");
             f.title = "disabled";
         })
-    }
-    
-    async function folder_remove_publication() {
-        var button = $(window.event.target);
-
-        let response = await fetch("{{ url_for('ui.folder_remove_publication') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                folder_id: button.data('folder-id'),
-                publication_id: button.data('publication-id'),
-            }),
-        });
-
-        await replace_publications_folders(button.data('publication-id'));
-    }
-
-    async function folder_add_publication() {
-        var button = $(window.event.target);
-
-        let response = await fetch("{{ url_for('ui.folder_add_publication') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                folder_id: button.data('folder-id'),
-                publication_id: button.data('publication-id'),
-            }),
-        })
-        
-        await replace_publications_folders(button.data('publication-id'));
-    }
-
-    async function replace_publications_folders(publication_id) {
-        let response = await fetch("{{ url_for('ui.publication_folders') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                id: publication_id,
-            }),
-        })
-        let data = await response.text();
-        document.getElementById(`publication_folders_${publication_id}`).innerHTML = data;
-    }
+    }    
 </script>
 
 {% endblock %}

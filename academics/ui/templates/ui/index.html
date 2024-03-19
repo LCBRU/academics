@@ -180,8 +180,8 @@
                                                         <a class="author_delete"
                                                         data-toggle="modal"
                                                         data-id="{{ au.id }}"
-                                                        data-name="{{ au.full_name }}"
-                                                        title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
+                                                        data-name="{{ au.display_name }}"
+                                                        title="Delete author {{ au.display_name }} from academic {{ a.display_name }}"
                                                         data-target="#deleteAuthorModal"
                                                         href="#"><i class="fas fa-trash"></i></a>
                                                     </td>
@@ -189,9 +189,9 @@
                                                 <td>
                                                     <div>
                                                         {% if au.author_url %}
-                                                            <a href="{{ au.author_url }}" target="_blank">{{au.full_name}} ({{au.catalog | title}})</a>
+                                                            <a href="{{ au.author_url }}" target="_blank">{{au.display_name}} ({{au.catalog | title}})</a>
                                                         {% else %}
-                                                            {{au.full_name}} ({{au.catalog | title}})
+                                                            {{au.display_name}} ({{au.catalog | title}})
                                                         {% endif %}
                                                     </div>
                                                     <div>

@@ -4,7 +4,7 @@ from typing import Optional
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, and_, case, func, or_, select
+from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, and_, func, select
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
