@@ -322,4 +322,5 @@ class CatalogPublicationsSources(db.Model):
     affiliations = db.relationship(
         Affiliation,
         secondary=catalog_publications_sources_affiliations,
+        backref=backref("catalog_publication_sources"),
     )
