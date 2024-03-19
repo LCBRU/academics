@@ -142,12 +142,12 @@
     <a class="{{cls}}"
         data-toggle="modal"
         data-id="{{ author.id }}"
-        data-name="{{ author.full_name }}"
+        data-name="{{ author.display_name }}"
         data-modal-content-url="{{ url_for('ui.source_details', id=author.id, prev=request.full_path) }}",
-        title="View author {{ author.full_name }}"
-        data-title="Author Details for {{ author.full_name }}"
+        title="View author {{ author.display_name }}"
+        data-title="Author Details for {{ author.display_name }}"
         data-target="#source_details"
-        href="#"><span class="author_list_ordinal">{{ cps.ordinal + 1 }}</span><span>{{ author.full_name }}</span></a>
+        href="#"><span class="author_list_ordinal">{{ cps.ordinal + 1 }}</span><span>{{ author.display_name }}</span></a>
 {% endmacro %}
 
 

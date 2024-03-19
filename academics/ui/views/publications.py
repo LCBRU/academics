@@ -244,7 +244,7 @@ def publication_export_pdf():
 
     if search_form.author_id.data:
         author = db.get_or_404(Source, search_form.author_id.data)
-        parameters.append(('Author', author.full_name))
+        parameters.append(('Author', author.display_name))
 
     if search_form.theme_id.data:
         theme = db.get_or_404(Theme, search_form.theme_id.data)

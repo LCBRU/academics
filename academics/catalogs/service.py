@@ -398,7 +398,7 @@ def _update_source(s):
 
             author_data.update_source(s)
         else:
-            logging.warn(f'Source {s.full_name} not found so setting it to be in error')
+            logging.warn(f'Source {s.display_name} not found so setting it to be in error')
             s.error = True
 
         if s.academic:
@@ -419,7 +419,7 @@ def _update_source(s):
 
     except Exception as e:
         log_exception(e)
-        logging.warn(f'Setting Source {s.full_name} to be in error')
+        logging.warn(f'Setting Source {s.display_name} to be in error')
         s.error = True
 
         db.session.rollback()
