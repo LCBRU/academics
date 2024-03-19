@@ -183,7 +183,7 @@ def publication_full_export_xlsx():
         'citations': p.best_catalog_publication.cited_by_count,
         'sponsor': '; '.join([s.name for s in p.best_catalog_publication.sponsors]),
         'author_count': len(p.best_catalog_publication.catalog_publication_sources),
-        'brc_authors': '; '.join([f'{cps.source.display_name} ({cps.ordinal})' for cps in p.best_catalog_publication.catalog_publication_sources]),
+        'brc_authors': '; '.join([f'{cps.source.display_name} ({cps.ordinal + 1})' for cps in p.best_catalog_publication.catalog_publication_sources if cps.source.academic is not None]),
         'nihr acknowledgement': '' if p.nihr_acknowledgement is None else p.nihr_acknowledgement.name,
     } for p in db.session.execute(q).scalars())
 
