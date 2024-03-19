@@ -1,5 +1,5 @@
 from flask import render_template, request
-from lbrc_flask.charting import BarChart, SeriesConfig, default_series_colors
+from lbrc_flask.charting import BarChart
 from lbrc_flask.database import db
 from sqlalchemy import select
 from lbrc_flask.export import csv_download

@@ -10,6 +10,7 @@ from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length
 from sqlalchemy.orm import selectinload
+from flask_security import roles_accepted
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
@@ -72,6 +73,7 @@ def index():
 
 
 @blueprint.route("/academic/<int:id>/edit", methods=['GET', 'POST'])
+@roles_accepted('editor')
 def academic_edit(id):
     academic = db.get_or_404(Academic, id)
 
@@ -99,6 +101,7 @@ def academic_edit(id):
 
 
 @blueprint.route("/update_all_academics")
+@roles_accepted('admin')
 def update_all_academics():
     if not updating():
         update_academics()
@@ -107,6 +110,7 @@ def update_all_academics():
 
 
 @blueprint.route("/trigger_refresh")
+@roles_accepted('admin')
 def trigger_refresh():
     if not updating():
         refresh()
@@ -115,6 +119,7 @@ def trigger_refresh():
 
 
 @blueprint.route("/add_author_search")
+@roles_accepted('editor')
 def add_author_search():
     search_form = SearchForm(formdata=request.args)
 
@@ -133,6 +138,7 @@ def add_author_search():
 
 
 @blueprint.route("/add_author", methods=['POST'])
+@roles_accepted('editor')
 def add_author():
     form = AddAuthorForm()
 
@@ -147,6 +153,7 @@ def add_author():
 
 
 @blueprint.route("/delete_academic", methods=['POST'])
+@roles_accepted('editor')
 def delete_academic():
     form = ConfirmForm()
 
@@ -165,6 +172,7 @@ def delete_academic():
 
 
 @blueprint.route("/update_academic", methods=['POST'])
+@roles_accepted('editor')
 def update_academic():
     form = ConfirmForm()
 

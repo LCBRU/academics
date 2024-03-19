@@ -1,12 +1,13 @@
 from flask import abort, jsonify, redirect, render_template, request, url_for
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from wtforms import SelectField
 from academics.catalogs.service import create_potential_sources, update_single_academic
-from academics.model.academic import Academic, AcademicPotentialSource, CatalogPublicationsSources, Source
+from academics.model.academic import Academic, AcademicPotentialSource, Source
 from .. import blueprint
 from lbrc_flask.database import db
 from lbrc_flask.json import validate_json
 from lbrc_flask.forms import ConfirmForm, FlashingForm
+from flask_security import roles_accepted
 
 
 class AcademicEditForm(FlashingForm):
@@ -67,6 +68,7 @@ def academics_potential_sources(id):
     },
     "required": ["id", "academic_id", "status"]
 })
+@roles_accepted('editor')
 def academics_amend_potential_sources():
     ps : AcademicPotentialSource = db.get_or_404(AcademicPotentialSource, request.json.get('id'))
     a : Academic = db.get_or_404(Academic, request.json.get('academic_id'))
@@ -103,6 +105,7 @@ def academics_amend_potential_sources():
 
 
 @blueprint.route("/sources/delete", methods=['POST'])
+@roles_accepted('editor')
 def delete_author():
     form = ConfirmForm()
 

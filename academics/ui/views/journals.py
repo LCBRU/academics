@@ -20,10 +20,6 @@ class JournalSearchForm(SearchForm):
     )
 
 
-class JournalEditForm(FlashingForm):
-    preprint = BooleanField('Preprint', default=False)
-
-
 @blueprint.route("/journals/")
 def journals():
     search_form = JournalSearchForm(formdata=request.args)
@@ -41,7 +37,6 @@ def journals():
         "ui/journals.html",
         journals=journals,
         search_form=search_form,
-        edit_journal_form=JournalEditForm(),
         updating=updating(),
     )
 
@@ -59,19 +54,6 @@ def journal_search_query(search_form):
     q = q.order_by(Journal.name)
 
     return q
-
-
-@blueprint.route("/journal/save", methods=['POST'])
-def journal_save():
-    form = JournalEditForm()
-
-    if form.validate_on_submit():
-        journal = db.get_or_404(Journal, form.id.data)
-
-        db.session.add(journal)
-        db.session.commit()
-
-    return redirect(request.referrer)
 
 
 @blueprint.route("/journal/update_preprint/<int:id>/<int:is_preprint>", methods=['POST'])

@@ -15,6 +15,7 @@
                 {
                     'text': 'Add Author',
                     'endpoint': 'ui.add_author_search',
+                    'disabled': not current_user.has_role('editor'),                    
                 },
                 {
                     'text': 'Download',
@@ -45,36 +46,40 @@
                     </div>
                     <div class="col-5">
                         <div class="btn-toolbar float-right" role="toolbar">
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                {% set cls = 'fa-user-cog' %}
-                                {% if a.has_new_potential_sources %}
-                                    {% set cls = 'fa-user-plus text-danger' %}
-                                {% endif %}
+                            {% if current_user.has_role('editor') %}
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    {% set cls = 'fa-user-cog' %}
+                                    {% if a.has_new_potential_sources %}
+                                        {% set cls = 'fa-user-plus text-danger' %}
+                                    {% endif %}
 
-                                <a
-                                    data-toggle="modal"
-                                    data-id="{{ a.id }}"
-                                    data-name="{{ a.full_name }}"
-                                    data-modal-content-url="{{ url_for('ui.academics_potential_sources', id=a.id) }}",
-                                    title="Edit Sources for {{ a.full_name }}"
-                                    data-title="Potential Sources for {{ a.full_name }}"
-                                    data-target="#potentialSources"
-                                    href="#"><i class="fas {{cls}}"></i></a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a class="academic_edit"
-                                    title="Edit academic {{ a.full_name }}"
-                                    href="{{ url_for('ui.academic_edit', id=a.id) }}"><i class="fas fa-edit"></i></a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a class="academic_delete"
-                                    data-toggle="modal"
-                                    data-id="{{ a.id }}"
-                                    data-name="{{ a.full_name }}"
-                                    title="Delete academic {{ a.full_name }}"
-                                    data-target="#deleteAcademicModal"
-                                    href="#"><i class="fas fa-trash"></i></a>
-                            </div>
+                                    <a
+                                        data-toggle="modal"
+                                        data-id="{{ a.id }}"
+                                        data-name="{{ a.full_name }}"
+                                        data-modal-content-url="{{ url_for('ui.academics_potential_sources', id=a.id) }}",
+                                        title="Edit Sources for {{ a.full_name }}"
+                                        data-title="Potential Sources for {{ a.full_name }}"
+                                        data-target="#potentialSources"
+                                        href="#"><i class="fas {{cls}}"></i></a>
+                                </div>
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a class="academic_edit"
+                                        title="Edit academic {{ a.full_name }}"
+                                        href="{{ url_for('ui.academic_edit', id=a.id) }}">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                                <div class="btn-group mr-1 mb-1" role="group">
+                                    <a class="academic_delete"
+                                        data-toggle="modal"
+                                        data-id="{{ a.id }}"
+                                        data-name="{{ a.full_name }}"
+                                        title="Delete academic {{ a.full_name }}"
+                                        data-target="#deleteAcademicModal"
+                                        href="#"><i class="fas fa-trash"></i></a>
+                                </div>
+                            {% endif %}
                             {% if current_user.is_admin %}
                                 <div class="btn-group mr-1 mb-1" role="group">
                                     <a class="academic_update"
@@ -170,15 +175,17 @@
                                     <tbody>
                                         {% for au in a.sources %}
                                             <tr>
-                                                <td>
-                                                    <a class="author_delete"
-                                                    data-toggle="modal"
-                                                    data-id="{{ au.id }}"
-                                                    data-name="{{ au.full_name }}"
-                                                    title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
-                                                    data-target="#deleteAuthorModal"
-                                                    href="#"><i class="fas fa-trash"></i></a>
-                                                </td>
+                                                {% if current_user.has_role('editor') %}
+                                                    <td>
+                                                        <a class="author_delete"
+                                                        data-toggle="modal"
+                                                        data-id="{{ au.id }}"
+                                                        data-name="{{ au.full_name }}"
+                                                        title="Delete author {{ au.full_name }} from academic {{ a.full_name }}"
+                                                        data-target="#deleteAuthorModal"
+                                                        href="#"><i class="fas fa-trash"></i></a>
+                                                    </td>
+                                                {% endif %}
                                                 <td>
                                                     <div>
                                                         {% if au.author_url %}
