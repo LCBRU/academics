@@ -1,4 +1,4 @@
-from flask import (abort, current_app, jsonify, render_template, render_template_string, request, url_for)
+from flask import abort, current_app, jsonify, render_template, render_template_string, request
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
@@ -9,13 +9,11 @@ from lbrc_flask.validators import parse_date_or_none
 from wtforms import HiddenField
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder
-from academics.model.publication import (CatalogPublication, Journal, Keyword,
-                             NihrAcknowledgement, Publication, Sponsor,
-                             Subtype)
+from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Subtype
 from academics.model.security import User
 from academics.model.theme import Theme
-from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, catalog_publication_search_query, publication_search_query
-from sqlalchemy import select, func, or_
+from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
+from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from .. import blueprint
 
