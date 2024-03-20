@@ -2,7 +2,7 @@ from itertools import chain, groupby
 import logging
 from pathlib import Path
 from flask import current_app
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, or_, select, update
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _institutions, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
 from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
@@ -342,7 +342,7 @@ def refresh_Academics():
     logging.debug('started')
 
     while True:
-        a = Academic.query.filter(Academic.updating == 1 or Academic.initialised == 0).filter(Academic.error == 0).first()
+        a = Academic.query.filter(or_(Academic.updating == 1, Academic.initialised == 0)).filter(Academic.error == 0).first()
 
         if not a:
             logging.info('No more academics to update')
