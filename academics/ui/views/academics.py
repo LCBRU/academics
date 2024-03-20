@@ -112,8 +112,7 @@ def update_all_academics():
 @blueprint.route("/trigger_refresh")
 @roles_accepted('admin')
 def trigger_refresh():
-    if not updating():
-        refresh()
+    refresh()
 
     return redirect(url_for('ui.index'))
 
