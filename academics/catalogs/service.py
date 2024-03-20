@@ -370,6 +370,7 @@ def _update_academic(academic: Academic):
 
         academic.ensure_initialisation()
         academic.updating = False
+        academic.initialised = True
         db.session.add(academic)
         db.session.commit()
 
