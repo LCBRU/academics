@@ -342,7 +342,7 @@ def refresh_Academics():
     logging.debug('started')
 
     while True:
-        a = Academic.query.filter(Academic.updating == 1 and Academic.error == 0).first()
+        a = Academic.query.filter(Academic.updating == 1 or Academic.initialised == 0).filter(Academic.error == 0).first()
 
         if not a:
             logging.info('No more academics to update')
