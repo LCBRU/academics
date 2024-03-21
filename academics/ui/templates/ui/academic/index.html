@@ -148,22 +148,20 @@
                                 <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.publication_count}}</a></td>
                                 <td>{{au.citation_count | blank_if_none}}</td>
                                 <td>{{au.h_index | blank_if_none}}</td>
-                                <td>
-                                    <div>
-                                        <a href="{{ au.author_url }}" class="btn" target="_blank" title="View on {{ au.catalog | title_case}} ">
-                                            {% if au.catalog == 'scopus' %}
-                                                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
-                                            {% elif au.catalog == 'open alex' %}
-                                                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg>
-                                            {% endif %}
-                                            {{au.catalog | title}}
-                                        </a>
-                            
-                                        {% if au.error %}
-                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                <td class="catalog">
+                                    <a href="{{ au.author_url }}" class="btn" target="_blank" title="View on {{ au.catalog | title_case}} ">
+                                        {% if au.catalog == 'scopus' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
+                                        {% elif au.catalog == 'open alex' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg>
                                         {% endif %}
-                                        &nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
-                                    </div>
+                                        {{au.catalog | title}}
+                                    </a>
+                        
+                                    {% if au.error %}
+                                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                                    {% endif %}
+                                    <div>{{ au.last_fetched_datetime | datetime_humanize }}</div>
                                 </td>
                             </tr>
                         {% endfor %}

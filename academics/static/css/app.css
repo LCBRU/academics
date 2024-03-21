@@ -223,6 +223,12 @@ dl.publication_details > div {
     padding-top: 1rem;
 }
 
+.catalog {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+}
+
 .orcid a, .orcid a:visited, .orcid a:active, .orcid a:hover {
     color: #a6ce39;
     font-weight: bold;
