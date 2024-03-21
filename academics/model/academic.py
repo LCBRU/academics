@@ -112,7 +112,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         elif len(self.sources) == 0:
             return None
         else:
-            self._best_source = list(reversed(sorted(self.sources, key=lambda x: x.document_count or '')))[0]
+            self._best_source = list(reversed(sorted(self.sources, key=lambda x: int(x.h_index or '0'))))[0]
             return self._best_source
 
     @property
