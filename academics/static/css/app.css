@@ -64,6 +64,7 @@ dl.publication_details > div {
     border: solid 1px var(--color-light-grey-border);
     border-radius: .25rem;
     margin-bottom: 1rem;
+    display: grid;
 }
 
 .panel_list > li > * {
@@ -125,6 +126,10 @@ dl.publication_details > div {
     display: flex;
     gap: 0.5rem;
     justify-content: center;
+}
+
+.source_table tr:not(:nth-of-type(1n + 2)) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .source_table tr > :nth-of-type(1n + 2) {
@@ -224,10 +229,9 @@ dl.publication_details > div {
 }
 
 .catalog {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5em;
-}
+    display: grid;
+    grid-template-columns: 1fr;
+ }
 
 .orcid a, .orcid a:visited, .orcid a:active, .orcid a:hover {
     color: #a6ce39;
