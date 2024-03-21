@@ -80,6 +80,7 @@ dl.publication_details > div {
     justify-content: space-between;
     padding-inline: 0.5rem;
     gap: 0.5em;
+    font-size: 1.2rem;
 
     --_forground_color: color-mix(in srgb, var(--_color) 20%, white);
     --_background_color: var(--_color);
@@ -101,13 +102,13 @@ dl.publication_details > div {
 }
 
 .main_title {
-    font-size: 1.2rem;
+    font-size: 1.1em;
     font-weight: bold;
     margin-bottom: 0;
 }
 
 .subtitle {
-    font-size: 1rem;
+    font-size: 0.8em;
     font-style: italic;
     color: var(--color-subheader);
     margin-bottom: 0;
@@ -207,11 +208,11 @@ dl.publication_details > div {
 }
 
 .author_name {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     justify-content: space-between;
     align-content: center;
     gap: 0.5em;
+    grid-template-columns: 1fr min-content;
 }
 
 .orcid {
