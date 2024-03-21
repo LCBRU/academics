@@ -128,7 +128,7 @@ dl.publication_details > div {
     justify-content: center;
 }
 
-.source_table tr {
+.source_table tbody tr {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
