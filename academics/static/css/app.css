@@ -128,8 +128,8 @@ dl.publication_details > div {
     justify-content: center;
 }
 
-.source_table tr:not(:nth-of-type(1n + 2)) {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+.source_table tr {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .source_table tr > :nth-of-type(1n + 2) {
