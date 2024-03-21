@@ -64,7 +64,7 @@ def index():
     )
 
     return render_template(
-        "ui/index.html",
+        "ui/academic/index.html",
         academics=academics,
         search_form=search_form,
         confirm_form=ConfirmForm(),
@@ -97,7 +97,7 @@ def academic_edit(id):
 
         return redirect(url_for('ui.index'))
 
-    return render_template("ui/academic_edit.html", form=form, academic=academic)
+    return render_template("ui/academic/edit.html", form=form, academic=academic)
 
 
 @blueprint.route("/update_all_academics")
@@ -128,7 +128,7 @@ def add_author_search():
         authors = scopus_author_search(search_form.search.data)
 
     return render_template(
-        "ui/add_author_search.html",
+        "ui/academic/add_search.html",
         authors=authors,
         academics=sorted(Academic.query.all(), key=lambda a: a.last_name + a.first_name),
         search_form=search_form,

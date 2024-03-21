@@ -34,30 +34,6 @@ dl.publication_details > div {
     grid-template-columns: 1fr 2fr;
 }
 
-.acordian h3 {
-    cursor: pointer;
-}
-
-.acordian {
-    margin-bottom: 1em;
-}
-
-.acordian h3 {
-    font-size: 1.2em;
-    text-align: left;
-}
-
-.acordian h3::after {
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    content: "\f0d8";
-    margin-left: 1em;
-}
-
-.acordian .collapsed h3::after {
-    content: "\f0d7";
-}
-
 .chart {
     position: relative;
     margin-top: 2rem;
@@ -76,12 +52,12 @@ dl.publication_details > div {
 
 /* Publications */
 
-.publications {
+.panel_list {
     margin: 0;
     padding: 0;
 }
 
-.publications > li {
+.panel_list > li {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -90,25 +66,12 @@ dl.publication_details > div {
     margin-bottom: 1rem;
 }
 
-.publications > li > div {
+.panel_list > li > * {
     padding-block: 0.5rem;
     padding-inline: 1rem;
 }
 
-.publication_title h3 {
-    font-size: 1.2rem;
-    font-weight: bold;
-    display: inline;
-}
-
-.publication_title h4 {
-    font-size: 1rem;
-    font-style: italic;
-    color: var(--color-subheader);
-    display: inline;
-}
-
-.publication_bar {
+.panel_list > li > header {
     background-color: var(--color-light-grey);
     border-color: var(--color-light-grey-border);
     display: flex;
@@ -122,12 +85,12 @@ dl.publication_details > div {
     --_background_color: var(--_color);
 }
 
-.publication_bar > div {
+.panel_list > li > header > div {
     min-height: 2.5rem;
     line-height: 2.5rem;
 }
 
-.publication_bar .btn, .journal_bar .btn {
+.panel_list > li > header .btn {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -137,11 +100,34 @@ dl.publication_details > div {
     font-weight: bold;
 }
 
+.main_title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.subtitle {
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--color-subheader);
+    margin-bottom: 0;
+}
+
+.publication_title {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .publication_access {
     flex-grow: 1;
     display: flex;
     gap: 0.5rem;
     justify-content: center;
+}
+
+.source_table tr > :nth-of-type(1n + 2) {
+    text-align: center;
 }
 
 .preprint {
@@ -213,6 +199,31 @@ dl.publication_details > div {
     border-radius: var(--border-radius);
     font-size: 0.7em;
     padding-inline: 0.25em;
+    font-weight: bold;
+}
+
+.academic_name {
+    text-align: center;
+}
+
+.author_name {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: center;
+    gap: 0.5em;
+}
+
+.orcid {
+    background-image: url('../img/ORCID_logo.svg');
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: auto 1rem;
+    padding-top: 1rem;
+}
+
+.orcid a, .orcid a:visited, .orcid a:active, .orcid a:hover {
+    color: #a6ce39;
     font-weight: bold;
 }
 

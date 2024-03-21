@@ -252,6 +252,10 @@ class Source(AuditMixin, CommonMixin, db.Model):
             return self.academic.has_left_brc
         else:
             return None
+    
+    @property
+    def affiliation_summary(self):
+        return '; '.join([a.name for a in self.affiliations])
 
 
 class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):

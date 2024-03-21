@@ -1,5 +1,5 @@
 {% macro render_journal(journal, current_user) %}
-<div id="journal_{{journal.id}}" class='row journal_bar' hx-target="#journal_{{journal.id}}" hx-swap="outerHTML">
+<header id="journal_{{journal.id}}" hx-target="#journal_{{journal.id}}" hx-swap="outerHTML">
     <div class="col-7">
         <h3>{{journal.name}}</h3>
     </div>
@@ -30,5 +30,5 @@
             {% endif %}
         {% endif %}
     </div>
-</div>
+</header>
 {% endmacro %}

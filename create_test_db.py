@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+import random
 from dotenv import load_dotenv
 from lbrc_flask.database import db
 from lbrc_flask.security import init_roles, init_users
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.publication import *
 from academics.model.theme import Theme
-from academics.security import get_roles
+from academics.security import ROLE_EDITOR, ROLE_VALIDATOR, get_roles
 
 
 load_dotenv()
@@ -15,9 +16,10 @@ from academics import create_app
 
 application = create_app()
 application.app_context().push()
+db.drop_all()
 db.create_all()
 init_roles(get_roles())
-init_users()
+init_users(admin_roles=[ROLE_VALIDATOR, ROLE_EDITOR])
 
 # Sub Types
 for st in ['article', 'book', 'correction']:
@@ -49,7 +51,7 @@ acknowledgement_details = {
 }
 
 # Acknowledgement
-for n, a in NihrAcknowledgement.all_details.items():
+for n, a in acknowledgement_details.items():
     db.session.add(NihrAcknowledgement(name=n, acknowledged=a))
 db.session.commit()
 
@@ -78,7 +80,7 @@ for a in [
     },
 ]:
     aca = Academic(first_name=a['first_name'], last_name=a['last_name'], initialised=True)
-    aca.themes = [Theme.query.get(t) for t in a['themes']]
+    aca.themes = db.session.execute(select(Theme).where(Theme.id.in_(a['themes']))).scalars().all()
     db.session.add(aca)
 
 db.session.commit()
@@ -88,49 +90,77 @@ for a in [
         'academic_id': 1,
         'first_name': 'Fred',
         'last_name': 'Hoyle',
+        'display_name': 'Fred Hoyle',
         'catalog': CATALOG_SCOPUS,
         'catalog_identifier': '12345678',
+        'citation_count': random.randint(1, 1000),
+        'document_count': random.randint(1, 1000),
+        'h_index': random.randint(1, 100),
     },
     {
         'academic_id': 1,
         'first_name': 'Frederick',
         'last_name': 'Hoyle',
+        'display_name': 'Frederick Hoyle',
         'catalog': CATALOG_SCOPUS,
         'catalog_identifier': '23456789',
+        'citation_count': random.randint(1, 1000),
+        'document_count': random.randint(1, 1000),
+        'h_index': random.randint(1, 100),
     },
     {
         'academic_id': 2,
         'first_name': 'Richard',
         'last_name': 'Feynman',
+        'display_name': 'Richard Feynman',
         'catalog': CATALOG_SCOPUS,
         'catalog_identifier': '34567890',
+        'citation_count': random.randint(1, 1000),
+        'document_count': random.randint(1, 1000),
+        'h_index': random.randint(1, 100),
     },
     {
         'academic_id': 2,
         'first_name': 'Dicky',
         'last_name': 'Feynman',
+        'display_name': 'Dicky Feynman',
         'catalog': CATALOG_SCOPUS,
         'catalog_identifier': '45678901',
+        'citation_count': random.randint(1, 1000),
+        'document_count': random.randint(1, 1000),
+        'h_index': random.randint(1, 100),
     },
     {
         'academic_id': 3,
         'first_name': 'Peter',
         'last_name': 'Faulk',
+        'display_name': 'Peter Faulk',
         'catalog': CATALOG_SCOPUS,
         'catalog_identifier': '56789012',
+        'citation_count': random.randint(1, 1000),
+        'document_count': random.randint(1, 1000),
+        'h_index': random.randint(1, 100),
     },
     {
         'academic_id': 3,
         'first_name': 'Pete',
         'last_name': 'Faulk',
+        'display_name': 'Peter Faulk',
         'catalog': CATALOG_SCOPUS,
         'catalog_identifier': '67890123',
+        'citation_count': random.randint(1, 1000),
+        'document_count': random.randint(1, 1000),
+        'h_index': random.randint(1, 100),
     },
     {
         'first_name': 'Other',
         'last_name': 'Author',
+        'display_name': 'Other Author',
         'catalog': CATALOG_SCOPUS,
         'catalog_identifier': '78901234',
+        'citation_count': random.randint(1, 1000),
+        'document_count': random.randint(1, 1000),
+        'h_index': random.randint(1, 100),
     },
 ]:
     db.session.add(Source(**a))
@@ -346,12 +376,12 @@ for pd in [
         journal_id=pd['journal_id'],
     )
 
-    cp.keywords = {Keyword.query.get(k) for k in pd['keywords']}
+    cp.keywords = set(db.session.execute(select(Keyword).where(Keyword.id.in_(pd['keywords']))).scalars().all())
 
     for s in pd['sources']:
         cp.catalog_publication_sources.append(CatalogPublicationsSources(
             catalog_publication=cp,
-            source=Source.query.get(s),
+            source=db.session.get(Source, s),
         ))
         db.session.add(cp)
 

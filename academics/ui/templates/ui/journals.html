@@ -18,9 +18,9 @@
 
     {{ pagination_summary(journals, 'journal') }}
 
-    <ul class="list-group">
+    <ul class="panel_list">
         {% for j in journals.items %}
-            <li class="list-group-item summary_details">
+            <li>
                 {{ render_journal(j, current_user) }}
             </li>
         {% endfor %}
