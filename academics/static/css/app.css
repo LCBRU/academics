@@ -117,6 +117,7 @@ dl.publication_details > div {
 
 .publication_title {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
 }
