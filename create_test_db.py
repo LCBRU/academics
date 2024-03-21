@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import random
+import string
 from dotenv import load_dotenv
 from lbrc_flask.database import db
 from lbrc_flask.security import init_roles, init_users
-from academics.model.academic import Academic, CatalogPublicationsSources, Source
+from academics.model.academic import Academic, Affiliation, CatalogPublicationsSources, Source
 from academics.model.publication import *
 from academics.model.theme import Theme
 from academics.security import ROLE_EDITOR, ROLE_VALIDATOR, get_roles
@@ -61,6 +62,14 @@ for k in ['Keyword 1', 'Keyword 2', 'Keyword 3']:
 
 db.session.commit()
 
+# Affiliations
+for a in ['Affiliation 1', 'Affiliation 2', 'Affiliation 3', 'Affiliation 4', 'Affiliation 5', 'Affiliation 6']:
+    db.session.add(Affiliation(name=a))
+
+db.session.commit()
+
+all_affiliations = db.session.execute(select(Affiliation)).scalars().all()
+
 # Academic
 for a in [
     {
@@ -96,6 +105,8 @@ for a in [
         'citation_count': random.randint(1, 1000),
         'document_count': random.randint(1, 1000),
         'h_index': random.randint(1, 100),
+        'affiliations': random.sample(all_affiliations, random.randint(1, len(all_affiliations))),
+        'orcid': ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(10, 15))),
     },
     {
         'academic_id': 1,
@@ -107,6 +118,8 @@ for a in [
         'citation_count': random.randint(1, 1000),
         'document_count': random.randint(1, 1000),
         'h_index': random.randint(1, 100),
+        'affiliations': random.sample(all_affiliations, random.randint(1, len(all_affiliations))),
+        'orcid': ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(10, 15))),
     },
     {
         'academic_id': 2,
@@ -118,6 +131,8 @@ for a in [
         'citation_count': random.randint(1, 1000),
         'document_count': random.randint(1, 1000),
         'h_index': random.randint(1, 100),
+        'affiliations': random.sample(all_affiliations, random.randint(1, len(all_affiliations))),
+        'orcid': ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(10, 15))),
     },
     {
         'academic_id': 2,
@@ -129,6 +144,8 @@ for a in [
         'citation_count': random.randint(1, 1000),
         'document_count': random.randint(1, 1000),
         'h_index': random.randint(1, 100),
+        'affiliations': random.sample(all_affiliations, random.randint(1, len(all_affiliations))),
+        'orcid': ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(10, 15))),
     },
     {
         'academic_id': 3,
@@ -140,6 +157,8 @@ for a in [
         'citation_count': random.randint(1, 1000),
         'document_count': random.randint(1, 1000),
         'h_index': random.randint(1, 100),
+        'affiliations': random.sample(all_affiliations, random.randint(1, len(all_affiliations))),
+        'orcid': ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(10, 15))),
     },
     {
         'academic_id': 3,
@@ -151,6 +170,8 @@ for a in [
         'citation_count': random.randint(1, 1000),
         'document_count': random.randint(1, 1000),
         'h_index': random.randint(1, 100),
+        'affiliations': random.sample(all_affiliations, random.randint(1, len(all_affiliations))),
+        'orcid': ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(10, 15))),
     },
     {
         'first_name': 'Other',
@@ -161,6 +182,8 @@ for a in [
         'citation_count': random.randint(1, 1000),
         'document_count': random.randint(1, 1000),
         'h_index': random.randint(1, 100),
+        'affiliations': random.sample(all_affiliations, random.randint(1, len(all_affiliations))),
+        'orcid': ''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(10, 15))),
     },
 ]:
     db.session.add(Source(**a))

@@ -119,20 +119,22 @@
                             <tr>
                                 <td class="author_name">
                                     <div>
-                                        {% if current_user.has_role('editor') %}
-                                            <a class="author_delete"
-                                            data-toggle="modal"
-                                            data-id="{{ au.id }}"
-                                            data-name="{{ au.display_name }}"
-                                            title="Delete author {{ au.display_name }} from academic {{ a.display_name }}"
-                                            data-target="#deleteAuthorModal"
-                                            href="#"><i class="fas fa-trash"></i></a>
-                                        {% endif %}
-                                        {% if au.author_url %}
-                                            <a href="{{ au.author_url }}" target="_blank">{{au.display_name}}</a>
-                                        {% else %}
+                                        <div>
+                                            {% if current_user.has_role('editor') %}
+                                                <a class="author_delete"
+                                                data-toggle="modal"
+                                                data-id="{{ au.id }}"
+                                                data-name="{{ au.display_name }}"
+                                                title="Delete author {{ au.display_name }} from academic {{ a.display_name }}"
+                                                data-target="#deleteAuthorModal"
+                                                href="#"><i class="fas fa-trash"></i></a>
+                                            {% endif %}
                                             {{au.display_name}} 
-                                        {% endif %}
+                                        </div>
+
+                                        {% for a in au.affiliations %}
+                                            <div class="subtitle">{{a.name}}</div>
+                                        {% endfor %}
                                     </div>
                                     <div class="orcid">
                                         {% if au.orcid %}
@@ -142,9 +144,6 @@
                                             {% endif %}
                                         {% endif %}
                                     </div>
-                                    {% if au.affiliation_summary | blank_if_none | length > 0 %}
-                                        <div>{{au.affiliation_summary}}</div>
-                                    {% endif %}
                                 </td>
                                 <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.publication_count}}</a></td>
                                 <td>{{au.citation_count | blank_if_none}}</td>
