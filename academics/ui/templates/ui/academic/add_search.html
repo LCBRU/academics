@@ -1,0 +1,151 @@
+{% extends "lbrc_flask/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_field %}
+{% from "lbrc_flask/modal_macros.html" import render_modal %}
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>Add Academic</h1>
+        <p>
+            This page searches Scopus for academics affiliated to an organisation in Leicester with a name or ORCID that matches the text entered below.
+            The search is not precise, so you will need to validate the author carefully.
+        </p>
+
+        {{ render_search(
+            search_form,
+            'ui.add_author_search',
+            placeholder='enter search text',
+        ) }}
+
+    </div>
+
+    <ul class="list-group">
+        {% for a in authors %}
+            <li class="list-group-item">
+                <div class='row'>
+                    <div class='col-1'>
+                        {% if not a.existing %}
+                            <input type="checkbox" data-catalog_identifier="{{ a.catalog_identifier }}" data-author-name="{{ a.display_name }}" class="check_author" name="check_author_{{ a.catalog_identifier }}"/>
+                        {% endif %}
+                    </div>
+                    <div class='col'>
+                        <header>
+                            <h1>
+                                <a href="https://www.scopus.com/authid/detail.uri?authorId={{a.catalog_identifier}}" target="_blank">{{a.display_name}} <i class="fas fa-external-link-alt fa-xs"></i></a>
+                                {% if a.existing %}
+                                    <span class="badge badge-secondary">Already Imported</span>
+                                {% endif %}
+                            </h1>
+                            <h2>
+                                <a href="https://www.scopus.com/affil/profile.uri?afid={{a.affiliation_id}}" target="_blank">{{a.affiliation_summary}} <i class="fas fa-external-link-alt fa-xs"></i></a>
+                                {% if a.is_local %}
+                                    <span class="badge badge-info">Local</span>
+                                {% endif %}
+                            </h2>
+                        </header>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    <a class="btn btn-primary" href="{{ url_for('ui.index') }}">Back</a>
+    <a class="btn btn-primary"
+        id="add_authors"
+        data-toggle="modal"
+        data-target="#add_author"
+        href="#">Add</a>
+</section>
+
+{% call render_modal('add_author', 'Add Author') %}
+    <p id="modal_description">Add the following authors to one of the following academics or create a new academic.</p>
+
+    <ul id="author_names"></ul>
+
+    <div>
+        <form id="add_author" action="{{ url_for('ui.add_author') }}" class="form" method="POST" enctype="multipart/form-data">
+            <fieldset id="add_author_fieldset">
+                {{ add_author_form.csrf_token() }}
+
+                {{ render_field(add_author_form.academic_id) }}
+                {{ render_field(add_author_form.themes) }}
+
+                <button id="add_submit" type="submit" class="btn btn-primary">Add</button>
+            </fieldset>
+        </form>
+
+    </div>
+{% endcall %}
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    function toggle_add() {
+        var num_checked_authors = $('.check_author:checked').length;
+        $("#add_authors").prop('disabled', num_checked_authors == 0);
+    }
+
+    function conditional_theme_selection() {
+        academic_id = document.getElementById('academic_id');
+        theme_id = document.getElementById('theme_id');
+
+        theme_id.value = 0;
+        theme_id.disabled = !(academic_id.value == 0);
+
+        allow_submit();
+    }
+
+    function allow_submit() {
+        academic_id = document.getElementById('academic_id');
+        theme_id = document.getElementById('theme_id');
+        submit = document.getElementById('add_submit');
+
+        submit.disabled = (theme_id.value == 0 && academic_id.value == 0);
+    }
+
+    $(document).ready(function(){
+        $('.check_author').on('click', function (event) {
+            toggle_add();
+        });
+
+        $('#add_author').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+
+            var modal = $(this);
+            modal.find('#author_name').text(name);
+
+            document.querySelectorAll('#add_author_fieldset input[name^="catalog_identifier"]').forEach((e) => {
+                e.remove();
+            });
+            document.querySelectorAll('#author_names li').forEach((e) => {
+                e.remove();
+            });
+
+            $('.check_author:checked').each(function() {
+                var catalog_identifier = $(this).data('catalog_identifier');
+                var author_name = $(this).data('author-name');
+
+                var hidden_id = document.createElement("input");
+                hidden_id.setAttribute("type", "hidden");
+                hidden_id.name = `catalog_identifier`;
+                hidden_id.value = catalog_identifier;
+                document.getElementById("add_author_fieldset").appendChild(hidden_id);
+
+                var author_name_span = document.createElement("li");
+                author_name_span.name = `author_name`;
+                author_name_span.appendChild(document.createTextNode(author_name));
+                document.getElementById("author_names").appendChild(author_name_span);
+            })
+
+        });
+
+        toggle_add();
+        conditional_theme_selection();
+        document.getElementById('academic_id').onchange = conditional_theme_selection;
+        document.getElementById('theme_id').onchange = allow_submit;
+
+    });
+</script>
+
+{% endblock %}

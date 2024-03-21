@@ -1,0 +1,210 @@
+{% extends "ui/page.html" %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, render_button_bar, pagination_summary %}
+{% from "lbrc_flask/modal_macros.html" import render_delete_modal, render_confirmation_modal, render_url_modal %}
+{% from "ui/assets.html" import render_assets %}
+
+{% block content %}
+<section>
+    <div class="page-header">
+        <h1>Academics</h1>
+
+        {{ render_search(
+            search_form,
+            'ui.index',
+            placeholder='enter search text - searches names',
+            buttons=[
+                {
+                    'text': 'Add Author',
+                    'endpoint': 'ui.add_author_search',
+                    'disabled': not current_user.has_role('editor'),                    
+                },
+                {
+                    'text': 'Download',
+                    'endpoint': 'ui.academics_export_csv',
+                },
+            ],
+        ) }}
+    </div>
+
+    {{ pagination_summary(academics, 'academic') }}
+    {{ render_assets() }}
+
+    <ul class="panel_list">
+        {% for a in academics.items %}
+            <li>
+                <header>
+                    <div class="orcid">
+                        {% if a.orcid | blank_if_none | length > 0 %}
+                            <a href="{{a.orcid_link}}" target="_blank">{{a.orcid}}</a>
+                        {% else %}
+                            <a href="https://orcid.org/register" target="_blank">Register</a>
+                        {% endif %}
+                    </div>
+                    <div class="academic_name">
+                        <h3 class="main_title">{{a.full_name}}</h3>
+                        <h4 class="subtitle">{{a.theme_summary}}</h4>
+                        <a href="{{ url_for('ui.publications', academic_id=a.id ) }}">
+                            <i class="far fa-newspaper"></i>
+                            {{a.publication_count}} Combined Publications
+                        </a>
+                    </div>
+                    <div>
+                        {% if current_user.has_role('editor') %}
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                {% set cls = 'fa-user-cog' %}
+                                {% if a.has_new_potential_sources %}
+                                    {% set cls = 'fa-user-plus text-danger' %}
+                                {% endif %}
+
+                                <a
+                                    data-toggle="modal"
+                                    data-id="{{ a.id }}"
+                                    data-name="{{ a.full_name }}"
+                                    data-modal-content-url="{{ url_for('ui.academics_potential_sources', id=a.id) }}",
+                                    title="Edit Sources for {{ a.full_name }}"
+                                    data-title="Potential Sources for {{ a.full_name }}"
+                                    data-target="#potentialSources"
+                                    href="#"><i class="fas {{cls}}"></i></a>
+                            </div>
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <a class="academic_edit"
+                                    title="Edit academic {{ a.full_name }}"
+                                    href="{{ url_for('ui.academic_edit', id=a.id) }}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <a class="academic_delete"
+                                    data-toggle="modal"
+                                    data-id="{{ a.id }}"
+                                    data-name="{{ a.full_name }}"
+                                    title="Delete academic {{ a.full_name }}"
+                                    data-target="#deleteAcademicModal"
+                                    href="#"><i class="fas fa-trash"></i></a>
+                            </div>
+                        {% endif %}
+                        {% if current_user.is_admin %}
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <a class="academic_update"
+                                    data-toggle="modal"
+                                    data-id="{{ a.id }}"
+                                    data-name="{{ a.full_name }}"
+                                    title="Update academic {{ a.full_name }}"
+                                    data-target="#updateAcademicModal"
+                                    href="#"><i class="fas fa-redo"></i></a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </header>
+
+                <table class="table table-sm source_table">
+                    <colgroup>
+                        <col style="width:40%">
+                        <col style="width:15%;">
+                        <col style="width:15%;">
+                        <col style="width:15%;">
+                        <col style="width:15;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Author</th>
+                            <th>Publications</th>
+                            <th>Citations</th>
+                            <th>h-index</th>
+                            <th>Catalog</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for au in a.sources | sort(attribute='h_index', reverse=True) %}
+                            <tr>
+                                <td class="author_name">
+                                    <div>
+                                        {% if current_user.has_role('editor') %}
+                                            <a class="author_delete"
+                                            data-toggle="modal"
+                                            data-id="{{ au.id }}"
+                                            data-name="{{ au.display_name }}"
+                                            title="Delete author {{ au.display_name }} from academic {{ a.display_name }}"
+                                            data-target="#deleteAuthorModal"
+                                            href="#"><i class="fas fa-trash"></i></a>
+                                        {% endif %}
+                                        {% if au.author_url %}
+                                            <a href="{{ au.author_url }}" target="_blank">{{au.display_name}}</a>
+                                        {% else %}
+                                            {{au.display_name}} 
+                                        {% endif %}
+                                    </div>
+                                    <div class="orcid">
+                                        {% if au.orcid %}
+                                            <a href="{{a.orcid_link}}" target="_blank">{{au.orcid}}</a>
+                                            {% if au.orcid_mismatch %}
+                                                &nbsp;<i class="fas fa-exclamation-triangle text-danger" title="ORCID Mismatch with Sources"></i>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    {% if au.affiliation_summary | blank_if_none | length > 0 %}
+                                        <div>{{au.affiliation_summary}}</div>
+                                    {% endif %}
+                                </td>
+                                <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.publication_count}}</a></td>
+                                <td>{{au.citation_count | blank_if_none}}</td>
+                                <td>{{au.h_index | blank_if_none}}</td>
+                                <td>
+                                    <div>
+                                        <a href="{{ au.author_url }}" class="btn" target="_blank" title="View on {{ au.catalog | title_case}} ">
+                                            {% if au.catalog == 'scopus' %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
+                                            {% elif au.catalog == 'open alex' %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg>
+                                            {% endif %}
+                                            {{au.catalog | title}}
+                                        </a>
+                            
+                                        {% if au.error %}
+                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        {% endif %}
+                                        &nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{{ render_pagination(academics, 'ui.index', form=search_form) }}
+
+
+{{ render_url_modal('potentialSources', 'Potential Sources') }}
+{{ render_delete_modal('deleteAcademicModal', 'Delete Academic', url_for('ui.delete_academic', prev=request.full_path), confirm_form) }}
+{{ render_delete_modal('deleteAuthorModal', 'Delete Author', url_for('ui.delete_author', prev=request.full_path), confirm_form) }}
+{{ render_confirmation_modal('updateAcademicModal', 'Update Academic', url_for('ui.update_academic', prev=request.full_path), confirm_form, 'Please confirm that you want to update') }}
+
+{% endblock %}
+
+{% block js %}
+<script>
+    async function amend_potential_source_assignment() {
+        var button = window.event.target;
+        var id = button.getAttribute('data-id');
+        var academic_id = button.getAttribute('data-academic-id');
+        var status = button.getAttribute('data-status');
+
+        let response = await fetch("{{ url_for('ui.academics_amend_potential_sources') }}", {
+            method: 'post',
+            headers: {"Content-type": "application/json; charset=UTF-8"},
+            body: JSON.stringify({
+                id: parseInt(id),
+                academic_id: parseInt(academic_id),
+                status: status,
+            }),
+        })
+        let data = await response.json();
+        b = document.getElementById(`btnPotentialSource_${id}`)
+        b.innerHTML = data['status'];
+    }
+</script>
+{% endblock %}
