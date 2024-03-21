@@ -4,7 +4,7 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
-from academics.model.catalog import CATALOG_SCOPUS
+from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.theme import Theme
 
@@ -204,6 +204,8 @@ class Source(AuditMixin, CommonMixin, db.Model):
     def author_url(self):
         if self.catalog == CATALOG_SCOPUS:
             return f'https://www.scopus.com/authid/detail.uri?authorId={self.catalog_identifier}'
+        elif self.catalog == CATALOG_OPEN_ALEX:
+            return f'https://openalex.org/authors/{self.catalog_identifier}'
 
     @property
     def publication_count(self):
