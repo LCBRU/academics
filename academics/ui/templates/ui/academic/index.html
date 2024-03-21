@@ -161,7 +161,7 @@
                                     {% if au.error %}
                                         <i class="fas fa-exclamation-triangle text-danger"></i>
                                     {% endif %}
-                                    <div>{{ au.last_fetched_datetime | datetime_humanize }}</div>
+                                    <div><i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}</div>
                                 </td>
                             </tr>
                         {% endfor %}
