@@ -2,6 +2,7 @@
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
 {% from "ui/_publication_details.html" import render_publication_resources, render_publication_bar, render_publication_title, render_publication_authors, render_publication_details %}
 {% from "lbrc_flask/modal_macros.html" import render_url_modal %}
+{% from "ui/assets.html" import render_assets %}
 
 
 {% block content %}
@@ -13,7 +14,7 @@
     {{ pagination_summary(publications, 'publication') }}
 
     <ul class="publications">
-        {{ render_publication_resources() }}
+        {{ render_assets() }}
 
         {% for p in publications.items %}
             <li>
