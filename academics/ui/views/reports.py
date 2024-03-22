@@ -116,7 +116,7 @@ def academics_export_csv():
     academic_details = ({
         'first_name': a.first_name,
         'last_name': a.last_name,
-        'theme': a.theme.name,
+        'theme': a.theme_summary,
         'ordcid': a.orcid,
     } for a in db.session.scalars(q).all())
 
