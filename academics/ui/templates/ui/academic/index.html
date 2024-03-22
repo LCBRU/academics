@@ -115,7 +115,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for au in a.sources | sort(attribute='h_index', reverse=True) %}
+                        {% for au in a.sources_by_h_index %}
                             <tr>
                                 <td class="author_name">
                                     <div>

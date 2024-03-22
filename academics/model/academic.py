@@ -116,6 +116,11 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             return self._best_source
 
     @property
+    def sources_by_h_index(self):
+        return list(reversed(sorted(self.sources, key=lambda x: int(x.h_index or '0'))))[0]
+
+
+    @property
     def publication_count(self) -> int:
         q =  (
             select(func.count(distinct(Publication.id)))
