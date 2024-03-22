@@ -117,7 +117,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def sources_by_h_index(self):
-        return list(reversed(sorted(self.sources, key=lambda x: int(x.h_index or '0'))))[0]
+        return list(reversed(sorted(self.sources, key=lambda x: int(x.h_index or '0'))))
 
 
     @property
