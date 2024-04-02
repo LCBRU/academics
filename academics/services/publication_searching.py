@@ -487,9 +487,11 @@ def by_publication_type(publications):
         .join(publications, publications.c.publication_id == CatalogPublication.publication_id)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .join(CatalogPublication.subtype)
-        .group_by(CatalogPublication.catalog, publications.c.bucket)
-        .order_by(CatalogPublication.catalog, publications.c.bucket)
+        .group_by(Subtype.description, publications.c.bucket)
+        .order_by(Subtype.description, publications.c.bucket)
     )
+
+    print(q)
 
     return db.session.execute(q).mappings().all()
 
