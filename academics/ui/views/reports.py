@@ -66,6 +66,7 @@ def report_image(type='png'):
     group_by_title = {
         'total': None,
         'acknowledgement': 'by Acknowledgement Status',
+        'type': 'by Publication Type',
         'external_collaboration': 'by External Collaboration',
         'industry_collaboration': 'by Industrial Collaboration',
         'international_collaboration': 'by International Collaboration',

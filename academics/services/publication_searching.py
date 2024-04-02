@@ -120,6 +120,7 @@ class PublicationSummarySearchForm(SearchForm):
     group_by = SelectField('Group By', choices=[
         ('total', 'Total'),
         ('acknowledgement', 'Acknowledgement Status'),
+        ('type', 'Publication Type'),
         ('external_collaboration', 'External Collaboration'),
         ('industry_collaboration', 'Industrial Collaboration'),
         ('international_collaboration', 'International Collaboration'),
@@ -128,6 +129,7 @@ class PublicationSummarySearchForm(SearchForm):
     ], default='total')
     theme_id = SelectField('Theme')
     nihr_acknowledgement_ids = SelectMultipleField('Acknowledgements')
+    subtype_id = SelectMultipleField('Type')
     academic_id = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
@@ -142,6 +144,7 @@ class PublicationSummarySearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
         self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.theme_id.choices = theme_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
@@ -319,6 +322,8 @@ def publication_summary(search_form):
 
     if search_form.group_by.data == "acknowledgement":
         results = by_acknowledge_status(publications)
+    elif search_form.group_by.data == "type":
+        results = by_publication_type(publications)
     elif search_form.group_by.data == "industry_collaboration":
         results = by_industrial_collaboration(publications)
     elif search_form.group_by.data == "international_collaboration":
@@ -338,12 +343,15 @@ def publication_summary(search_form):
 def all_series_configs(search_form):
     results = []
 
+    cols = iter(default_series_colors())
+
     if search_form.group_by.data == "acknowledgement":
         for a in db.session.execute(select(NihrAcknowledgement)).scalars().all():
             results.append(SeriesConfig(name=a.name, color=a.colour))
-
+    elif search_form.group_by.data == "type":
+        for a in db.session.execute(select(Subtype)).scalars().all():
+            results.append(SeriesConfig(name=a.description, color=next(cols)))
     elif search_form.group_by.data in ["industry_collaboration", "international_collaboration", "external_collaboration"]:
-        cols = iter(default_series_colors())
         results.append(SeriesConfig(name='Collaboration', color=next(cols)))
         results.append(SeriesConfig(name='Not Collaboration', color=next(cols)))
     elif search_form.group_by.data == "theme_collaboration":
@@ -453,6 +461,33 @@ def by_acknowledge_status(publications):
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
         .order_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
+    )
+
+    return db.session.execute(q).mappings().all()
+
+
+def by_publication_type(publications):
+    q_total = (
+        select(
+            publications.c.bucket,
+            func.count().label('total_count'),
+        )
+        .group_by(publications.c.bucket)
+    ).alias()
+
+    q = (
+        select(
+            publications.c.bucket,
+            Subtype.description.label('series'),
+            func.count().label('publications'),
+            q_total.c.total_count
+        )
+        .select_from(CatalogPublication)
+        .join(publications, publications.c.publication_id == CatalogPublication.publication_id)
+        .join(q_total, q_total.c.bucket == publications.c.bucket)
+        .join(CatalogPublication.subtype)
+        .group_by(CatalogPublication.catalog, publications.c.bucket)
+        .order_by(CatalogPublication.catalog, publications.c.bucket)
     )
 
     return db.session.execute(q).mappings().all()
@@ -589,7 +624,6 @@ def by_theme_collaboration(publications):
 
 
 def by_catalog(publications):
-    print(publications)
     q_total = (
         select(
             publications.c.bucket,
