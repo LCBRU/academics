@@ -33,7 +33,7 @@
         {% for a in academics.items %}
             <li>
                 <header>
-                    <div class="orcid">
+                    <div class="orcid academic_orcid">
                         {% if a.orcid | blank_if_none | length > 0 %}
                             <a href="{{a.orcid_link}}" target="_blank">{{a.orcid}}</a>
                         {% else %}
@@ -48,7 +48,7 @@
                             {{a.publication_count}} Combined Publications
                         </a>
                     </div>
-                    <div>
+                    <div class="academic_buttons">
                         {% if current_user.has_role('editor') %}
                             <div class="btn-group mr-1 mb-1" role="group">
                                 {% set cls = 'fa-user-cog' %}
