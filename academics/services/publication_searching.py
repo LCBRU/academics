@@ -371,7 +371,7 @@ def get_publication_by_theme(search_form):
     cat_pubs = catalog_publication_search_query(search_form).alias()
 
     pub_themes = select(
-        CatalogPublication.publication_id,
+        CatalogPublication.id,
         Theme.name.label('bucket')
     ).select_from(
         cat_pubs
@@ -393,10 +393,10 @@ def get_publication_by_theme(search_form):
     pub_themes = pub_themes.cte('pubs')
 
     multi_theme = select(
-        pub_themes.c.publication_id,
+        pub_themes.c.id,
         func.group_concat(pub_themes.c.bucket.distinct().op('ORDER BY pubs.bucket SEPARATOR')(literal_column('" / "'))).label("bucket")
     ).group_by(
-        pub_themes.c.publication_id
+        pub_themes.c.id
     ).having(func.count() > 1)
 
     return multi_theme.union_all(
@@ -408,7 +408,7 @@ def get_publication_by_academic(search_form):
     cat_pubs = catalog_publication_search_query(search_form).alias()
 
     q = select(
-        CatalogPublication.publication_id,
+        CatalogPublication.id,
         func.concat(Academic.first_name, ' ', Academic.last_name).label('bucket')
     ).select_from(
         cat_pubs
@@ -434,10 +434,12 @@ def get_publication_by_academic(search_form):
 def get_publication_by_brc(search_form):
     cat_pubs = catalog_publication_search_query(search_form)
 
-    return select(
-        CatalogPublication.publication_id,
-        literal('brc').label('bucket')
-    ).where(CatalogPublication.id.in_(cat_pubs)).cte()
+    q = select(
+        cat_pubs.c.id,
+        literal('brc').label('bucket'),
+    )
+
+    return q.cte()
 
 
 def by_acknowledge_status(publications):
@@ -456,8 +458,9 @@ def by_acknowledge_status(publications):
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(Publication)
-        .join(publications, publications.c.publication_id == Publication.id)
+        .select_from(CatalogPublication)
+        .join(publications, publications.c.id == CatalogPublication.id)
+        .join(CatalogPublication.publication)
         .join(NihrAcknowledgement, NihrAcknowledgement.id == Publication.nihr_acknowledgement_id, isouter=True)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(func.coalesce(NihrAcknowledgement.name, 'Unvalidated'), publications.c.bucket)
@@ -484,14 +487,12 @@ def by_publication_type(publications):
             q_total.c.total_count
         )
         .select_from(CatalogPublication)
-        .join(publications, publications.c.publication_id == CatalogPublication.publication_id)
+        .join(publications, publications.c.id == CatalogPublication.id)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .join(CatalogPublication.subtype)
         .group_by(Subtype.description, publications.c.bucket)
         .order_by(Subtype.description, publications.c.bucket)
     )
-
-    print(q)
 
     return db.session.execute(q).mappings().all()
 
@@ -517,8 +518,9 @@ def by_industrial_collaboration(publications):
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(Publication)
-        .join(publications, publications.c.publication_id == Publication.id)
+        .select_from(CatalogPublication)
+        .join(publications, publications.c.id == CatalogPublication.id)
+        .join(CatalogPublication.publication)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(series_case, publications.c.bucket)
         .order_by(series_case, publications.c.bucket)
@@ -548,8 +550,9 @@ def by_international_collaboration(publications):
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(Publication)
-        .join(publications, publications.c.publication_id == Publication.id)
+        .select_from(CatalogPublication)
+        .join(publications, publications.c.id == CatalogPublication.id)
+        .join(CatalogPublication.publication)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(series_case, publications.c.bucket)
         .order_by(series_case, publications.c.bucket)
@@ -579,8 +582,9 @@ def by_external_collaboration(publications):
             func.count().label('publications'),
             q_total.c.total_count
         )
-        .select_from(Publication)
-        .join(publications, publications.c.publication_id == Publication.id)
+        .select_from(CatalogPublication)
+        .join(publications, publications.c.id == CatalogPublication.id)
+        .join(CatalogPublication.publication)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(series_case, publications.c.bucket)
         .order_by(series_case, publications.c.bucket)
@@ -599,14 +603,14 @@ def by_theme_collaboration(publications):
     ).alias()
 
     collaboration_theme = (
-        select(CatalogPublication.publication_id, Theme.name.label('theme_name'))
+        select(CatalogPublication.id, Theme.name.label('theme_name'))
         .select_from(CatalogPublication)
         .join(CatalogPublication.catalog_publication_sources)
         .join(CatalogPublicationsSources.source)
         .join(Source.academic)
         .join(Academic.themes)
-        .where(CatalogPublication.publication_id.in_(select(publications.c.publication_id)))
-        .group_by(CatalogPublication.publication_id, Theme.name)
+        .where(CatalogPublication.id.in_(select(publications.c.id)))
+        .group_by(CatalogPublication.id, Theme.name)
     ).alias()
 
     q = (
@@ -617,10 +621,10 @@ def by_theme_collaboration(publications):
             q_total.c.total_count
         )
         .select_from(publications)
-        .join(collaboration_theme, collaboration_theme.c.publication_id == publications.c.publication_id)
+        .join(collaboration_theme, collaboration_theme.c.id == publications.c.id)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(collaboration_theme.c.theme_name, publications.c.bucket)
-        .order_by(collaboration_theme.c.publication_id, publications.c.bucket)
+        .order_by(collaboration_theme.c.id, publications.c.bucket)
     )
 
     return db.session.execute(q).mappings().all()
@@ -643,7 +647,7 @@ def by_catalog(publications):
             q_total.c.total_count
         )
         .select_from(CatalogPublication)
-        .join(publications, publications.c.publication_id == CatalogPublication.publication_id)
+        .join(publications, publications.c.id == CatalogPublication.id)
         .join(q_total, q_total.c.bucket == publications.c.bucket)
         .group_by(CatalogPublication.catalog, publications.c.bucket)
         .order_by(CatalogPublication.catalog, publications.c.bucket)
@@ -653,15 +657,12 @@ def by_catalog(publications):
 
 
 def by_total(publications):
-    q = (
-        select(
-            publications.c.bucket,
-            literal('').label('series'),
-            func.count().label('publications'),
-            func.count().label('total_count'),
-        )
-        .group_by(publications.c.bucket)
-    )
+    q = select(
+        publications.c.bucket,
+        literal('').label('series'),
+        func.count().label('publications'),
+        func.count().label('total_count'),
+    ).group_by(publications.c.bucket)
 
     return db.session.execute(q).mappings().all()
 
