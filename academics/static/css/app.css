@@ -77,8 +77,6 @@ dl.publication_details > div {
     border-color: var(--color-light-grey-border);
     display: flex;
     flex-wrap: wrap;
-    /* align-items: center;
-    justify-content: space-between; */
     padding-inline: 0.5rem;
     gap: 0.5em;
     font-size: 1.2rem;
@@ -240,11 +238,12 @@ dl.publication_details > div {
 }
 
 .author_name {
-    display: grid;
-    justify-content: space-between;
-    align-content: center;
+    display: flex;
     gap: 0.5em;
-    grid-template-columns: 1fr min-content;
+}
+
+.author_name :first-child {
+    flex-grow: 1;
 }
 
 .catalog {
