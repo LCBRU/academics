@@ -3,7 +3,6 @@ from lbrc_flask.charting import BarChart
 from lbrc_flask.database import db
 from sqlalchemy import select
 from lbrc_flask.export import csv_download
-from sqlalchemy import select
 from academics.model.academic import Academic
 from academics.model.theme import Theme
 from academics.services.academic_searching import academic_search_query, theme_search_query

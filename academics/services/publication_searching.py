@@ -132,6 +132,12 @@ class PublicationSummarySearchForm(SearchForm):
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
     supress_validation_historic = BooleanField('Suppress Historic')
+    preprint = SelectField(
+        'Preprint',
+        choices=[('', ''), ('True', 'Yes'), ('False', 'No')],
+        coerce=boolean_coerce,
+        default=None,
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
