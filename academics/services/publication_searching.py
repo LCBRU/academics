@@ -1,3 +1,4 @@
+from itertools import cycle
 import logging
 from dateutil.relativedelta import relativedelta
 from flask import current_app, url_for
@@ -343,7 +344,7 @@ def publication_summary(search_form):
 def all_series_configs(search_form):
     results = []
 
-    cols = iter(default_series_colors())
+    cols = iter(cycle(default_series_colors()))
 
     if search_form.group_by.data == "acknowledgement":
         for a in db.session.execute(select(NihrAcknowledgement)).scalars().all():
