@@ -182,7 +182,7 @@
                 </ul>
             {% elif details_selector == 'affiliations' %}
                 <ul class="list-group">
-                    {% for a in cp.affiliations | sort %}
+                    {% for a in cp.affiliations  | sort(attribute='name')%}
                         <li class="list-group-item">{{ a.name }}</li>
                     {% endfor %}
                 </ul>
