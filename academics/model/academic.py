@@ -67,6 +67,9 @@ class Affiliation(db.Model):
     def summary(self):
         return '\n'.join(filter(None, [self.name, self.address, self.country]))
 
+    @property
+    def is_nihr(self):
+        return any([n in self.name for n in self.NIHR_NAMES])
 
 class Academic(AuditMixin, CommonMixin, db.Model):
     # MariaDB backends need a VARChar variable, added 255 to set a max length
