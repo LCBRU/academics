@@ -1,3 +1,4 @@
+from itertools import chain
 import logging
 from datetime import date
 from typing import Optional
@@ -145,7 +146,6 @@ class Publication(db.Model, AuditMixin):
              .where(Institution.id == institutions__publications.c.institution_id)
              .where(Institution.sector == 'corporate')).exists().label("is_industrial_collaboration")
 
-
     @hybrid_property
     def is_international_collaboration(self):
         if self.institutions:
@@ -280,3 +280,7 @@ class CatalogPublication(db.Model, AuditMixin):
     @property
     def author_count(self):
         return len(self.catalog_publication_sources)
+
+    @property
+    def affiliations(self):
+        return set(chain.from_iterable([cps.affiliations for cps in self.catalog_publication_sources]))
