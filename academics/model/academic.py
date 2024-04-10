@@ -67,6 +67,12 @@ class Affiliation(db.Model):
     def summary(self):
         return '\n'.join(filter(None, [self.name, self.address, self.country]))
 
+    NIHR_NAMES = [
+        'NIHR',
+        'National Institute for Health Research',
+        'National Institute for Health and Care Research',
+    ]
+
     @property
     def is_nihr(self):
         return any([n in self.name for n in self.NIHR_NAMES])
