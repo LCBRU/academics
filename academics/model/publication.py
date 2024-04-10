@@ -225,7 +225,10 @@ class Publication(db.Model, AuditMixin):
 
     @property
     def is_nihr_acknowledged(self):
-        return any([s.is_nihr for s in self.sponsors])
+        return any(chain(
+            [s.is_nihr for s in self.best_catalog_publication.sponsors],
+            [a.is_nihr for a in self.best_catalog_publication.affiliations]
+        ))
 
 
 class CatalogPublication(db.Model, AuditMixin):
