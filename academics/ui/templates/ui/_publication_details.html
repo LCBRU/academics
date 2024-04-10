@@ -183,7 +183,7 @@
             {% elif details_selector == 'affiliations' %}
                 <ul class="list-group">
                     {% for a in cp.affiliations  | sort(attribute='name')%}
-                        <li class="list-group-item">{{ a.name }}</li>
+                        <li class="list-group-item {% if s.home_organisation %} list-group-item-success{% endif %}">{{ a.name }}</li>
                     {% endfor %}
                 </ul>
             {% elif details_selector == 'abstract' %}
