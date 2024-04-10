@@ -1,12 +1,17 @@
 {% macro render_publication_title(publication) %}
+
+{% set cp = publication.best_catalog_publication %}
+
 <div class="publication_title">
-    <h3 class="main_title">{{publication.title}}</h3>
-    <h4 class="subtitle">{{publication.journal.name | blank_if_none | title_case}} ({{publication.publication_cover_date | date_format}} {{publication.issue_volume | blank_if_none}} {{publication.pp | blank_if_none}})</h4>    
+    <h3 class="main_title">{{cp.title}}</h3>
+    <h4 class="subtitle">{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
 </div>
 {% endmacro %}
 
 
 {% macro render_publication_bar(publication, current_user, nihr_acknowledgements) %}
+
+{% set cp = publication.best_catalog_publication %}
 
 {% set col = '#03A9F4' %}
 {% if publication.nihr_acknowledgement.name | default_if_none('Unvalidated') == 'Unvalidated' %}
@@ -43,9 +48,9 @@
             {% endif %}
         {% endif %}
 
-        <span>{{ publication.subtype.description | blank_if_none | title_case}}:</span>
+        <span>{{ cp.subtype.description | blank_if_none | title_case}}:</span>
 
-        {% if publication.is_open_access %}
+        {% if cp.is_open_access %}
             <span class="open_access">Open Access</span>
         {% else%}
             <span class="closed_access">Closed Access</span>
@@ -75,22 +80,22 @@
             </button>
         {% endif %}
 
-        {% if publication.catalog %}
-            <a href="{{ publication.href }}" class="btn" target="_blank" title="View on {{ publication.catalog | title_case}} ">
-                {% if publication.catalog == 'scopus' %}
+        {% if cp.catalog %}
+            <a href="{{ cp.href }}" class="btn" target="_blank" title="View on {{ cp.catalog | title_case}} ">
+                {% if cp.catalog == 'scopus' %}
                     <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg> Scopus
-                {% elif publication.catalog == 'open alex' %}
+                {% elif cp.catalog == 'open alex' %}
                     <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg> Open Alex
                 {% endif %}
             </a>
         {% endif %}
 
-        {% if publication.doi %}
+        {% if cp.doi %}
             <a href="http://doi.org/{{ publication.doi }}" class="btn" target="_blank" title="View publication">
                 <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
-                {{publication.doi}}
+                {{cp.doi}}
             </a>
-            <a href="https://google.com/search?q={{ publication.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
+            <a href="https://google.com/search?q={{ cp.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
         {% endif %}
     </div>
 </header>
@@ -98,22 +103,25 @@
 
 
 {% macro render_publication_authors(publication, author_selector) %}
-    <div id="authors_{{publication.id}}" class="tabbed_display">
 
-        <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{publication.id}}" hx-swap="outerHTML">
-            {{ tabbed_display_tab(author_selector, 'brc', 'BRC Authors', url_for('ui.publication_authors', id=publication.id, author_selector='brc')) }}
-            {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=publication.id, author_selector='all')) }}
-            <span>{{publication.best_catalog_publication.author_count}} author(s)</span>
+    {% set cp = publication.best_catalog_publication %}
+
+    <div id="authors_{{cp.publication_id}}" class="tabbed_display">
+
+        <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{cp.publication_id}}" hx-swap="outerHTML">
+            {{ tabbed_display_tab(author_selector, 'brc', 'BRC Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='brc')) }}
+            {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='all')) }}
+            <span>{{cp.author_count}} author(s)</span>
         </div>
         <div class="tabbed_display_content author_list">
-            {% for cps in publication.best_catalog_publication.catalog_publication_sources %}
+            {% for cps in cp.catalog_publication_sources %}
                 {% if cps.source.is_academic or author_selector == 'all' %}
                     {{ _render_publication_author(cps) }}
                 {% endif %}
             {% endfor%}
         </div>
 
-        {% if publication.all_academics_left_brc %}
+        {% if cp.all_academics_left_brc %}
             <div class="text-danger">All authors have left the BRC</div>
         {% endif %}
     </div>
@@ -149,32 +157,43 @@
 
 
 {% macro render_publication_details(publication, details_selector, folders) %}
-    <div id="details_{{publication.id}}" class="tabbed_display">
 
-        <div class="tabbed_display_tabs {{detail_selector}}" hx-target="#details_{{publication.id}}" hx-swap="outerHTML">
-            {{ tabbed_display_tab(details_selector, 'funding', 'Funding Text', url_for('ui.publication_details', id=publication.id, detail_selector='funding')) }}
-            {{ tabbed_display_tab(details_selector, 'sponsors', 'Sponsors', url_for('ui.publication_details', id=publication.id, detail_selector='sponsors')) }}
-            {{ tabbed_display_tab(details_selector, 'abstract', 'Abstract', url_for('ui.publication_details', id=publication.id, detail_selector='abstract')) }}
-            {{ tabbed_display_tab(details_selector, 'keywords', 'Keywords', url_for('ui.publication_details', id=publication.id, detail_selector='keywords')) }}
-            {{ tabbed_display_tab(details_selector, 'folders', 'Folders', url_for('ui.publication_details', id=publication.id, detail_selector='folders')) }}
+
+    {% set cp = publication.best_catalog_publication %}
+
+    <div id="details_{{cp.publication_id}}" class="tabbed_display">
+
+        <div class="tabbed_display_tabs {{detail_selector}}" hx-target="#details_{{cp.publication_id}}" hx-swap="outerHTML">
+            {{ tabbed_display_tab(details_selector, 'funding', 'Funding Text', url_for('ui.publication_details', id=cp.publication_id, detail_selector='funding')) }}
+            {{ tabbed_display_tab(details_selector, 'sponsors', 'Sponsors', url_for('ui.publication_details', id=cp.publication_id, detail_selector='sponsors')) }}
+            {{ tabbed_display_tab(details_selector, 'affiliations', 'Affiliations', url_for('ui.publication_details', id=cp.publication_id, detail_selector='affiliations')) }}
+            {{ tabbed_display_tab(details_selector, 'abstract', 'Abstract', url_for('ui.publication_details', id=cp.publication_id, detail_selector='abstract')) }}
+            {{ tabbed_display_tab(details_selector, 'keywords', 'Keywords', url_for('ui.publication_details', id=cp.publication_id, detail_selector='keywords')) }}
+            {{ tabbed_display_tab(details_selector, 'folders', 'Folders', url_for('ui.publication_details', id=cp.publication_id, detail_selector='folders')) }}
         </div>
         <div class="tabbed_display_content">
             {% if details_selector == 'funding' %}
-                {{ publication.funding_text | blank_if_none | paragraphs }}
+                {{ cp.funding_text | blank_if_none | paragraphs }}
             {% elif details_selector == 'sponsors' %}
                 <ul class="list-group">
-                    {% for s in publication.sponsors %}
+                    {% for s in cp.sponsors %}
                         <li class="list-group-item {% if s.is_nihr %} list-group-item-success{% endif %}">{{ s.name }}</li>
                     {% endfor %}
                 </ul>
+            {% elif details_selector == 'affiliations' %}
+                <ul class="list-group">
+                    {% for a in cp.affiliation %}
+                        <li class="list-group-item">{{ a.name }}</li>
+                    {% endfor %}
+                </ul>
             {% elif details_selector == 'abstract' %}
-                {{publication.abstract | blank_if_none}}
+                {{cp.abstract | blank_if_none}}
             {% elif details_selector == 'keywords' %}
-                {% for k in publication.keywords | sort(attribute='keyword')%}
+                {% for k in cp.keywords | sort(attribute='keyword')%}
                     <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1">{{ k.keyword }}</a>
                 {% endfor %}
             {% elif details_selector == 'folders' %}
-                {{ _render_publication_folders(publication, folders) }}
+                {{ _render_publication_folders(cp.publication, folders) }}
             {% endif %}
         </div>
     </div>

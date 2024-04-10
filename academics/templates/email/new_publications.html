@@ -131,24 +131,24 @@
                                     <span>{{ a.full_name }}</span>
                                 {% endfor %}
                             </p>
-                            {% if p.all_academics_left_brc %}
+                            {% if p.best_catalog_publication.all_academics_left_brc %}
                                 <div class="text-danger">All authors have left the BRC</div>
                             {% endif %}
                         </div>
                     </header>
                     <dl>
-                        {% if p.journal %}
+                        {% if p.best_catalog_publication.journal %}
                             <dt>Journal</dt>
-                            <dd>{{p.journal.name | blank_if_none | title_case}} ({{p.publication_cover_date | date_format}}{{p.issue_volume}}{{p.pp}})</dd>
+                            <dd>{{p.best_catalog_publication.journal.name | blank_if_none | title_case}} ({{p.best_catalog_publication.publication_cover_date | date_format}}{{p.best_catalog_publication.issue_volume}}{{p.best_catalog_publication.pp}})</dd>
                         {% endif %}
-                        {% if p.subtype %}
+                        {% if p.best_catalog_publication.subtype %}
                             <dt>Type</dt>
-                            <dd>{{ p.subtype.description }}</dd>
+                            <dd>{{ p.best_catalog_publication.subtype.description }}</dd>
                         {% endif %}
                     </dl>
-                    {% if p.abstract | length > 0 %}
+                    {% if p.best_catalog_publication.abstract | length > 0 %}
                         <h3>Abstract</h3>
-                        {{ p.abstract | blank_if_none | paragraphs }}
+                        {{ p.best_catalog_publication.abstract | blank_if_none | paragraphs }}
                     {% endif %}
                 </div>
             </div>

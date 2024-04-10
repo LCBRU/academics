@@ -183,18 +183,6 @@ class Publication(db.Model, AuditMixin):
             ).label("is_external_collaboration")
 
     @property
-    def sponsors(self):
-        return self.best_catalog_publication.sponsors
-
-    @property
-    def keywords(self):
-        return self.best_catalog_publication.keywords
-
-    @property
-    def academics(self):
-        return self.best_catalog_publication.academics
-
-    @property
     def scopus_catalog_publication(self):
         return next((cp for cp in self.catalog_publications if cp.catalog == CATALOG_SCOPUS), None)
 
@@ -205,93 +193,6 @@ class Publication(db.Model, AuditMixin):
     @property
     def best_catalog_publication(self):
         return self.scopus_catalog_publication or self.openalex_catalog_publication or None
-
-    @property
-    def catalog(self) -> str:
-        return self.best_catalog_publication.catalog
-
-    @property
-    def catalog_identifier(self) -> str:
-        return self.best_catalog_publication.catalog_identifier
-
-    @property
-    def title(self) -> str:
-        return self.best_catalog_publication.title
-
-    @property
-    def publication_cover_date(self) -> date:
-        return self.best_catalog_publication.publication_cover_date
-
-    @property
-    def pubmed_id(self) -> str:
-        return self.best_catalog_publication.pubmed_id
-
-    @property
-    def pii(self) -> str:
-        return self.best_catalog_publication.pii
-
-    @property
-    def abstract(self) -> str:
-        return self.best_catalog_publication.abstract
-
-    @property
-    def volume(self) -> str:
-        return self.best_catalog_publication.volume
-
-    @property
-    def issue(self) -> str:
-        return self.best_catalog_publication.issue
-
-    @property
-    def pages(self) -> str:
-        return self.best_catalog_publication.pages
-
-    @property
-    def funding_text(self) -> str:
-        return self.best_catalog_publication.funding_text
-
-    @property
-    def is_open_access(self) -> bool:
-        return self.best_catalog_publication.is_open_access
-
-    @property
-    def cited_by_count(self) -> int:
-        return self.best_catalog_publication.cited_by_count
-
-    @property
-    def href(self) -> str:
-        return self.best_catalog_publication.href
-
-    @property
-    def journal_id(self) -> int:
-        return self.best_catalog_publication.journal_id
-
-    @property
-    def journal(self) -> Journal:
-        return self.best_catalog_publication.journal
-
-    @property
-    def subtype_id(self) -> int:
-        return self.best_catalog_publication.subtype_id
-
-    @property
-    def subtype(self) -> Subtype:
-        return self.best_catalog_publication.subtype
-
-    @property
-    def authors(self) -> Subtype:
-        return self.best_catalog_publication.authors
-
-    @property
-    def issue_volume(self):
-        return '/'.join(filter(None, [self.issue, self.volume]))
-
-    @property
-    def pp(self):
-        if self.pages:
-            return f'pp{self.pages}'
-        else:
-            return ''
 
     def set_vancouver(self):
         if not self.best_catalog_publication:
@@ -323,16 +224,8 @@ class Publication(db.Model, AuditMixin):
         self.vancouver = '. '.join(parts)
 
     @property
-    def folder_ids(self):
-        return ','.join([str(f.id) for f in self.folders])
-
-    @property
     def is_nihr_acknowledged(self):
         return any([s.is_nihr for s in self.sponsors])
-
-    @property
-    def all_academics_left_brc(self):
-        return self.best_catalog_publication.all_academics_left_brc
 
 
 class CatalogPublication(db.Model, AuditMixin):
