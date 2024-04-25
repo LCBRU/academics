@@ -33,12 +33,10 @@
         {% for a in academics.items %}
             <li>
                 <header>
-                    <div class="orcid academic_orcid">
-                        {% if a.orcid | blank_if_none | length > 0 %}
-                            <a href="{{a.orcid_link}}" target="_blank">{{a.orcid}}</a>
-                        {% else %}
-                            <a href="https://orcid.org/register" target="_blank">Register</a>
-                        {% endif %}
+                    <div class="academic_ids">
+                        <a class="academic_orcid {% if not a.orcid %}disabled{% endif %}" href="{{a.orcid_link}}" target="_blank">ORCID</a>
+                        <a class="academic_google_scholar {% if not a.google_scholar_id %}disabled{% endif %}" href="{{a.google_scholar_link}}" target="_blank">Google Scholar</a>
+                        <a class="academic_pubmed {% if not a.orcid %}disabled{% endif %}" href="{{a.pubmed_link}}" target="_blank">Pubmed</a>
                     </div>
                     <div class="academic_name">
                         <h3 class="main_title">{{a.full_name}}</h3>

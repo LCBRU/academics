@@ -1,8 +1,7 @@
-from flask import render_template, render_template_string, request, redirect
-from lbrc_flask.forms import FlashingForm, SearchForm, boolean_coerce
+from flask import render_template, render_template_string, request
+from lbrc_flask.forms import SearchForm, boolean_coerce
 from lbrc_flask.database import db
 from sqlalchemy import func, select
-from wtforms.fields.simple import BooleanField
 from wtforms import SelectField
 from academics.catalogs.service import updating
 from academics.model.publication import Journal
@@ -34,7 +33,7 @@ def journals():
     )
 
     return render_template(
-        "ui/journals.html",
+        "ui/journal/index.html",
         journals=journals,
         search_form=search_form,
         updating=updating(),
@@ -65,8 +64,7 @@ def journal_update_preprint(id, is_preprint):
     db.session.commit()
 
     template = '''
-        {% from "ui/_journal_details.html" import render_journal %}
-
+        {% from "ui/journal/_details.html" import render_journal %}
         {{ render_journal(journal, current_user) }}
     '''
 

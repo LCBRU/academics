@@ -39,6 +39,8 @@ class AddAuthorForm(FlashingForm):
 class AcademicEditForm(FlashingForm):
     first_name = StringField("First Name", validators=[Length(max=500)])
     last_name = StringField("Last Name", validators=[Length(max=500)])
+    initials = StringField("Initials", validators=[Length(max=255)])
+    google_scholar_id = StringField("Google Scholar ID", validators=[Length(max=255)])
     orcid = StringField("ORCID", validators=[Length(max=255)])
     themes = SelectMultipleField('Theme', coerce=int)
     has_left_brc = BooleanField('Has Left BRC', default=False)
@@ -80,6 +82,8 @@ def academic_edit(id):
     form = AcademicEditForm(data={
         'first_name': academic.first_name,
         'last_name': academic.last_name,
+        'initials': academic.initials,
+        'google_scholar_id': academic.google_scholar_id,
         'orcid': academic.orcid,
         'has_left_brc': academic.has_left_brc,
         'themes': [t.id for t in academic.themes]
@@ -88,6 +92,8 @@ def academic_edit(id):
     if form.validate_on_submit():
         academic.first_name = form.first_name.data
         academic.last_name = form.last_name.data
+        academic.initials = form.initials.data
+        academic.google_scholar_id = form.google_scholar_id.data
         academic.orcid = form.orcid.data
         academic.themes = [db.session.get(Theme, t) for t in form.themes.data]
         academic.has_left_brc = form.has_left_brc.data

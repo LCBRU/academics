@@ -1,3 +1,4 @@
+import re
 from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint, distinct, func, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -83,7 +84,9 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(255), default='')
     last_name = db.Column(db.String(255), default='')
+    initials = db.Column(db.String(255), default='')
     orcid = db.Column(db.String(255))
+    google_scholar_id = db.Column(db.String(255))
     updating = db.Column(db.Boolean, default=False)
     initialised = db.Column(db.Boolean, default=False)
     error = db.Column(db.Boolean, default=False)
@@ -104,15 +107,40 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         if self.best_source.last_name:
             self.first_name = self.best_source.first_name or ''
             self.last_name = self.best_source.last_name or ''
+            self.initials = self.best_source.initials or ''
         elif self.best_source.display_name:
             parts = self.best_source.display_name.strip().rsplit(maxsplit=1)
             self.first_name = parts[0] or ''
             self.last_name = parts[-1] or ''
+            self.initials = ''
 
     @property
     def orcid_link(self):
         if self.orcid:
             return f'https://orcid.org/{self.orcid}'
+        else:
+            return "https://orcid.org/register"
+        
+    @property
+    def google_scholar_link(self):
+        if self.google_scholar_id:
+            return f'https://scholar.google.com/citations?user={self.google_scholar_id}'
+        else:
+            return "https://scholar.google.com/intl/en/scholar/citations.html"
+        
+    @property
+    def pubmed_link(self):
+        if self.orcid:
+            return f'https://pubmed.ncbi.nlm.nih.gov/?term=orcid+{self.orcid}[auid]'
+        else:
+            regex = re.compile('[^a-zA-Z ]')
+            name = ' '.join(filter(None, [
+                regex.sub('', self.last_name or ''),
+                regex.sub('', self.initials or ''),
+            ]))
+
+            return f"https://pubmed.ncbi.nlm.nih.gov/?term={name}[au]"
+             
         
     @property
     def best_source(self):

@@ -64,7 +64,7 @@ def publications():
     ))
 
     return render_template(
-        "ui/publications.html",
+        "ui/publication/index.html",
         search_form=search_form,
         publication_folder_form=PublicationFolderForm(),
         publications=publications,
@@ -95,7 +95,7 @@ def validation(page=1):
     )
 
     return render_template(
-        "ui/validation.html",
+        "ui/publication/validation.html",
         publications=publications,
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
@@ -118,7 +118,7 @@ def publication_folders():
     ))
 
     return render_template(
-        "ui/publication_folders.html",
+        "ui/publication/folders.html",
         publication=publication,
         folders=folder_query.all(),
     )
@@ -250,7 +250,7 @@ def publication_export_pdf():
     publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
 
     return pdf_download(
-        'ui/publications_pdf.html',
+        'ui/publication/pdf.html',
         title='Academics Publications',
         publications=publications,
         parameters=parameters,
@@ -289,7 +289,7 @@ def publication_authors(id, author_selector):
         abort(404)
 
     template = '''
-        {% from "ui/_publication_details.html" import render_publication_authors %}
+        {% from "ui/publication/_details.html" import render_publication_authors %}
 
         {{ render_publication_authors(publication, author_selector) }}
     '''
@@ -305,7 +305,7 @@ def publication_details(id, detail_selector):
     publication = db.get_or_404(Publication, id)
 
     template = '''
-        {% from "ui/_publication_details.html" import render_publication_details %}
+        {% from "ui/publication/_details.html" import render_publication_details %}
 
         {{ render_publication_details(publication, detail_selector, folders) }}
     '''
@@ -387,7 +387,7 @@ def request_publication_bar(publication_id):
         abort(404)
 
     template = '''
-        {% from "ui/_publication_details.html" import render_publication_bar %}
+        {% from "ui/publication/_details.html" import render_publication_bar %}
 
         {{ render_publication_bar(publication, current_user, nihr_acknowledgements) }}
     '''

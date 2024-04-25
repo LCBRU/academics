@@ -34,7 +34,7 @@ def folders():
     )
 
     return render_template(
-        "ui/folders.html",
+        "ui/folder/index.html",
         search_form=search_form,
         folders=folders,
         users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
@@ -151,7 +151,7 @@ def folder_users():
     folder = db.get_or_404(Folder, request.json.get('id'))
 
     resp = render_template(
-        "ui/folder_users.html",
+        "ui/folder/users.html",
         folder=folder,
         users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
     )

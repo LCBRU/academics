@@ -135,6 +135,10 @@ dl.publication_details > div {
     text-align: center;
 }
 
+.source_table td {
+    vertical-align: top;
+}
+
 .preprint {
     --_background_color: var(--color-preprint);
     --_forground_color: var(--color-black);
@@ -220,15 +224,58 @@ dl.publication_details > div {
     font-weight: bold;
 }
 
+.academic_orcid {
+    background-image: url('../img/ORCID_logo.svg');
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: auto 1.5rem;
+    font-size: 0;
+    height: 1.5rem;
+    width: 4.5rem;
+}
+
+.academic_orcid.disabled {
+    background-image: url('../img/ORCID_logo_disabled.svg');
+}
+
+.academic_google_scholar {
+    background-image: url('../img/Google_Scholar_logo.svg');
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: auto 1.5rem;
+    font-size: 0;
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.academic_google_scholar.disabled {
+    background-image: url('../img/Google_Scholar_logo_disabled.svg');
+}
+
+.academic_pubmed {
+    background-image: url('../img/US-NLM-PubMed-Logo.svg');
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: auto 1.5rem;
+    font-size: 0;
+    height: 1.5rem;
+    width: 4.5rem;
+}
+
+.academic_pubmed.disabled {
+    background-image: url('../img/US-NLM-PubMed-Logo_disabled.svg');
+}
+
 .academic_name {
     text-align: center;
     flex-grow: 1;
 }
 
-.academic_orcid {
+.academic_ids {
     flex-basis: 100px;
     flex-grow: 1;
-    background-position: top left;
+    display: flex;
+    gap: 1rem;
 }
 
 .academic_buttons {
