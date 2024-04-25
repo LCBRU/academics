@@ -131,7 +131,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     @property
     def pubmed_link(self):
         if self.orcid:
-            return f'https://pubmed.ncbi.nlm.nih.gov/?term=orcid+{self.orcid}[auid]'
+            return f'https://pubmed.ncbi.nlm.nih.gov/?term=orcid {self.orcid}[auid]'
         else:
             regex = re.compile('[^a-zA-Z ]')
             name = ' '.join(filter(None, [
