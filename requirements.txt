@@ -14,7 +14,7 @@ arrow==1.2.3
     # via lbrc-flask
 async-timeout==4.0.2
     # via redis
-attrs==22.2.0
+attrs==23.2.0
     # via jsonschema
 bcrypt==4.0.1
     # via
@@ -228,7 +228,7 @@ tinycss2==1.2.1
     #   cairosvg
     #   cssselect2
     #   weasyprint
-typing-extensions==4.5.0
+typing-extensions==4.11.0
     # via
     #   alembic
     #   sqlalchemy
