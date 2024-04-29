@@ -252,7 +252,7 @@ def refresh_publications():
 
             p.set_vancouver()
 
-            if p.journal and p.journal.preprint and p.preprint is None:
+            if p.best_catalog_publication.journal and p.best_catalog_publication.journal.preprint and p.preprint is None:
                 p.preprint = True
 
             if p.is_nihr_acknowledged and p.auto_nihr_acknowledgement is None and p.nihr_acknowledgement is None:
