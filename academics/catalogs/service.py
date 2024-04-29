@@ -4,17 +4,16 @@ from pathlib import Path
 from flask import current_app
 from sqlalchemy import delete, or_, select, update
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
-from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _institutions, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
+from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
+from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _institutions, _journal_xref_for_publication_data_list, _keyword_xref_for_publication_data_list, _publication_xref_for_publication_data_list, _source_xref_for_author_data_list, _source_xref_for_publication_data_list, _sponsor_xref_for_publication_data_list, _subtype_xref_for_publication_data_list
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source, catalog_publications_sources_affiliations
 from academics.model.catalog import CATALOG_SCIVAL
-from academics.model.publication import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, CatalogPublication, NihrAcknowledgement, Publication, Subtype
+from academics.model.publication import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, CatalogPublication, NihrAcknowledgement, Publication
 from academics.model.folder import folders__publications
 from academics.model.institutions import Institution
 from lbrc_flask.celery import celery
 from celery.signals import after_setup_logger
-from academics.services.publication_searching import ValidationSearchForm, publication_search_query
-from .scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception

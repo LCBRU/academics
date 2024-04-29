@@ -208,18 +208,18 @@ class Publication(db.Model, AuditMixin):
         parts = []
 
         parts.append(author_list)
-        parts.append(self.title)
+        parts.append(self.best_catalog_publication.title)
         
-        if self.journal:
-            parts.append(self.journal.name)
+        if self.best_catalog_publication.journal:
+            parts.append(self.best_catalog_publication.journal.name)
         
         pp = ''
-        if self.pages:
-            pp = f'pp{self.pages}'
+        if self.best_catalog_publication.pages:
+            pp = f'pp{self.best_catalog_publication.pages}'
 
-        issue_volume = '/'.join(filter(None, [self.issue, self.volume]))
+        issue_volume = '/'.join(filter(None, [self.best_catalog_publication.issue, self.best_catalog_publication.volume]))
 
-        parts.append(f'({self.publication_cover_date:%B %y}{issue_volume}{pp})')
+        parts.append(f'({self.best_catalog_publication.publication_cover_date:%B %y}{issue_volume}{pp})')
 
         self.vancouver = '. '.join(parts)
 
