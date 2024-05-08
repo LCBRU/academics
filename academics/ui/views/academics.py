@@ -24,6 +24,10 @@ def _get_academic_choices():
     return [(0, 'New Academic')] + [(a.id, a.full_name) for a in academics]
 
 
+class AddAuthorSearchForm(SearchForm):
+    show_non_local = BooleanField('Show Non-Local', default=False)
+
+
 class AddAuthorForm(FlashingForm):
     catalog_identifier = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
@@ -126,12 +130,15 @@ def trigger_refresh():
 @blueprint.route("/add_author_search")
 @roles_accepted('editor')
 def add_author_search():
-    search_form = SearchForm(formdata=request.args)
+    search_form = AddAuthorSearchForm(formdata=request.args)
 
     authors = []
 
     if search_form.search.data:
-        authors = scopus_author_search(search_form.search.data)
+        authors = scopus_author_search(
+            search_string=search_form.search.data,
+            search_non_local=search_form.show_non_local.data,
+        )
 
     return render_template(
         "ui/academic/add_search.html",

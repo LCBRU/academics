@@ -250,7 +250,7 @@ def scopus_similar_authors(academic: Academic):
     return scopus_author_search(academic.last_name)
 
 
-def scopus_author_search(search_string):
+def scopus_author_search(search_string, search_non_local=False):
 
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')
@@ -263,7 +263,11 @@ def scopus_author_search(search_string):
     else:
         q = f'AUTHLASTNAME({search_string})'
 
-    auth_srch = ElsSearch(f'{q} AND (affil(leicester) OR affil(loughborough) OR affil(northampton))','author')
+    if search_non_local:
+        auth_srch = ElsSearch(f'{q}','author')
+    else:
+        auth_srch = ElsSearch(f'{q} AND (affil(leicester) OR affil(loughborough) OR affil(northampton))','author')
+
     auth_srch.execute(_client(), get_all=True)
 
     existing_catalog_identifiers = set(db.session.execute(

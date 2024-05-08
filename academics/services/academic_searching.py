@@ -1,5 +1,5 @@
 from lbrc_flask.forms import SearchForm
-from sqlalchemy import alias, select
+from sqlalchemy import select
 from wtforms import SelectField
 from academics.model.academic import Academic
 from academics.model.theme import Theme
