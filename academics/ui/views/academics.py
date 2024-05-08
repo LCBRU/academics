@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for
+from flask import flash, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from sqlalchemy import delete
@@ -134,11 +134,14 @@ def add_author_search():
 
     authors = []
 
-    if search_form.search.data:
-        authors = scopus_author_search(
-            search_string=search_form.search.data,
-            search_non_local=search_form.show_non_local.data,
-        )
+    try:
+        if search_form.search.data:
+            authors = scopus_author_search(
+                search_string=search_form.search.data,
+                search_non_local=search_form.show_non_local.data,
+            )
+    except:
+        flash('Search failed.  Please tighten your search criteria.')
 
     return render_template(
         "ui/academic/add_search.html",
