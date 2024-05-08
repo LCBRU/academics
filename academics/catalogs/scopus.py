@@ -261,7 +261,8 @@ def scopus_author_search(search_string, search_non_local=False):
     if re_orcid.match(search_string):
         q = f'ORCID({search_string})'
     else:
-        q = f'AUTHLASTNAME({search_string})'
+        q = ' AND '.join({w for w in search_string.split()})
+        # q = f'AUTHLASTNAME({search_string})'
 
     if search_non_local:
         auth_srch = ElsSearch(f'{q}','author')
