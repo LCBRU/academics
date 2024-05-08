@@ -388,7 +388,7 @@ for pd in [
         title=pd['title'],
         publication_cover_date=pd['publication_cover_date'],
         subtype_id=1,
-        publication=Publication(),
+        publication=Publication(doi=pd['doi']),
         doi=pd['doi'],
         abstract='',
         volume='',

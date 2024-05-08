@@ -293,11 +293,6 @@ def remove_publication_without_catalog_entry():
     logging.debug('ended')
 
 
-def _update_publication(publication: Publication):
-    logging.debug(publication.id)
-
-
-
 def refresh_catalog_publications():
     logging.debug('started')
 
