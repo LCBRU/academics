@@ -262,7 +262,6 @@ def scopus_author_search(search_string, search_non_local=False):
         q = f'ORCID({search_string})'
     elif search_string.isnumeric():
         q = f'AU-ID({search_string})'
-        search_non_local = True
     else:
         q = ' AND '.join({f'(AUTHLASTNAME({w}) OR AUTHFIRST({w}))' for w in search_string.split()})
         # q = f'AUTHLASTNAME({search_string})'
