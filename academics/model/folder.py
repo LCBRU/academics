@@ -14,13 +14,6 @@ folders__shared_users = db.Table(
 )
 
 
-folders__publications = db.Table(
-    'folders__publications',
-    db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
-    db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
-)
-
-
 class Folder(db.Model):
     __table_args__ = (
         UniqueConstraint("name", "owner_id", name='ux__folder__name__owner_id'),
@@ -45,7 +38,7 @@ class FolderDoi(db.Model):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    folder_id = mapped_column(ForeignKey(Folder.id), nullable=False)
+    folder_id = mapped_column(ForeignKey(Folder.id), nullable=False, index=True)
     folder: Mapped[Folder] = relationship(
         lazy="selectin",
         foreign_keys=[folder_id],
@@ -55,7 +48,7 @@ class FolderDoi(db.Model):
         )
     )
     doi: Mapped[str] = mapped_column(Unicode(1000), nullable=False)
-    publications: Mapped[Folder] = relationship(
+    publication: Mapped[Folder] = relationship(
         Publication,
         foreign_keys=[doi],
         primaryjoin='FolderDoi.doi == Publication.doi',

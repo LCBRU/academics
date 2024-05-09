@@ -10,7 +10,7 @@ from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source, catalog_publications_sources_affiliations
 from academics.model.catalog import CATALOG_SCIVAL
 from academics.model.publication import CATALOG_OPEN_ALEX, CATALOG_SCOPUS, CatalogPublication, NihrAcknowledgement, Publication
-from academics.model.folder import folders__publications
+from academics.model.folder import FolderDoi
 from academics.model.institutions import Institution
 from lbrc_flask.celery import celery
 from celery.signals import after_setup_logger
@@ -279,8 +279,8 @@ def remove_publication_without_catalog_entry():
     ).scalars().all()
 
     db.session.execute(
-        delete(folders__publications)
-        .where(folders__publications.c.publication_id.in_(pubs_without_catalog))
+        delete(FolderDoi)
+        .where(FolderDoi.publication.id.in_(pubs_without_catalog))
     )
 
     db.session.execute(
