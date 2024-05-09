@@ -1,9 +1,10 @@
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey, Index, Unicode, UniqueConstraint
 from sqlalchemy.orm import backref
 from lbrc_flask.database import db
 
 from academics.model.publication import Publication
 from academics.model.security import User
+from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 
 
 folders__shared_users = db.Table(
@@ -47,3 +48,18 @@ class Folder(db.Model):
         return Publication.query.filter(Publication.folders.any(Folder.id == self.id)).count()
 
 
+class FolderDoi(db.Model):
+    __table_args__ = (
+        UniqueConstraint("folder_id", "doi", name='ux__folder_doi__folder_id__doi'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    folder_id = mapped_column(ForeignKey(Folder.id), nullable=False)
+    folder: Mapped[Folder] = relationship(lazy="selectin", foreign_keys=[folder_id])
+    doi: Mapped[str] = mapped_column(Unicode(1000), nullable=False)
+    publications: Mapped[Folder] = relationship(
+        Publication,
+        foreign_keys=[doi],
+        primaryjoin='FolderDoi.doi == Publication.dio',
+        lazy='selectin',
+    )
