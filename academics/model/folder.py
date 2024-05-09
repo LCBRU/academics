@@ -60,6 +60,6 @@ class FolderDoi(db.Model):
     publications: Mapped[Folder] = relationship(
         Publication,
         foreign_keys=[doi],
-        primaryjoin='FolderDoi.doi == Publication.dio',
+        primaryjoin='FolderDoi.doi == Publication.doi',
         lazy='selectin',
     )
