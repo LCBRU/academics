@@ -228,6 +228,10 @@ def publication_export_pdf():
     q = q.options(
         selectinload(Publication.folders)
     )
+    q = q.options(
+        selectinload(Publication.folder_dois)
+        .selectinload(FolderDoi.folder)
+    )
 
     parameters = []
 
