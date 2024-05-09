@@ -32,15 +32,6 @@ class Folder(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete")) 
 
-    publicationses = db.relationship(
-        "Publication",
-        secondary=folders__publications,
-        collection_class=set,
-        backref=backref(
-            "folders",
-            collection_class=set,
-        )
-    )
     shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set)
 
     @property
@@ -55,11 +46,22 @@ class FolderDoi(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     folder_id = mapped_column(ForeignKey(Folder.id), nullable=False)
-    folder: Mapped[Folder] = relationship(lazy="selectin", foreign_keys=[folder_id])
+    folder: Mapped[Folder] = relationship(
+        lazy="selectin",
+        foreign_keys=[folder_id],
+        backref=backref(
+            "dois",
+            collection_class=set,
+        )
+    )
     doi: Mapped[str] = mapped_column(Unicode(1000), nullable=False)
     publications: Mapped[Folder] = relationship(
         Publication,
         foreign_keys=[doi],
         primaryjoin='FolderDoi.doi == Publication.doi',
         lazy='selectin',
+        backref=backref(
+            "folder_dois",
+            collection_class=set,
+        )
     )

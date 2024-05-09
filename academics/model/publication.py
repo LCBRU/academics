@@ -10,6 +10,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.institutions import Institution
+from sqlalchemy.ext.associationproxy import association_proxy
+
 
 
 DOI_URL = 'doi.org'
@@ -130,6 +132,8 @@ class Publication(db.Model, AuditMixin):
         secondary=institutions__publications,
         collection_class=set,
     )
+
+    folders = association_proxy('folder_dois', 'folder')
 
     @hybrid_property
     def is_industrial_collaboration(self):

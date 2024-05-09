@@ -95,50 +95,6 @@ def folder_delete():
     return redirect(request.referrer)
 
 
-@blueprint.route("/folder/remove_publication", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'folder_id': {'type': 'integer'},
-        'publication_id': {'type': 'integer'},
-    },
-    "required": ["folder_id", "publication_id"]
-})
-@assert_folder_user()
-def folder_remove_publication():
-    p = db.get_or_404(Publication, request.json.get('publication_id'))
-    f = db.get_or_404(Folder, request.json.get('folder_id'))
-
-    f.publications.remove(p)
-
-    db.session.add(f)
-    db.session.commit()
-
-    return jsonify({}), 200
-
-
-@blueprint.route("/folder/add_publication", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'folder_id': {'type': 'integer'},
-        'publication_id': {'type': 'integer'},
-    },
-    "required": ["folder_id", "publication_id"]
-})
-@assert_folder_user()
-def folder_add_publication():
-    p = db.get_or_404(Publication, request.json.get('publication_id'))
-    f = db.get_or_404(Folder, request.json.get('folder_id'))
-
-    f.publications.add(p)
-
-    db.session.add(f)
-    db.session.commit()
-
-    return jsonify({}), 200
-
-
 @blueprint.route("/folder/users", methods=['POST'])
 @validate_json({
     'type': 'object',

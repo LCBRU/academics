@@ -8,7 +8,7 @@ from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from wtforms import HiddenField
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
-from academics.model.folder import Folder
+from academics.model.folder import Folder, FolderDoi
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Subtype
 from academics.model.security import User
 from academics.model.theme import Theme
@@ -41,7 +41,7 @@ def publications():
         .selectinload(Source.academic)
     )
     q = q.options(
-        selectinload(Publication.folders)
+        selectinload(Publication.folder_dois)
     )
     q = q.order_by(CatalogPublication.publication_cover_date.desc())
 
@@ -355,9 +355,15 @@ def publication_add_folder(id, folder_id):
     publication = db.get_or_404(Publication, id)
     folder = db.get_or_404(Folder, folder_id)
 
-    publication.folders.add(folder)
-    db.session.add(publication)
-    db.session.commit()
+    fd = db.session.execute(
+        select(FolderDoi)
+        .where(FolderDoi.folder_id == folder_id)
+        .where(FolderDoi.doi == publication.doi)
+    ).scalar_one_or_none()
+
+    if not fd:
+        db.session.add(FolderDoi(folder_id=folder.id, doi=publication.doi))
+        db.session.commit()
 
     return publication_details(publication.id, 'folders')
 
@@ -365,11 +371,16 @@ def publication_add_folder(id, folder_id):
 @blueprint.route("/publication/<int:id>/remove/<int:folder_id>", methods=['POST'])
 def publication_remove_folder(id, folder_id):
     publication = db.get_or_404(Publication, id)
-    folder = db.get_or_404(Folder, folder_id)
 
-    publication.folders.remove(folder)
-    db.session.add(publication)
-    db.session.commit()
+    fd = db.session.execute(
+        select(FolderDoi)
+        .where(FolderDoi.folder_id == folder_id)
+        .where(FolderDoi.doi == publication.doi)
+    ).scalar_one_or_none()
+
+    if fd:
+        db.session.delete(fd)
+        db.session.commit()
 
     return publication_details(publication.id, 'folders')
 
