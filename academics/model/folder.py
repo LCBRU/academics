@@ -40,7 +40,6 @@ class FolderDoi(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     folder_id = mapped_column(ForeignKey(Folder.id), nullable=False, index=True)
     folder: Mapped[Folder] = relationship(
-        lazy="selectin",
         foreign_keys=[folder_id],
         backref=backref(
             "dois",
@@ -52,7 +51,6 @@ class FolderDoi(db.Model):
         Publication,
         foreign_keys=[doi],
         primaryjoin='FolderDoi.doi == Publication.doi',
-        lazy='selectin',
         backref=backref(
             "folder_dois",
             collection_class=set,
