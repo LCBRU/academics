@@ -1,8 +1,15 @@
 {% extends "modal.html" %}
 {% from "lbrc_flask/form_macros.html" import render_field, render_button_bar %}
+{% import "lbrc_flask/errors.html" as errors %}
+
 
 {% block content %}
     <h2>{{ title }}</h2>
+
+    <div class="errors">
+        {{ errors.render_errors(get_flashed_messages(with_categories=true)) }}
+    </div>
+
     <form action="{{ url }}" hx-post="{{ url }}" method="POST" enctype="multipart/form-data">
         <fieldset>
             {{ form.hidden_tag() }}

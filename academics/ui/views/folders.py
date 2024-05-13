@@ -21,7 +21,7 @@ class FolderEditForm(FlashingForm):
 
 
 class UploadFolderDois(FlashingForm):
-    dois = TextAreaField('DOIs', validators=[DataRequired(), Length(max=100)])
+    dois = TextAreaField('DOIs', validators=[DataRequired()])
 
 
 @blueprint.route("/folders/")
