@@ -2,10 +2,13 @@
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
 {% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal %}
 {% from "ui/folder/_details.html" import render_folder_details with context %}
+{% from "ui/assets.html" import render_assets %}
 
 
 {% block content %}
 <section>
+    {{ render_assets() }}
+
     <div class="page-header">
         <h1>Folders</h1>
 

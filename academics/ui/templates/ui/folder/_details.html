@@ -67,7 +67,12 @@
                 <td>
                     <a href="#" hx-post="{{url_for('ui.folder_delete_doi', id=folder.id, doi=d.doi)}}"><i class="fas fa-trash"></i></a>
                 </td>
-                <td>{{d.doi}}</td>
+                <td>
+                    <a href="http://doi.org/{{ d.doi }}" class="btn btn-primary" target="_blank" title="View publication">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
+                        {{d.doi}}
+                    </a>
+                </td>
                 <td>
                     {% if d.publication %}
                         <a href="{{ url_for('ui.publications', search=d.doi) }}">{{ d.publication.vancouver }}</a>
