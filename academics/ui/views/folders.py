@@ -111,7 +111,7 @@ def folder_remove_shared_user(id, user_id):
     db.session.add(f)
     db.session.commit()
 
-    return _render_folder_users(f)
+    return folder_details(id, 'users')
 
 
 @blueprint.route("/folder/<int:id>/add_shared_user/<int:user_id>", methods=['POST'])
@@ -125,22 +125,7 @@ def folder_add_shared_user(id, user_id):
     db.session.add(f)
     db.session.commit()
 
-    return _render_folder_users(f)
-
-
-def _render_folder_users(folder):
-    template = '''
-        {% from "ui/folder/_users.html" import render_folder_users %}
-        {{ render_folder_users(folder, users, current_user) }}
-    '''
-
-    resp = render_template_string(
-        template,
-        folder=folder,
-        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
-    )
-
-    return resp
+    return folder_details(id, 'users')
 
 
 @blueprint.route("/folder/<int:id>/upload_dois", methods=['GET', 'POST'])
