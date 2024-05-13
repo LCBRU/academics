@@ -1,7 +1,7 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
 {% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal %}
-{% from "ui/folder/_users.html" import render_folder_users %}
+{% from "ui/folder/_details.html" import render_folder_details with context %}
 
 
 {% block content %}
@@ -41,6 +41,9 @@
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a href="{{ url_for('ui.publications', folder_id=f.id ) }}" title="Publications in {{ f.name }}"><i class="far fa-newspaper"></i></a>
                             </div>
+                            <div class="btn-group mr-1 mb-1" role="group">
+                                <a href="#" title="Upload Publication DOIs" hx-get="{{ url_for('ui.folder_upload_dois', id=f.id ) }}" hx-target="body" hx-swap="beforeend"><i class="fas fa-upload"></i></a>
+                            </div>
                             {% if f.owner == current_user %}
                                 <div class="btn-group mr-1 mb-1" role="group">
                                     <a
@@ -71,7 +74,7 @@
                     <h4><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">{{f.publication_count}} publication(s)</a></h4>
                 </div>
                 <div id="folder_users_{{f.id}}">
-                    {{ render_folder_users(f, users, current_user) }}
+                    {{ render_folder_details(f, 'users', users) }}
                 </div>
             </li>
         {% endfor %}
@@ -82,53 +85,5 @@
 
 {{ render_edit_modal('editFolderModal', 'Folder Details', url_for('ui.folder_save', prev=request.full_path), edit_folder_form) }}
 {{ render_delete_modal('deleteModal', 'Delete Folder', url_for('ui.folder_delete', prev=request.full_path), confirm_form) }}
-
-{% endblock %}
-
-{% block js %}
-
-<script>
-    async function folder_remove_shared_user() {
-        var button = $(window.event.target);
-
-        let response = await fetch("{{ url_for('ui.folder_remove_shared_user') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                folder_id: button.data('folder-id'),
-                user_id: button.data('user-id'),
-            }),
-        })
-
-        await replace_folder_users(button.data('folder-id'));
-    }
-
-    async function folder_add_shared_user() {
-        var button = $(window.event.target);
-
-        let response = await fetch("{{ url_for('ui.folder_add_shared_user') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                folder_id: button.data('folder-id'),
-                user_id: button.data('user-id'),
-            }),
-        })
-
-        await replace_folder_users(button.data('folder-id'));
-    }
-
-    async function replace_folder_users(folder_id) {
-        let response = await fetch("{{ url_for('ui.folder_users') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                id: folder_id,
-            }),
-        })
-        let data = await response.text();
-        document.getElementById(`folder_users_${folder_id}`).innerHTML = data;
-    }
-</script>
 
 {% endblock %}

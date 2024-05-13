@@ -381,3 +381,80 @@ dl.publication_details > div {
     --_img: url(../img/Closed_Access_logo_white.png);
     color: #848484;
 }
+
+/***** MODAL DIALOG ****/
+#modal {
+	/* Underlay covers entire screen. */
+	position: fixed;
+    inset: 0;
+	background-color:rgba(0,0,0,0.5);
+	z-index: 1000;
+
+    display: flex;
+    flex-direction:column;
+	align-items:center;
+
+	/* Animate when opening */
+	animation-name: fadeIn;
+	animation-duration: 150ms;
+	animation-timing-function: ease;
+}
+
+#modal > .modal-underlay {
+	/* underlay takes up the entire viewport. This is only
+	required if you want to click to dismiss the popup */
+	position: absolute;
+	z-index: -1;
+    inset: 0;
+}
+
+#modal > .modal-content {
+	max-width: 60em;
+    margin: auto;
+
+	/* Display properties for visible dialog*/
+	border: solid 1px #999;
+	border-radius: 8px;
+	box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.3);
+	background-color: white;
+	padding: 20px;
+
+	/* Animate when opening */
+	animation-name:zoomIn;
+	animation-duration:150ms;
+	animation-timing-function: ease;
+}
+
+#modal.closing {
+	/* Animate when closing */
+	animation-name: fadeOut;
+	animation-duration:150ms;
+	animation-timing-function: ease;
+}
+
+#modal.closing > .modal-content {
+	/* Animate when closing */
+	animation-name: zoomOut;
+	animation-duration:150ms;
+	animation-timing-function: ease;
+}
+
+@keyframes fadeIn {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+} 
+
+@keyframes fadeOut {
+	0% {opacity: 1;}
+	100% {opacity: 0;}
+} 
+
+@keyframes zoomIn {
+	0% {transform: scale(0.9);}
+	100% {transform: scale(1);}
+} 
+
+@keyframes zoomOut {
+	0% {transform: scale(1);}
+	100% {transform: scale(0.9);}
+} 

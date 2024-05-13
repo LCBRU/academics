@@ -1,0 +1,79 @@
+{% macro render_folder_details(folder, details_selector, users) %}
+
+    <div id="details_{{folder.id}}" class="tabbed_display" hx-target="#details_{{folder.id}}" hx-swap="outerHTML">
+
+        <div class="tabbed_display_tabs {{detail_selector}}">
+            {{ tabbed_display_tab(details_selector, 'users', 'Users', url_for('ui.folder_details', id=folder.id, detail_selector='users')) }}
+            {{ tabbed_display_tab(details_selector, 'dois', 'DOIs', url_for('ui.folder_details', id=folder.id, detail_selector='dois')) }}
+        </div>
+        <div class="tabbed_display_content">
+            {% if details_selector == 'users' %}
+                {{ render_folder_users(folder, users) }}
+            {% elif details_selector == 'dois' %}
+                {{ render_folder_dois(folder) }}
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
+
+{% macro render_folder_users(folder, users) %}
+    <div id="users_{{folder.id}}">
+        {% if users | length > 0 and folder.owner == current_user %}
+            <h5>Shared With</h5>
+            {% for u in folder.shared_users | sort(attribute='full_name')%}
+                <div class="btn-group mr-1 mb-1" role="group">
+                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-user"></i> {{ u.full_name }}</button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                        <a class="dropdown-item" href="#" hx-post="{{url_for('ui.folder_remove_shared_user', id=folder.id, user_id=u.id)}}">Remove</a>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if users | reject('in', folder.shared_users) | list | length > 0 %}
+                <div class="btn-group mr-1 mb-1" role="group">
+                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-user-plus"></i></button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                        {% for u in users | reject('in', folder.shared_users) | sort(attribute='full_name') %}
+                            <a class="dropdown-item" href="#" hx-post="{{url_for('ui.folder_add_shared_user', id=folder.id, user_id=u.id)}}">Share with '{{u.full_name}}'</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endmacro %}
+
+
+{% macro render_folder_dois(folder) %}
+    <table id="dois_{{folder.id}}" class="table table-sm">
+        <thead>
+            <tr>
+                <td></td>
+                <td>DOI</td>
+                <td>Publication</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for d in folder.dois | sort(attribute='doi')%}
+            <tr class="{%if not d.publication %}table-warning{%endif%}">
+                <td>
+                    <a href="#" hx-post="{{url_for('ui.folder_delete_doi', id=folder.id, doi=d.doi)}}"><i class="fas fa-trash"></i></a>
+                </td>
+                <td>{{d.doi}}</td>
+                <td>
+                    {% if d.publication %}
+                        <a href="{{ url_for('ui.publications', search=d.doi) }}">{{ d.publication.vancouver }}</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+{% endmacro %}
+
+
+{% macro tabbed_display_tab(selector, this_selector, name, url) %}
+    <a class="{% if selector == this_selector %}selected{% endif %}"
+        href="#" hx-get="{{ url }}">{{name}}</a>
+{% endmacro %}

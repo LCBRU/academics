@@ -1,22 +1,27 @@
 from os import abort
-from flask import jsonify, redirect, render_template, request
+import re
+from flask import redirect, render_template, render_template_string, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from sqlalchemy import or_
-from academics.model.folder import Folder
-from academics.model.publication import Publication
+from sqlalchemy import or_, select
+from academics.model.folder import Folder, FolderDoi
 from academics.model.security import User
 from academics.ui.views.decorators import assert_folder_user
 from .. import blueprint
-from wtforms import HiddenField, StringField
+from wtforms import HiddenField, StringField, TextAreaField
 from lbrc_flask.database import db
-from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id, system_user_id
+from wtforms.validators import Length, DataRequired
+from lbrc_flask.response import refresh_response
 
 
 class FolderEditForm(FlashingForm):
     id = HiddenField('id')
     name = StringField('Name')
+
+
+class UploadFolderDois(FlashingForm):
+    dois = TextAreaField('DOIs', validators=[DataRequired(), Length(max=100)])
 
 
 @blueprint.route("/folders/")
@@ -95,19 +100,42 @@ def folder_delete():
     return redirect(request.referrer)
 
 
-@blueprint.route("/folder/users", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'integer'},
-    },
-    "required": ["id"]
-})
-def folder_users():
-    folder = db.get_or_404(Folder, request.json.get('id'))
+@blueprint.route("/folder/<int:id>/remove_shared_user/<int:user_id>", methods=['POST'])
+@assert_folder_user()
+def folder_remove_shared_user(id, user_id):
+    u = db.get_or_404(User, user_id)
+    f = db.get_or_404(Folder, id)
 
-    resp = render_template(
-        "ui/folder/users.html",
+    f.shared_users.remove(u)
+
+    db.session.add(f)
+    db.session.commit()
+
+    return _render_folder_users(f)
+
+
+@blueprint.route("/folder/<int:id>/add_shared_user/<int:user_id>", methods=['POST'])
+@assert_folder_user()
+def folder_add_shared_user(id, user_id):
+    u = db.get_or_404(User, user_id)
+    f = db.get_or_404(Folder, id)
+
+    f.shared_users.add(u)
+
+    db.session.add(f)
+    db.session.commit()
+
+    return _render_folder_users(f)
+
+
+def _render_folder_users(folder):
+    template = '''
+        {% from "ui/folder/_users.html" import render_folder_users %}
+        {{ render_folder_users(folder, users, current_user) }}
+    '''
+
+    resp = render_template_string(
+        template,
         folder=folder,
         users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
     )
@@ -115,45 +143,79 @@ def folder_users():
     return resp
 
 
-@blueprint.route("/folder/remove_shared_user", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'folder_id': {'type': 'integer'},
-        'user_id': {'type': 'integer'},
-    },
-    "required": ["folder_id", "user_id"]
-})
+@blueprint.route("/folder/<int:id>/upload_dois", methods=['GET', 'POST'])
 @assert_folder_user()
-def folder_remove_shared_user():
-    u = db.get_or_404(User, request.json.get('user_id'))
-    f = db.get_or_404(Folder, request.json.get('folder_id'))
+def folder_upload_dois(id):
+    form = UploadFolderDois()
 
-    f.shared_users.remove(u)
+    if form.validate_on_submit():
+        for doi in filter(None, re.split(',|\s', form.dois.data)):
+            doi = doi.strip('.:')
+            add_doi_to_folder(id, doi)
 
-    db.session.add(f)
-    db.session.commit()
+        return refresh_response()
 
-    return jsonify({}), 205
+    return render_template(
+        "form_modal.html",
+        title="Upload Folder DOIs",
+        form=form,
+        url=url_for('ui.folder_upload_dois', id=id),
+    )
 
 
-@blueprint.route("/folder/add_shared_user", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'folder_id': {'type': 'integer'},
-        'user_id': {'type': 'integer'},
-    },
-    "required": ["folder_id", "user_id"]
-})
-@assert_folder_user()
-def folder_add_shared_user():
-    u = db.get_or_404(User, request.json.get('user_id'))
-    f = db.get_or_404(Folder, request.json.get('folder_id'))
+@blueprint.route("/folder/<int:id>/details/<string:detail_selector>")
+def folder_details(id, detail_selector):
+    folder = db.get_or_404(Folder, id)
 
-    f.shared_users.add(u)
+    template = '''
+        {% from "ui/folder/_details.html" import render_folder_details with context %}
 
-    db.session.add(f)
-    db.session.commit()
+        {{ render_folder_details(folder, detail_selector, users) }}
+    '''
 
-    return jsonify({}), 205
+    folder_query = Folder.query
+
+    folder_query = folder_query.filter(or_(
+        Folder.owner_id == current_user_id(),
+        Folder.shared_users.any(User.id == current_user_id()),
+    ))
+
+    return render_template_string(
+        template,
+        folder=folder,
+        detail_selector=detail_selector,
+        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
+    )
+
+@blueprint.route("/folder/<int:id>/delete_doi/<string:doi>", methods=['POST'])
+def folder_delete_doi(id, doi):
+    remove_doi_from_folder(id, doi)
+
+    return folder_details(id, 'dois')
+
+
+def add_doi_to_folder(folder_id, doi):
+    fd = db.session.execute(
+        select(FolderDoi)
+        .where(FolderDoi.folder_id == folder_id)
+        .where(FolderDoi.doi == doi)
+    ).scalar_one_or_none()
+
+    if not fd:
+        db.session.add(FolderDoi(
+            folder_id=folder_id,
+            doi=doi,
+        ))
+        db.session.commit()
+
+
+def remove_doi_from_folder(folder_id, doi):
+    fd = db.session.execute(
+        select(FolderDoi)
+        .where(FolderDoi.folder_id == folder_id)
+        .where(FolderDoi.doi == doi)
+    ).scalar_one_or_none()
+
+    if fd:
+        db.session.delete(fd)
+        db.session.commit()

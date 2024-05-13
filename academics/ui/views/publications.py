@@ -15,6 +15,8 @@ from academics.model.theme import Theme
 from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
+
+from academics.ui.views.folders import add_doi_to_folder, remove_doi_from_folder
 from .. import blueprint
 
 
@@ -356,15 +358,7 @@ def publication_add_folder(id, folder_id):
     publication = db.get_or_404(Publication, id)
     folder = db.get_or_404(Folder, folder_id)
 
-    fd = db.session.execute(
-        select(FolderDoi)
-        .where(FolderDoi.folder_id == folder_id)
-        .where(FolderDoi.doi == publication.doi)
-    ).scalar_one_or_none()
-
-    if not fd:
-        db.session.add(FolderDoi(folder_id=folder.id, doi=publication.doi))
-        db.session.commit()
+    add_doi_to_folder(folder_id, publication.doi)
 
     return publication_details(publication.id, 'folders')
 
@@ -373,15 +367,7 @@ def publication_add_folder(id, folder_id):
 def publication_remove_folder(id, folder_id):
     publication = db.get_or_404(Publication, id)
 
-    fd = db.session.execute(
-        select(FolderDoi)
-        .where(FolderDoi.folder_id == folder_id)
-        .where(FolderDoi.doi == publication.doi)
-    ).scalar_one_or_none()
-
-    if fd:
-        db.session.delete(fd)
-        db.session.commit()
+    remove_doi_from_folder(folder_id, publication.doi)
 
     return publication_details(publication.id, 'folders')
 

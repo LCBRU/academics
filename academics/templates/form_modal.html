@@ -1,0 +1,22 @@
+{% extends "modal.html" %}
+{% from "lbrc_flask/form_macros.html" import render_field, render_button_bar %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+    <form action="{{ url }}" hx-post="{{ url }}" method="POST" enctype="multipart/form-data">
+        <fieldset>
+            {{ form.hidden_tag() }}
+
+            {% for f in form %}
+                {{ render_field(f) }}
+            {% endfor %}
+
+            <div class="form-group text-right">
+                <div>
+                    <a href="#" class="btn btn-default" _="on click trigger closeModal" role="button">Cancel</a>
+                    <button type="submit" class="btn btn-primary">{{ submit_label | default_if_none('Save') }}</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}
