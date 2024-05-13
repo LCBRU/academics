@@ -56,7 +56,14 @@
         </thead>
         <tbody>
         {% for d in folder.dois | sort(attribute='doi')%}
-            <tr class="{%if not d.publication %}table-warning{%endif%}">
+            {% set cls = '' %}
+            {% if d.invalid_doi %}
+                {% set cls = 'table-danger' %}
+            {% elif not d.publication %}
+                {% set cls = 'table-warning' %}
+            {% endif %}
+
+            <tr class="{{cls}}">
                 <td>
                     <a href="#" hx-post="{{url_for('ui.folder_delete_doi', id=folder.id, doi=d.doi)}}"><i class="fas fa-trash"></i></a>
                 </td>

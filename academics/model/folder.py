@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey, Index, Unicode, UniqueConstraint
 from sqlalchemy.orm import backref
 from lbrc_flask.database import db
+from lbrc_flask.validators import is_invalid_doi
 
 from academics.model.publication import Publication
 from academics.model.security import User
@@ -56,3 +57,7 @@ class FolderDoi(db.Model):
             collection_class=set,
         )
     )
+
+    @property
+    def invalid_doi(self):
+        return is_invalid_doi(self.doi)
