@@ -45,6 +45,7 @@ class FolderDoi(db.Model):
         backref=backref(
             "dois",
             collection_class=set,
+            cascade="all, delete",
         )
     )
     doi: Mapped[str] = mapped_column(Unicode(1000), nullable=False)
