@@ -30,7 +30,7 @@ q = (
     .order_by(Publication.created_date.asc())
 )
 
-publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start <= p.publication_cover_date < this_month_start])
+publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start <= p.best_catalog_publication.publication_cover_date < this_month_start])
 
 email(
     subject='New Publications this Month',
