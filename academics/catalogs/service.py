@@ -280,7 +280,7 @@ def remove_publication_without_catalog_entry():
 
     db.session.execute(
         delete(FolderDoi)
-        .where(FolderDoi.publication.id.in_(pubs_without_catalog))
+        .where(FolderDoi.publication.any(Publication.id.in_(pubs_without_catalog)))
     )
 
     db.session.execute(
