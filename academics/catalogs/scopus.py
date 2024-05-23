@@ -162,10 +162,6 @@ def get_scopus_publications(identifier):
     for p in search_results.results:
         id = p.get(u'dc:identifier', ':').split(':')[1]
 
-        logging.warn('B'* 50)
-        logging.warn(p)
-        logging.warn('B'* 50)
-        
         if not id:
             # SCOPUS sends an "Empty Set" result as opposed to no results
             continue
@@ -595,10 +591,6 @@ class DocumentSearch(ElsSearch):
 
         if not current_app.config['LOAD_OLD_PUBLICATIONS']:
             q = f'{q} AND PUBYEAR > {current_app.config["HISTORIC_PUBLICATION_CUTOFF"].year - 1}'
-
-        logging.warn('A'* 50)
-        logging.warn(q)
-        logging.warn('A'* 50)
 
         super().__init__(query=q, index='scopus')
         self._uri += '&view=complete'
