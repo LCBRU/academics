@@ -594,7 +594,7 @@ class DocumentSearch(ElsSearch):
         q = f'au-id({identifier})'
 
         if not current_app.config['LOAD_OLD_PUBLICATIONS']:
-            q = f'{q} AND PUBYEAR > {current_app.config["HISTORIC_PUBLICATION_CUTOFF"].year}'
+            q = f'{q} AND PUBYEAR > {current_app.config["HISTORIC_PUBLICATION_CUTOFF"].year - 1}'
 
         logging.warn('A'* 50)
         logging.warn(q)
