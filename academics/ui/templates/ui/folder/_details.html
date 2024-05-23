@@ -72,6 +72,9 @@
                         <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
                         {{d.doi}}
                     </a>
+                    <a href="https://www.scopus.com/results/results.uri?s=DOI({{ d.doi }})" class="btn" target="_blank" title="Search on Scopus ">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
+                    </a>        
                 </td>
                 <td>
                     {% if d.publication %}
