@@ -1,6 +1,6 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
-{% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal %}
+{% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal, render_url_modal %}
 {% from "ui/folder/_details.html" import render_folder_details with context %}
 {% from "ui/assets.html" import render_assets %}
 
@@ -88,5 +88,11 @@
 
 {{ render_edit_modal('editFolderModal', 'Folder Details', url_for('ui.folder_save', prev=request.full_path), edit_folder_form) }}
 {{ render_delete_modal('deleteModal', 'Delete Folder', url_for('ui.folder_delete', prev=request.full_path), confirm_form) }}
+{{ render_url_modal('source_details', 'Source Details') }}
 
+
+{% endblock %}
+
+{% block js %}
+<script>htmx.logAll();</script>
 {% endblock %}

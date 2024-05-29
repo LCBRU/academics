@@ -1,5 +1,6 @@
 from os import abort
 import re
+from datetime import datetime, timezone
 from flask import redirect, render_template, render_template_string, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
@@ -204,3 +205,19 @@ def remove_doi_from_folder(folder_id, doi):
     if fd:
         db.session.delete(fd)
         db.session.commit()
+
+def create_publication_folder(publications):
+    folder = Folder(
+        name=f'Publication Search {datetime.now(timezone.utc):%Y%m%d_%H%M%S}',
+        owner_id=current_user_id(),
+    )
+    db.session.add(folder)
+    db.session.flush()
+
+    db.session.add_all([
+        FolderDoi(folder_id=folder.id, doi=p.doi) for p in publications
+    ])
+
+    db.session.commit()
+
+    return folder

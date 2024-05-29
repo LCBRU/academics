@@ -1,3 +1,5 @@
+{% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_authors, render_publication_details %}
+
 {% macro render_folder_details(folder, details_selector, users) %}
 
     <div id="details_{{folder.id}}" class="tabbed_display" hx-target="#details_{{folder.id}}" hx-swap="outerHTML">
@@ -46,45 +48,43 @@
 
 
 {% macro render_folder_dois(folder) %}
-    <table id="dois_{{folder.id}}" class="table table-sm">
-        <thead>
-            <tr>
-                <td></td>
-                <td>DOI</td>
-                <td>Publication</td>
-            </tr>
-        </thead>
-        <tbody>
+    <ul class="panel_list">
         {% for d in folder.dois | sort(attribute='doi')%}
-            {% set cls = '' %}
-            {% if d.invalid_doi %}
-                {% set cls = 'table-danger' %}
-            {% elif not d.publication %}
-                {% set cls = 'table-warning' %}
-            {% endif %}
-
-            <tr class="{{cls}}">
-                <td>
+            <li>
+                <header>
                     <a href="#" hx-post="{{url_for('ui.folder_delete_doi', id=folder.id, doi=d.doi)}}"><i class="fas fa-trash"></i></a>
-                </td>
-                <td>
                     <a href="http://doi.org/{{ d.doi }}" class="btn btn-primary" target="_blank" title="View publication">
                         <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
                         {{d.doi}}
                     </a>
                     <a href="https://www.scopus.com/results/results.uri?s=DOI({{ d.doi }})" class="btn" target="_blank" title="Search on Scopus ">
                         <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
-                    </a>        
-                </td>
-                <td>
-                    {% if d.publication %}
-                        <a href="{{ url_for('ui.publications', search=d.doi) }}">{{ d.publication.vancouver }}</a>
+                        Search Scopus
+                    </a>
+                    {% if d.invalid_doi %}
+                        <div class="badge badge-pill badge-danger">Invalid DOI</div>
                     {% endif %}
-                </td>
-            </tr>
+                    {% if not d.publication %}
+                        <div class="badge badge-pill badge-warning">Publication Missing</div>
+                    {% endif %}
+                </header>
+                          
+                {% if d.publication %}
+                    {{ render_publication_title(d.publication) }}
+
+                    <div class="doi_folders">
+                        <h3>Other Folders</h3>
+
+                        {% for f in d.publication.folders | rejectattr("id", "eq", folder.id) %}
+                            <div>{{f.name}}</div>
+                        {% endfor %}
+                    </div>
+
+                    {{ render_publication_authors(d.publication, 'brc') }}
+                {% endif %}
+            </li>
         {% endfor %}
-        </tbody>
-        </table>
+    </ul>
 {% endmacro %}
 
 

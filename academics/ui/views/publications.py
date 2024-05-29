@@ -1,4 +1,4 @@
-from flask import abort, current_app, jsonify, render_template, render_template_string, request
+from flask import abort, current_app, flash, jsonify, redirect, render_template, render_template_string, request, url_for
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
@@ -16,7 +16,7 @@ from academics.services.publication_searching import PublicationSearchForm, acad
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
-from academics.ui.views.folders import add_doi_to_folder, remove_doi_from_folder
+from academics.ui.views.folders import add_doi_to_folder, create_publication_folder, remove_doi_from_folder
 from .. import blueprint
 
 
@@ -225,9 +225,6 @@ def publication_export_pdf():
         .selectinload(Source.academic)
     )
     q = q.options(
-        selectinload(Publication.folders)
-    )
-    q = q.options(
         selectinload(Publication.folder_dois)
         .selectinload(FolderDoi.folder)
     )
@@ -395,3 +392,16 @@ def request_publication_bar(publication_id):
         publication=publication,
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
+
+
+@blueprint.route("/publications/create_folder", methods=['POST'])
+def publication_create_folder():
+    search_form = PublicationSearchForm()
+
+    q = publication_search_query(search_form)
+
+    folder = create_publication_folder(db.session.execute(q).unique().scalars())
+
+    flash(f'Publications added to new folder "{folder.name}"')
+
+    return redirect(url_for('ui.folders'))

@@ -1,5 +1,5 @@
 {% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
+{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary, render_field_actual %}
 {% from "lbrc_flask/modal_macros.html" import render_modal %}
 {% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_authors, render_publication_details %}
 {% from "ui/assets.html" import render_assets %}
@@ -12,30 +12,45 @@
     <div class="page-header">
         <h1>Publications</h1>
 
-        {{ render_search(
-            search_form,
-            'ui.publications',
-            placeholder='enter search text - searches title, journal or DOI',
-            buttons=[
-                {
-                    'text': 'Full Export',
-                    'endpoint': 'ui.publication_full_export_xlsx',
-                    'add_form_fields': True,
-                },
-                {
-                    'text': 'Annual Report',
-                    'endpoint': 'ui.publication_full_annual_report_xlsx',
-                    'add_form_fields': True,
-                },
-                {
-                    'text': 'PDF',
-                    'endpoint': 'ui.publication_export_pdf',
-                    'add_form_fields': True,
-                    'disabled': publications.total > 10000,
-                },
-            ],
-            checkboxes_on_searchbar=False
-        ) }}
+        <form method="GET" class="form-horizontal search-form no_lock" action="{{ url_for('ui.publications') }}">
+            {{ search_form.hidden_tag() }}
+
+            <div class="input-group">
+                {{ search_form.search(class="form-control", placeholder='enter search text - searches title, journal or DOI') | safe }}
+
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <a href="{{ url_for('ui.publications') }}">Clear Search</a>
+                    </span>
+                </div>
+            
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+
+            {% set filter = "SelectField,SelectMultipleField,DateField,MonthField,BooleanField" %}
+          
+            {% if search_form | selectattr("type", "in", filter) | list | length is ge(1) %}
+              <div class="search-filters">
+                <div class="row">
+                  {% for field in search_form | selectattr("type", "in", filter) %}
+                    <div class="form-group{% if field.errors %} has-error{%endif%} col-auto">
+                      <div>{{ field.label.text | nbsp | br }}</div>
+                      <div>{{ render_field_actual(field) |safe }}</div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            <div class="button_bar" hx-target="body">
+                <button class="btn btn-primary" formaction="{{ url_for('ui.publication_full_export_xlsx') }}" formmethod="get" title="Full Export" data-toggle="tooltip">Full Export</button>
+                <button class="btn btn-primary" formaction="{{ url_for('ui.publication_full_annual_report_xlsx') }}" formmethod="get" title="Annual Report" data-toggle="tooltip">Annual Report</button>
+                <button class="btn btn-primary" formaction="{{ url_for('ui.publication_export_pdf') }}" formmethod="get" title="PDF" data-toggle="tooltip">PDF</button>
+                <button class="btn btn-primary" formaction="{{ url_for('ui.publication_create_folder') }}" formmethod="post" title="Add Publications to Folder" data-toggle="tooltip">Add to Folder</button>
+            </div>
+        </form>
     </div>
 
     {{ pagination_summary(publications, 'publication') }}
