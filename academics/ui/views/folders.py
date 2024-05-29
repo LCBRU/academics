@@ -3,7 +3,9 @@ from flask import redirect, render_template, render_template_string, request
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from sqlalchemy import or_, select
-from academics.model.folder import Folder
+from sqlalchemy.orm import selectinload
+from academics.model.folder import Folder, FolderDoi
+from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
 from academics.ui.views.decorators import assert_folder_user
 from .. import blueprint
@@ -116,21 +118,29 @@ def folder_add_shared_user(id, user_id):
 
 
 @blueprint.route("/folder/<int:id>/details/<string:detail_selector>")
+@assert_folder_user()
 def folder_details(id, detail_selector):
-    folder = db.get_or_404(Folder, id)
-
     template = '''
         {% from "ui/folder/_details.html" import render_folder_details with context %}
 
         {{ render_folder_details(folder, detail_selector, users, folders) }}
     '''
 
-    folder_query = Folder.query
+    q = select(Folder).where(
+            Folder.id == id
+        ).options(
+            selectinload(Folder.dois)
+            .selectinload(FolderDoi.publication)
+            .selectinload(Publication.folder_dois)
+            .selectinload(FolderDoi.folder)
+        ).options(
+            selectinload(Folder.dois)
+            .selectinload(FolderDoi.publication)
+            .selectinload(Publication.catalog_publications)
+            .selectinload(CatalogPublication.catalog_publication_sources)
+        )
 
-    folder_query = folder_query.filter(or_(
-        Folder.owner_id == current_user_id(),
-        Folder.shared_users.any(User.id == current_user_id()),
-    ))
+    folder = db.session.execute(q).scalar_one()
 
     return render_template_string(
         template,
