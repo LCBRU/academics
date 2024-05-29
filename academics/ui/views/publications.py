@@ -264,7 +264,7 @@ def publication_authors(id, author_selector):
         abort(404)
 
     template = '''
-        {% from "ui/publication/_details.html" import render_publication_authors %}
+        {% from "ui/publication/_publication_authors.html" import render_publication_authors %}
 
         {{ render_publication_authors(publication, author_selector) }}
     '''
