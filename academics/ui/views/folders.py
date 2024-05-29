@@ -4,7 +4,7 @@ from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
-from academics.model.academic import CatalogPublicationsSources
+from academics.model.academic import CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
@@ -140,6 +140,7 @@ def folder_details(id, detail_selector):
             .selectinload(Publication.catalog_publications)
             .selectinload(CatalogPublication.catalog_publication_sources)
             .selectinload(CatalogPublicationsSources.source)
+            .selectinload(Source.academic)
         )
 
     folder = db.session.execute(q).scalar_one()
