@@ -1,9 +1,10 @@
 {% extends "ui/page.html" %}
 {% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary, render_field_actual %}
 {% from "lbrc_flask/modal_macros.html" import render_modal %}
-{% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_authors, render_publication_details %}
+{% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_details %}
 {% from "ui/assets.html" import render_assets %}
 {% from "lbrc_flask/modal_macros.html" import render_url_modal %}
+{% from "ui/_publication_authors.html" import render_publication_authors with context %}
 
 
 {% block content %}

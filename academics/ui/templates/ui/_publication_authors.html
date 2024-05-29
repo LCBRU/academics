@@ -1,0 +1,48 @@
+{% from "ui/_tabbed_display.html" import tabbed_display_tab with context %}
+
+{% macro render_publication_authors(publication, author_selector) %}
+
+    {% set cp = publication.best_catalog_publication %}
+
+    <div id="authors_{{cp.publication_id}}" class="tabbed_display">
+
+        <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{cp.publication_id}}" hx-swap="outerHTML">
+            {{ tabbed_display_tab(author_selector, 'brc', 'BRC Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='brc')) }}
+            {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='all')) }}
+            <span>{{cp.author_count}} author(s)</span>
+        </div>
+        <div class="tabbed_display_content author_list">
+            {% for cps in cp.catalog_publication_sources %}
+                {% if cps.source.is_academic or author_selector == 'all' %}
+                    {{ _render_publication_author(cps) }}
+                {% endif %}
+            {% endfor%}
+        </div>
+
+        {% if cp.all_academics_left_brc %}
+            <div class="text-danger">All authors have left the BRC</div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+
+{% macro _render_publication_author(cps) %}
+    {% set author = cps.source %}
+    {% set cls = 'not_academic' %}
+
+    {% if author.has_left_brc %}
+        {% set cls = 'left_brc' %}
+    {% elif author.is_academic %}
+        {% set cls = 'is_academic' %}
+    {% endif %}
+
+    <a  class="{{cls}}"
+        href="#"
+        title="Upload Publication DOIs"
+        hx-get="{{ url_for('ui.source_summary_details', id=author.id ) }}"
+        hx-target="body"
+        hx-swap="beforeend">
+        <span class="author_list_ordinal">{{ cps.ordinal + 1 }}</span>
+        <span>{{ author.display_name }}</span>
+    </a>
+{% endmacro %}

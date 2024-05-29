@@ -8,6 +8,7 @@ from lbrc_flask.database import db
 from lbrc_flask.json import validate_json
 from lbrc_flask.forms import ConfirmForm, FlashingForm
 from flask_security import roles_accepted
+from lbrc_flask.response import refresh_response
 
 
 class AcademicEditForm(FlashingForm):
@@ -23,8 +24,8 @@ class AcademicEditForm(FlashingForm):
         self.academic_id.choices = [(0, '')] + [(a.id, a.full_name) for a in academics]
 
 
-@blueprint.route("/sources/<int:id>/details", methods=['GET', 'POST'])
-def source_details(id):
+@blueprint.route("/source/<int:id>/summary_details", methods=['GET', 'POST'])
+def source_summary_details(id):
     form = AcademicEditForm()
 
     s = db.get_or_404(Source, id)
@@ -36,10 +37,10 @@ def source_details(id):
         if form.has_value('academic_id'):
             create_potential_sources([s], db.get_or_404(Academic, form.academic_id.data), not_match=False)
 
-        return redirect(request.args.get('prev', ''))
+        return refresh_response()
 
     return render_template(
-        "ui/source_details.html",
+        "ui/source_summary_details.html",
         source=s,
         form=form,
     )

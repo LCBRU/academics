@@ -1,7 +1,10 @@
-{% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_authors, render_publication_details %}
+{% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_details %}
+{% from "ui/_folder_dois.html" import render_publication_folders with context %}
+{% from "ui/_tabbed_display.html" import tabbed_display_tab with context %}
+{% from "ui/_publication_authors.html" import render_publication_authors with context %}
 
-{% macro render_folder_details(folder, details_selector, users) %}
 
+{% macro render_folder_details(folder, details_selector, users, folders) %}
     <div id="details_{{folder.id}}" class="tabbed_display" hx-target="#details_{{folder.id}}" hx-swap="outerHTML">
 
         <div class="tabbed_display_tabs {{detail_selector}}">
@@ -12,7 +15,7 @@
             {% if details_selector == 'users' %}
                 {{ render_folder_users(folder, users) }}
             {% elif details_selector == 'dois' %}
-                {{ render_folder_dois(folder) }}
+                {{ render_folder_dois(folder, folders) }}
             {% endif %}
         </div>
     </div>
@@ -47,12 +50,12 @@
 {% endmacro %}
 
 
-{% macro render_folder_dois(folder) %}
+{% macro render_folder_dois(folder, folders) %}
     <ul class="panel_list">
         {% for d in folder.dois | sort(attribute='doi')%}
             <li>
                 <header>
-                    <a href="#" hx-post="{{url_for('ui.folder_delete_doi', id=folder.id, doi=d.doi)}}"><i class="fas fa-trash"></i></a>
+                    <a href="#" hx-post="{{url_for('ui.publication_delete_folder', folder_id=folder.id, doi=d.doi)}}"><i class="fas fa-trash"></i></a>
                     <a href="http://doi.org/{{ d.doi }}" class="btn btn-primary" target="_blank" title="View publication">
                         <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
                         {{d.doi}}
@@ -72,23 +75,12 @@
                 {% if d.publication %}
                     {{ render_publication_title(d.publication) }}
 
-                    <div class="doi_folders">
-                        <h3>Other Folders</h3>
-
-                        {% for f in d.publication.folders | rejectattr("id", "eq", folder.id) %}
-                            <div>{{f.name}}</div>
-                        {% endfor %}
-                    </div>
+                    <h3>Other Folders</h3>
+                    {{ render_publication_folders(d.publication, folders) }}
 
                     {{ render_publication_authors(d.publication, 'brc') }}
                 {% endif %}
             </li>
         {% endfor %}
     </ul>
-{% endmacro %}
-
-
-{% macro tabbed_display_tab(selector, this_selector, name, url) %}
-    <a class="{% if selector == this_selector %}selected{% endif %}"
-        href="#" hx-get="{{ url }}">{{name}}</a>
 {% endmacro %}

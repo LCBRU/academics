@@ -1,3 +1,7 @@
+{% from "ui/_folder_dois.html" import render_publication_folders with context %}
+{% from "ui/_tabbed_display.html" import tabbed_display_tab with context %}
+
+
 {% macro render_publication_title(publication) %}
 
 {% set cp = publication.best_catalog_publication %}
@@ -102,63 +106,7 @@
 {% endmacro %}
 
 
-{% macro render_publication_authors(publication, author_selector) %}
-
-    {% set cp = publication.best_catalog_publication %}
-
-    <div id="authors_{{cp.publication_id}}" class="tabbed_display">
-
-        <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{cp.publication_id}}" hx-swap="outerHTML">
-            {{ tabbed_display_tab(author_selector, 'brc', 'BRC Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='brc')) }}
-            {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='all')) }}
-            <span>{{cp.author_count}} author(s)</span>
-        </div>
-        <div class="tabbed_display_content author_list">
-            {% for cps in cp.catalog_publication_sources %}
-                {% if cps.source.is_academic or author_selector == 'all' %}
-                    {{ _render_publication_author(cps) }}
-                {% endif %}
-            {% endfor%}
-        </div>
-
-        {% if cp.all_academics_left_brc %}
-            <div class="text-danger">All authors have left the BRC</div>
-        {% endif %}
-    </div>
-{% endmacro %}
-
-
-{% macro tabbed_display_tab(selector, this_selector, name, url) %}
-    <a class="{% if selector == this_selector %}selected{% endif %}"
-        href="#" hx-get="{{ url }}">{{name}}</a>
-{% endmacro %}
-
-
-{% macro _render_publication_author(cps) %}
-    {% set author = cps.source %}
-    {% set cls = 'not_academic' %}
-
-    {% if author.has_left_brc %}
-        {% set cls = 'left_brc' %}
-    {% elif author.is_academic %}
-        {% set cls = 'is_academic' %}
-    {% endif %}
-
-    <a class="{{cls}}"
-        data-toggle="modal"
-        data-id="{{ author.id }}"
-        data-name="{{ author.display_name }}"
-        data-modal-content-url="{{ url_for('ui.source_details', id=author.id, prev=request.full_path) }}",
-        title="View author {{ author.display_name }}"
-        data-title="Author Details for {{ author.display_name }}"
-        data-target="#source_details"
-        href="#"><span class="author_list_ordinal">{{ cps.ordinal + 1 }}</span><span>{{ author.display_name }}</span></a>
-{% endmacro %}
-
-
 {% macro render_publication_details(publication, details_selector, folders) %}
-
-
     {% set cp = publication.best_catalog_publication %}
 
     <div id="details_{{cp.publication_id}}" class="tabbed_display">
@@ -193,34 +141,8 @@
                     <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1">{{ k.keyword }}</a>
                 {% endfor %}
             {% elif details_selector == 'folders' %}
-                {{ _render_publication_folders(cp.publication, folders) }}
+                {{ render_publication_folders(cp.publication, folders) }}
             {% endif %}
         </div>
-    </div>
-{% endmacro %}
-
-
-{% macro _render_publication_folders(publication, folders) %}
-    <div hx-target="#details_{{publication.id}}" hx-swap="outerHTML">
-        {% for f in publication.folders | sort(attribute='name')%}
-            <div class="btn-group mr-1 mb-1" role="group">
-                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ f.name }}</button>
-                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                    <a class="dropdown-item" href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications in this folder</a>
-                    <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_remove_folder', id=publication.id, folder_id=f.id)}}">Remove</a>
-                </div>
-            </div>
-        {% endfor %}
-
-        {% if folders | reject('in', publication.folders) | list | length > 0 %}
-            <div class="btn-group mr-1 mb-1" role="group">
-                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
-                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement"  >
-                    {% for f in folders | reject('in', publication.folders) | sort(attribute='name') %}
-                        <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_add_folder', id=publication.id, folder_id=f.id)}}">{{ f.name }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
     </div>
 {% endmacro %}

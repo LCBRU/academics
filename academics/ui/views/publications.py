@@ -1,9 +1,8 @@
-from flask import abort, current_app, flash, jsonify, redirect, render_template, render_template_string, request, url_for
+from flask import abort, current_app, jsonify, render_template, render_template_string, request
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
 from lbrc_flask.forms import FlashingForm, MultiCheckboxField
-from lbrc_flask.json import validate_json
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from wtforms import HiddenField
@@ -16,7 +15,6 @@ from academics.services.publication_searching import PublicationSearchForm, acad
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
-from academics.ui.views.folders import add_doi_to_folder, create_publication_folder, remove_doi_from_folder
 from .. import blueprint
 
 
@@ -97,29 +95,6 @@ def validation(page=1):
         "ui/publication/validation.html",
         publications=publications,
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
-    )
-
-
-@blueprint.route("/publications/folders", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'integer'},
-    },
-    "required": ["id"]
-})
-def publication_folders():
-    publication = db.get_or_404(Publication, request.json.get('id'))
-
-    folder_query = Folder.query.filter(or_(
-        Folder.owner_id == current_user_id(),
-        Folder.shared_users.any(User.id == current_user_id()),
-    ))
-
-    return render_template(
-        "ui/publication/folders.html",
-        publication=publication,
-        folders=folder_query.all(),
     )
 
 
@@ -324,6 +299,7 @@ def publication_details(id, detail_selector):
         folders=folder_query.all(),
     )
 
+
 @blueprint.route("/publication/update_preprint/<int:id>/<int:is_preprint>", methods=['POST'])
 @roles_accepted('validator')
 def publication_update_preprint(id, is_preprint):
@@ -350,25 +326,6 @@ def publication_update_nihr_acknowledgement(id, nihr_acknowledgement_id):
     return request_publication_bar(publication.id)
 
 
-@blueprint.route("/publication/<int:id>/add_folder/<int:folder_id>", methods=['POST'])
-def publication_add_folder(id, folder_id):
-    publication = db.get_or_404(Publication, id)
-    folder = db.get_or_404(Folder, folder_id)
-
-    add_doi_to_folder(folder_id, publication.doi)
-
-    return publication_details(publication.id, 'folders')
-
-
-@blueprint.route("/publication/<int:id>/remove/<int:folder_id>", methods=['POST'])
-def publication_remove_folder(id, folder_id):
-    publication = db.get_or_404(Publication, id)
-
-    remove_doi_from_folder(folder_id, publication.doi)
-
-    return publication_details(publication.id, 'folders')
-
-
 def request_publication_bar(publication_id):
     q = select(Publication).where(Publication.id == publication_id)
 
@@ -392,16 +349,3 @@ def request_publication_bar(publication_id):
         publication=publication,
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
-
-
-@blueprint.route("/publications/create_folder", methods=['POST'])
-def publication_create_folder():
-    search_form = PublicationSearchForm()
-
-    q = publication_search_query(search_form)
-
-    folder = create_publication_folder(db.session.execute(q).unique().scalars())
-
-    flash(f'Publications added to new folder "{folder.name}"')
-
-    return redirect(url_for('ui.folders'))

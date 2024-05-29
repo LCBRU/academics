@@ -77,7 +77,7 @@
                     <h4><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">{{f.publication_count}} publication(s)</a></h4>
                 </div>
                 <div id="folder_users_{{f.id}}">
-                    {{ render_folder_details(f, 'users', users) }}
+                    {{ render_folder_details(f, 'users', users, folders) }}
                 </div>
             </li>
         {% endfor %}
