@@ -79,6 +79,8 @@
                     {{ render_publication_folders(d.publication, folders) }}
 
                     {{ render_publication_authors(d.publication, 'brc') }}
+
+                    <h4>Publication first imported {{ d.publication.created_date | date_format }}</h4>
                 {% endif %}
             </li>
         {% endfor %}
