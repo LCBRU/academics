@@ -20,14 +20,14 @@ class UploadFolderDois(FlashingForm):
     dois = TextAreaField('DOIs', validators=[DataRequired()])
 
 
-@blueprint.route("/folder/<int:folder_id>/doi/<string:doi>/delete", methods=['POST'])
+@blueprint.route("/folder/<int:folder_id>/doi/delete/<path:doi>", methods=['POST'])
 def publication_delete_folder(folder_id, doi):
     remove_doi_from_folder(folder_id, doi)
 
     return render_publication_folders(doi)
 
 
-@blueprint.route("/folder/<int:folder_id>/doi/<string:doi>/add", methods=['POST'])
+@blueprint.route("/folder/<int:folder_id>/doi/add/<path:doi>", methods=['POST'])
 def publication_add_folder(folder_id, doi):
     add_doi_to_folder(folder_id, doi)
 
