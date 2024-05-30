@@ -129,19 +129,22 @@ def folder_details(id, detail_selector):
 
     q = select(Folder).where(
             Folder.id == id
-        ).options(
-            selectinload(Folder.dois)
-            .selectinload(FolderDoi.publication)
-            .selectinload(Publication.folder_dois)
-            .selectinload(FolderDoi.folder)
-        ).options(
-            selectinload(Folder.dois)
-            .selectinload(FolderDoi.publication)
-            .selectinload(Publication.catalog_publications)
-            .selectinload(CatalogPublication.catalog_publication_sources)
-            .selectinload(CatalogPublicationsSources.source)
-            .selectinload(Source.academic)
         )
+    
+    if detail_selector == 'dois':
+        q = q.options(
+                selectinload(Folder.dois)
+                .selectinload(FolderDoi.publication)
+                .selectinload(Publication.folder_dois)
+                .selectinload(FolderDoi.folder)
+            ).options(
+                selectinload(Folder.dois)
+                .selectinload(FolderDoi.publication)
+                .selectinload(Publication.catalog_publications)
+                .selectinload(CatalogPublication.catalog_publication_sources)
+                .selectinload(CatalogPublicationsSources.source)
+                .selectinload(Source.academic)
+            )
 
     folder = db.session.execute(q).scalar_one()
 
