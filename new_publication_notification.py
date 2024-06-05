@@ -29,8 +29,7 @@ print(last_week_start)
 
 q = (
     select(Publication)
-    .join(Publication.catalog_publications)
-    .where(CatalogPublication.publication_cover_date.between(last_week_start, last_week_end))
+    .where(Publication.catalog_publications.any(CatalogPublication.publication_cover_date.between(last_week_start, last_week_end)))
 )
 
 print(q)
