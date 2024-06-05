@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import date
+from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta 
 from dotenv import load_dotenv
 from flask import render_template
@@ -10,7 +10,7 @@ from lbrc_flask.emailing import email
 from lbrc_flask.security import get_users_for_role
 from academics.security import ROLE_NEW_PUBLICATION_RECIPIENT
 
-from academics.model.publication import Publication
+from academics.model.publication import CatalogPublication, Publication
 from academics import create_app
 
 from dateutil.parser import parse
@@ -21,22 +21,25 @@ application = create_app()
 application.app_context().push()
 
 today = date.today()
-this_month_start = date(today.year, today.month, 1)
-last_month_start = this_month_start - relativedelta(months=1)
+last_week_end = today - timedelta(days=today.weekday() + 1)
+last_week_start = last_week_end - timedelta(days=6)
+
+print(last_week_end)
+print(last_week_start)
 
 q = (
     select(Publication)
-    .where(Publication.created_date.between(last_month_start, this_month_start))
-    .order_by(Publication.created_date.asc())
+    .join(Publication.catalog_publications)
+    .where(CatalogPublication.publication_cover_date.between(last_week_start, last_week_end))
 )
 
-publications = list([p for p in db.session.execute(q).unique().scalars() if last_month_start <= p.best_catalog_publication.publication_cover_date < this_month_start])
+publications = db.session.execute(q).unique().scalars()
 
 email(
-    subject='New Publications this Month',
+    subject='New Publications Last Week',
     message=render_template('email/new_publications.txt', publications=publications),
-    recipients=[u.email for u in get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT)],
-    # recipients=['rabramley@gmail.com'],
+    # recipients=[u.email for u in get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT)],
+    recipients=['rabramley@gmail.com'],
     html_template='email/new_publications.html',
     publications=publications,
 )
