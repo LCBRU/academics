@@ -29,12 +29,14 @@ print(last_week_start)
 
 q = (
     select(Publication)
-    .where(Publication.catalog_publications.any(CatalogPublication.publication_cover_date.between(last_week_start, last_week_end)))
+    .where(Publication.catalog_publications.any(CatalogPublication.publication_cover_date.between(last_week_end, last_week_start)))
 )
 
 print(q)
 
 publications = db.session.execute(q).unique().scalars()
+
+print(publications)
 
 email(
     subject='New Publications Last Week',
