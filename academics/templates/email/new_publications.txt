@@ -1,4 +1,4 @@
-The following new publications have been created in the last month:
+The following new publications were published last week:
 
 {% for p in publications %}
 --------------------------------------------------------------------
