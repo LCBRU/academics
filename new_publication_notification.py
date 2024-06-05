@@ -34,9 +34,9 @@ q = (
 
 print(q)
 
-publications = db.session.execute(q).unique().scalars()
+publications = list(db.session.execute(q).unique().scalars())
 
-print(list(publications))
+print(publications)
 
 email(
     subject='New Publications Last Week',
