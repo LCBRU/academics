@@ -33,6 +33,8 @@ q = (
     .where(CatalogPublication.publication_cover_date.between(last_week_start, last_week_end))
 )
 
+print(q)
+
 publications = db.session.execute(q).unique().scalars()
 
 email(
