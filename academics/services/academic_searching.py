@@ -9,7 +9,7 @@ class AcademicSearchForm(SearchForm):
     theme_id = SelectField('Theme')
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(search_placeholder='Search Academic Name', **kwargs)
 
         self.theme_id.choices = [('', ''), (-1, '[Unset]')] + [(t.id, t.name) for t in Theme.query.all()]
 

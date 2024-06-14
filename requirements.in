@@ -7,7 +7,7 @@ elsapy
 pandas
 celery
 celery[redis]
-weasyprint==52.5
+weasyprint
 Flask-WeasyPrint
 alembic
 flask-security-too[fsqla,common]
