@@ -1,6 +1,7 @@
 from flask import flash, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
+from lbrc_flask.response import trigger_response
 from sqlalchemy import delete
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
@@ -8,7 +9,7 @@ from academics.catalogs.scopus import scopus_author_search
 from academics.catalogs.service import add_sources_to_academic, refresh, update_academics, update_single_academic, updating
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
-from wtforms.validators import Length
+from wtforms.validators import Length, DataRequired
 from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
 
@@ -30,14 +31,18 @@ class AddAuthorSearchForm(SearchForm):
 
 class AddAuthorForm(FlashingForm):
     catalog_identifier = HiddenField()
+
+
+class AddAuthorEditForm(FlashingForm):
+    catalog_identifier = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
-    themes = SelectField('Theme', coerce=int)
+    themes = SelectField('Theme', coerce=int, default=0, validators=[DataRequired()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.academic_id.choices = _get_academic_choices()
-        self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
+        self.themes.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
 class AcademicEditForm(FlashingForm):
@@ -152,19 +157,60 @@ def add_author_search():
     )
 
 
-@blueprint.route("/add_author", methods=['POST'])
+@blueprint.route("/add_author_search_results")
 @roles_accepted('editor')
-def add_author():
-    form = AddAuthorForm()
+def add_author_search_results():
+    search_form = AddAuthorSearchForm(formdata=request.args)
 
-    add_sources_to_academic(
-        catalog=CATALOG_SCOPUS,
-        catalog_identifiers=request.form.getlist('catalog_identifier'),
-        academic_id=form.academic_id.data,
-        themes=[db.session.get(Theme, form.themes.data)],
+    authors = []
+
+    try:
+        authors = scopus_author_search(
+            search_string=search_form.search.data,
+            search_non_local=search_form.show_non_local.data,
+        )
+    except Exception as e:
+        print(e)
+        flash('Search failed.  Please tighten your search criteria.')
+
+    return render_template(
+        "ui/academic/add_search_results.html",
+        authors=authors,
+        search_form=search_form,
+        add_form=AddAuthorForm(),
     )
 
-    return redirect(url_for('ui.index'))
+
+@blueprint.route("/add_author", methods=['GET'])
+@roles_accepted('editor')
+def add_author():
+    form = AddAuthorEditForm()
+
+    return render_template(
+        "ui/academic/add_author.html",
+        form=form,
+    )
+
+
+@blueprint.route("/add_author", methods=['POST'])
+@roles_accepted('editor')
+def add_author_submit():
+    form = AddAuthorEditForm()
+
+    if form.validate_on_submit():
+        add_sources_to_academic(
+            catalog=CATALOG_SCOPUS,
+            catalog_identifiers=request.form.getlist('catalog_identifier'),
+            academic_id=form.academic_id.data,
+            themes=[db.session.get(Theme, form.themes.data)],
+        )
+
+        return trigger_response('refreshSearch')
+    
+    return render_template(
+        "ui/academic/add_author.html",
+        form=form,
+    )
 
 
 @blueprint.route("/delete_academic", methods=['POST'])

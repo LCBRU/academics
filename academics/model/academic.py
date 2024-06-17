@@ -326,6 +326,19 @@ class AcademicPotentialSource(AuditMixin, CommonMixin, db.Model):
             return f"Assigned to {self.source.academic.full_name}"
 
 
+    @property
+    def can_unassign(self):
+        return self.status in ['No Match', 'Match']
+
+    @property
+    def can_no_match(self):
+        return self.status in ['Unassigned', 'Match']
+
+    @property
+    def can_match(self):
+        return self.status in ['No Match', 'Unassigned']
+
+
 catalog_publications_sources_affiliations = db.Table(
     'catalog_publications_sources__affiliations',
     db.Column(

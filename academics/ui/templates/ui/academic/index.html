@@ -19,7 +19,7 @@
                     <button type="submit" formaction="{{ url_for('ui.academics_export_csv') }}" formmethod="get">Download</button>
 
                     {% if current_user.has_role('editor') %}
-                        <a href="{{ url_for('ui.add_author_search') }}" role="button">Add Author</a>
+                        <a hx-get="{{ url_for('ui.add_author_search') }}" hx-target="body" hx-swap="beforeend" role="button">Add&nbsp;Author</a>
                     {% endif %}
                 </div>
             </fieldset>
@@ -54,15 +54,7 @@
                                     {% set cls = 'fa-user-plus text-danger' %}
                                 {% endif %}
 
-                                <a
-                                    data-toggle="modal"
-                                    data-id="{{ a.id }}"
-                                    data-name="{{ a.full_name }}"
-                                    data-modal-content-url="{{ url_for('ui.academics_potential_sources', id=a.id) }}",
-                                    title="Edit Sources for {{ a.full_name }}"
-                                    data-title="Potential Sources for {{ a.full_name }}"
-                                    data-target="#potentialSources"
-                                    href="#"><i class="fas {{cls}}"></i></a>
+                                <a title="Edit Sources for {{ a.full_name }}" hx-get="{{ url_for('ui.academics_potential_sources', id=a.id) }}" hx-target="body" hx-swap="beforeend"><i class="fas {{cls}}"></i></a>
                             </div>
                             <div class="btn-group mr-1 mb-1" role="group">
                                 <a class="academic_edit"
@@ -175,11 +167,11 @@
 {{ render_pagination(academics, 'ui.index', form=search_form) }}
 
 
-{{ render_url_modal('potentialSources', 'Potential Sources') }}
+<!--
 {{ render_delete_modal('deleteAcademicModal', 'Delete Academic', url_for('ui.delete_academic', prev=request.full_path), confirm_form) }}
 {{ render_delete_modal('deleteAuthorModal', 'Delete Author', url_for('ui.delete_author', prev=request.full_path), confirm_form) }}
 {{ render_confirmation_modal('updateAcademicModal', 'Update Academic', url_for('ui.update_academic', prev=request.full_path), confirm_form, 'Please confirm that you want to update') }}
-
+ -->
 {% endblock %}
 
 {% block js %}

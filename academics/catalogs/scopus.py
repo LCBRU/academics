@@ -1,5 +1,6 @@
 from datetime import date, datetime
 import logging
+from random import choice, randint
 import requests
 import time
 import re
@@ -254,7 +255,8 @@ def scopus_author_search(search_string, search_non_local=False):
 
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')
-        return []
+        print('B')
+        return _test_author_search_data()
 
     re_orcid = re.compile(r'\d{4}-\d{4}-\d{4}-\d{4}$')
 
@@ -317,6 +319,25 @@ def scopus_author_search(search_string, search_non_local=False):
 
         result.append(a)
 
+    return result
+
+
+def _test_author_search_data():
+    result = []
+    for _ in range(randint(1,20)):
+        a = AuthorData(
+            catalog=CATALOG_SCOPUS,
+            catalog_identifier='powkf',
+            orcid='frerferf',
+            first_name='Richard',
+            last_name='Bramley',
+            initials='RA',
+            href='',
+            affiliations=[],
+        )
+        a.existing=choice([True, False])
+        result.append(a)
+        
     return result
 
 

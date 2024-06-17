@@ -8,7 +8,7 @@ from lbrc_flask.database import db
 from lbrc_flask.json import validate_json
 from lbrc_flask.forms import ConfirmForm, FlashingForm
 from flask_security import roles_accepted
-from lbrc_flask.response import refresh_response
+from lbrc_flask.response import refresh_response, trigger_response
 
 
 class AcademicEditForm(FlashingForm):
@@ -48,10 +48,7 @@ def source_summary_details(id):
 
 @blueprint.route("/sources/potential_for_academic/<int:id>")
 def academics_potential_sources(id):
-    a = db.session.get(Academic, id)
-
-    if not a:
-        abort(404)
+    a = db.get_or_404(Academic, id)
 
     return render_template(
         "ui/potential_sources.html",
@@ -59,21 +56,11 @@ def academics_potential_sources(id):
     )
 
 
-@blueprint.route("/sources/potential_for_academic_status", methods=['POST'])
-@validate_json({
-    'type': 'object',
-    'properties': {
-        'id': {'type': 'integer'},
-        'academic_id': {'type': 'integer'},
-        'status': {'type': 'string'},
-    },
-    "required": ["id", "academic_id", "status"]
-})
+@blueprint.route("/sources/<int:id>/academic/<int:academic_id>/<string:status>", methods=['POST'])
 @roles_accepted('editor')
-def academics_amend_potential_sources():
-    ps : AcademicPotentialSource = db.get_or_404(AcademicPotentialSource, request.json.get('id'))
-    a : Academic = db.get_or_404(Academic, request.json.get('academic_id'))
-    status = request.json.get('status').lower()
+def academics_amend_potential_sources(id, academic_id, status):
+    ps : AcademicPotentialSource = db.get_or_404(AcademicPotentialSource, id)
+    a : Academic = db.get_or_404(Academic, academic_id)
 
     UNASSIGNED = 'unassigned'
     NO_MATCH = 'no match'
@@ -87,7 +74,7 @@ def academics_amend_potential_sources():
     if ps.source.academic and ps.source.academic != a:
         abort(406, f"Academic does not match source academic of {ps.source.academic.full_name}, but is {a.full_name}")
 
-    match request.json.get('status').lower():
+    match status:
         case 'unassigned':
             ps.source.academic = None
             ps.not_match = False
@@ -102,7 +89,7 @@ def academics_amend_potential_sources():
     db.session.add(ps)
     db.session.commit()
 
-    return jsonify({'status': request.json.get('status')}), 200
+    return trigger_response('refreshModal')
 
 
 @blueprint.route("/sources/delete", methods=['POST'])

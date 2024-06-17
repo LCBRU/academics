@@ -1,0 +1,41 @@
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Author</th>
+            <th>Affiliation</th>
+        </tr>
+    </thead>
+    <tbody hx-target="body" hx-swap="beforeend">
+        {% for a in authors %}
+            <tr>
+                <td>
+                    {% if a.existing %}
+                        <span class="pill small">Already Imported</span>
+                    {% else %}
+                        <form hx-get="{{ url_for('ui.add_author') }}">
+                            <fieldset>
+                                {{ add_form.csrf_token() }}
+                                <input type="hidden" name="catalog_identifier" value="{{ a.catalog_identifier }}">
+                                <button class="icon add" type="submit">Add</button>
+                            </fieldset>
+                        </form>
+                    {% endif %}
+                </td>
+                <td>
+                    <div>
+                        <a href="https://www.scopus.com/authid/detail.uri?authorId={{a.catalog_identifier}}" target="_blank">{{a.display_name}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div class="flex_two_left_grow">
+                        <a href="https://www.scopus.com/affil/profile.uri?afid={{a.affiliation_id}}" target="_blank">{{a.affiliation_summary}}</a>
+                        {% if a.is_local %}
+                            <span class="pill small">Local</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

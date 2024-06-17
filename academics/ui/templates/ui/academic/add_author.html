@@ -1,0 +1,11 @@
+{% extends "lbrc/modal.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields, render_field, render_modal_button_bar %}
+
+{% block content %}
+    <form hx-post="{{ url_for('ui.add_author_submit') }}" hx-target="closest .modal" hx-swap="outerHTML">
+        <fieldset>
+            {{ render_form_fields(form) }}
+            {{render_modal_button_bar(submit_label="Add Academic")}}
+        </fieldset>
+    </form>
+{% endblock %}
