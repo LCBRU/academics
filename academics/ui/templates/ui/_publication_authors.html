@@ -1,4 +1,4 @@
-{% from "ui/_tabbed_display.html" import tabbed_display_tab with context %}
+{% from "lbrc/tabbed_display.html" import tabbed_display_tab with context %}
 
 {% macro render_publication_authors(publication, author_selector) %}
 
@@ -11,12 +11,14 @@
             {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='all')) }}
             <span>{{cp.author_count}} author(s)</span>
         </div>
-        <div class="tabbed_display_content author_list">
-            {% for cps in cp.catalog_publication_sources %}
-                {% if cps.source.is_academic or author_selector == 'all' %}
-                    {{ _render_publication_author(cps) }}
-                {% endif %}
-            {% endfor%}
+        <div class="tabbed_display_content">
+            <nav class="link_list">
+                {% for cps in cp.catalog_publication_sources %}
+                    {% if cps.source.is_academic or author_selector == 'all' %}
+                        {{ _render_publication_author(cps) }}
+                    {% endif %}
+                {% endfor%}
+            </nav>
         </div>
 
         {% if cp.all_academics_left_brc %}
@@ -28,21 +30,21 @@
 
 {% macro _render_publication_author(cps) %}
     {% set author = cps.source %}
-    {% set cls = 'not_academic' %}
+    {% set cls = 'muted' %}
 
     {% if author.has_left_brc %}
-        {% set cls = 'left_brc' %}
+        {% set cls = 'error' %}
     {% elif author.is_academic %}
-        {% set cls = 'is_academic' %}
+        {% set cls = '' %}
     {% endif %}
 
     <a  class="{{cls}}"
-        href="#"
+        href="javascript:;"
         title="Upload Publication DOIs"
         hx-get="{{ url_for('ui.source_summary_details', id=author.id ) }}"
         hx-target="body"
-        hx-swap="beforeend">
-        <span class="author_list_ordinal">{{ cps.ordinal + 1 }}</span>
+        hx-swap="beforeend" role="button">
+        <span class="pill small">{{ cps.ordinal + 1 }}</span>
         <span>{{ author.display_name }}</span>
     </a>
 {% endmacro %}

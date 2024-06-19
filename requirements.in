@@ -14,3 +14,4 @@ flask-security-too[fsqla,common]
 pyalex
 cachetools
 unidecode
+Faker

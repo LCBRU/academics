@@ -1,8 +1,5 @@
 {% extends "ui/menu_page.html" %}
-{% from "lbrc_flask/modal_macros.html" import render_delete_modal, render_confirmation_modal, render_url_modal %}
-
 {% from "ui/assets.html" import render_assets %}
-
 {% from "lbrc/form_macros.html" import render_form_fields, render_field_and_submit %}
 {% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
 
@@ -39,8 +36,8 @@
                         <a class="academic_pubmed {% if not a.orcid %}disabled{% endif %}" href="{{a.pubmed_link}}" target="_blank">Pubmed</a>
                     </nav>
                     <div class="grid_stacked_center">
-                        <h3 class="main_title">{{a.full_name}}</h3>
-                        <h4 class="subtitle">{{a.theme_summary}}</h4>
+                        <h3>{{a.full_name}}</h3>
+                        <h4>{{a.theme_summary}}</h4>
                         <a href="{{ url_for('ui.publications', academic_id=a.id ) }}">
                             <i class="far fa-newspaper"></i>
                             {{a.publication_count}} Combined Publications
@@ -48,41 +45,17 @@
                     </div>
                     <nav class="link_list">
                         {% if current_user.has_role('editor') %}
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                {% set cls = 'fa-user-cog' %}
-                                {% if a.has_new_potential_sources %}
-                                    {% set cls = 'fa-user-plus text-danger' %}
-                                {% endif %}
+                            {% set cls = 'user_cog' %}
+                            {% if a.has_new_potential_sources %}
+                                {% set cls = 'user_add text-danger' %}
+                            {% endif %}
 
-                                <a title="Edit Sources for {{ a.full_name }}" hx-get="{{ url_for('ui.academics_potential_sources', id=a.id) }}" hx-target="body" hx-swap="beforeend"><i class="fas {{cls}}"></i></a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a class="academic_edit"
-                                    title="Edit academic {{ a.full_name }}"
-                                    href="{{ url_for('ui.academic_edit', id=a.id) }}">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a class="academic_delete"
-                                    data-toggle="modal"
-                                    data-id="{{ a.id }}"
-                                    data-name="{{ a.full_name }}"
-                                    title="Delete academic {{ a.full_name }}"
-                                    data-target="#deleteAcademicModal"
-                                    href="#"><i class="fas fa-trash"></i></a>
-                            </div>
+                            <a title="Edit Sources for {{ a.full_name }}" hx-get="{{ url_for('ui.academics_potential_sources', id=a.id) }}" hx-target="body" hx-swap="beforeend" class="icon {{cls}}"></a>
+                            <a title="Edit academic {{ a.full_name }}" hx-get="{{ url_for('ui.academic_edit', id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon edit"></a>
+                            <a title="Delete academic {{ a.full_name }}" hx-post="{{ url_for('ui.delete_academic', id=a.id) }}" hx-confirm="Are you sure you wish to delete '{{ a.full_name }}'?" href="javascript:;" class="icon delete"></a>
                         {% endif %}
                         {% if current_user.is_admin %}
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a class="academic_update"
-                                    data-toggle="modal"
-                                    data-id="{{ a.id }}"
-                                    data-name="{{ a.full_name }}"
-                                    title="Update academic {{ a.full_name }}"
-                                    data-target="#updateAcademicModal"
-                                    href="#"><i class="fas fa-redo"></i></a>
-                            </div>
+                            <a title="Update academic {{ a.full_name }}" hx-post="{{ url_for('ui.update_academic', id=a.id) }}" hx-confirm="Are you sure you wish to update '{{ a.full_name }}'?" href="javascript:;" class="icon redo"></a>
                         {% endif %}
                     </nav>
                 </header>
@@ -90,16 +63,14 @@
                 <table class="source_table">
                     <colgroup>
                         <col style="width:40%">
-                        <col style="width:12%;">
-                        <col style="width:12%;">
-                        <col style="width:12%;">
-                        <col style="width:12%;">
-                        <col style="width:12%;">
+                        <col style="width:15%;">
+                        <col style="width:15%;">
+                        <col style="width:15%;">
+                        <col style="width:15%;">
                     </colgroup>
                     <thead>
                         <tr>
                             <th>Author</th>
-                            <th>ORCID</th>
                             <th>Publications</th>
                             <th>Citations</th>
                             <th>h-index</th>
@@ -109,25 +80,23 @@
                     <tbody>
                         {% for au in a.sources_by_h_index %}
                             <tr>
-                                <td>
-                                    <div class="main_title">
-                                        {% if current_user.has_role('editor') %}
-                                            <a class="author_delete"
-                                            data-toggle="modal"
-                                            data-id="{{ au.id }}"
-                                            data-name="{{ au.display_name }}"
-                                            title="Delete author {{ au.display_name }} from academic {{ a.display_name }}"
-                                            data-target="#deleteAuthorModal"
-                                            href="#"><i class="fas fa-trash"></i></a>
-                                        {% endif %}
-                                        {{au.display_name}} 
+                                <td class="flex_two_left_grow">
+                                    <div>
+                                        <h3>
+                                            {% if current_user.has_role('editor') %}
+                                                <a class="icon delete"
+                                                    title="Delete author {{ au.display_name }}"
+                                                    hx-post="{{ url_for('ui.delete_author', id=au.id) }}"
+                                                    hx-confirm="Are you sure you wish to delete '{{ au.full_name }}'?"
+                                                    href="javascript:;"></a>
+                                            {% endif %}
+                                            {{au.display_name}}
+                                        </h3>
+                                        
+                                        {% for a in au.affiliations %}
+                                            <h5>{{a.name}}</h5>
+                                        {% endfor %}
                                     </div>
-
-                                    {% for a in au.affiliations %}
-                                        <div class="subtitle">{{a.name}}</div>
-                                    {% endfor %}
-                                </td>
-                                <td>
                                     <div class="orcid">
                                         {% if au.orcid %}
                                             <a href="{{a.orcid_link}}" target="_blank">{{au.orcid}}</a>
@@ -140,20 +109,25 @@
                                 <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.publication_count}}</a></td>
                                 <td>{{au.citation_count | blank_if_none}}</td>
                                 <td>{{au.h_index | blank_if_none}}</td>
-                                <td class="catalog">
-                                    <a href="{{ au.author_url }}" class="btn" target="_blank" title="View on {{ au.catalog | title_case}} ">
-                                        {% if au.catalog == 'scopus' %}
-                                            <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
-                                        {% elif au.catalog == 'open alex' %}
-                                            <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg>
-                                        {% endif %}
-                                        {{au.catalog | title}}
-                                    </a>
-                        
+                                <td>
+                                    <div>
+                                        <a href="{{ au.author_url }}" target="_blank" title="View on {{ au.catalog | title_case}} ">
+                                            {% if au.catalog == 'scopus' %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
+                                            {% elif au.catalog == 'open alex' %}
+                                                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg>
+                                            {% endif %}
+                                            {{au.catalog | title}}
+                                        </a>
+                                    </div>
                                     {% if au.error %}
-                                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        <div>
+                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        </div>
                                     {% endif %}
-                                    <div><i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}</div>
+                                    <div>
+                                        <i class="fas fa-history"></i>&nbsp;{{ au.last_fetched_datetime | datetime_humanize }}
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -166,34 +140,4 @@
 
 {{ render_pagination(academics, 'ui.index', form=search_form) }}
 
-
-<!--
-{{ render_delete_modal('deleteAcademicModal', 'Delete Academic', url_for('ui.delete_academic', prev=request.full_path), confirm_form) }}
-{{ render_delete_modal('deleteAuthorModal', 'Delete Author', url_for('ui.delete_author', prev=request.full_path), confirm_form) }}
-{{ render_confirmation_modal('updateAcademicModal', 'Update Academic', url_for('ui.update_academic', prev=request.full_path), confirm_form, 'Please confirm that you want to update') }}
- -->
-{% endblock %}
-
-{% block js %}
-<script>
-    async function amend_potential_source_assignment() {
-        var button = window.event.target;
-        var id = button.getAttribute('data-id');
-        var academic_id = button.getAttribute('data-academic-id');
-        var status = button.getAttribute('data-status');
-
-        let response = await fetch("{{ url_for('ui.academics_amend_potential_sources') }}", {
-            method: 'post',
-            headers: {"Content-type": "application/json; charset=UTF-8"},
-            body: JSON.stringify({
-                id: parseInt(id),
-                academic_id: parseInt(academic_id),
-                status: status,
-            }),
-        })
-        let data = await response.json();
-        b = document.getElementById(`btnPotentialSource_${id}`)
-        b.innerHTML = data['status'];
-    }
-</script>
 {% endblock %}

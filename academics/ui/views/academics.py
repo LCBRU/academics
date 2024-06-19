@@ -12,6 +12,7 @@ from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length, DataRequired
 from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
+from lbrc_flask.response import refresh_response
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
@@ -110,9 +111,14 @@ def academic_edit(id):
         db.session.add(academic)
         db.session.commit()
 
-        return redirect(url_for('ui.index'))
+        return refresh_response()
 
-    return render_template("ui/academic/edit.html", form=form, academic=academic)
+    return render_template(
+        "lbrc/form_modal.html",
+        title=f"Edit Academic {academic.full_name}",
+        form=form,
+        url=url_for('ui.academic_edit', id=id),
+    )
 
 
 @blueprint.route("/update_all_academics")
@@ -213,33 +219,27 @@ def add_author_submit():
     )
 
 
-@blueprint.route("/delete_academic", methods=['POST'])
+@blueprint.route("/delete_academic/<int:id>", methods=['POST'])
 @roles_accepted('editor')
-def delete_academic():
-    form = ConfirmForm()
+def delete_academic(id):
+    a = db.get_or_404(Academic, id)
 
-    if form.validate_on_submit():
-        a = db.get_or_404(Academic, form.id.data)
+    db.session.execute(
+        delete(AcademicPotentialSource)
+        .where(AcademicPotentialSource.academic_id == a.id)
+    )
 
-        db.session.execute(
-            delete(AcademicPotentialSource)
-            .where(AcademicPotentialSource.academic_id == a.id)
-        )
+    db.session.delete(a)
+    db.session.commit()
 
-        db.session.delete(a)
-        db.session.commit()
-
-    return redirect(url_for('ui.index'))
+    return refresh_response()
 
 
-@blueprint.route("/update_academic", methods=['POST'])
+@blueprint.route("/update_academic/<int:id>", methods=['POST'])
 @roles_accepted('editor')
-def update_academic():
-    form = ConfirmForm()
+def update_academic(id):
+    academic = db.get_or_404(Academic, id)
 
-    if form.validate_on_submit():
-        academic = db.get_or_404(Academic, form.id.data)
+    update_single_academic(academic)
 
-        update_single_academic(academic)
-
-    return redirect(url_for('ui.index'))
+    return refresh_response()

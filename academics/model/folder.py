@@ -34,10 +34,6 @@ class Folder(db.Model):
 
 
 class FolderDoi(db.Model):
-    __table_args__ = (
-        UniqueConstraint("folder_id", "doi", name='ux__folder_doi__folder_id__doi'),
-    )
-
     id: Mapped[int] = mapped_column(primary_key=True)
     folder_id = mapped_column(ForeignKey(Folder.id), nullable=False, index=True)
     folder: Mapped[Folder] = relationship(

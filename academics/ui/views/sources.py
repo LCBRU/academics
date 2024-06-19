@@ -92,15 +92,12 @@ def academics_amend_potential_sources(id, academic_id, status):
     return trigger_response('refreshModal')
 
 
-@blueprint.route("/sources/delete", methods=['POST'])
+@blueprint.route("/sources/delete/<int:id>", methods=['POST'])
 @roles_accepted('editor')
-def delete_author():
-    form = ConfirmForm()
+def delete_author(id):
+    s = db.get_or_404(Source, id)
 
-    if form.validate_on_submit():
-        s = db.get_or_404(Source, form.id.data)
+    db.session.delete(s)
+    db.session.commit()
 
-        db.session.delete(s)
-        db.session.commit()
-
-    return redirect(url_for('ui.index'))
+    return refresh_response()

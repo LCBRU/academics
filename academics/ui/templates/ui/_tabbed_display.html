@@ -1,4 +1,0 @@
-{% macro tabbed_display_tab(selector, this_selector, name, url) %}
-    <a class="{% if selector == this_selector %}selected{% endif %}"
-        href="#" hx-get="{{ url }}">{{name}}</a>
-{% endmacro %}

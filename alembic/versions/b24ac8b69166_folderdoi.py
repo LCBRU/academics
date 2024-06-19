@@ -23,7 +23,6 @@ def upgrade() -> None:
     sa.Column('folder_id', sa.Integer(), nullable=False),
     sa.Column('doi', sa.Unicode(length=1000), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('folder_id', 'doi', name='ux__folder_doi__folder_id__doi')
     )
     op.create_index(index_name='ix_folder_doi__folder_id', table_name='folder_doi', columns=('folder_id',))
     op.create_foreign_key('fk_folder_doi__folder', 'folder_doi', 'folder', ('folder_id', ), ('id', ))

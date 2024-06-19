@@ -1,14 +1,13 @@
 {% from "ui/_folder_dois.html" import render_publication_folders with context %}
-{% from "ui/_tabbed_display.html" import tabbed_display_tab with context %}
-
+{% from "lbrc/tabbed_display.html" import tabbed_display_tab with context %}
 
 {% macro render_publication_title(publication) %}
 
 {% set cp = publication.best_catalog_publication %}
 
-<div class="publication_title">
-    <h3 class="main_title">{{cp.title}}</h3>
-    <h4 class="subtitle">{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
+<div class="flex_two_left_grow">
+    <h3>{{cp.title}}</h3>
+    <h4>{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
 </div>
 {% endmacro %}
 
@@ -20,37 +19,29 @@
 {% set col = '#03A9F4' %}
 {% if publication.nihr_acknowledgement.name | default_if_none('Unvalidated') == 'Unvalidated' %}
     {% set col = '#03A9F4' %}
-{% else%}
+{% else %}
     {% set col = publication.nihr_acknowledgement.colour %}
 {% endif %}
 
-<header id="publication_bar_{{publication.id}}" style="--_color: {{col}};" hx-target="#publication_bar_{{publication.id}}" hx-swap="outerHTML">
-    <div class="publication_access">
-        {% if current_user.has_role('validator') %}
-            {% if publication.preprint %}
-                {% set pp_cls = 'preprint' %}
-                {% set pp_name = 'Preprint' %}
-            {% else %}
-                {% set pp_cls = 'not_preprint' %}
-                {% set pp_name = 'Not Preprint' %}
-            {% endif %}
-
-            <button
-                id="btnPreprint_{{publication.id}}"
-                type="button"
-                class="btn dropdown-toggle {{pp_cls}}"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">{{pp_name}}</button>
-            <div class="dropdown-menu" aria-labelledby="btnPreprint_{{publication.id}}">
-                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_preprint', id=publication.id, is_preprint=1)}}">Preprint</a>
-                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_preprint', id=publication.id, is_preprint=0)}}">Not Preprint</a>
-            </div>
+<header class="flex_two_left_grow" id="publication_bar_{{publication.id}}" style="--_color: {{col}};" hx-target="#publication_bar_{{publication.id}}" hx-swap="outerHTML">
+    <nav class="link_list">
+        {% if publication.preprint %}
+            {% set pp_cls = 'preprint' %}
+            {% set pp_name = 'Preprint' %}
         {% else %}
-            {% if publication.preprint %}
-                <button id="btnPreprint_{{publication.id}}" type="button" class="btn preprint">Preprint</button>
-            {% endif %}
+            {% set pp_cls = 'not_preprint' %}
+            {% set pp_name = 'Not Preprint' %}
         {% endif %}
+
+        <div class="dropdown">
+            <a href="javascript:;" class="{{ pp_cls }}" role="button">{{ pp_name }}</a>
+            {% if current_user.has_role('validator') %}
+                <ul>
+                    <li><a href="javascript:;" hx-post="{{url_for('ui.publication_update_preprint', id=publication.id, is_preprint=1)}}">Preprint</a></li>
+                    <li><a href="javascript:;" hx-post="{{url_for('ui.publication_update_preprint', id=publication.id, is_preprint=0)}}">Not Preprint</a></li>
+                </ul>
+            {% endif %}
+        </div>
 
         <span>{{ cp.subtype.description | blank_if_none | title_case}}:</span>
 
@@ -59,47 +50,37 @@
         {% else%}
             <span class="closed_access">Closed Access</span>
         {% endif %}
-    </div>
+    </nav>
     
-    <div class="publication_links">
-        {% if current_user.has_role('validator') %}
-            <button
-                id="btnGroupAcknowledgement_{{publication.id}}"
-                type="button"
-                class="btn dropdown-toggle"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">
-                    {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
-            </button>
-            <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement_{{publication.id}}">
-                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_nihr_acknowledgement', id=publication.id, nihr_acknowledgement_id=0)}}">Unvalidated</a>
-                {% for n in nihr_acknowledgements %}
-                    <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_update_nihr_acknowledgement', id=publication.id, nihr_acknowledgement_id=n.id)}}">{{ n.name }}</a>
-                {% endfor %}
-            </div>
-        {% else %}
-            <button id="btnGroupAcknowledgement_{{publication.id}}" type="button" class="btn">
-                    {{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}
-            </button>
-        {% endif %}
+    <nav class="link_list" style="--_button_background_color: {{col}}">
+        <div class="dropdown">
+            <a href="javascript:;" role="button">{{ publication.nihr_acknowledgement.name | default_if_none('Unvalidated') }}</a>
+            {% if current_user.has_role('validator') %}
+                <ul>
+                    <li><a class="dropdown-item" href="javascript:;" hx-post="{{url_for('ui.publication_update_nihr_acknowledgement', id=publication.id, nihr_acknowledgement_id=0)}}">Unvalidated</a></li>
+                    {% for n in nihr_acknowledgements %}
+                        <li><a class="dropdown-item" href="javascript:;" hx-post="{{url_for('ui.publication_update_nihr_acknowledgement', id=publication.id, nihr_acknowledgement_id=n.id)}}">{{ n.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
 
         {% if cp.catalog %}
-            <a href="{{ cp.href }}" class="btn" target="_blank" title="View on {{ cp.catalog | title_case}} ">
+            <a href="{{ cp.href }}" target="_blank" title="View on {{ cp.catalog | title_case}}" role="button">
                 {% if cp.catalog == 'scopus' %}
-                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg> Scopus
+                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1rem" height="1rem"><use href="#scopus_logo" /></svg> Scopus
                 {% elif cp.catalog == 'open alex' %}
-                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#open_alex_logo" /></svg> Open Alex
+                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1rem" height="1rem"><use href="#open_alex_logo" /></svg> Open Alex
                 {% endif %}
             </a>
         {% endif %}
 
         {% if cp.doi %}
-            <a href="http://doi.org/{{ publication.doi }}" class="btn" target="_blank" title="View publication">
-                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
+            <a href="http://doi.org/{{ publication.doi }}" target="_blank" title="View publication" role="button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1rem" height="1rem"><use href="#doi_logo" /></svg>
                 {{cp.doi}}
             </a>
-            <a href="https://google.com/search?q={{ cp.doi }}" class="btn btn-primary" target="_blank" title="Google Publication"><i class="fab fa-google"></i></a>
+            <a href="https://google.com/search?q={{ cp.doi }}" target="_blank" title="Google Publication" role="button"><i class="fab fa-google"></i></a>
         {% endif %}
     </div>
 </header>
@@ -123,15 +104,15 @@
             {% if details_selector == 'funding' %}
                 {{ cp.funding_text | blank_if_none | paragraphs }}
             {% elif details_selector == 'sponsors' %}
-                <ul class="list-group">
+                <ul>
                     {% for s in cp.sponsors %}
-                        <li class="list-group-item {% if s.is_nihr %} list-group-item-success{% endif %}">{{ s.name }}</li>
+                        <li class="{% if s.is_nihr %}list-group-item-success{% endif %}">{{ s.name }}</li>
                     {% endfor %}
                 </ul>
             {% elif details_selector == 'affiliations' %}
-                <ul class="list-group">
+                <ul>
                     {% for a in cp.affiliations  | sort(attribute='name')%}
-                        <li class="list-group-item {% if a.is_nihr %} list-group-item-success{% endif %}">{{ a.name }}</li>
+                        <li class="{% if a.is_nihr %}list-group-item-success{% endif %}">{{ a.name }}</li>
                     {% endfor %}
                 </ul>
             {% elif details_selector == 'abstract' %}

@@ -9,6 +9,8 @@ from academics.model.academic import Academic, Affiliation, CatalogPublicationsS
 from academics.model.publication import *
 from academics.model.theme import Theme
 from academics.security import ROLE_EDITOR, ROLE_VALIDATOR, get_roles
+from faker import Faker
+fake = Faker()
 
 
 load_dotenv()
@@ -51,9 +53,42 @@ acknowledgement_details = {
     'Unable To Check - Full Paper Not Available': False,    
 }
 
+acknowledgement_details = [
+    {
+        'name': 'NIHR Acknowledged',
+        'acknowledged': True,
+        'colour': '#F44336',
+    },
+    {
+        'name': 'BRC Investigators Not A Primary Author',
+        'acknowledged': False,
+        'colour': '#3F51B5',
+    },
+    {
+        'name': 'Need Senior Review',
+        'acknowledged': False,
+        'colour': '#009688',
+    },
+    {
+        'name': 'NIHR Not Acknowledged',
+        'acknowledged': False,
+        'colour': '#8BC34A',
+    },
+    {
+        'name': 'No BRC Investigator On Publication Or Not Relevant',
+        'acknowledged': False,
+        'colour': '#FF5722',
+    },
+    {
+        'name': 'Unable To Check - Full Paper Not Available',
+        'acknowledged': False,
+        'colour': '#9C27B0',
+    },
+]
+
 # Acknowledgement
-for n, a in acknowledgement_details.items():
-    db.session.add(NihrAcknowledgement(name=n, acknowledged=a))
+for a in acknowledgement_details:
+    db.session.add(NihrAcknowledgement(name=a['name'], acknowledged=a['acknowledged'], colour=a['colour']))
 db.session.commit()
 
 # Keyword
@@ -76,19 +111,22 @@ for a in [
         'first_name': 'Fred',
         'last_name': 'Hoyle',
         'themes': [1],
+        'has_left_brc': False,
     },
     {
         'first_name': 'Richard',
         'last_name': 'Feynman',
         'themes': [1,2],
+        'has_left_brc': False,
     },
     {
         'first_name': 'Peter',
         'last_name': 'Faulk',
         'themes': [2],
+        'has_left_brc': True,
     },
 ]:
-    aca = Academic(first_name=a['first_name'], last_name=a['last_name'], initialised=True)
+    aca = Academic(first_name=a['first_name'], last_name=a['last_name'], initialised=True, has_left_brc=a['has_left_brc'])
     aca.themes = db.session.execute(select(Theme).where(Theme.id.in_(a['themes']))).scalars().all()
     db.session.add(aca)
 
@@ -401,10 +439,11 @@ for pd in [
 
     cp.keywords = set(db.session.execute(select(Keyword).where(Keyword.id.in_(pd['keywords']))).scalars().all())
 
-    for s in pd['sources']:
+    for i, s in enumerate(pd['sources']):
         cp.catalog_publication_sources.append(CatalogPublicationsSources(
             catalog_publication=cp,
             source=db.session.get(Source, s),
+            ordinal=i,
         ))
         db.session.add(cp)
 

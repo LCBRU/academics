@@ -1,49 +1,29 @@
-{% extends "modal.html" %}
-{% import "lbrc_flask/form_macros.html" as formhelper %}
+{% extends "lbrc/modal.html" %}
+{% from "lbrc/form_macros.html" import render_field, render_modal_button_bar %}
 
 {% block content %}
     <div>
-        <dl class="row">
-            <div class="col">
-                <dt>Name</dt>
-                <dd>{{source.display_name}}</dd>
-            </div>
-        </dl>
-        <dl class="row">
-            <div class="col">
-                <dt>Catalog</dt>
-                <dd>{{source.catalog}}</dd>
-                </div>
-            <div class="col">
-                <dt>Catalog Identifier</dt>
-                <dd>{{source.catalog_identifier}}</dd>
-            </div>
-        </dl>
-        <dl class="row">
-            <div class="col">
-                <dt>Academic</dt>
-                <dd>{{source.academic.full_name}}</dd>
-            </div>
-            <div class="col">
-                <dt>Has Left BRC</dt>
-                <dd>{{source.has_left_brc | yes_no}}</dd>
-            </div>
-        </dl>
-        <dl class="row">
-            <div class="col">
-                <dt>Themes</dt>
-                {% for t in source.academic.themes %}
-                    <dd>{{t.name | blank_if_none}}</dd>
-                {% endfor %}
-            </div>
-            <div class="col">
-                <dt>ORCID</dt>
-                <dd>{{source.orcid | blank_if_none}}</dd>
-            </div>
+        <dl>
+            <dt>Name</dt>
+            <dd>{{source.display_name}}</dd>
+            <dt>Catalog</dt>
+            <dd>{{source.catalog}}</dd>
+            <dt>Catalog Identifier</dt>
+            <dd>{{source.catalog_identifier}}</dd>
+            <dt>Academic</dt>
+            <dd>{{source.academic.full_name}}</dd>
+            <dt>Has Left BRC</dt>
+            <dd>{{source.has_left_brc | yes_no}}</dd>
+            <dt>Themes</dt>
+            {% for t in source.academic.themes %}
+                <dd>{{t.name | blank_if_none}}</dd>
+            {% endfor %}
+            <dt>ORCID</dt>
+            <dd>{{source.orcid | blank_if_none}}</dd>
         </dl>
 
         {% if source.potential_academics | length > 0 %}
-            <table class="table table-sm">
+            <table>
                 <colgroup>
                     <col style="width:70%">
                     <col style="width:30%">
@@ -59,17 +39,19 @@
                         <tr>
                             <td>{{ps.academic.full_name}}</td>
                             <td>
-                                <div class="btn-toolbar float-right">
-                                    <div class="btn-group mr-1 mb-1" role="group">
-                                        <button id="btnPotentialSource_{{ps.id}}" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            {{ ps.status }}
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="btnPotentialSource_{{ps.id}}">
-                                            <a class="dropdown-item" href="Javascript://" onclick="amend_potential_source_assignment()" data-id="{{ps.id}}" data-academic-id="{{ps.academic.id}}" data-status="Unassigned">Unassigned</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="amend_potential_source_assignment()" data-id="{{ps.id}}" data-academic-id="{{ps.academic.id}}" data-status="No Match">No Match</a>
-                                            <a class="dropdown-item" href="Javascript://" onclick="amend_potential_source_assignment()" data-id="{{ps.id}}" data-academic-id="{{ps.academic.id}}" data-status="Match">Match</a>
-                                        </div>
-                                    </div>
+                                <div class="dropdown">
+                                    <a href="javascript:;">{{ ps.status }}</a>
+                                    <ul>
+                                        {% if ps.can_unassign %}
+                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=academic.id, status='unassigned') }}">Unassigned</a></li>
+                                        {% endif %}
+                                        {% if ps.can_no_match %}
+                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=academic.id, status='no match') }}">No Match</a></li>
+                                        {% endif %}
+                                        {% if ps.can_match %}
+                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=academic.id, status='match') }}">Match</a></li>
+                                        {% endif %}
+                                    </ul>
                                 </div>
                             </td>
                         </tr>
@@ -79,15 +61,12 @@
         {% endif %}
 
         <form hx-post="{{ url_for('ui.source_summary_details', id=source.id, prev=previous_page) }}">
-            {{ form.hidden_tag() }}
-
-            <label for="">Add to other academic</label>
-            {{ formhelper.render_field_actual(form.academic_id) }}
-
-            <div class="button_bar">
-                <a href="#" class="btn btn-default" _="on click trigger closeModal" role="button">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save</button>
-            </div>
+            <fieldset>
+                {{ form.hidden_tag() }}
+                <label for="">Add to other academic</label>
+                {{ render_field(form.academic_id) }}
+                {{ render_modal_button_bar() }}
+            </fieldset>
         </form>
     </div>
 {% endblock %}
