@@ -17,7 +17,7 @@
             <li><a href="{{url_for('ui.validation')}}"><i class="far fa-check-circle"></i> Validation</a></li>
         {% endif %}
 
-        <li><a href="{{url_for('ui.publications')}}"><i class="fas fa-folder"></i> Publications</a></li>
+        <li><a href="{{url_for('ui.folders')}}"><i class="fas fa-folder"></i> Folders</a></li>
 
         {% if current_user.is_admin %}
             <li><a href="{{url_for('ui.objectives')}}"><i class="far fas fa-tasks"></i> Objectives</a></li>

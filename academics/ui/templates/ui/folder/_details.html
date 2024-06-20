@@ -1,6 +1,6 @@
+{% from "lbrc/tabbed_display.html" import tabbed_display_tab with context %}
 {% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_details %}
 {% from "ui/_folder_dois.html" import render_publication_folders with context %}
-{% from "ui/_tabbed_display.html" import tabbed_display_tab with context %}
 {% from "ui/_publication_authors.html" import render_publication_authors with context %}
 
 
@@ -8,7 +8,7 @@
     <div id="details_{{folder.id}}" class="tabbed_display" hx-target="#details_{{folder.id}}" hx-swap="outerHTML">
 
         <div class="tabbed_display_tabs {{detail_selector}}">
-            {{ tabbed_display_tab(details_selector, 'users', 'Users', url_for('ui.folder_details', id=folder.id, detail_selector='users')) }}
+            {{ tabbed_display_tab(details_selector, 'users', 'Shared With', url_for('ui.folder_details', id=folder.id, detail_selector='users')) }}
             {{ tabbed_display_tab(details_selector, 'dois', 'DOIs', url_for('ui.folder_details', id=folder.id, detail_selector='dois')) }}
         </div>
         <div class="tabbed_display_content">
@@ -23,30 +23,29 @@
 
 
 {% macro render_folder_users(folder, users) %}
-    <div id="users_{{folder.id}}">
+    <nav class="link_list">
         {% if users | length > 0 and folder.owner == current_user %}
-            <h5>Shared With</h5>
             {% for u in folder.shared_users | sort(attribute='full_name')%}
-                <div class="btn-group mr-1 mb-1" role="group">
-                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-user"></i> {{ u.full_name }}</button>
-                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                        <a class="dropdown-item" href="#" hx-post="{{url_for('ui.folder_remove_shared_user', id=folder.id, user_id=u.id)}}">Remove</a>
-                    </div>
+                <div class="dropdown">
+                    <a class="icon user" href="javascript:;" role="button">{{ u.full_name }}</a>
+                    <ul>
+                        <li><a href="javascript:;" hx-post="{{url_for('ui.folder_remove_shared_user', id=folder.id, user_id=u.id)}}">Remove</a></li>
+                    </ul>
                 </div>
             {% endfor %}
 
             {% if users | reject('in', folder.shared_users) | list | length > 0 %}
-                <div class="btn-group mr-1 mb-1" role="group">
-                    <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-user-plus"></i></button>
-                    <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+                <div class="dropdown">
+                    <a class="icon user_add" href="javascript:;" role="button"></a>
+                    <ul>
                         {% for u in users | reject('in', folder.shared_users) | sort(attribute='full_name') %}
-                            <a class="dropdown-item" href="#" hx-post="{{url_for('ui.folder_add_shared_user', id=folder.id, user_id=u.id)}}">Share with '{{u.full_name}}'</a>
+                            <li><a href="javascript:;" hx-post="{{url_for('ui.folder_add_shared_user', id=folder.id, user_id=u.id)}}">Share with '{{u.full_name}}'</a></li>
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
             {% endif %}
         {% endif %}
-    </div>
+    </nav>
 {% endmacro %}
 
 
@@ -54,33 +53,37 @@
     <ul class="panel_list">
         {% for d in folder.dois | sort(attribute='doi')%}
             <li>
-                <header>
-                    <a href="#" hx-post="{{url_for('ui.publication_delete_folder', folder_id=folder.id, doi=d.doi)}}"><i class="fas fa-trash"></i></a>
-                    <a href="http://doi.org/{{ d.doi }}" class="btn btn-primary" target="_blank" title="View publication">
-                        <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
-                        {{d.doi}}
-                    </a>
-                    <a href="https://www.scopus.com/results/results.uri?s=DOI({{ d.doi }})" class="btn" target="_blank" title="Search on Scopus ">
-                        <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
-                        Search Scopus
-                    </a>
-                    {% if d.invalid_doi %}
-                        <div class="badge badge-pill badge-danger">Invalid DOI</div>
-                    {% endif %}
-                    {% if not d.publication %}
-                        <div class="badge badge-pill badge-warning">Publication Missing</div>
-                    {% endif %}
+                <header class="flex_two_left_grow">
+                    <nav class="link_list">
+                        <a class="icon delete" href="javascript:;" hx-post="{{url_for('ui.folder_delete_publication', folder_id=folder.id, doi=d.doi)}}"></a>
+                    </nav>
+                    <nav class="link_list">
+                        <a href="http://doi.org/{{ d.doi }}" target="_blank" title="View publication" role="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#doi_logo" /></svg>
+                            {{d.doi}}
+                        </a>
+                        <a href="https://www.scopus.com/results/results.uri?s=DOI({{ d.doi }})" target="_blank" title="Search on Scopus" role="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1.5rem" height="1.5rem"><use href="#scopus_logo" /></svg>
+                            Search Scopus
+                        </a>
+                        {% if d.invalid_doi %}
+                            <div class="pill error">Invalid DOI</div>
+                        {% endif %}
+                        {% if not d.publication %}
+                            <div class="pill warning">Publication Missing</div>
+                        {% endif %}    
+                    </nav>    
                 </header>
                           
                 {% if d.publication %}
                     {{ render_publication_title(d.publication) }}
 
-                    <h3>Other Folders</h3>
+                    <h4>Other Folders</h4>
                     {{ render_publication_folders(d.publication, folders) }}
 
                     {{ render_publication_authors(d.publication, 'brc') }}
 
-                    <h4>Publication first imported {{ d.publication.created_date | date_format }}</h4>
+                    <h5>Publication first imported {{ d.publication.created_date | date_format }}</h5>
                 {% endif %}
             </li>
         {% endfor %}

@@ -290,4 +290,4 @@ class CatalogPublication(db.Model, AuditMixin):
 
     @property
     def affiliations(self):
-        return set(chain.from_iterable([cps.affiliations for cps in self.catalog_publication_sources]))
+        return set(chain.from_iterable([cps.source.affiliations for cps in self.catalog_publication_sources]))

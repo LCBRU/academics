@@ -47,7 +47,7 @@ def folder_upload_dois(id):
         return refresh_response()
 
     return render_template(
-        "form_modal.html",
+        "lbrc/form_modal.html",
         title="Upload Folder DOIs",
         form=form,
         url=url_for('ui.folder_upload_dois', id=id),

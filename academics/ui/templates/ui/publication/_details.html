@@ -104,23 +104,37 @@
             {% if details_selector == 'funding' %}
                 {{ cp.funding_text | blank_if_none | paragraphs }}
             {% elif details_selector == 'sponsors' %}
-                <ul>
-                    {% for s in cp.sponsors %}
-                        <li class="{% if s.is_nihr %}list-group-item-success{% endif %}">{{ s.name }}</li>
+                <nav class="link_list">
+                    {% for s in cp.sponsors | sort(attribute='name') %}
+                        {% set cls = 'muted' %}
+
+                        {% if s.is_nihr %}
+                            {% set cls = '' %}
+                        {% endif %}
+                
+                        <a class="{{cls}}" role="button">{{ s.name }}</a>
                     {% endfor %}
-                </ul>
+                </nav>
             {% elif details_selector == 'affiliations' %}
-                <ul>
-                    {% for a in cp.affiliations  | sort(attribute='name')%}
-                        <li class="{% if a.is_nihr %}list-group-item-success{% endif %}">{{ a.name }}</li>
+                <nav class="link_list">
+                    {% for a in cp.affiliations | sort(attribute='name') %}
+                        {% set cls = 'muted' %}
+
+                        {% if a.is_nihr %}
+                            {% set cls = '' %}
+                        {% endif %}
+                
+                        <a class="{{cls}}" role="button">{{ a.name }}</a>
                     {% endfor %}
-                </ul>
+                </nav>
             {% elif details_selector == 'abstract' %}
-                {{cp.abstract | blank_if_none}}
+                {{cp.abstract | blank_if_none | paragraphs }}
             {% elif details_selector == 'keywords' %}
-                {% for k in cp.keywords | sort(attribute='keyword')%}
-                    <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="mr-1">{{ k.keyword }}</a>
-                {% endfor %}
+                <nav class="link_list">
+                    {% for k in cp.keywords | sort(attribute='keyword') %}
+                        <a href="{{ url_for('ui.publications', keywords=k.id ) }}" class="{{cls}}" role="button">{{ k.keyword }}</a>
+                    {% endfor %}
+                </nav>
             {% elif details_selector == 'folders' %}
                 {{ render_publication_folders(cp.publication, folders) }}
             {% endif %}

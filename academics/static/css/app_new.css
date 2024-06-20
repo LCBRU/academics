@@ -135,3 +135,8 @@ dl.publication_details > div {
     --_img: url(../img/Closed_Access_logo_white.png);
     color: var(--color-dark-grey);
 }
+
+.icon.publication::after {
+    content: "\f1ea";
+}
+

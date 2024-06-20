@@ -1,25 +1,25 @@
 {% macro render_publication_folders(publication, folders) %}
-    <div id="publication_{{publication.id}}_folders" hx-target="#publication_{{publication.id}}_folders" hx-swap="outerHTML">
+    <nav class="link_list" id="publication_{{publication.id}}_folders" hx-target="#publication_{{publication.id}}_folders" hx-swap="outerHTML">
         {% for f in publication.folders | sort(attribute='name')%}
-            <div class="btn-group mr-1 mb-1" role="group">
-                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder"></i> {{ f.name }}</button>
-                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
-                    <a class="dropdown-item" href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications in this folder</a>
-                    <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_delete_folder', folder_id=f.id, doi=publication.doi)}}">Remove</a>
-                </div>
+            <div class="dropdown">
+                <a href="javascript:;" class="icon folder" role="button">{{f.name}}</a>
+                <ul>
+                    <li><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications in this folder</a></li>
+                    <li><a href="javascript:;" hx-post="{{url_for('ui.publication_delete_folder', folder_id=f.id, doi=publication.doi)}}">Remove</a></li>
+                </ul>
             </div>
         {% endfor %}
 
         {% if folders | reject('in', publication.folders) | list | length > 0 %}
-            <div class="btn-group mr-1 mb-1" role="group">
-                <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" data-display="static" aria-expanded="false"><i class="fas fa-folder-plus"></i></button>
-                <div class="dropdown-menu" aria-labelledby="btnGroupAcknowledgement">
+            <div class="dropdown">
+                <a href="javascript:;" class="icon folder_add" role="button"></a>
+                <ul>
                     {% for f in folders | reject('in', publication.folders) | sort(attribute='name')%}
-                        <a class="dropdown-item" href="#" hx-post="{{url_for('ui.publication_add_folder', doi=publication.doi, folder_id=f.id)}}">{{ f.name }}</a>
+                        <li><a href="javascript:;" hx-post="{{url_for('ui.publication_add_folder', doi=publication.doi, folder_id=f.id)}}">{{ f.name }}</a></li>
                     {% endfor %}
-                </div>
+                </ul>
             </div>
         {% endif %}
-    </div>
+        </nav>
 {% endmacro %}
 

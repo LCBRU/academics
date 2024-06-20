@@ -1,16 +1,17 @@
-{% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
-{% from "ui/publication/_details.html" import render_publication_resources, render_publication_bar, render_publication_title, render_publication_details %}
-{% from "lbrc_flask/modal_macros.html" import render_url_modal %}
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
+
+{% from "ui/publication/_details.html" import render_publication_bar, render_publication_title, render_publication_details %}
 {% from "ui/assets.html" import render_assets %}
 {% from "ui/_publication_authors.html" import render_publication_authors with context %}
 
 
-{% block content %}
-<section>
-    <div class="page-header">
-        <h1>Validation</h1>
-    </div>
+{% block menu_page_content %}
+<section class="container">
+    <header>
+        <h2>Validation</h2>
+    </header>
 
     {{ pagination_summary(publications, 'publication') }}
 
@@ -31,6 +32,5 @@
 </section>
 
 {{ render_pagination(publications, 'ui.validation', form=search_form) }}
-{{ render_url_modal('source_details', 'Source Details') }}
 
 {% endblock %}

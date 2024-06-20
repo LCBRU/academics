@@ -1,84 +1,51 @@
-{% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
-{% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal, render_url_modal %}
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
 {% from "ui/folder/_details.html" import render_folder_details with context %}
 {% from "ui/assets.html" import render_assets %}
 
 
-{% block content %}
-<section>
+{% block menu_page_content %}
+<section class="container">
     {{ render_assets() }}
 
-    <div class="page-header">
-        <h1>Folders</h1>
+    <header>
+        <h2>Folders</h2>
 
-        {{ render_search(
-            search_form,
-            'ui.folders',
-            placeholder='enter search text - searches name',
-            buttons=[
-                {
-                    'id': 'add_folder',
-                    'text': 'Add',
-                    'data-toggle': "modal",
-                    'data-id': "",
-                    'data-name': "",
-                    'data-target': "#editFolderModal",
-                },
-            ],
-        ) }}
-
-    </div>
+        <form method="GET" action="{{ url_for('ui.folders') }}">
+            <fieldset>
+                {{ search_form.hidden_tag() }}
+                {{ render_form_fields(search_form) }}
+    
+                <div class="button_bar" hx-target="body">
+                    <a class="icon add" href="javascript:;" title="Add Folder" hx-get="{{ url_for('ui.folder_edit' ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Folder</a>
+                </div>    
+            </fieldset>
+        </form>
+    </header>
 
     {{ pagination_summary(folders, 'folder') }}
 
-    <ul class="list-group">
+    <ul class="panel_list">
         {% for f in folders.items %}
-            <li class="list-group-item summary_details">
-                <div class='row'>
-                    <div class="col-7">
-                        <h3>{{f.name}}</h3>
-                    </div>
-                    <div class="col-5">
-                        <div class="btn-toolbar float-right">
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a href="{{ url_for('ui.publications', folder_id=f.id ) }}" title="Publications in {{ f.name }}"><i class="far fa-newspaper"></i></a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a href="#" title="Upload Publication DOIs" hx-get="{{ url_for('ui.folder_upload_dois', id=f.id ) }}" hx-target="body" hx-swap="beforeend"><i class="fas fa-upload"></i></a>
-                            </div>
-                            {% if f.owner == current_user %}
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <a
-                                        data-toggle="modal"
-                                        data-id="{{ f.id }}"
-                                        data-name="{{ f.name }}"
-                                        title="Edit folder {{ f.name }}"
-                                        data-target="#editFolderModal"
-                                        href="#"><i class="fas fa-edit"></i></a>
-                                </div>
-                                <div class="btn-group mr-1 mb-1" role="group">
-                                    <a
-                                        data-toggle="modal"
-                                        data-id="{{ f.id }}"
-                                        data-name="{{ f.name }}"
-                                        title="Delete folder {{ f.name }}"
-                                        data-target="#deleteModal"
-                                        href="#"><i class="fas fa-trash"></i></a>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
+            <li>
+                <div class="flex_two_left_grow">
+                    <h3>{{f.name}}</h3>
+                    <nav class="link_list">
+                        <a class="icon publication" href="{{ url_for('ui.publications', folder_id=f.id ) }}" title="Publications in {{ f.name }}"></a>
+                        <a class="icon upload" href="javascript:;" title="Upload Publication DOIs" hx-get="{{ url_for('ui.folder_upload_dois', id=f.id ) }}" hx-target="body" hx-swap="beforeend"></a>
+                        {% if f.owner == current_user %}
+                            <a class="icon edit" href="javascript:;" title="Edit Folder" hx-get="{{ url_for('ui.folder_edit', id=f.id ) }}" hx-target="body" hx-swap="beforeend"></a>
+                            <a class="icon delete" href="javascript:;" title="Delete Folder" hx-post="{{ url_for('ui.folder_delete', id=f.id ) }}" hx-confirm="Are you sure you want to delete folder {{f.name}}"></a>
+                        {% endif %}
+                    </nav>
                 </div>
                 <div>
                     {% if f.owner != current_user %}
                         <h5>Owned by {{f.owner.full_name}}</h4>
                     {% endif %}
-                    <h4><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">{{f.publication_count}} publication(s)</a></h4>
                 </div>
-                <div id="folder_users_{{f.id}}">
-                    {{ render_folder_details(f, 'users', users, folders) }}
-                </div>
+                {{ render_folder_details(f, 'users', users, folders) }}
             </li>
         {% endfor %}
     </ul>
@@ -86,13 +53,4 @@
 
 {{ render_pagination(folders, 'ui.folders', form=search_form) }}
 
-{{ render_edit_modal('editFolderModal', 'Folder Details', url_for('ui.folder_save', prev=request.full_path), edit_folder_form) }}
-{{ render_delete_modal('deleteModal', 'Delete Folder', url_for('ui.folder_delete', prev=request.full_path), confirm_form) }}
-{{ render_url_modal('source_details', 'Source Details') }}
-
-
-{% endblock %}
-
-{% block js %}
-<script>htmx.logAll();</script>
 {% endblock %}
