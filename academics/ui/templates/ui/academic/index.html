@@ -80,8 +80,8 @@
                     <tbody>
                         {% for au in a.sources_by_h_index %}
                             <tr>
-                                <td class="flex_two_left_grow">
-                                    <div>
+                                <td>
+                                    <div class="flex_two_left_grow">
                                         <h3>
                                             {% if current_user.has_role('editor') %}
                                                 <a class="icon delete"
@@ -91,20 +91,19 @@
                                                     href="javascript:;"></a>
                                             {% endif %}
                                             {{au.display_name}}
-                                        </h3>
-                                        
-                                        {% for a in au.affiliations %}
-                                            <h5>{{a.name}}</h5>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="orcid">
-                                        {% if au.orcid %}
-                                            <a href="{{a.orcid_link}}" target="_blank">{{au.orcid}}</a>
-                                            {% if au.orcid_mismatch %}
-                                                &nbsp;<i class="fas fa-exclamation-triangle text-danger" title="ORCID Mismatch with Sources"></i>
+                                        </h3>                                        
+                                        <div class="orcid">
+                                            {% if au.orcid %}
+                                                <a href="{{a.orcid_link}}" target="_blank">{{au.orcid}}</a>
+                                                {% if au.orcid_mismatch %}
+                                                    &nbsp;<i class="fas fa-exclamation-triangle text-danger" title="ORCID Mismatch with Sources"></i>
+                                                {% endif %}
                                             {% endif %}
-                                        {% endif %}
+                                        </div>
                                     </div>
+                                    {% for a in au.affiliations %}
+                                        <h5>{{a.name}}</h5>
+                                    {% endfor %}
                                 </td>
                                 <td><a href="{{ url_for('ui.publications', author_id=au.id ) }}">{{au.publication_count}}</a></td>
                                 <td>{{au.citation_count | blank_if_none}}</td>
