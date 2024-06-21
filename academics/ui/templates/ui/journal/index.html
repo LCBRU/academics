@@ -1,20 +1,21 @@
-{% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
 {% from "ui/journal/_details.html" import render_journal %}
 
 
-{% block content %}
-<section>
-    <div class="page-header">
-        <h1>Journals</h1>
+{% block menu_page_content %}
+<section class="container">
+    <header>
+        <h2>Journals</h2>
 
-        {{ render_search(
-            search_form,
-            'ui.journals',
-            placeholder='enter search text - searches name',
-        ) }}
-
-    </div>
+        <form method="GET" action="{{ url_for('ui.journals') }}">
+            <fieldset>
+                {{ search_form.hidden_tag() }}
+                {{ render_form_fields(search_form) }}
+            </fieldset>
+        </form>
+    </header>
 
     {{ pagination_summary(journals, 'journal') }}
 

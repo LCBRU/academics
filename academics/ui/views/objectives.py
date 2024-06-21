@@ -1,4 +1,4 @@
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, url_for
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from academics.model.objective import Objective
 from academics.model.security import User
@@ -10,6 +10,7 @@ from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from wtforms import SelectField
 from wtforms.validators import Length, DataRequired
+from lbrc_flask.response import refresh_response
 
 
 class ObjectiveSearchForm(SearchForm):
@@ -34,10 +35,16 @@ class ObjectiveSearchForm(SearchForm):
 class ObjectiveEditForm(FlashingForm):
     id = HiddenField('id')
     name = StringField('Name', validators=[DataRequired(), Length(max=500)])
-    theme_id = HiddenField('Theme', validators=[DataRequired()])
+    theme_id = SelectField('Theme', coerce=int)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        choices = [(t.id, t.name) for t in Theme.query.all()]
+
+        if choices:
+            self.theme_id.choices = choices
+            self.theme_id.default = choices[0][0]
 
 
 @blueprint.route("/objectives/")
@@ -74,35 +81,40 @@ def _get_objective_query(search_form):
     return q
 
 
-@blueprint.route("/objective/save", methods=['POST'])
-def objective_save():
-    form = ObjectiveEditForm()
+@blueprint.route("/objective/<int:id>/edit", methods=['GET', 'POST'])
+@blueprint.route("/objective/add", methods=['GET', 'POST'])
+def objective_edit(id=None):
+    if id:
+        objective = db.get_or_404(Objective, id)
+        title=f'Edit Objective'
+    else:
+        objective = Objective()
+        title=f'Add Objective'
+
+    form = ObjectiveEditForm(obj=objective)
 
     if form.validate_on_submit():
-        id = form.id.data
+        objective.name = form.name.data
+        objective.theme_id = form.theme_id.data
 
-        if id:
-            obj = db.get_or_404(Objective, id)
-        else:
-            obj = Objective()
-
-        obj.name = form.name.data
-        obj.theme_id = form.theme_id.data
-
-        db.session.add(obj)
+        db.session.add(objective)
         db.session.commit()
 
-    return redirect(request.referrer)
+        return refresh_response()
+
+    return render_template(
+        "lbrc/form_modal.html",
+        title=title,
+        form=form,
+        url=url_for('ui.objective_edit', id=id),
+    )
 
 
-@blueprint.route("/objective/delete", methods=['POST'])
-def objective_delete():
-    form = ConfirmForm()
+@blueprint.route("/objective/<int:id>/delete", methods=['POST'])
+def objective_delete(id):
+    objective = db.get_or_404(Objective, id)
 
-    if form.validate_on_submit():
-        objective = db.get_or_404(Objective, form.id.data)
+    db.session.delete(objective)
+    db.session.commit()
 
-        db.session.delete(objective)
-        db.session.commit()
-
-    return redirect(request.referrer)
+    return refresh_response()

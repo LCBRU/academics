@@ -1,64 +1,36 @@
-{% extends "ui/page.html" %}
-{% from "lbrc_flask/form_macros.html" import render_search, render_pagination, pagination_summary %}
-{% from "lbrc_flask/modal_macros.html" import render_edit_modal, render_delete_modal %}
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
 
 
-{% block content %}
-<section>
-    <div class="page-header">
-        <h1>Objectives</h1>
+{% block menu_page_content %}
+<section class="container">
+    <header>
+        <h2>Objectives</h2>
 
-        {{ render_search(
-            search_form,
-            'ui.objectives',
-            placeholder='enter search text - searches name',
-            buttons=[
-                {
-                    'id': 'add_objective',
-                    'text': 'Add',
-                    'data-toggle': "modal",
-                    'data-id': "",
-                    'data-name': "",
-                    'data-theme_id': search_form.get_theme_id(),
-                    'data-target': "#editObjectiveModal",
-                },
-            ],
-        ) }}
-
-    </div>
+        <form method="GET" action="{{ url_for('ui.objectives') }}">
+            <fieldset>
+                {{ search_form.hidden_tag() }}
+                {{ render_form_fields(search_form) }}
+    
+                <div class="button_bar" hx-target="body">
+                    <a class="icon add" href="javascript:;" hx-get="{{ url_for('ui.objective_edit') }}" hx-target="body" hx-swap="beforeend" title="Add Objective" role="button">Add Objective</a>
+                </div>    
+            </fieldset>
+        </form>
+    </header>
 
     {{ pagination_summary(objectives, 'objective') }}
 
-    <ul class="list-group">
+    <ul class="panel_list">
         {% for o in objectives.items %}
-            <li class="list-group-item summary_details">
-                <div class='row'>
-                    <div class="col-7">
-                        <h3>{{o.name}}</h3>
-                    </div>
-                    <div class="col-5">
-                        <div class="btn-toolbar float-right">
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a
-                                    data-toggle="modal"
-                                    data-id="{{ o.id }}"
-                                    data-name="{{ o.name }}"
-                                    title="Edit obejctive {{ o.name }}"
-                                    data-target="#editObjectiveModal"
-                                    data-theme_id="{{o.theme_id}}"
-                                    href="#"><i class="fas fa-edit"></i></a>
-                            </div>
-                            <div class="btn-group mr-1 mb-1" role="group">
-                                <a
-                                    data-toggle="modal"
-                                    data-id="{{ o.id }}"
-                                    data-name="{{ o.name }}"
-                                    title="Delete objective {{ o.name }}"
-                                    data-target="#deleteObjectiveModal"
-                                    href="#"><i class="fas fa-trash"></i></a>
-                            </div>
-                        </div>
-                    </div>
+            <li>
+                <div class='flex_two_left_grow'>
+                    <h3>{{o.name}}</h3>
+                    <nav class="link_list">
+                        <a class="icon edit" href="javascript:;" hx-get="{{ url_for('ui.objective_edit', id=o.id ) }}" hx-target="body" hx-swap="beforeend" title="Edit {{ o.name }}"></a>
+                        <a class="icon delete" href="javascript:;" title="Delete {{o.name}}" hx-post="{{ url_for('ui.objective_delete', id=o.id ) }}" hx-confirm="Are you sure you want to delete {{o.name}}"></a>
+                    </nav>
                 </div>
             </li>
         {% endfor %}
@@ -66,16 +38,5 @@
 </section>
 
 {{ render_pagination(objectives, 'ui.objectives', form=search_form) }}
-
-{{ render_edit_modal('editObjectiveModal', 'Objective Details', url_for('ui.objective_save', prev=request.full_path), edit_objective_form) }}
-{{ render_delete_modal('deleteObjectiveModal', 'Delete Objective', url_for('ui.objective_delete', prev=request.full_path), confirm_form) }}
-
-{% endblock %}
-
-{% block js %}
-
-<script>
-    document.getElementById('theme_id').onchange = function(){this.form.submit()};
-</script>
 
 {% endblock %}

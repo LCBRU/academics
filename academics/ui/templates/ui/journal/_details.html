@@ -1,34 +1,24 @@
 {% macro render_journal(journal, current_user) %}
-<header id="journal_{{journal.id}}" hx-target="#journal_{{journal.id}}" hx-swap="outerHTML">
-    <div class="col-7">
-        <h3>{{journal.name}}</h3>
-    </div>
-    <div class="col-5">
-        {% if current_user.has_role('validator') %}
-            {% if journal.preprint %}
-                {% set pp_cls = 'preprint' %}
-                {% set pp_name = 'Preprint' %}
-            {% else %}
-                {% set pp_cls = 'not_preprint' %}
-                {% set pp_name = 'Not Preprint' %}
-            {% endif %}
-
-            <button
-                id="btnPreprint_{{journal.id}}"
-                type="button"
-                class="btn dropdown-toggle {{pp_cls}}"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">{{pp_name}}</button>
-            <div class="dropdown-menu" aria-labelledby="btnPreprint_{{journal.id}}">
-                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.journal_update_preprint', id=journal.id, is_preprint=1)}}">Preprint</a>
-                <a class="dropdown-item" href="#" hx-post="{{url_for('ui.journal_update_preprint', id=journal.id, is_preprint=0)}}">Not Preprint</a>
-            </div>
+<header id="journal_{{journal.id}}" hx-target="#journal_{{journal.id}}" class="flex_two_left_grow" hx-swap="outerHTML">
+    <h3>{{journal.name}}</h3>
+    <div>
+        {% if journal.preprint %}
+            {% set pp_cls = 'preprint' %}
+            {% set pp_name = 'Preprint' %}
         {% else %}
-            {% if journal.preprint %}
-                <button id="btnPreprint_{{journal.id}}" type="button" class="btn preprint">Preprint</button>
-            {% endif %}
+            {% set pp_cls = 'not_preprint' %}
+            {% set pp_name = 'Not Preprint' %}
         {% endif %}
+
+        <div class="dropdown">
+            <a href="javascript:;" class="{{ pp_cls }}" role="button">{{ pp_name }}</a>
+            {% if current_user.has_role('validator') %}
+                <ul>
+                    <li><a href="javascript:;" hx-post="{{url_for('ui.journal_update_preprint', id=journal.id, is_preprint=1)}}">Preprint</a></li>
+                    <li><a href="javascript:;" hx-post="{{url_for('ui.journal_update_preprint', id=journal.id, is_preprint=0)}}">Not Preprint</a></li>
+                </ul>
+            {% endif %}
+        </div>        
     </div>
 </header>
 {% endmacro %}
