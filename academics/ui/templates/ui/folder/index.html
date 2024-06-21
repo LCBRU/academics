@@ -29,7 +29,7 @@
     <ul class="panel_list">
         {% for f in folders.items %}
             <li>
-                <div class="flex_two_left_grow">
+                <header class="flex_two_left_grow">
                     <h3>{{f.name}}</h3>
                     <nav class="link_list">
                         <a class="icon publication" href="{{ url_for('ui.publications', folder_id=f.id ) }}" title="Publications in {{ f.name }}"></a>
@@ -39,7 +39,7 @@
                             <a class="icon delete" href="javascript:;" title="Delete Folder" hx-post="{{ url_for('ui.folder_delete', id=f.id ) }}" hx-confirm="Are you sure you want to delete folder {{f.name}}"></a>
                         {% endif %}
                     </nav>
-                </div>
+                </header>
                 <div>
                     {% if f.owner != current_user %}
                         <h5>Owned by {{f.owner.full_name}}</h4>

@@ -30,22 +30,6 @@ dl.publication_details > div {
     grid-template-columns: 1fr 2fr;
 }
 
-.chart {
-    position: relative;
-    margin-top: 2rem;
-}
-
-.chart:hover .insert {
-    display: block;
-}
-
-.insert {
-    position: absolute;
-    display: none;
-    right: 0;
-}
-
-
 .source_table tr > :nth-of-type(1n + 2):nth-of-type(-1n + 4) {
     text-align: center;
 }
