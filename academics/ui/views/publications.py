@@ -1,11 +1,12 @@
-from flask import abort, current_app, jsonify, render_template, render_template_string, request
+from flask import abort, current_app, jsonify, render_template, render_template_string, request, url_for
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
 from lbrc_flask.forms import FlashingForm, MultiCheckboxField
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
-from wtforms import HiddenField
+from lbrc_flask.response import trigger_response
+from wtforms import HiddenField, SelectField
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Subtype
@@ -26,6 +27,17 @@ class PublicationFolderForm(FlashingForm):
         super().__init__(**kwargs)
 
         self.folder_ids.choices = folder_select_choices()
+
+
+class SupplementaryAuthorAddForm(FlashingForm):
+    id = HiddenField('id')
+    academic_id = SelectField('Academic', coerce=int)
+
+    def __init__(self, publication, **kwargs):
+        super().__init__(**kwargs)
+
+        academics = db.session.execute(select(Academic).where(Academic.id.notin_([a.id for a in publication.supplementary_authors])).order_by(Academic.last_name, Academic.first_name)).scalars()
+        self.academic_id.choices = [(0, '')] + [(a.id, a.full_name) for a in academics]
 
 
 @blueprint.route("/publications/")
@@ -275,6 +287,7 @@ def publication_authors(id, author_selector):
         author_selector=author_selector,
     )
 
+
 @blueprint.route("/publication/details/<int:id>/<string:detail_selector>")
 def publication_details(id, detail_selector):
     publication = db.get_or_404(Publication, id)
@@ -349,3 +362,44 @@ def request_publication_bar(publication_id):
         publication=publication,
         nihr_acknowledgements=NihrAcknowledgement.query.all(),
     )
+
+
+@blueprint.route("/publication/<int:id>/supplementary_author/<int:academic_id>/delete", methods=['POST'])
+@roles_accepted('editor')
+def publication_delete_supplementary_author(id, academic_id):
+    publication = db.get_or_404(Publication, id)
+    academic = db.get_or_404(Academic, academic_id)
+
+    publication.supplementary_authors.remove(academic)
+
+    db.session.add(publication)
+    db.session.commit()
+
+    return trigger_response('refreshAuthors')
+
+
+@blueprint.route("/publication/<int:id>/supplementary_author/add", methods=['GET', 'POST'])
+def publication_add_supplementary_author(id):
+    publication = db.get_or_404(Publication, id)
+
+    form = SupplementaryAuthorAddForm(publication=publication)
+
+    if form.validate_on_submit():
+        academic = db.get_or_404(Academic, form.academic_id.data)
+        publication.supplementary_authors.append(academic)
+
+        db.session.add(publication)
+        db.session.commit()
+
+        return trigger_response('refreshAuthors')
+
+    return render_template(
+        "lbrc/form_modal.html",
+        title='Add Supplementary Author',
+        form=form,
+        closing_events=['refreshAuthors'],
+        submit_label='Add',
+        url=url_for('ui.publication_add_supplementary_author', id=id),
+    )
+
+

@@ -207,10 +207,17 @@ def catalog_publication_search_query(search_form):
         ))
 
     if search_form.has_value('academic_id'):
-        q = q.where(CatalogPublication.id.in_(
-            select(CatalogPublicationsSources.catalog_publication_id)
-            .join(CatalogPublicationsSources.source)
-            .where(Source.academic_id.in_(ensure_list(search_form.academic_id.data)))
+        q = q.where(or_(
+            CatalogPublication.id.in_(
+                select(CatalogPublicationsSources.catalog_publication_id)
+                .join(CatalogPublicationsSources.source)
+                .where(Source.academic_id.in_(ensure_list(search_form.academic_id.data)))
+            ),
+            CatalogPublication.publication_id.in_(
+                select(Publication.id)
+                .join(Publication.supplementary_authors)
+                .where(Academic.id.in_(ensure_list(search_form.academic_id.data)))
+            ),
         ))
 
     if search_form.has_value('theme_id'):

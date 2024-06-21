@@ -183,6 +183,7 @@ for _ in range(randint(400, 600)):
         doi=doi,
         nihr_acknowledgement=choice(acknowledgements + [None]),
         preprint=choice([False, False, False, True]),
+        supplementary_authors=sample(academics, choice([0, 0, 0, 0, 1, 2])),
     )
 
     cp = CatalogPublication(

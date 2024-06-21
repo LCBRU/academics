@@ -1,5 +1,5 @@
 import re
-from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint, distinct, func, select
+from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint, distinct, func, or_, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 from lbrc_flask.security import AuditMixin
@@ -39,6 +39,23 @@ academics_themes = db.Table(
         'theme_id',
         db.Integer(),
         db.ForeignKey('theme.id'),
+        primary_key=True,
+    ),
+)
+
+
+supplementary_authors = db.Table(
+    'supplementary_authors',
+    db.Column(
+        'publication_id',
+        db.Integer(),
+        db.ForeignKey('publication.id'),
+        primary_key=True,
+    ),
+    db.Column(
+        'academic_id',
+        db.Integer(),
+        db.ForeignKey('academic.id'),
         primary_key=True,
     ),
 )
@@ -93,6 +110,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
 
     themes = db.relationship(Theme, secondary='academics_themes', lazy="selectin")
+
+    supplementary_publications = db.relationship(
+        Publication,
+        secondary=supplementary_authors,
+        backref=backref("supplementary_authors"),
+    )
 
     @property
     def full_name(self):
@@ -159,12 +182,26 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def publication_count(self) -> int:
-        q =  (
-            select(func.count(distinct(Publication.id)))
+        normal_ids = (
+            select(distinct(Publication.id))
             .join(Publication.catalog_publications)
             .join(CatalogPublication.catalog_publication_sources)
             .join(CatalogPublicationsSources.source)
             .where(Source.academic_id == self.id)
+        ).subquery()
+
+        supplementary_ids = (
+            select(distinct(Publication.id))
+            .join(Publication.supplementary_authors)
+            .where(Academic.id == self.id)
+        ).subquery()
+
+        q =  (
+            select(func.count(distinct(Publication.id)))
+            .where(or_(
+                Publication.id.in_(normal_ids),
+                Publication.id.in_(supplementary_ids),
+            ))
         )
 
         return db.session.execute(q).scalar()    

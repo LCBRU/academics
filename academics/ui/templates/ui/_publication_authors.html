@@ -6,18 +6,19 @@
 
     <div id="authors_{{cp.publication_id}}" class="tabbed_display">
 
-        <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{cp.publication_id}}" hx-swap="outerHTML">
+        <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{cp.publication_id}}" hx-swap="outerHTML" hx-trigger="refreshAuthors from:body" hx-get="{{ url_for('ui.publication_authors', id=cp.publication_id, author_selector=author_selector) }}">
             {{ tabbed_display_tab(author_selector, 'brc', 'BRC Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='brc')) }}
             {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='all')) }}
+            {{ tabbed_display_tab(author_selector, 'supplementary', 'Suplementary Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='supplementary')) }}
             <span>{{cp.author_count}} author(s)</span>
         </div>
         <div class="tabbed_display_content">
             <nav class="link_list">
-                {% for cps in cp.catalog_publication_sources %}
-                    {% if cps.source.is_academic or author_selector == 'all' %}
-                        {{ _render_publication_author(cps) }}
-                    {% endif %}
-                {% endfor%}
+                {% if author_selector == 'supplementary' %}
+                    {{ _render_supplementary_authors(publication) }}
+                {% else %}
+                    {{ _render_publication_authors(cp, (author_selector == 'all'))}}
+                {% endif %}
             </nav>
         </div>
 
@@ -25,6 +26,15 @@
             <div class="text-danger">All authors have left the BRC</div>
         {% endif %}
     </div>
+{% endmacro %}
+
+
+{% macro _render_publication_authors(catalog_publication, show_all) %}
+    {% for cps in catalog_publication.catalog_publication_sources %}
+        {% if cps.source.is_academic or show_all %}
+            {{ _render_publication_author(cps) }}
+        {% endif %}
+    {% endfor %}
 {% endmacro %}
 
 
@@ -38,13 +48,22 @@
         {% set cls = '' %}
     {% endif %}
 
-    <a  class="{{cls}}"
-        href="javascript:;"
-        title="Upload Publication DOIs"
-        hx-get="{{ url_for('ui.source_summary_details', id=author.id ) }}"
-        hx-target="body"
-        hx-swap="beforeend" role="button">
+    <a  class="{{cls}}" href="javascript:;" title="Upload Publication DOIs" hx-get="{{ url_for('ui.source_summary_details', id=author.id ) }}" hx-target="body" hx-swap="beforeend" role="button">
         <span class="pill small">{{ cps.ordinal + 1 }}</span>
         <span>{{ author.display_name }}</span>
     </a>
 {% endmacro %}
+
+{% macro _render_supplementary_authors(publication) %}
+    {% for a in publication.supplementary_authors %}
+        <div class="dropdown">
+            <a href="javascript:;" role="button">{{ a.full_name }}</a>
+            <ul>
+                <li><a href="javascript:;" hx-post="{{url_for('ui.publication_delete_supplementary_author', id=publication.id, academic_id=a.id)}}">Remove</a></li>
+            </ul>
+        </div>
+    {% endfor %}
+    <a class="icon add" href="javascript:;" hx-get="{{ url_for('ui.publication_add_supplementary_author', id=publication.id) }}" hx-target="body" hx-swap="beforeend" role="button"></a>
+{% endmacro %}
+
+
