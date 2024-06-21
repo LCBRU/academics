@@ -24,7 +24,7 @@ class FolderEditForm(FlashingForm):
 
 @blueprint.route("/folders/")
 def folders():
-    search_form = SearchForm(formdata=request.args)
+    search_form = SearchForm(search_placeholder='Search Name', formdata=request.args)
     
     q = Folder.query
 

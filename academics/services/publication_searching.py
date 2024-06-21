@@ -96,7 +96,7 @@ class PublicationSearchForm(SearchForm):
     external_collaboration = BooleanField('External\nCollabortaion')
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(search_placeholder='Search Title, Journal or DOI', **kwargs)
 
         self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
@@ -143,7 +143,7 @@ class PublicationSummarySearchForm(SearchForm):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(search_placeholder='Search Title, Journal or DOI', **kwargs)
 
         self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
         self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'

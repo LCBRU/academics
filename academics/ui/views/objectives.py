@@ -17,7 +17,7 @@ class ObjectiveSearchForm(SearchForm):
     theme_id = SelectField('Theme', coerce=int)
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(search_placeholder='Search Name', **kwargs)
 
         choices = [(t.id, t.name) for t in Theme.query.all()]
 
