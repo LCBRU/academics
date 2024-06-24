@@ -11,27 +11,27 @@
     <div class="container">
       <menu>
         <li><a href="{{url_for('ui.index')}}">Home</a></li>
-        <li><a href="{{url_for('ui.publications')}}"><i class="far fa-newspaper"></i> Publications</a></li>
+        <li><a href="{{url_for('ui.publications')}}" class="icon add">Publications</a></li>
 
         {% if current_user.has_role('validator') %}
-            <li><a href="{{url_for('ui.validation')}}"><i class="far fa-check-circle"></i> Validation</a></li>
+            <li><a href="{{url_for('ui.validation')}}" class="icon check_circle">Validation</a></li>
         {% endif %}
 
-        <li><a href="{{url_for('ui.folders')}}"><i class="fas fa-folder"></i> Folders</a></li>
+        <li><a href="{{url_for('ui.folders')}}" class="icon folder">Folders</a></li>
 
         {% if current_user.is_admin %}
-            <li><a href="{{url_for('ui.objectives')}}"><i class="far fas fa-tasks"></i> Objectives</a></li>
+            <li><a href="{{url_for('ui.objectives')}}" class="icon check_list">Objectives</a></li>
         {% endif %}
 
         {% if current_user.is_admin %}
-            <li><a href="{{url_for('ui.journals')}}"><i class="fas fa-book"></i> Journals</a></li>
+            <li><a href="{{url_for('ui.journals')}}" class="icon book">Journals</a></li>
         {% endif %}
 
         <li>
-          <a><i class="fas fa-download"></i> Downloads</a>
+          <a class="icon download">Downloads</a>
           <menu>
-            <li><a href="{{url_for('ui.academics_export_csv')}}"><i class="fas fa-user-graduate"></i> Academic Contact List</a></li>
-            <li><a href="{{url_for('ui.reports')}}"><i class="fas fa-toilet-paper"></i> Reports Contact List</a></li>
+            <li><a href="{{url_for('ui.academics_export_csv')}}" class="icon academic">Academic Contact List</a></li>
+            <li><a href="{{url_for('ui.reports')}}" class="icon report">Reports Contact List</a></li>
           </menu>
         </li>
       </menu>
@@ -42,9 +42,9 @@
                 <menu>
                     <li><a href="{{url_for('admin.index')}}">Maintenance</a></li>
                     {% if not updating %}
-                        <li><a href="{{url_for('ui.update_all_academics')}}"><i class="fas fa-recycle"></i> Update All</a></li>
+                        <li><a href="{{url_for('ui.update_all_academics')}}" class="icon refresh">Update All</a></li>
                     {% endif %}
-                    <li><a href="{{url_for('ui.trigger_refresh')}}"><i class="fas fa-fish"></i> Refresh</a></li>
+                    <li><a href="{{url_for('ui.trigger_refresh')}}" class="icon fish">Refresh</a></li>
                 </menu>
             </li>
             <li>

@@ -19,10 +19,10 @@
                 {{ render_form_fields(search_form) }}
     
                 <div class="button_bar" hx-target="body">
-                    <button formaction="{{ url_for('ui.publication_full_export_xlsx') }}" formmethod="get" title="Full Export" type="submit">Full Export</button>
-                    <button formaction="{{ url_for('ui.publication_full_annual_report_xlsx') }}" formmethod="get" title="Annual Report" type="submit">Annual Report</button>
-                    <button formaction="{{ url_for('ui.publication_export_pdf') }}" formmethod="get" title="PDF" type="submit">PDF</button>
-                    <button formaction="{{ url_for('ui.publication_create_folder') }}" formmethod="post" title="Add Publications to Folder" type="submit">Add to Folder</button>
+                    <button class="icon download" formaction="{{ url_for('ui.publication_full_export_xlsx') }}" formmethod="get" title="Full Export" type="submit">Full Export</button>
+                    <button class="icon report" formaction="{{ url_for('ui.publication_full_annual_report_xlsx') }}" formmethod="get" title="Annual Report" type="submit">Annual Report</button>
+                    <button class="icon pdf" formaction="{{ url_for('ui.publication_export_pdf') }}" formmethod="get" title="PDF" type="submit">PDF</button>
+                    <button class="icon folder_add" formaction="{{ url_for('ui.publication_create_folder') }}" formmethod="post" title="Add Publications to Folder" type="submit">Add to Folder</button>
                 </div>    
             </fieldset>
         </form>
