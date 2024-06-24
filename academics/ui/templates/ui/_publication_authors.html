@@ -22,9 +22,11 @@
             </nav>
         </div>
 
-        {% if cp.all_academics_left_brc %}
-            <div class="text-danger">All authors have left the BRC</div>
-        {% endif %}
+        <nav class="link_list">
+            {% if cp.all_academics_left_brc %}
+                <div class="pill error">All BRC authors have left the BRC</div>
+            {% endif %}
+        </nav>
     </div>
 {% endmacro %}
 

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, and_, func, select
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import SQLColumnExpression
-from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
+from academics.model.catalog import CATALOG_MANUAL, CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.institutions import Institution
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -195,8 +195,12 @@ class Publication(db.Model, AuditMixin):
         return next((cp for cp in self.catalog_publications if cp.catalog == CATALOG_OPEN_ALEX), None)
 
     @property
+    def manual_catalog_publication(self):
+        return next((cp for cp in self.catalog_publications if cp.catalog == CATALOG_MANUAL), None)
+
+    @property
     def best_catalog_publication(self):
-        return self.scopus_catalog_publication or self.openalex_catalog_publication or None
+        return self.scopus_catalog_publication or self.openalex_catalog_publication or self.manual_catalog_publication or None
 
     def set_vancouver(self):
         if not self.best_catalog_publication:
@@ -278,7 +282,11 @@ class CatalogPublication(db.Model, AuditMixin):
 
     @property
     def all_academics_left_brc(self):
-        return all(cps.source.academic.has_left_brc for cps in self.catalog_publication_sources)
+        return all(cps.source.academic.has_left_brc for cps in self.brc_authors) and len(list(self.brc_authors)) > 0
+
+    @property
+    def brc_authors(self):
+        return filter(lambda cps: cps.source.is_academic, self.catalog_publication_sources)
 
     @property
     def academics(self):

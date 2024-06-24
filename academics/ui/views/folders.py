@@ -15,11 +15,12 @@ from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from lbrc_flask.response import refresh_response
+from wtforms.validators import Length, DataRequired
 
 
 class FolderEditForm(FlashingForm):
     id = HiddenField('id')
-    name = StringField('Name')
+    name = StringField('Name', validators=[Length(max=1000), DataRequired()])
 
 
 @blueprint.route("/folders/")

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import abort, current_app, jsonify, render_template, render_template_string, request, url_for
 from flask_security import roles_accepted
 from lbrc_flask.database import db
@@ -6,8 +7,9 @@ from lbrc_flask.forms import FlashingForm, MultiCheckboxField
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.response import trigger_response
-from wtforms import HiddenField, SelectField
+from wtforms import HiddenField, SelectField, StringField
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
+from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Subtype
 from academics.model.security import User
@@ -15,6 +17,7 @@ from academics.model.theme import Theme
 from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
+from wtforms.validators import Length, DataRequired
 
 from .. import blueprint
 
@@ -38,6 +41,10 @@ class SupplementaryAuthorAddForm(FlashingForm):
 
         academics = db.session.execute(select(Academic).where(Academic.id.notin_([a.id for a in publication.supplementary_authors])).order_by(Academic.last_name, Academic.first_name)).scalars()
         self.academic_id.choices = [(0, '')] + [(a.id, a.full_name) for a in academics]
+
+
+class PublicationAddForm(FlashingForm):
+    doi = StringField('DOI', validators=[Length(max=50), DataRequired()])
 
 
 @blueprint.route("/publications/")
@@ -403,3 +410,38 @@ def publication_add_supplementary_author(id):
     )
 
 
+@blueprint.route("/publication/add", methods=['GET', 'POST'])
+def publication_add():
+    form = PublicationAddForm()
+
+    if form.validate_on_submit():
+        publication = Publication(doi=form.doi.data)
+        catalog_publication = CatalogPublication(
+            catalog=CATALOG_MANUAL,
+            catalog_identifier=form.doi.data,
+            doi=form.doi.data,
+            title=form.doi.data,
+            publication_cover_date=datetime.now(),
+            abstract='',
+            volume='',
+            issue='',
+            pages='',
+            funding_text='',
+            href='',
+            refresh_full_details=True,
+            publication=publication,
+        )
+
+        db.session.add(catalog_publication)
+        db.session.commit()
+
+        return trigger_response('refreshSearch')
+
+    return render_template(
+        "lbrc/form_modal.html",
+        title='Add Supplementary Publication',
+        form=form,
+        closing_events=['refreshSearch'],
+        submit_label='Add',
+        url=url_for('ui.publication_add', id=id),
+    )
