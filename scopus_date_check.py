@@ -31,4 +31,5 @@ for p in list(db.session.execute(q).scalars())[:1]:
 
     details.append(client.exec_request(uri))
 
-print(json.dumps(details))
+with open('scopus_date_check.json', 'w', encoding='utf-8') as f:
+    json.dump(details, f, ensure_ascii=False, indent=4)
