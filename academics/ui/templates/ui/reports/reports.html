@@ -7,7 +7,7 @@
     <header>
         <h2>Reports</h2>
 
-        <form method="GET" action="{{ url_for('ui.objectives') }}">
+        <form method="GET" action="{{ url_for('ui.reports') }}">
             <fieldset>
                 {{ search_form.hidden_tag() }}
                 {{ render_form_fields(search_form) }}
