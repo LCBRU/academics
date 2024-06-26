@@ -26,10 +26,11 @@ q = select(CatalogPublication).where(CatalogPublication.publication_cover_date =
 
 details = []
 
-for p in list(db.session.execute(q).scalars()):
+for p in list(db.session.execute(q).scalars())[0:50]:
     uri=f'https://api.elsevier.com/content/abstract/doi/{p.doi}'
 
-    details.append(client.exec_request(uri))
+    if p.doi:
+        details.append(client.exec_request(uri))
 
 with open('scopus_date_check.json', 'w', encoding='utf-8') as f:
     json.dump(details, f, ensure_ascii=False, indent=4)
