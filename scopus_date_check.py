@@ -31,4 +31,4 @@ for p in list(db.session.execute(q).scalars())[:1]:
 
     details.append(client.exec_request(uri))
 
-print(details)
+print(json.sumps(details))
