@@ -13,3 +13,4 @@ application = create_app()
 application.app_context().push()
 
 out = get_scopus_publication_data(doi=sys.argv[1], log_data=True)
+
