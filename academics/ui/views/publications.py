@@ -447,7 +447,20 @@ def catalog_publication_edit(id=None):
     return render_template(
         "lbrc/form_modal.html",
         title='Add Manual Publication' if id is None else 'Edit Manual Publication',
+        delete_link=url_for('ui.catalog_publication_delete', id=id) if id is not None else None,
         form=form,
         submit_label='Add' if id is None else 'Save',
         url=url_for('ui.catalog_publication_edit', id=id),
     )
+
+
+@blueprint.route("/catalog_publication/<int:id>/delete", methods=['POST'])
+def catalog_publication_delete(id):
+    catalog_publication = db.get_or_404(CatalogPublication, id)
+
+    db.session.delete(catalog_publication)
+    db.session.commit()
+
+    return refresh_response()
+
+
