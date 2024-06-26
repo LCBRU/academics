@@ -23,7 +23,7 @@ client = ScopusClient(current_app.config['SCOPUS_API_KEY'])
 
 q = select(CatalogPublication).where(CatalogPublication.publication_cover_date == date(day=1, month=1, year=2023))
 
-for p in list(db.session.execute(q).scalars())[:1]:
+for p in list(db.session.execute(q).scalars()):
     uri=f'https://api.elsevier.com/content/abstract/doi/{p.doi}'
 
     # resp = client.exec_request(uri)
