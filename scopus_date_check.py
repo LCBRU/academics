@@ -26,7 +26,7 @@ q = select(CatalogPublication).where(CatalogPublication.publication_cover_date =
 
 details = []
 
-for p in list(db.session.execute(q).scalars())[:1]:
+for p in list(db.session.execute(q).scalars()):
     uri=f'https://api.elsevier.com/content/abstract/doi/{p.doi}'
 
     details.append(client.exec_request(uri))
