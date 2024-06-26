@@ -20,7 +20,7 @@
     
                 <div class="button_bar" hx-target="body">
                     {% if current_user.has_role('editor') %}
-                        <a class="icon add" href="javascript:;" title="Add Supplementary Publication" hx-get="{{ url_for('ui.publication_add' ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Publication</a>
+                        <a class="icon add" href="javascript:;" title="Add Supplementary Publication" hx-get="{{ url_for('ui.catalog_publication_edit' ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Publication</a>
                     {% endif %}
                     <button class="icon download" formaction="{{ url_for('ui.publication_full_export_xlsx') }}" formmethod="get" title="Full Export" type="submit">Full Export</button>
                     <button class="icon report" formaction="{{ url_for('ui.publication_full_annual_report_xlsx') }}" formmethod="get" title="Annual Report" type="submit">Annual Report</button>

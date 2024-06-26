@@ -66,13 +66,19 @@
         </div>
 
         {% if cp.catalog %}
-            <a href="{{ cp.href }}" target="_blank" title="View on {{ cp.catalog | title_case}}" role="button">
-                {% if cp.catalog == 'scopus' %}
+            {% if cp.catalog == 'manual' %}
+                <a href="javascript:;" hx-get="{{url_for('ui.catalog_publication_edit', id=cp.id)}}" hx-target="body" hx-swap="beforeend" title="View on {{ cp.catalog | title_case}}" role="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1rem" height="1rem"><use href="#manual_logo" /></svg> Manual
+                </a>
+            {% elif cp.catalog == 'scopus' %}
+                <a href="{{ cp.href }}" target="_blank" title="View on {{ cp.catalog | title_case}}" role="button">
                     <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1rem" height="1rem"><use href="#scopus_logo" /></svg> Scopus
-                {% elif cp.catalog == 'open alex' %}
+                </a>
+            {% elif cp.catalog == 'open alex' %}
+                <a href="{{ cp.href }}" target="_blank" title="View on {{ cp.catalog | title_case}}" role="button">
                     <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1rem" height="1rem"><use href="#open_alex_logo" /></svg> Open Alex
-                {% endif %}
-            </a>
+                </a>
+            {% endif %}
         {% endif %}
 
         {% if cp.doi %}
@@ -84,6 +90,7 @@
         {% endif %}
     </div>
 </header>
+
 {% endmacro %}
 
 

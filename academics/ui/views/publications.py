@@ -6,8 +6,8 @@ from lbrc_flask.export import excel_download, pdf_download
 from lbrc_flask.forms import FlashingForm, MultiCheckboxField
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
-from lbrc_flask.response import trigger_response
-from wtforms import HiddenField, SelectField, StringField
+from lbrc_flask.response import trigger_response, refresh_response
+from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi
@@ -45,6 +45,8 @@ class SupplementaryAuthorAddForm(FlashingForm):
 
 class PublicationAddForm(FlashingForm):
     doi = StringField('DOI', validators=[Length(max=50), DataRequired()])
+    title = TextAreaField('Title', validators=[Length(max=1000)])
+    publication_cover_date = DateField('Publication Cover Date')
 
 
 @blueprint.route("/publications/")
@@ -410,38 +412,42 @@ def publication_add_supplementary_author(id):
     )
 
 
-@blueprint.route("/publication/add", methods=['GET', 'POST'])
-def publication_add():
-    form = PublicationAddForm()
+@blueprint.route("/catalog_publication/add", methods=['GET', 'POST'])
+@blueprint.route("/catalog_publication/<int:id>/edit", methods=['GET', 'POST'])
+def catalog_publication_edit(id=None):
+    if id:
+        catalog_publication = db.get_or_404(CatalogPublication, id)
+        form = PublicationAddForm(obj=catalog_publication)
+    else:
+        form = PublicationAddForm()
 
     if form.validate_on_submit():
-        publication = Publication(doi=form.doi.data)
-        catalog_publication = CatalogPublication(
-            catalog=CATALOG_MANUAL,
-            catalog_identifier=form.doi.data,
-            doi=form.doi.data,
-            title=form.doi.data,
-            publication_cover_date=datetime.now(),
-            abstract='',
-            volume='',
-            issue='',
-            pages='',
-            funding_text='',
-            href='',
-            refresh_full_details=True,
-            publication=publication,
-        )
+        publication = db.session.execute(select(Publication).where(Publication.doi == form.doi.data)).unique().scalar_one_or_none() or Publication(doi=form.doi.data)
+
+        catalog_publication = catalog_publication or CatalogPublication(catalog=CATALOG_MANUAL)
+
+        catalog_publication.catalog_identifier = form.doi.data
+        catalog_publication.doi = form.doi.data
+        catalog_publication.title = form.title.data or ''
+        catalog_publication.publication_cover_date = form.publication_cover_date.data or datetime.now()
+        catalog_publication.abstract = ''
+        catalog_publication.volume = ''
+        catalog_publication.issue = ''
+        catalog_publication.pages = ''
+        catalog_publication.funding_text = ''
+        catalog_publication.href = ''
+        catalog_publication.refresh_full_details = True
+        catalog_publication.publication = publication
 
         db.session.add(catalog_publication)
         db.session.commit()
 
-        return trigger_response('refreshSearch')
+        return refresh_response()
 
     return render_template(
         "lbrc/form_modal.html",
-        title='Add Supplementary Publication',
+        title='Add Manual Publication' if id is None else 'Edit Manual Publication',
         form=form,
-        closing_events=['refreshSearch'],
-        submit_label='Add',
-        url=url_for('ui.publication_add', id=id),
+        submit_label='Add' if id is None else 'Save',
+        url=url_for('ui.catalog_publication_edit', id=id),
     )
