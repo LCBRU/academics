@@ -29,4 +29,4 @@ for p in list(db.session.execute(q).scalars())[:1]:
 
     resp = client.exec_request(uri)
 
-    print(json.loads(resp.text))
+    print(resp)
