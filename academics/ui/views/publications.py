@@ -419,12 +419,11 @@ def catalog_publication_edit(id=None):
         catalog_publication = db.get_or_404(CatalogPublication, id)
         form = PublicationAddForm(obj=catalog_publication)
     else:
+        catalog_publication = CatalogPublication(catalog=CATALOG_MANUAL)
         form = PublicationAddForm()
 
     if form.validate_on_submit():
         publication = db.session.execute(select(Publication).where(Publication.doi == form.doi.data)).unique().scalar_one_or_none() or Publication(doi=form.doi.data)
-
-        catalog_publication = catalog_publication or CatalogPublication(catalog=CATALOG_MANUAL)
 
         catalog_publication.catalog_identifier = form.doi.data
         catalog_publication.doi = form.doi.data

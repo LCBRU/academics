@@ -35,6 +35,7 @@ class AuthorData():
     citation_count: str = None
     document_count: str = None
     h_index: str = None
+    raw_text: str = None
 
     @property
     def display_name(self):
@@ -93,6 +94,7 @@ class PublicationData():
     authors: list
     keywords: str
     is_open_access : bool = False
+    raw_text: str = None
 
 
 @dataclass
@@ -102,6 +104,7 @@ class AffiliationData():
     name: str = ''
     address: str = ''
     country: str = ''
+    raw_text: str = None
 
     @property
     def is_local(self):
@@ -126,6 +129,7 @@ class InstitutionData():
     name: str = ''
     country_code: str = ''
     sector: str = ''
+    raw_text: str = None
 
     def update_institution(self, institution):
         institution.catalog_identifier = self.catalog_identifier
