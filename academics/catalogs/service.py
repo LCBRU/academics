@@ -312,6 +312,7 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
     logging.debug(f'Updating publication {catalog_publication.catalog_identifier}')
 
     try:
+        pub_data = None
         if catalog_publication.catalog == CATALOG_SCOPUS:
             pub_data = get_scopus_publication_data(scopus_id=catalog_publication.catalog_identifier)
         if catalog_publication.catalog == CATALOG_OPEN_ALEX:
