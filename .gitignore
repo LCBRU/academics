@@ -139,3 +139,4 @@ dump.rdb
 *.sqlite3
 database.db
 src
+data

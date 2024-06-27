@@ -17,7 +17,7 @@ from academics.model.theme import Theme
 from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
-from wtforms.validators import Length, DataRequired
+from wtforms.validators import Length, DataRequired, Optional
 
 from .. import blueprint
 
@@ -46,7 +46,7 @@ class SupplementaryAuthorAddForm(FlashingForm):
 class PublicationAddForm(FlashingForm):
     doi = StringField('DOI', validators=[Length(max=50), DataRequired()])
     title = TextAreaField('Title', validators=[Length(max=1000)])
-    publication_cover_date = DateField('Publication Cover Date')
+    publication_cover_date = DateField('Publication Cover Date', validators=[Optional()])
 
 
 @blueprint.route("/publications/")

@@ -271,10 +271,10 @@ class CatalogPublication(db.Model, AuditMixin):
     cited_by_count: Mapped[int] = mapped_column(UnicodeText, nullable=True)
     href: Mapped[str] = mapped_column(UnicodeText)
 
-    journal_id = mapped_column(ForeignKey(Journal.id))
+    journal_id = mapped_column(ForeignKey(Journal.id), nullable=True)
     journal: Mapped[Journal] = relationship(lazy="selectin")
 
-    subtype_id = mapped_column(ForeignKey(Subtype.id))
+    subtype_id = mapped_column(ForeignKey(Subtype.id), nullable=True)
     subtype: Mapped[Subtype] = relationship(lazy="selectin")
 
     sponsors = db.relationship("Sponsor", lazy="selectin", secondary=catalog_publications_sponsors, back_populates="catalog_publications", collection_class=set)
