@@ -242,8 +242,12 @@ def refresh_publications():
 
     try:
         for p in db.session.execute(select(Publication).where(Publication.refresh_full_details == True)).unique().scalars():
+            logging.warning('A')
+            logging.warning(p.doi)
             if not p.scopus_catalog_publication and p.doi:
+                logging.warning('B')
                 if pub_data := get_scopus_publication_data(doi=p.doi):
+                    logging.warning('C')
                     save_publications([pub_data])
 
             if p.scopus_catalog_publication and not p.institutions:
