@@ -423,7 +423,7 @@ def catalog_publication_edit(id=None):
         form = PublicationAddForm()
 
     if form.validate_on_submit():
-        publication = db.session.execute(select(Publication).where(Publication.doi == form.doi.data)).unique().scalar_one_or_none() or Publication(doi=form.doi.data)
+        publication = db.session.execute(select(Publication).where(Publication.doi == form.doi.data)).unique().scalar_one_or_none() or Publication(doi=form.doi.data, refresh_full_details=True)
 
         catalog_publication.catalog_identifier = form.doi.data
         catalog_publication.doi = form.doi.data
