@@ -538,6 +538,7 @@ def save_publications(new_pubs):
         cat_pub.subtype_id = subtype_xref[cpr]
         cat_pub.sponsors = set(sponsor_xref[cpr])
         cat_pub.keywords = set(keyword_xref[cpr])
+        cat_pub.raw_text = p.raw_text
 
         db.session.add(cat_pub)
 

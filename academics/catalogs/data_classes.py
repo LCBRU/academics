@@ -71,6 +71,7 @@ class AuthorData():
         source.citation_count = self.citation_count
         source.document_count = self.document_count
         source.h_index = self.h_index
+        source.raw_text = self.raw_text
 
 
 @dataclass
@@ -120,6 +121,7 @@ class AffiliationData():
         affiliation.name = self.name
         affiliation.address = self.address
         affiliation.country = self.country
+        affiliation.raw_text = self.raw_text
 
 
 @dataclass
@@ -137,6 +139,7 @@ class InstitutionData():
         institution.name = self.name
         institution.country_code = self.country_code
         institution.sector = self.sector
+        institution.raw_text = self.raw_text
 
         return institution
 
@@ -313,6 +316,7 @@ def _affiliation_xref_for_author_data_list(author_datas):
                 address=a.address,
                 country=a.country,
                 refresh_details=True,
+                raw_text=a.raw_text,
             )
             for a in afils if CatalogReference(a) not in xref.keys()
         ]
