@@ -10,7 +10,7 @@ from elsapy.elsprofile import ElsAuthor, ElsAffil
 from academics.catalogs.data_classes import AffiliationData, AuthorData, PublicationData
 from elsapy.elsdoc import AbsDoc
 from elsapy.elsclient import ElsClient
-from flask import current_app, jsonify
+from flask import current_app
 from sqlalchemy import select
 from lbrc_flask.database import db
 from lbrc_flask.logging import log_exception
@@ -117,7 +117,7 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
     if log_data:
         logging.info(a.data)
         with open('rich_dump.json', 'w') as f:
-            f.write(json.dumps(a.data))
+            f.write(json.dumps(a.data, sort_keys=True, indent=4))
 
     id = ((a.data.get('coredata', {}) or {}).get(u'dc:identifier', ':') or ':').split(':')[1]
 
@@ -145,6 +145,7 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
             authors=a.authors,
             keywords=list(filter(None, set([k.get('$', '') for k in (a.data.get(u'authkeywords') or {}).get('author-keywords', [])]))),
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
+            raw_text=json.dumps(a.data, sort_keys=True, indent=4),
         )
 
 
@@ -188,6 +189,7 @@ def get_scopus_publications(identifier):
                 authors=[_translate_publication_author(a) for a in p.get('author', [])],
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
+                raw_text=json.dumps(p, sort_keys=True, indent=4),
             ))
 
     return result
@@ -214,7 +216,7 @@ def _translate_publication_author(author_dict):
         author_name=author_dict.get('authname', None),
         href=author_dict.get('author-url', None),
         affiliations=affiliations,
-        raw_text=json.dumps(author_dict),
+        raw_text=json.dumps(author_dict, sort_keys=True, indent=4),
     )
 
     return result
@@ -299,6 +301,7 @@ def scopus_author_search(search_string, search_non_local=False):
                 name=a.get('affiliation-name'),
                 address=a.get('affiliation-city'),
                 country=a.get('affiliation-country'),
+                raw_text=json.dumps(a, sort_keys=True, indent=4),
             ) for a in afils if a.get('affiliation-id')
         ]
 
@@ -311,7 +314,7 @@ def scopus_author_search(search_string, search_non_local=False):
             initials=r.get(u'preferred-name', {}).get('initials', None),
             href=href,
             affiliations=affiliations,
-            raw_text=json.dumps(r),
+            raw_text=json.dumps(r, sort_keys=True, indent=4),
         )
 
         if len(a.catalog_identifier) == 0:
@@ -460,6 +463,7 @@ class Author(ElsAuthor):
                 name=a.get('@name'),
                 address=a.get('@city'),
                 country=a.get('@country'),
+                raw_text=json.dumps(a, sort_keys=True, indent=4),
             ) for a in afils if a.get('@id')
         ]
 
@@ -475,7 +479,7 @@ class Author(ElsAuthor):
             document_count=self.document_count,
             h_index=self.h_index,
             affiliations=affiliations,
-            raw_text=json.dumps(self.data),
+            raw_text=json.dumps(self.data, sort_keys=True, indent=4),
         )
 
         return result
@@ -514,6 +518,7 @@ class ScopusAffiliation(ElsAffil):
             name=self.name,
             address=self.address,
             country=self.country,
+            raw_text=json.dumps(self.data, sort_keys=True, indent=4),
         )
 
 
@@ -597,7 +602,7 @@ class Abstract(AbsDoc):
             author_name=author_dict.get('ce:indexed-name', None),
             href=author_dict.get('author-url', None),
             affiliations=affiliations,
-            raw_text=json.dumps(author_dict),
+            raw_text=json.dumps(author_dict, sort_keys=True, indent=4),
         )
 
         return result
