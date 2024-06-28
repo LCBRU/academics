@@ -77,7 +77,6 @@ class Affiliation(db.Model):
     home_organisation: Mapped[bool] = mapped_column(Boolean, nullable=True)
     international: Mapped[bool] = mapped_column(Boolean, nullable=True)
     industry: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    raw_text: Mapped[str] = mapped_column(LONGTEXT, nullable=True)
 
     @property
     def line_summary(self):
@@ -96,6 +95,7 @@ class Affiliation(db.Model):
     @property
     def is_nihr(self):
         return any([n in self.name or '' for n in self.NIHR_NAMES])
+
 
 class Academic(AuditMixin, CommonMixin, db.Model):
     # MariaDB backends need a VARChar variable, added 255 to set a max length
@@ -280,7 +280,6 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
     last_fetched_datetime = db.Column(db.DateTime)
     error = db.Column(db.Boolean, default=False)
-    raw_text: Mapped[str] = mapped_column(LONGTEXT, nullable=True)
 
     @property
     def author_url(self):

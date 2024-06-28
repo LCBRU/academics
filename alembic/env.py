@@ -17,6 +17,7 @@ import academics.model.publication
 import academics.model.security
 import academics.model.theme
 import academics.catalogs.scopus
+import academics.model.raw_data
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
