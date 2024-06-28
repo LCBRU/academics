@@ -204,8 +204,6 @@ def _translate_publication_author(author_dict):
         ) for a in afils if a.get('$')
     ]
 
-    print(author_dict)
-
     result = AuthorData(
         catalog=CATALOG_SCOPUS,
         catalog_identifier=author_dict.get('authid', None),
@@ -216,7 +214,7 @@ def _translate_publication_author(author_dict):
         author_name=author_dict.get('authname', None),
         href=author_dict.get('author-url', None),
         affiliations=affiliations,
-        raw_text=json.dumps(dict),
+        raw_text=json.dumps(author_dict),
     )
 
     return result
