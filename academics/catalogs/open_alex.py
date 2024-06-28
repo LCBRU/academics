@@ -1,3 +1,4 @@
+import json
 import pyalex
 import logging
 
@@ -91,6 +92,7 @@ def _get_publication_data(pubdata):
         authors=[_translate_publication_author(a) for a in pd.get('authorships', [])],
         keywords={k.get('keyword', None) for k in pd.get('keywords', {})},
         is_open_access=pd.get('open_access', {}).get('is_oa', False),
+        raw_text=json.dumps(pd.data, sort_keys=True, indent=4),
     )
 
 
@@ -119,6 +121,7 @@ def _translate_publication_author(author_dict):
             name=a.get('display_name'),
             address='',
             country=a.get('country_code'),
+            raw_text=json.dumps(a.data, sort_keys=True, indent=4),
         ) for a in afils if a.get('id')
     ]
 
@@ -134,6 +137,7 @@ def _translate_publication_author(author_dict):
         author_name=author.get('display_name', None),
         href=author.get('id', None),
         affiliations=affiliations,
+        raw_text=json.dumps(author.data, sort_keys=True, indent=4),
     )
 
 
@@ -213,6 +217,7 @@ def _get_affiliation_datas(affiliations):
             name=a.get('display_name'),
             address=a.get('geo', {}).get('city'),
             country=a.get('geo', {}).get('country'),
+            raw_text=json.dumps(a.data, sort_keys=True, indent=4),
         ) for a in affiliations
     ]
 
@@ -231,6 +236,7 @@ def _get_author_datas(authors):
                 name=a.get('institution', {}).get('display_name'),
                 address='',
                 country=a.get('institution', {}).get('country_code'),
+                raw_text=json.dumps(a.data, sort_keys=True, indent=4),
             ) for a in afils if a.get('institution', {}).get('id') and date.today().year in a.get('years', [])
         ]
 
@@ -248,6 +254,7 @@ def _get_author_datas(authors):
                 document_count=a.get('works_count', None),
                 h_index=a.get('summary_stats', {}).get('h_index', None),
                 affiliations=affiliations,
+                raw_text=json.dumps(a.data, sort_keys=True, indent=4),
             )
         )
 
