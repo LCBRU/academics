@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, String, UniqueConstraint
+from sqlalchemy import Boolean, String, UnicodeText, UniqueConstraint
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,3 +16,4 @@ class Institution(db.Model):
     sector: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
     home_institution: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    raw_text: Mapped[str] = mapped_column(UnicodeText, nullable=True)

@@ -214,6 +214,7 @@ def _translate_publication_author(author_dict):
         author_name=author_dict.get('authname', None),
         href=author_dict.get('author-url', None),
         affiliations=affiliations,
+        raw_text=json.dumps(dict),
     )
 
     return result
@@ -310,6 +311,7 @@ def scopus_author_search(search_string, search_non_local=False):
             initials=r.get(u'preferred-name', {}).get('initials', None),
             href=href,
             affiliations=affiliations,
+            raw_text=json.dumps(r),
         )
 
         if len(a.catalog_identifier) == 0:
@@ -473,6 +475,7 @@ class Author(ElsAuthor):
             document_count=self.document_count,
             h_index=self.h_index,
             affiliations=affiliations,
+            raw_text=json.dumps(self.data),
         )
 
         return result
@@ -594,6 +597,7 @@ class Abstract(AbsDoc):
             author_name=author_dict.get('ce:indexed-name', None),
             href=author_dict.get('author-url', None),
             affiliations=affiliations,
+            raw_text=json.dumps(author_dict),
         )
 
         return result

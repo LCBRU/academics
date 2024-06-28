@@ -1,5 +1,5 @@
 import re
-from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint, distinct, func, or_, select
+from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, UniqueConstraint, distinct, func, or_, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 from lbrc_flask.security import AuditMixin
@@ -76,6 +76,7 @@ class Affiliation(db.Model):
     home_organisation: Mapped[bool] = mapped_column(Boolean, nullable=True)
     international: Mapped[bool] = mapped_column(Boolean, nullable=True)
     industry: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    raw_text: Mapped[str] = mapped_column(UnicodeText, nullable=True)
 
     @property
     def line_summary(self):
@@ -278,6 +279,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
     last_fetched_datetime = db.Column(db.DateTime)
     error = db.Column(db.Boolean, default=False)
+    raw_text: Mapped[str] = mapped_column(UnicodeText, nullable=True)
 
     @property
     def author_url(self):

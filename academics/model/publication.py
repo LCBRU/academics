@@ -270,6 +270,7 @@ class CatalogPublication(db.Model, AuditMixin):
     is_open_access: Mapped[bool] = mapped_column(Boolean, nullable=True)
     cited_by_count: Mapped[int] = mapped_column(UnicodeText, nullable=True)
     href: Mapped[str] = mapped_column(UnicodeText)
+    raw_text: Mapped[str] = mapped_column(UnicodeText, nullable=True)
 
     journal_id = mapped_column(ForeignKey(Journal.id), nullable=True)
     journal: Mapped[Journal] = relationship(lazy="selectin")
