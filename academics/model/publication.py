@@ -11,7 +11,7 @@ from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_MANUAL, CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.institutions import Institution
 from sqlalchemy.ext.associationproxy import association_proxy
-
+from sqlalchemy.dialects.mysql import LONGTEXT
 
 
 DOI_URL = 'doi.org'
@@ -270,7 +270,7 @@ class CatalogPublication(db.Model, AuditMixin):
     is_open_access: Mapped[bool] = mapped_column(Boolean, nullable=True)
     cited_by_count: Mapped[int] = mapped_column(UnicodeText, nullable=True)
     href: Mapped[str] = mapped_column(UnicodeText)
-    raw_text: Mapped[str] = mapped_column(UnicodeText, nullable=True)
+    raw_text: Mapped[str] = mapped_column(LONGTEXT, nullable=True)
 
     journal_id = mapped_column(ForeignKey(Journal.id), nullable=True)
     journal: Mapped[Journal] = relationship(lazy="selectin")

@@ -8,6 +8,7 @@ from lbrc_flask.database import db
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.theme import Theme
+from sqlalchemy.dialects.mysql import LONGTEXT
 
 
 sources__affiliations = db.Table(
@@ -76,7 +77,7 @@ class Affiliation(db.Model):
     home_organisation: Mapped[bool] = mapped_column(Boolean, nullable=True)
     international: Mapped[bool] = mapped_column(Boolean, nullable=True)
     industry: Mapped[bool] = mapped_column(Boolean, nullable=True)
-    raw_text: Mapped[str] = mapped_column(UnicodeText, nullable=True)
+    raw_text: Mapped[str] = mapped_column(LONGTEXT, nullable=True)
 
     @property
     def line_summary(self):
@@ -279,7 +280,7 @@ class Source(AuditMixin, CommonMixin, db.Model):
 
     last_fetched_datetime = db.Column(db.DateTime)
     error = db.Column(db.Boolean, default=False)
-    raw_text: Mapped[str] = mapped_column(UnicodeText, nullable=True)
+    raw_text: Mapped[str] = mapped_column(LONGTEXT, nullable=True)
 
     @property
     def author_url(self):
