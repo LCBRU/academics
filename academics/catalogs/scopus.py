@@ -125,7 +125,7 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
         logging.info(f'No publication for {scopus_id=}; {doi=}')
         return None
 
-    publication_date = a.data.get('bibrecord', {}).get('head', {}).get('source', {}).get('publicationdate', {})
+    publication_date = a.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('source', {}).get('publicationdate', {})
     date_text = publication_date.get('date-text', '')
     if '$' in publication_date:
         date_text = publication_date.get('$', '')
