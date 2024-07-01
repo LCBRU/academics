@@ -551,8 +551,8 @@ def save_publications(new_pubs):
             cat_pub.publication_period_start = date(year=int(p.publication_year), month=int(p.publication_month), day=1)
             cat_pub.publication_period_end = cat_pub.publication_period_start + relativedelta(months=1) - relativedelta(days=1)
         else:
-            cat_pub.publication_period_start = date(year=int(p.publication_year), month=int(p.publication_month), day=1)
-            cat_pub.publication_period_end = cat_pub.publication_period_start + relativedelta(months=1) - relativedelta(days=1)
+            cat_pub.publication_period_start = date(year=int(p.publication_year), month=1, day=1)
+            cat_pub.publication_period_end = cat_pub.publication_period_start + relativedelta(year=1) - relativedelta(days=1)
 
 
         db.session.add(RawData(
