@@ -555,7 +555,7 @@ def save_publications(new_pubs):
             logging.info('A'*40)
             logging.info(cat_pub.publication_period_start)
             logging.info('A'*40)
-            cat_pub.publication_period_end = (cat_pub.publication_period_start + relativedelta(year=1)) - relativedelta(days=1)
+            cat_pub.publication_period_end = (cat_pub.publication_period_start + relativedelta(years=1)) - relativedelta(days=1)
 
 
         db.session.add(RawData(
