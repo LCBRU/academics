@@ -127,8 +127,16 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
 
     publication_date = a.data.get('item', {}).get('bibrecord', {}).get('head', {}).get('source', {}).get('publicationdate', {})
     date_text = publication_date.get('date-text', '')
-    if '$' in publication_date:
-        date_text = publication_date.get('$', '')
+    if '$' in date_text:
+        date_text = date_text.get('$', '')
+
+    logging.info('A'*40)
+    logging.info(publication_date)
+    logging.info(publication_date.get('year', ''))
+    logging.info(publication_date.get('month', ''))
+    logging.info(publication_date.get('day', ''))
+    logging.info(date_text)
+    logging.info('A'*40)
 
     result = PublicationData(
             catalog='scopus',
@@ -152,9 +160,9 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
             raw_text=json.dumps(a.data, sort_keys=True, indent=4),
             action='get_scopus_publication_data',
-            publication_year=publication_date.get('year', ''),
-            publication_month=publication_date.get('month', ''),
-            publication_day=publication_date.get('day', ''),
+            publication_year=publication_date.get('year', None),
+            publication_month=publication_date.get('month', None),
+            publication_day=publication_date.get('day', None),
             publication_date_text=date_text,       
         )
     
