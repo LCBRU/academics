@@ -611,6 +611,8 @@ class Abstract(AbsDoc):
         affiliations = [AffiliationData(
             catalog=CATALOG_SCOPUS,
             catalog_identifier=a.get('@id') or '',
+            raw_text=a.get('@id') or '',
+            action=action,
         ) for a in afils if a.get('@id')]
 
         result = AuthorData(
