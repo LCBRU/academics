@@ -15,11 +15,11 @@ from academics.model.institutions import Institution
 from lbrc_flask.celery import celery
 from celery.signals import after_setup_logger
 from lbrc_flask.database import db
-from datetime import datetime
+from datetime import date, datetime
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
 from academics.model.raw_data import RawData
-
+from dateutil.relativedelta import relativedelta
 
 @after_setup_logger.connect
 def setup_loggers(logger, *args, **kwargs):
@@ -543,6 +543,17 @@ def save_publications(new_pubs):
         cat_pub.publication_month = p.publication_month
         cat_pub.publication_day = p.publication_day
         cat_pub.publication_date_text = p.publication_date_text
+
+        if p.publication_day:
+            cat_pub.publication_period_start = date(year=int(p.publication_year), month=int(p.publication_month), day=int(p.publication_day))
+            cat_pub.publication_period_end = cat_pub.publication_period_start
+        elif p.publication_month:
+            cat_pub.publication_period_start = date(year=int(p.publication_year), month=int(p.publication_month), day=1)
+            cat_pub.publication_period_end = cat_pub.publication_period_start + relativedelta(months=1) - relativedelta(days=1)
+        else:
+            cat_pub.publication_period_start = date(year=int(p.publication_year), month=int(p.publication_month), day=1)
+            cat_pub.publication_period_end = cat_pub.publication_period_start + relativedelta(months=1) - relativedelta(days=1)
+
 
         db.session.add(RawData(
             catalog=cat_pub.catalog,
