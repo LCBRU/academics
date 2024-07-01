@@ -130,6 +130,10 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
     if '$' in publication_date:
         date_text = publication_date.get('$', '')
 
+    logging.info('A'*40)
+    logging.info(publication_date)
+    logging.info('A'*40)
+
     result = PublicationData(
             catalog='scopus',
             catalog_identifier=id,
