@@ -49,7 +49,7 @@ def get_openalex_publications(identifier):
         )
 
     for w in chain(*q.paginate(per_page=200)):
-        result.append(_get_publication_data(w))
+        result.append(_get_publication_data(w, 'get_openalex_publications'))
 
     return result
 
@@ -63,10 +63,10 @@ def get_open_alex_publication_data(identifier):
         logging.warn('OpenAlex Not Enabled')
         return None
     
-    return _get_publication_data(Works()[identifier])
+    return _get_publication_data(Works()[identifier], 'get_open_alex_publication_data')
 
 
-def _get_publication_data(pubdata):
+def _get_publication_data(pubdata, action):
 
     pd = _diction_purge_none(pubdata)
     bib = pd.get('biblio', {})
@@ -89,10 +89,11 @@ def _get_publication_data(pubdata):
         subtype_code='',
         subtype_description=pd.get('type', None),
         cited_by_count=pd.get('cited_by_count', None),
-        authors=[_translate_publication_author(a) for a in pd.get('authorships', [])],
+        authors=[_translate_publication_author(a, '_get_publication_data') for a in pd.get('authorships', [])],
         keywords={k.get('keyword', None) for k in pd.get('keywords', {})},
         is_open_access=pd.get('open_access', {}).get('is_oa', False),
         raw_text=json.dumps(pd, sort_keys=True, indent=4),
+        action=action,
     )
 
 
@@ -111,7 +112,7 @@ def _diction_purge_none(_dict):
     return _dict
 
 
-def _translate_publication_author(author_dict):
+def _translate_publication_author(author_dict, action):
     afils = ensure_list(author_dict.get('institutions'))
 
     affiliations = [
@@ -122,6 +123,7 @@ def _translate_publication_author(author_dict):
             address='',
             country=a.get('country_code'),
             raw_text=json.dumps(a, sort_keys=True, indent=4),
+            action=action,
         ) for a in afils if a.get('id')
     ]
 
@@ -138,6 +140,7 @@ def _translate_publication_author(author_dict):
         href=author.get('id', None),
         affiliations=affiliations,
         raw_text=json.dumps(author, sort_keys=True, indent=4),
+        action=action,
     )
 
 
@@ -172,7 +175,7 @@ def open_alex_similar_authors(academic: Academic):
 
     new_authors = [a for a in authors.values() if _get_id_from_href(a.get('id', '')) not in existing]
 
-    return _get_author_datas(new_authors)
+    return _get_author_datas(new_authors, 'open_alex_similar_authors')
 
 
 def abstract_from_inverted_index(inverted_index):
@@ -192,7 +195,7 @@ def get_open_alex_affiliation_data(identifier):
 
     affiliation = Institutions()[identifier]
 
-    results = _get_affiliation_datas([affiliation])
+    results = _get_affiliation_datas([affiliation], 'get_open_alex_affiliation_data')
 
     return next(iter(results), None)
 
@@ -204,12 +207,12 @@ def get_open_alex_author_data(identifier):
 
     author = Authors()[identifier]
 
-    results = _get_author_datas([author])
+    results = _get_author_datas([author], 'get_open_alex_author_data')
 
     return next(iter(results), None)
 
 
-def _get_affiliation_datas(affiliations):
+def _get_affiliation_datas(affiliations, action):
     return [
         AffiliationData(
             catalog=CATALOG_OPEN_ALEX,
@@ -218,11 +221,12 @@ def _get_affiliation_datas(affiliations):
             address=a.get('geo', {}).get('city'),
             country=a.get('geo', {}).get('country'),
             raw_text=json.dumps(a, sort_keys=True, indent=4),
+            action=action,
         ) for a in affiliations
     ]
 
 
-def _get_author_datas(authors):
+def _get_author_datas(authors, action):
     result = []
 
     for a in authors:
@@ -237,6 +241,7 @@ def _get_author_datas(authors):
                 address='',
                 country=a.get('institution', {}).get('country_code'),
                 raw_text=json.dumps(a, sort_keys=True, indent=4),
+                action=action,
             ) for a in afils if a.get('institution', {}).get('id') and date.today().year in a.get('years', [])
         ]
 
@@ -255,6 +260,7 @@ def _get_author_datas(authors):
                 h_index=a.get('summary_stats', {}).get('h_index', None),
                 affiliations=affiliations,
                 raw_text=json.dumps(a, sort_keys=True, indent=4),
+                action=action,
             )
         )
 

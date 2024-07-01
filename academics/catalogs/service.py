@@ -18,6 +18,7 @@ from lbrc_flask.database import db
 from datetime import datetime
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
+from academics.model.raw_data import RawData
 
 
 @after_setup_logger.connect
@@ -538,7 +539,13 @@ def save_publications(new_pubs):
         cat_pub.subtype_id = subtype_xref[cpr]
         cat_pub.sponsors = set(sponsor_xref[cpr])
         cat_pub.keywords = set(keyword_xref[cpr])
-        cat_pub.raw_text = p.raw_text
+
+        db.session.add(RawData(
+            catalog=cat_pub.catalog,
+            catalog_identifier=cat_pub.catalog_identifier,
+            action=p.action,
+            raw_text=p.raw_text,
+        ))
 
         db.session.add(cat_pub)
 

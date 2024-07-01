@@ -146,6 +146,7 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
             keywords=list(filter(None, set([k.get('$', '') for k in (a.data.get(u'authkeywords') or {}).get('author-keywords', [])]))),
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
             raw_text=json.dumps(a.data, sort_keys=True, indent=4),
+            action='get_scopus_publication_data',
         )
 
 
@@ -186,16 +187,17 @@ def get_scopus_publications(identifier):
                 subtype_code=p.get(u'subtype', ''),
                 subtype_description=p.get(u'subtypeDescription', ''),
                 cited_by_count=int(p.get(u'citedby-count', '0')),
-                authors=[_translate_publication_author(a) for a in p.get('author', [])],
+                authors=[_translate_publication_author(a, 'get_scopus_publications') for a in p.get('author', [])],
                 keywords=set(p.get(u'authkeywords', '').split('|')),
                 is_open_access=p.get(u'openaccess', '0') == "1",
                 raw_text=json.dumps(p, sort_keys=True, indent=4),
+                action='get_scopus_publications',
             ))
 
     return result
 
 
-def _translate_publication_author(author_dict):
+def _translate_publication_author(author_dict, action):
 
     afils = ensure_list(author_dict.get('afid'))
 
@@ -203,6 +205,8 @@ def _translate_publication_author(author_dict):
         AffiliationData(
             catalog=CATALOG_SCOPUS,
             catalog_identifier=a.get('$'),
+            raw_text=json.dumps(a, sort_keys=True, indent=4),
+            action=action,
         ) for a in afils if a.get('$')
     ]
 
@@ -217,6 +221,7 @@ def _translate_publication_author(author_dict):
         href=author_dict.get('author-url', None),
         affiliations=affiliations,
         raw_text=json.dumps(author_dict, sort_keys=True, indent=4),
+        action=action,
     )
 
     return result
@@ -302,6 +307,7 @@ def scopus_author_search(search_string, search_non_local=False):
                 address=a.get('affiliation-city'),
                 country=a.get('affiliation-country'),
                 raw_text=json.dumps(a, sort_keys=True, indent=4),
+                action='scopus_author_search',
             ) for a in afils if a.get('affiliation-id')
         ]
 
@@ -315,6 +321,7 @@ def scopus_author_search(search_string, search_non_local=False):
             href=href,
             affiliations=affiliations,
             raw_text=json.dumps(r, sort_keys=True, indent=4),
+            action='scopus_author_search',
         )
 
         if len(a.catalog_identifier) == 0:
@@ -464,6 +471,7 @@ class Author(ElsAuthor):
                 address=a.get('@city'),
                 country=a.get('@country'),
                 raw_text=json.dumps(a, sort_keys=True, indent=4),
+                action='get_data',
             ) for a in afils if a.get('@id')
         ]
 
@@ -480,6 +488,7 @@ class Author(ElsAuthor):
             h_index=self.h_index,
             affiliations=affiliations,
             raw_text=json.dumps(self.data, sort_keys=True, indent=4),
+            action='get_data',
         )
 
         return result
@@ -519,6 +528,7 @@ class ScopusAffiliation(ElsAffil):
             address=self.address,
             country=self.country,
             raw_text=json.dumps(self.data, sort_keys=True, indent=4),
+            action='get_data',
         )
 
 
@@ -580,10 +590,10 @@ class Abstract(AbsDoc):
 
     @property
     def authors(self):
-        return [self._translate_publication_author(a) for a in ((self.data or {}).get('authors') or {}).get('author', [])]
+        return [self._translate_publication_author(a, 'authors') for a in ((self.data or {}).get('authors') or {}).get('author', [])]
 
 
-    def _translate_publication_author(self, author_dict):
+    def _translate_publication_author(self, author_dict, action):
 
         afils = ensure_list(self.data.get('affiliation'))
 
@@ -603,6 +613,7 @@ class Abstract(AbsDoc):
             href=author_dict.get('author-url', None),
             affiliations=affiliations,
             raw_text=json.dumps(author_dict, sort_keys=True, indent=4),
+            action=action,
         )
 
         return result

@@ -10,6 +10,8 @@ from lbrc_flask.database import db
 from datetime import date
 from unidecode import unidecode
 
+from academics.model.raw_data import RawData
+
 
 @dataclass(init=False, unsafe_hash=True)
 class CatalogReference():
@@ -36,6 +38,7 @@ class AuthorData():
     document_count: str = None
     h_index: str = None
     raw_text: str = None
+    action: str = None
 
     @property
     def display_name(self):
@@ -71,7 +74,6 @@ class AuthorData():
         source.citation_count = self.citation_count
         source.document_count = self.document_count
         source.h_index = self.h_index
-        source.raw_text = self.raw_text
 
 
 @dataclass
@@ -96,6 +98,7 @@ class PublicationData():
     keywords: str
     is_open_access : bool = False
     raw_text: str = None
+    action: str = None
 
 
 @dataclass
@@ -106,6 +109,7 @@ class AffiliationData():
     address: str = ''
     country: str = ''
     raw_text: str = None
+    action: str = None
 
     @property
     def is_local(self):
@@ -121,7 +125,6 @@ class AffiliationData():
         affiliation.name = self.name
         affiliation.address = self.address
         affiliation.country = self.country
-        affiliation.raw_text = self.raw_text
 
 
 @dataclass
@@ -132,6 +135,7 @@ class InstitutionData():
     country_code: str = ''
     sector: str = ''
     raw_text: str = None
+    action: str = None
 
     def update_institution(self, institution):
         institution.catalog_identifier = self.catalog_identifier
@@ -139,7 +143,6 @@ class InstitutionData():
         institution.name = self.name
         institution.country_code = self.country_code
         institution.sector = self.sector
-        institution.raw_text = self.raw_text
 
         return institution
 
@@ -257,6 +260,12 @@ def _institutions(institution_datas):
         xref[new_i.catalog_identifier] = new_i
 
         db.session.add(new_i)
+        db.session.add(RawData(
+            catalog=i.catalog,
+            catalog_identifier=i.catalog_identifier,
+            action=i.action,
+            raw_text=i.raw_text,
+        ))
     
     db.session.commit()
 
@@ -308,18 +317,26 @@ def _affiliation_xref_for_author_data_list(author_datas):
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
 
-        new_affiliations = [
-            Affiliation(
+        new_affiliations = []
+
+        for a in afils:
+            if CatalogReference(a) in xref.keys():
+                continue
+
+            new_affiliations.append(Affiliation(
                 catalog=cat,
                 catalog_identifier=a.catalog_identifier,
                 name=a.name,
                 address=a.address,
                 country=a.country,
                 refresh_details=True,
+            ))
+            db.session.add(RawData(
+                catalog=a.catalog,
+                catalog_identifier=a.catalog_identifier,
+                action=a.action,
                 raw_text=a.raw_text,
-            )
-            for a in afils if CatalogReference(a) not in xref.keys()
-        ]
+            ))
 
         db.session.add_all(new_affiliations)
         db.session.commit()
@@ -363,7 +380,19 @@ def _source_xref_for_author_data_list(author_datas):
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
 
-    new_sources = [a.get_new_source() for a in author_datas if CatalogReference(a) not in xref.keys()]
+    new_sources = []
+
+    for a in author_datas:
+        if CatalogReference(a) in xref.keys():
+            continue
+
+        new_sources.append(a.get_new_source())
+        db.session.add(RawData(
+            catalog=a.catalog,
+            catalog_identifier=a.catalog_identifier,
+            action=a.action,
+            raw_text=a.raw_text,
+        ))
 
     db.session.add_all(new_sources)
     db.session.commit()
