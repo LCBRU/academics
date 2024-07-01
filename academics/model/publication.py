@@ -5,7 +5,7 @@ from typing import Optional
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy import Boolean, ForeignKey, String, Unicode, UnicodeText, UniqueConstraint, and_, func, select
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, Unicode, UnicodeText, UniqueConstraint, and_, func, select
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_MANUAL, CATALOG_OPEN_ALEX, CATALOG_SCOPUS
@@ -249,7 +249,6 @@ class CatalogPublication(db.Model, AuditMixin):
     publication: Mapped[Publication] = relationship(
         backref=backref(
             "catalog_publications",
-            lazy="joined",
             cascade="delete, delete-orphan",
         )
     )
@@ -270,6 +269,13 @@ class CatalogPublication(db.Model, AuditMixin):
     is_open_access: Mapped[bool] = mapped_column(Boolean, nullable=True)
     cited_by_count: Mapped[int] = mapped_column(UnicodeText, nullable=True)
     href: Mapped[str] = mapped_column(UnicodeText)
+
+    publication_year: Mapped[int] = mapped_column(Integer, nullable=True)
+    publication_month: Mapped[int] = mapped_column(Integer, nullable=True)
+    publication_day: Mapped[int] = mapped_column(Integer, nullable=True)
+    publication_date_text: Mapped[str] = mapped_column(String(100), nullable=True)
+    publication_period_start: Mapped[date] = mapped_column(Date, nullable=True)
+    publication_period_end: Mapped[date] = mapped_column(Date, nullable=True)
 
     journal_id = mapped_column(ForeignKey(Journal.id), nullable=True)
     journal: Mapped[Journal] = relationship(lazy="selectin")

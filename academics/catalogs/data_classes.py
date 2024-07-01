@@ -99,6 +99,10 @@ class PublicationData():
     is_open_access : bool = False
     raw_text: str = None
     action: str = None
+    publication_year: str = None
+    publication_month: str = None
+    publication_day: str = None
+    publication_date_text: str = None
 
 
 @dataclass

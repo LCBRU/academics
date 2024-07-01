@@ -1,5 +1,5 @@
 import re
-from sqlalchemy import Boolean, ForeignKey, String, UnicodeText, UniqueConstraint, distinct, func, or_, select
+from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint, distinct, func, or_, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 from lbrc_flask.security import AuditMixin
@@ -8,7 +8,6 @@ from lbrc_flask.database import db
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.theme import Theme
-from sqlalchemy.dialects.mysql import LONGTEXT
 
 
 sources__affiliations = db.Table(

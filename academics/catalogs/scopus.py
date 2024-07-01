@@ -124,8 +124,13 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
     if not id:
         logging.info(f'No publication for {scopus_id=}; {doi=}')
         return None
-    
-    return PublicationData(
+
+    publication_date = a.data.get('bibrecord', {}).get('head', {}).get('source', {}).get('publicationdate', {})
+    date_text = publication_date.get('date-text', '')
+    if '$' in publication_date:
+        date_text = publication_date.get('$', '')
+
+    result = PublicationData(
             catalog='scopus',
             catalog_identifier=id,
             href=_get_scopus_publication_link(a.data.get('coredata')),
@@ -147,7 +152,13 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
             is_open_access=a.data.get('coredata', {}).get(u'openaccess', '0') == "1",
             raw_text=json.dumps(a.data, sort_keys=True, indent=4),
             action='get_scopus_publication_data',
+            publication_year=publication_date.get('year', ''),
+            publication_month=publication_date.get('month', ''),
+            publication_day=publication_date.get('day', ''),
+            publication_date_text=date_text,       
         )
+    
+    return result
 
 
 def get_scopus_publications(identifier):
@@ -635,4 +646,3 @@ class DocumentSearch(ElsSearch):
 
         super().__init__(query=q, index='scopus')
         self._uri += '&view=complete'
-

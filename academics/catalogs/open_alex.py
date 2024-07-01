@@ -72,14 +72,17 @@ def _get_publication_data(pubdata, action):
     bib = pd.get('biblio', {})
     grants = pd.get('grants', [])
 
-    return PublicationData(
+    publication_date_text = pd.get('publication_date', None)
+    parsed_publication_date = parse_date(publication_date_text)
+
+    result = PublicationData(
         catalog=CATALOG_OPEN_ALEX,
         catalog_identifier=_get_id_from_href(pd['id']),
         href=pd['id'],
         doi=_get_doi_from_href(pd.get('doi', None)),
         title=pd.get('title', None),
         journal_name=pd.get('primary_location', {}).get('source', {}).get('display_name', ''),
-        publication_cover_date=parse_date(pd.get('publication_date', None)),
+        publication_cover_date=parsed_publication_date,
         abstract_text=abstract_from_inverted_index(pd.get('abstract_inverted_index', None)),
         funding_list={g.get('funder_display_name', None) for g in grants},
         funding_text='',
@@ -94,8 +97,10 @@ def _get_publication_data(pubdata, action):
         is_open_access=pd.get('open_access', {}).get('is_oa', False),
         raw_text=json.dumps(pd, sort_keys=True, indent=4),
         action=action,
+        publication_date_text=publication_date_text,
     )
 
+    return result
 
 def _diction_purge_none(_dict):
     """Delete None values recursively from all of the dictionaries"""
