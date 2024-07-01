@@ -132,6 +132,10 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
 
     logging.info('A'*40)
     logging.info(publication_date)
+    logging.info(publication_date.get('year', ''))
+    logging.info(publication_date.get('month', ''))
+    logging.info(publication_date.get('day', ''))
+    logging.info(date_text)
     logging.info('A'*40)
 
     result = PublicationData(
