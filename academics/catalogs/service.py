@@ -546,7 +546,7 @@ def save_publications(new_pubs):
 
         if not p.publication_year:
             cat_pub.publication_period_start = cat_pub.publication_period_end = cat_pub.publication_cover_date
-        if p.publication_day:
+        elif p.publication_day:
             cat_pub.publication_period_start = date(year=int(p.publication_year), month=int(p.publication_month), day=int(p.publication_day))
             cat_pub.publication_period_end = cat_pub.publication_period_start
         elif p.publication_month:
