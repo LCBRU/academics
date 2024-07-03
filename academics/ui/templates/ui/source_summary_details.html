@@ -43,13 +43,13 @@
                                     <a href="javascript:;">{{ ps.status }}</a>
                                     <ul>
                                         {% if ps.can_unassign %}
-                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=academic.id, status='unassigned') }}">Unassigned</a></li>
+                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=ps.academic.id, status='unassigned') }}">Unassigned</a></li>
                                         {% endif %}
                                         {% if ps.can_no_match %}
-                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=academic.id, status='no match') }}">No Match</a></li>
+                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=ps.academic.id, status='no match') }}">No Match</a></li>
                                         {% endif %}
                                         {% if ps.can_match %}
-                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=academic.id, status='match') }}">Match</a></li>
+                                            <li><a href="javascript:;" hx-post="{{ url_for('ui.academics_amend_potential_sources', id=ps.id, academic_id=ps.academic.id, status='match') }}">Match</a></li>
                                         {% endif %}
                                     </ul>
                                 </div>
