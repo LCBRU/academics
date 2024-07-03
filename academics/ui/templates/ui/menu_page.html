@@ -11,7 +11,7 @@
     <div class="container">
       <menu>
         <li><a href="{{url_for('ui.index')}}">Home</a></li>
-        <li><a href="{{url_for('ui.publications')}}" class="icon add">Publications</a></li>
+        <li><a href="{{url_for('ui.publications')}}" class="icon publication">Publications</a></li>
 
         {% if current_user.has_role('validator') %}
             <li><a href="{{url_for('ui.validation')}}" class="icon check_circle">Validation</a></li>
