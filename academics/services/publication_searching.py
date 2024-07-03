@@ -247,18 +247,21 @@ def catalog_publication_search_query(search_form):
         publication_start_date = parse_date_or_none(search_form.publication_start_date.data)
 
     if publication_start_date:
-        q = q.where(CatalogPublication.publication_cover_date >= publication_start_date)
+        q = q.where(CatalogPublication.publication_period_end >= publication_start_date)
 
     publication_end_date = None
 
     if search_form.has_value('publication_end_month'):
         publication_end_date = parse_date_or_none(search_form.publication_end_month.data)
 
+        if publication_end_date:
+            publication_end_date += relativedelta(months=1)
+
     if search_form.has_value('publication_end_date'):
         publication_end_date = parse_date_or_none(search_form.publication_end_date.data)
 
     if publication_end_date:
-        q = q.where(CatalogPublication.publication_cover_date < (publication_end_date + relativedelta(months=1)))
+        q = q.where(CatalogPublication.publication_period_start < publication_end_date)
 
     if search_form.has_value('search'):
         q = q.where(or_(
