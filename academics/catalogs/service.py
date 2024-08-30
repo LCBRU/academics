@@ -392,10 +392,7 @@ def _update_source(s):
             _source_xref_for_author_data_list([author_data])
             affiliation_xref = _affiliation_xref_for_author_data_list([author_data])
 
-            logging.warn(author_data)
-            logging.warn(affiliation_xref)
-
-            s.affiliations = affiliation_xref[CatalogReference(s)]
+            s.affiliations = affiliation_xref[CatalogReference(author_data)]
 
             author_data.update_source(s)
         else:
