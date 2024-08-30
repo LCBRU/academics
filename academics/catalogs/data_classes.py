@@ -218,7 +218,7 @@ def _publication_xref_for_publication_data_list(publication_datas):
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
-    xref = xref | {CatalogReference(p): new_pubs[pd.doi] for pd in cat_pubs_no_pub}
+    xref = xref | {CatalogReference(pd): new_pubs[pd.doi] for pd in cat_pubs_no_pub}
 
     return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
 
