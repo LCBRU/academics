@@ -384,10 +384,6 @@ def _source_xref_for_author_data_list(author_datas):
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
 
-        logging.warn('A'*100)
-        logging.warn([a.catalog_identifier for a in authors])
-        logging.warn(list(db.session.execute(q).scalars()))
-
     new_sources = []
 
     for a in author_datas:
@@ -403,9 +399,6 @@ def _source_xref_for_author_data_list(author_datas):
             action=a.action,
             raw_text=a.raw_text,
         ))
-
-    logging.warn('C'*100)
-    logging.warn(new_sources)    
 
     db.session.add_all(new_sources)
     db.session.commit()
