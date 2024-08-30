@@ -376,9 +376,9 @@ def _source_xref_for_author_data_list(author_datas):
     keyfunc = lambda a: a.catalog
 
     for cat, authors in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
-        logging.debug('A'*100)
-        logging.debug(authors)
-        logging.debug(cat)
+        logging.warn('A'*100)
+        logging.warn(authors)
+        logging.warn(cat)
 
         q = select(Source).where(
             Source.catalog_identifier.in_([a.catalog_identifier for a in authors])
@@ -402,8 +402,8 @@ def _source_xref_for_author_data_list(author_datas):
             raw_text=a.raw_text,
         ))
 
-    logging.debug('B'*100)
-    logging.debug(new_sources)    
+    logging.warn('B'*100)
+    logging.warn(new_sources)    
 
     db.session.add_all(new_sources)
     db.session.commit()
