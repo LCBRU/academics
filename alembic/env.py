@@ -8,6 +8,9 @@ from sqlalchemy import pool
 from alembic import context
 
 from lbrc_flask.database import db
+
+load_dotenv()
+
 import academics.model.institutions
 import academics.model.academic
 import academics.model.catalog
@@ -39,7 +42,6 @@ target_metadata = db.Model.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-load_dotenv()
 config.set_main_option('sqlalchemy.url', os.environ["SQLALCHEMY_DATABASE_URI"])
 
 def run_migrations_offline() -> None:
