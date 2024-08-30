@@ -377,7 +377,7 @@ def _source_xref_for_author_data_list(author_datas):
 
     for cat, authors in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
         logging.warn('A'*100)
-        logging.warn(authors)
+        logging.warn(list(authors))
         logging.warn(cat)
 
         q = select(Source).where(
@@ -394,6 +394,8 @@ def _source_xref_for_author_data_list(author_datas):
         if CatalogReference(a) in xref.keys():
             continue
 
+        logging.warn('B'*100)
+
         new_sources.append(a.get_new_source())
         db.session.add(RawData(
             catalog=a.catalog,
@@ -402,7 +404,7 @@ def _source_xref_for_author_data_list(author_datas):
             raw_text=a.raw_text,
         ))
 
-    logging.warn('B'*100)
+    logging.warn('C'*100)
     logging.warn(new_sources)    
 
     db.session.add_all(new_sources)
