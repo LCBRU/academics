@@ -303,6 +303,9 @@ def _affiliation_xref_for_author_data_list(author_datas):
 
     author_datas = list(author_datas)
 
+    logging.warn('A'*100)
+    logging.warn(author_datas)
+
     affiliations = {CatalogReference(af): af for af in chain.from_iterable([a.affiliations for a in author_datas])}
 
     xref = {}
@@ -350,6 +353,8 @@ def _affiliation_xref_for_author_data_list(author_datas):
     results = {}
 
     for a in author_datas:
+        logging.warn('B'*100)
+        logging.warn(a)
         results[CatalogReference(a)] = [xref[af] for af in {CatalogReference(af) for af in a.affiliations}]
 
     return results
