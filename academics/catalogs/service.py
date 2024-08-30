@@ -145,10 +145,10 @@ def _process_updates():
     logging.debug('started')
 
     refresh_Academics()
-    refresh_catalog_publications()
-    refresh_publications()
-    remove_publication_without_catalog_entry()
-    refresh_affiliations()
+    # refresh_catalog_publications()
+    # refresh_publications()
+    # remove_publication_without_catalog_entry()
+    # refresh_affiliations()
     refresh_institutions()
 
     logging.debug('Ended')

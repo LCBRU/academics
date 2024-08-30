@@ -92,6 +92,7 @@ def get_scival_publication_institutions(scopus_id=None, log_data=False):
             name=i.get('name'),
             country_code=i.get('countryCode'),
             sector=None,
+            action="get_scival_publication_institutions",
         ) for i in result.get('publication', {}).get('institutions')]
 
     except Exception as e:
@@ -122,6 +123,7 @@ def get_scival_institution(institution_id=None):
             name=i.get('name'),
             country_code=i.get('countryCode'),
             sector=i.get('sector'),
+            action="get_scival_institution",
         )
 
     except Exception as e:
