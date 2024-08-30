@@ -392,11 +392,12 @@ def _update_source(s):
             _source_xref_for_author_data_list([author_data])
             affiliation_xref = _affiliation_xref_for_author_data_list([author_data])
 
+            logging.warn(affiliation_xref)
+
             s.affiliations = affiliation_xref[CatalogReference(s)]
 
             author_data.update_source(s)
         else:
-            logging.warn(affiliation_xref)
             logging.warn(f'Source {s.display_name} not found so setting it to be in error')
             s.error = True
 
