@@ -388,12 +388,12 @@ def _update_source(s):
         if s.catalog == CATALOG_OPEN_ALEX:
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
-        if author_data:
-            # _source_xref_for_author_data_list([author_data])
-            # affiliation_xref = _affiliation_xref_for_author_data_list([author_data])
+        if author_data and CatalogReference(s) == CatalogReference(author_data):
+            _source_xref_for_author_data_list([author_data])
+            affiliation_xref = _affiliation_xref_for_author_data_list([author_data])
 
-            # if CatalogReference(s) in affiliation_xref:
-            #     s.affiliations = affiliation_xref[CatalogReference(s)]
+            if CatalogReference(s) in affiliation_xref:
+                s.affiliations = affiliation_xref[CatalogReference(s)]
 
             author_data.update_source(s)
         else:
