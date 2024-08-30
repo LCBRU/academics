@@ -50,7 +50,7 @@
                                 {% set cls = 'user_add text-danger' %}
                             {% endif %}
 
-                            <a title="Edit Sources for {{ a.full_name }}" hx-get="{{ url_for('ui.academics_potential_sources', id=a.id) }}" hx-target="body" hx-swap="beforeend" class="icon {{cls}}"></a>
+                            <a title="Edit Sources for {{ a.full_name }}" hx-get="{{ url_for('ui.academics_potential_sources', id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon {{cls}}"></a>
                             <a title="Edit academic {{ a.full_name }}" hx-get="{{ url_for('ui.academic_edit', id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon edit"></a>
                             <a title="Delete academic {{ a.full_name }}" hx-post="{{ url_for('ui.delete_academic', id=a.id) }}" hx-confirm="Are you sure you wish to delete '{{ a.full_name }}'?" href="javascript:;" class="icon delete"></a>
                         {% endif %}

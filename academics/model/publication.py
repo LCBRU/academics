@@ -11,7 +11,6 @@ from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_MANUAL, CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.institutions import Institution
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.dialects.mysql import LONGTEXT
 
 
 DOI_URL = 'doi.org'

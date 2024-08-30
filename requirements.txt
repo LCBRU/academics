@@ -4,10 +4,10 @@
 #
 #    pip-compile
 #
--e git+https://github.com/LCBRU/lbrc_flask.git@main#egg=lbrc_flask
-    # via -r requirements.in
 alembic==1.11.1
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   lbrc-flask
 amqp==5.1.1
     # via kombu
 arrow==1.2.3
@@ -34,9 +34,13 @@ cairocffi==1.5.0
     #   cairosvg
     #   weasyprint
 cairosvg==2.7.0
-    # via weasyprint
+    # via
+    #   lbrc-flask
+    #   weasyprint
 celery[redis]==5.2.7
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   lbrc-flask
 certifi==2022.12.7
     # via requests
 cffi==1.15.1
@@ -105,7 +109,9 @@ flask-mailman==0.3.0
 flask-principal==0.4.0
     # via flask-security-too
 flask-security-too[common,fsqla]==5.2.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   lbrc-flask
 flask-sqlalchemy==3.0.3
     # via
     #   flask-security-too
@@ -115,9 +121,13 @@ flask-weasyprint==1.0.0
     #   -r requirements.in
     #   lbrc-flask
 flask-wtf==1.1.1
-    # via flask-security-too
+    # via
+    #   flask-security-too
+    #   lbrc-flask
 greenlet==2.0.2
     # via sqlalchemy
+hatchling==1.25.0
+    # via lbrc-flask
 html5lib==1.1
     # via weasyprint
 idna==3.4
@@ -136,6 +146,8 @@ jsonschema==4.17.3
     # via lbrc-flask
 kombu==5.2.4
     # via celery
+lbrc-flask @ git+https://github.com/LCBRU/lbrc_flask.git@pyproject
+    # via -r requirements.in
 mako==1.2.4
     # via alembic
 markdown==3.4.1
@@ -156,14 +168,20 @@ numpy==1.24.2
     # via pandas
 openpyxl==3.1.2
     # via lbrc-flask
+packaging==24.1
+    # via hatchling
 pandas==1.5.3
     # via -r requirements.in
 passlib==1.7.4
     # via flask-security-too
+pathspec==0.12.1
+    # via hatchling
 pillow==9.4.0
     # via
     #   cairosvg
     #   weasyprint
+pluggy==1.5.0
+    # via hatchling
 prompt-toolkit==3.0.38
     # via click-repl
 pyalex==0.11
@@ -190,6 +208,7 @@ python-dateutil==2.8.2
     # via
     #   arrow
     #   faker
+    #   lbrc-flask
     #   pandas
 python-dotenv==1.0.0
     # via lbrc-flask
@@ -229,6 +248,8 @@ tinycss2==1.2.1
     #   cairosvg
     #   cssselect2
     #   weasyprint
+trove-classifiers==2024.7.2
+    # via hatchling
 typing-extensions==4.11.0
     # via
     #   alembic
@@ -263,6 +284,7 @@ wtforms==3.0.1
     #   flask-admin
     #   flask-security-too
     #   flask-wtf
+    #   lbrc-flask
 xlrd==2.0.1
     # via lbrc-flask
 

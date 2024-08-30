@@ -1,8 +1,8 @@
 from flask import flash, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
-from lbrc_flask.response import trigger_response
-from sqlalchemy import delete
+from lbrc_flask.response import trigger_response, refresh_response
+from sqlalchemy import delete, select, func
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
 from academics.catalogs.scopus import scopus_author_search
@@ -12,7 +12,6 @@ from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length, DataRequired
 from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
-from lbrc_flask.response import refresh_response
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
@@ -243,3 +242,9 @@ def update_academic(id):
     update_single_academic(academic)
 
     return refresh_response()
+
+
+@blueprint.route("/is_updating")
+def is_updating():
+    q = select(func.count(Academic.id)).where(Academic.updating == True)
+    return render_template("ui/updating.html", count=db.session.execute(q).scalar())

@@ -1,12 +1,11 @@
-from flask import abort, jsonify, redirect, render_template, request, url_for
+from flask import abort, render_template
 from sqlalchemy import select
 from wtforms import SelectField
 from academics.catalogs.service import create_potential_sources, update_single_academic
 from academics.model.academic import Academic, AcademicPotentialSource, Source
 from .. import blueprint
 from lbrc_flask.database import db
-from lbrc_flask.json import validate_json
-from lbrc_flask.forms import ConfirmForm, FlashingForm
+from lbrc_flask.forms import FlashingForm
 from flask_security import roles_accepted
 from lbrc_flask.response import refresh_response, trigger_response
 

@@ -1,6 +1,5 @@
 {% extends "lbrc/page.html" %}
 
-
 {% block page_css %}
     <link href="{{ url_for('static', filename='css/app_new.css', ver=4) }}" rel="stylesheet">
 {% endblock %}
@@ -57,6 +56,13 @@
        {% endif %}
     </div>
   </nav>
+
+  <div clas="container">
+    <div hx-get="{{ url_for('ui.is_updating') }}"
+        hx-trigger="every 30s"
+        hx-target="this"
+        hx-swap="outerHTML"></div>
+  </div>
 
   {% block menu_page_content %}{% endblock %}
 

@@ -21,6 +21,7 @@ from lbrc_flask.validators import parse_date
 from academics.model.raw_data import RawData
 from dateutil.relativedelta import relativedelta
 
+
 @after_setup_logger.connect
 def setup_loggers(logger, *args, **kwargs):
     formatter = logging.Formatter('%(asctime)s (%(levelname)s) %(module)s::%(funcName)s(%(lineno)d): %(message)s')
@@ -388,7 +389,7 @@ def _update_source(s):
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
-            _source_xref_for_author_data_list([author_data])[CatalogReference(s)]
+            _source_xref_for_author_data_list([author_data])
             affiliation_xref = _affiliation_xref_for_author_data_list([author_data])
 
             s.affiliations = affiliation_xref[CatalogReference(s)]
@@ -555,7 +556,6 @@ def save_publications(new_pubs):
         else:
             cat_pub.publication_period_start = date(year=int(p.publication_year), month=1, day=1)
             cat_pub.publication_period_end = (cat_pub.publication_period_start + relativedelta(years=1)) - relativedelta(days=1)
-
 
         db.session.add(RawData(
             catalog=cat_pub.catalog,

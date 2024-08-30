@@ -189,13 +189,13 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             .join(CatalogPublication.catalog_publication_sources)
             .join(CatalogPublicationsSources.source)
             .where(Source.academic_id == self.id)
-        ).subquery()
+        )
 
         supplementary_ids = (
             select(distinct(Publication.id))
             .join(Publication.supplementary_authors)
             .where(Academic.id == self.id)
-        ).subquery()
+        )
 
         q =  (
             select(func.count(distinct(Publication.id)))
