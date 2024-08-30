@@ -211,7 +211,7 @@ def _publication_xref_for_publication_data_list(publication_datas):
         ).unique().scalar_one_or_none():
             xref[CatalogReference(p)] = pub
 
-    cat_pubs_no_pub = (pd for pd in publication_datas if CatalogReference(p) not in xref.keys() and p.doi)
+    cat_pubs_no_pub = (pd for pd in publication_datas if CatalogReference(pd) not in xref.keys() and pd.doi)
     dois_for_cat_pubs_no_pubs = {pd.doi for pd in cat_pubs_no_pub}
     new_pubs = {doi: Publication(doi=doi, refresh_full_details=True) for doi in dois_for_cat_pubs_no_pubs}
 
