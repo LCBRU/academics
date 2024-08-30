@@ -376,10 +376,6 @@ def _source_xref_for_author_data_list(author_datas):
     keyfunc = lambda a: a.catalog
 
     for cat, authors in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
-        logging.warn('A'*100)
-        logging.warn(list(authors))
-        logging.warn(cat)
-
         q = select(Source).where(
             Source.catalog_identifier.in_([a.catalog_identifier for a in authors])
         ).where(
@@ -387,6 +383,10 @@ def _source_xref_for_author_data_list(author_datas):
         )
 
         xref = xref | {CatalogReference(a): a for a in db.session.execute(q).scalars()}
+
+        logging.warn('A'*100)
+        logging.warn([a.catalog_identifier for a in authors])
+        logging.warn(db.session.execute(q).scalars())
 
     new_sources = []
 
