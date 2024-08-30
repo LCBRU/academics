@@ -389,7 +389,7 @@ def _update_source(s):
             author_data = get_open_alex_author_data(s.catalog_identifier)
 
         if author_data:
-            _source_xref_for_author_data_list([author_data])
+            # _source_xref_for_author_data_list([author_data])
             affiliation_xref = _affiliation_xref_for_author_data_list([author_data])
 
             if CatalogReference(s) in affiliation_xref:

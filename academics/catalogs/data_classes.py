@@ -386,7 +386,7 @@ def _source_xref_for_author_data_list(author_datas):
 
         logging.warn('A'*100)
         logging.warn([a.catalog_identifier for a in authors])
-        logging.warn(db.session.execute(q).scalars())
+        logging.warn(list(db.session.execute(q).scalars()))
 
     new_sources = []
 
