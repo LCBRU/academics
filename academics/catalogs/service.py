@@ -396,6 +396,7 @@ def _update_source(s):
 
             author_data.update_source(s)
         else:
+            logging.warn(affiliation_xref)
             logging.warn(f'Source {s.display_name} not found so setting it to be in error')
             s.error = True
 
