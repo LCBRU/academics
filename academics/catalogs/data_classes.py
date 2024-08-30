@@ -211,12 +211,14 @@ def _publication_xref_for_publication_data_list(publication_datas):
         ).unique().scalar_one_or_none():
             xref[CatalogReference(p)] = pub
 
-    new_pubs = {CatalogReference(p): Publication(doi=p.doi, refresh_full_details=True) for p in publication_datas if CatalogReference(p) not in xref.keys()}
+    cat_pubs_no_pub = (pd for pd in publication_datas if CatalogReference(p) not in xref.keys() and p.doi)
+    dois_for_cat_pubs_no_pubs = {pd.doi for pd in cat_pubs_no_pub}
+    new_pubs = {doi: Publication(doi=doi, refresh_full_details=True) for doi in dois_for_cat_pubs_no_pubs}
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
-    xref = xref | new_pubs
+    xref = xref | {CatalogReference(p): new_pubs[pd.doi] for pd in cat_pubs_no_pub}
 
     return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
 
