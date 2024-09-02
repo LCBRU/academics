@@ -211,25 +211,33 @@ def _publication_xref_for_publication_data_list(publication_datas):
         ).unique().scalar_one_or_none():
             xref[CatalogReference(p)] = pub
 
-    logging.warn(f'publication_datas: {list(publication_datas)}')
-    cat_pubs_no_pub = [pd for pd in publication_datas if CatalogReference(pd) not in xref.keys() and pd.doi]
-    logging.warn(f'cat_pubs_no_pub: {list(cat_pubs_no_pub)}')
-    dois_for_cat_pubs_no_pubs = {pd.doi for pd in cat_pubs_no_pub}
-    logging.warn(f'dois_for_cat_pubs_no_pubs: {list(dois_for_cat_pubs_no_pubs)}')
+    xref = xref | _publication_xref_for_pub_data_with_doi([pd for pd in publication_datas if CatalogReference(pd) not in xref.keys() and pd.doi])
+    xref = xref | _publication_xref_for_pub_data_with_no_doi([pd for pd in publication_datas if CatalogReference(pd) not in xref.keys()])
+
+    return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
+
+
+def _publication_xref_for_pub_data_with_doi(pub_data):
+    dois_for_cat_pubs_no_pubs = {pd.doi for pd in pub_data}
     new_pubs = {doi: Publication(doi=doi, refresh_full_details=True) for doi in dois_for_cat_pubs_no_pubs}
-    logging.warn(f'New Pubs: {new_pubs}')
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
-    logging.warn(f'XREF Before: {xref}')
+    return {CatalogReference(pd): new_pubs[pd.doi] for pd in pub_data}
+    
 
-    xref = xref | {CatalogReference(pd): new_pubs[pd.doi] for pd in cat_pubs_no_pub}
+def _publication_xref_for_pub_data_with_no_doi(pub_data):
+    result = {}
 
-    logging.warn(f'XREF After: {xref}')
+    for pd in pub_data:
+        new_pub = Publication(refresh_full_details=True)
+        db.session.add(new_pub)
+        db.session.commit()
+        result[CatalogReference(pd)] = new_pub
 
-    return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
-
+    return result
+    
 
 def _sponsor_xref_for_publication_data_list(publication_datas):
     logging.debug('started')
