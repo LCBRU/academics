@@ -212,15 +212,16 @@ def _publication_xref_for_publication_data_list(publication_datas):
             xref[CatalogReference(p)] = pub
 
     cat_pubs_no_pub = (pd for pd in publication_datas if CatalogReference(pd) not in xref.keys() and pd.doi)
+    logging.warn(f'cat_pubs_no_pub: {list(cat_pubs_no_pub)}')
     dois_for_cat_pubs_no_pubs = {pd.doi for pd in cat_pubs_no_pub}
+    logging.warn(f'dois_for_cat_pubs_no_pubs: {list(dois_for_cat_pubs_no_pubs)}')
     new_pubs = {doi: Publication(doi=doi, refresh_full_details=True) for doi in dois_for_cat_pubs_no_pubs}
+    logging.warn(f'New Pubs: {new_pubs}')
 
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
     logging.warn(f'XREF Before: {xref}')
-    logging.warn(f'New Pubs: {new_pubs}')
-    logging.warn(f'cat_pubs_no_pub: {list(cat_pubs_no_pub)}')
 
     xref = xref | {CatalogReference(pd): new_pubs[pd.doi] for pd in cat_pubs_no_pub}
 
