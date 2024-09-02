@@ -218,7 +218,13 @@ def _publication_xref_for_publication_data_list(publication_datas):
     db.session.add_all(new_pubs.values())
     db.session.commit()
 
+    logging.warn(f'XREF Before: {xref}')
+    logging.warn(f'New Pubs: {new_pubs}')
+    logging.warn(f'cat_pubs_no_pub: {cat_pubs_no_pub}')
+
     xref = xref | {CatalogReference(pd): new_pubs[pd.doi] for pd in cat_pubs_no_pub}
+
+    logging.warn(f'XREF After: {xref}')
 
     return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
 
@@ -391,8 +397,6 @@ def _source_xref_for_author_data_list(author_datas):
     for a in author_datas:
         if CatalogReference(a) in xref.keys():
             continue
-
-        logging.warn('B'*100)
 
         new_sources.append(a.get_new_source())
         db.session.add(RawData(
