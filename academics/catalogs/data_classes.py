@@ -220,7 +220,7 @@ def _publication_xref_for_publication_data_list(publication_datas):
 
     logging.warn(f'XREF Before: {xref}')
     logging.warn(f'New Pubs: {new_pubs}')
-    logging.warn(f'cat_pubs_no_pub: {cat_pubs_no_pub}')
+    logging.warn(f'cat_pubs_no_pub: {list(cat_pubs_no_pub)}')
 
     xref = xref | {CatalogReference(pd): new_pubs[pd.doi] for pd in cat_pubs_no_pub}
 
