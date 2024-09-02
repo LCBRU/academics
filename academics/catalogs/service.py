@@ -149,7 +149,7 @@ def _process_updates():
     # refresh_publications()
     # remove_publication_without_catalog_entry()
     # refresh_affiliations()
-    refresh_institutions()
+    # refresh_institutions()
 
     logging.debug('Ended')
 
@@ -372,11 +372,18 @@ def _update_academic(academic: Academic):
         db.session.commit()
 
     except Exception as e:
+        logging.error('='*40)
+        logging.error('Error processing academic {academic.full_name}')
+        logging.error('='*40)
+
         log_exception(e)
 
         db.session.rollback()
         db.session.execute(update(Academic).where(Academic.id == academic.id).values(updating=False, error=True))
         db.session.commit()
+
+        if current_app.config['WORKER_STOPS_ON_ERROR']:
+            raise e
 
 
 def _update_source(s):
