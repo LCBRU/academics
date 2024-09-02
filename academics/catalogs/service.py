@@ -201,6 +201,10 @@ def _update_affiliation(affiliation: Affiliation):
         db.session.commit()
 
     except Exception as e:
+        logging.error('='*40)
+        logging.error(f'Error processing affiliation {CatalogReference(affiliation)}')
+        logging.error('='*40)
+
         log_exception(e)
 
         logging.warn('Rolling back transaction')
@@ -208,6 +212,9 @@ def _update_affiliation(affiliation: Affiliation):
         db.session.rollback()
         db.session.execute(update(Affiliation).where(Affiliation.id == affiliation.id).values(refresh_details=False))
         db.session.commit()
+
+        if current_app.config['WORKER_STOPS_ON_ERROR']:
+            raise e
 
 
 def _update_institution(institution: Institution):
@@ -230,6 +237,10 @@ def _update_institution(institution: Institution):
         db.session.commit()
 
     except Exception as e:
+        logging.error('='*40)
+        logging.error(f'Error processing institution {CatalogReference(institution)}')
+        logging.error('='*40)
+
         log_exception(e)
 
         logging.warn('Rolling back transaction')
@@ -237,6 +248,9 @@ def _update_institution(institution: Institution):
         db.session.rollback()
         db.session.execute(update(Institution).where(Institution.id == institution.id).values(refresh_full_details=False))
         db.session.commit()
+
+        if current_app.config['WORKER_STOPS_ON_ERROR']:
+            raise e
 
 
 def refresh_publications():
@@ -267,6 +281,9 @@ def refresh_publications():
     except Exception as e:
         log_exception(e)
         db.session.rollback()
+
+        if current_app.config['WORKER_STOPS_ON_ERROR']:
+            raise e
 
     logging.info('All publications refreshed')
     logging.debug('ended')
@@ -328,11 +345,18 @@ def _update_catalog_publication(catalog_publication: CatalogPublication):
         db.session.commit()
 
     except Exception as e:
+        logging.error('='*40)
+        logging.error(f'Error processing catalogue publication {CatalogReference(catalog_publication)}')
+        logging.error('='*40)
+
         log_exception(e)
 
         db.session.rollback()
         db.session.execute(update(CatalogPublication).where(CatalogPublication.id == catalog_publication.id).values(refresh_full_details=False))
         db.session.commit()
+
+        if current_app.config['WORKER_STOPS_ON_ERROR']:
+            raise e
 
 
 def refresh_Academics():
@@ -373,7 +397,7 @@ def _update_academic(academic: Academic):
 
     except Exception as e:
         logging.error('='*40)
-        logging.error('Error processing academic {academic.full_name}')
+        logging.error(f'Error processing academic {academic.full_name}')
         logging.error('='*40)
 
         log_exception(e)
@@ -424,6 +448,10 @@ def _update_source(s):
         db.session.commit()
 
     except Exception as e:
+        logging.error('='*40)
+        logging.error(f'Error processing source {s.full_name}')
+        logging.error('='*40)
+
         log_exception(e)
         logging.warn(f'Setting Source {s.display_name} to be in error')
         s.error = True
@@ -433,6 +461,9 @@ def _update_source(s):
         if s and s.id:
             db.session.execute(update(Source).where(Source.id == s.id).values(error=True))
             db.session.commit()
+
+        if current_app.config['WORKER_STOPS_ON_ERROR']:
+            raise e
 
 
 def _find_new_potential_sources(academic):
