@@ -57,9 +57,9 @@ class AsyncJob(db.Model):
         params = {}
 
         if self.retry_timedelta_period == AsyncJob.TIMEDELTA_HOURS:
-            params = {'hours', self.retry_timedelta_size}
+            params = {'hours': self.retry_timedelta_size}
         elif self.retry_timedelta_period == AsyncJob.TIMEDELTA_DAYS:
-            params = {'days', self.retry_timedelta_size}
+            params = {'days': self.retry_timedelta_size}
         
         return timedelta(**params)
     
