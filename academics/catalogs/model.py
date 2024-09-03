@@ -71,16 +71,16 @@ class AsyncJob(db.Model):
 
 
 class AsyncJobs:
-    @classmethod
+    @staticmethod
     def due():
         return db.session.execute(select(AsyncJob).where(AsyncJob.scheduled < datetime.now(timezone.utc)))
 
-    @classmethod
+    @staticmethod
     def run_due():
         for j in AsyncJobs.due:
             j.run()
 
-    @classmethod
+    @staticmethod
     def schedule(job: AsyncJob):
         existing: AsyncJob = db.session.execute(
             select(AsyncJobs)
