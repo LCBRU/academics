@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 from flask import current_app
 from sqlalchemy import delete, or_, select, update
-from academics.catalogs.model import AsyncJob, AsyncJobs
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
@@ -16,7 +15,8 @@ from academics.model.institutions import Institution
 from lbrc_flask.celery import celery
 from celery.signals import after_setup_logger
 from lbrc_flask.database import db
-from datetime import date, datetime, timezone
+from lbrc_flask.async_jobs import AsyncJobs
+from datetime import date, datetime
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
 from academics.model.raw_data import RawData
