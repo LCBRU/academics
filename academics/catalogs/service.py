@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from flask import current_app
 from sqlalchemy import delete, or_, select, update
+from academics.catalogs.model import AsyncJob, AsyncJobs
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
@@ -15,7 +16,7 @@ from academics.model.institutions import Institution
 from lbrc_flask.celery import celery
 from celery.signals import after_setup_logger
 from lbrc_flask.database import db
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
 from academics.model.raw_data import RawData
@@ -151,9 +152,16 @@ def _process_updates():
     refresh_affiliations()
     refresh_institutions()
 
+    AsyncJobs.run_due()
+
     logging.debug('Ended')
 
 
+class AffiliationRefresh(AsyncJob):
+    __mapper_args__ = {
+        "polymorphic_identity": "AffiliationRefresh",
+    }
+    
 def refresh_affiliations():
     logging.debug('started')
 
@@ -165,21 +173,6 @@ def refresh_affiliations():
             break
 
         _update_affiliation(a)
-
-    logging.debug('ended')
-
-
-def refresh_institutions():
-    logging.debug('started')
-
-    while True:
-        i = Institution.query.filter(Institution.refresh_full_details == 1).first()
-
-        if not i:
-            logging.info('No more institutions to refresh')
-            break
-
-        _update_institution(i)
 
     logging.debug('ended')
 
@@ -215,6 +208,21 @@ def _update_affiliation(affiliation: Affiliation):
 
         if current_app.config['WORKER_STOPS_ON_ERROR']:
             raise e
+
+
+def refresh_institutions():
+    logging.debug('started')
+
+    while True:
+        i = Institution.query.filter(Institution.refresh_full_details == 1).first()
+
+        if not i:
+            logging.info('No more institutions to refresh')
+            break
+
+        _update_institution(i)
+
+    logging.debug('ended')
 
 
 def _update_institution(institution: Institution):
