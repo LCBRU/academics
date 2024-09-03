@@ -21,7 +21,7 @@ class AsyncJob(db.Model):
     id: Mapped[Integer] = mapped_column(Integer, primary_key=True, nullable=False)
     job_type: Mapped[String] = mapped_column(String(100), nullable=False)
     entity_id: Mapped[Integer] = mapped_column(Integer, nullable=True)
-    entity_id_string: Mapped[UnicodeText] = mapped_column(UnicodeText, nullable=True)
+    entity_id_string: Mapped[String] = mapped_column(String(255), nullable=True)
     scheduled: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     error: Mapped[UnicodeText] = mapped_column(UnicodeText, nullable=True)
     retry: Mapped[Boolean] = mapped_column(Boolean, nullable=False, default=False)

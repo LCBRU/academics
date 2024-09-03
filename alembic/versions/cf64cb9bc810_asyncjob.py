@@ -22,7 +22,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('job_type', sa.String(length=100), nullable=False),
     sa.Column('entity_id', sa.Integer(), nullable=True),
-    sa.Column('entity_id_string', sa.UnicodeText(), nullable=True),
+    sa.Column('entity_id_string', sa.String(length=255), nullable=True),
     sa.Column('scheduled', sa.DateTime(), nullable=False),
     sa.Column('error', sa.UnicodeText(), nullable=True),
     sa.Column('retry', sa.Boolean(), nullable=False),
