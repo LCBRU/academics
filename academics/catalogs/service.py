@@ -157,11 +157,6 @@ def _process_updates():
     logging.debug('Ended')
 
 
-class AffiliationRefresh(AsyncJob):
-    __mapper_args__ = {
-        "polymorphic_identity": "AffiliationRefresh",
-    }
-    
 def refresh_affiliations():
     logging.debug('started')
 
