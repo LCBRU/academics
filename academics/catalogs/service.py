@@ -149,7 +149,7 @@ def _process_updates():
     # refresh_publications()
     remove_publication_without_catalog_entry()
     refresh_affiliations()
-    # refresh_institutions()
+    refresh_institutions()
 
     logging.debug('Ended')
 
