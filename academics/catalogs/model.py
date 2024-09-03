@@ -77,7 +77,7 @@ class AsyncJobs:
 
     @staticmethod
     def run_due():
-        for j in AsyncJobs.due:
+        for j in AsyncJobs.due():
             j.run()
 
     @staticmethod
