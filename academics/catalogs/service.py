@@ -21,6 +21,7 @@ from lbrc_flask.logging import log_exception
 from lbrc_flask.validators import parse_date
 from academics.model.raw_data import RawData
 from dateutil.relativedelta import relativedelta
+import jobs
 
 
 @after_setup_logger.connect
