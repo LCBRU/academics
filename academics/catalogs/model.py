@@ -73,7 +73,7 @@ class AsyncJob(db.Model):
 class AsyncJobs:
     @staticmethod
     def due():
-        return db.session.execute(select(AsyncJob).where(AsyncJob.scheduled < datetime.now(timezone.utc)))
+        return db.session.execute(select(AsyncJob).where(AsyncJob.scheduled < datetime.now(timezone.utc))).scalars()
 
     @staticmethod
     def run_due():
