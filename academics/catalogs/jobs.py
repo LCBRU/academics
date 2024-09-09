@@ -91,7 +91,7 @@ def _publication_xref_for_pub_data_with_doi(pub_data):
     dois_for_cat_pubs_no_pubs = {pd.doi for pd in pub_data}
     new_pubs = {doi: Publication(doi=doi, refresh_full_details=True) for doi in dois_for_cat_pubs_no_pubs}
 
-    for np in new_pubs.values:
+    for np in new_pubs.values():
         db.session.add(np)
         AsyncJobs.schedule(PublicationInitialise(np))
     db.session.commit()
