@@ -5,9 +5,9 @@ from lbrc_flask.async_jobs import AsyncJob, AsyncJobs
 from lbrc_flask.database import db
 from sqlalchemy import delete, select
 from academics.services.sources import create_potential_sources
-from academics.catalogs.data_classes import CatalogReference, _affiliation_xref_for_author_data_list, _institutions, _source_xref_for_author_data_list
+from academics.catalogs.data_classes import CatalogReference
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
-from academics.catalogs.publication import save_publications
+from academics.catalogs.publication import _affiliation_xref_for_author_data_list, _institutions, _source_xref_for_author_data_list, save_publications
 from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
 from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, Source
