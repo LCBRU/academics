@@ -17,7 +17,7 @@ from lbrc_flask.async_jobs import AsyncJobs
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
-from academics.services.sources import add_sources_to_academic
+from academics.services.sources import add_sources_to_academic, create_potential_sources, get_sources_for_catalog_identifiers
 from .. import blueprint
 
 
@@ -213,11 +213,9 @@ def add_author_submit():
             academic.themes = [db.session.get(Theme, form.themes.data)]
             db.session.add(academic)
         
-        add_sources_to_academic(
-            catalog=CATALOG_SCOPUS,
-            catalog_identifiers=request.form.getlist('catalog_identifier'),
-            academic=academic,
-        )
+        sources = get_sources_for_catalog_identifiers(CATALOG_SCOPUS, request.form.getlist('catalog_identifier'))
+        create_potential_sources(sources, academic, not_match=False)
+        db.session.commit()
 
         AsyncJobs.schedule(AcademicRefresh(academic))
 
