@@ -418,7 +418,7 @@ class RefreshAll(AsyncJob):
         "polymorphic_identity": "RefreshAll",
     }
 
-    def __init__():
+    def __init__(self):
         super.__init__(
             scheduled=datetime.now(timezone.utc),
             retry=False,
@@ -436,7 +436,7 @@ class AffiliationRefresh(AsyncJob):
         "polymorphic_identity": "AffiliationRefresh",
     }
 
-    def __init__(affiliation):
+    def __init__(self, affiliation):
         db.session.refresh(affiliation)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -465,7 +465,7 @@ class InstitutionRefresh(AsyncJob):
         "polymorphic_identity": "InstitutionRefresh",
     }
 
-    def __init__(institution):
+    def __init__(self, institution):
         db.session.refresh(institution)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -497,7 +497,7 @@ class PublicationGetMissingScopus(AsyncJob):
         "polymorphic_identity": "PublicationGetMissingScopus",
     }
 
-    def __init__(publication):
+    def __init__(self, publication):
         db.session.refresh(publication)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -519,7 +519,7 @@ class PublicationGetScivalInstitutions(AsyncJob):
         "polymorphic_identity": "PublicationGetScivalInstitutions",
     }
 
-    def __init__(publication):
+    def __init__(self, publication):
         db.session.refresh(publication)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -541,7 +541,7 @@ class PublicationInitialise(AsyncJob):
         "polymorphic_identity": "PublicationInitialise",
     }
 
-    def __init__(publication):
+    def __init__(self, publication):
         db.session.refresh(publication)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -571,7 +571,7 @@ class CatalogPublicationRefresh(AsyncJob):
         "polymorphic_identity": "CatalogPublicationRefresh",
     }
 
-    def __init__(catalog_publication):
+    def __init__(self, catalog_publication):
         db.session.refresh(catalog_publication)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -601,7 +601,7 @@ class SourceRefresh(AsyncJob):
         "polymorphic_identity": "SourceRefresh",
     }
 
-    def __init__(source):
+    def __init__(self, source):
         db.session.refresh(source)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -642,7 +642,7 @@ class SourceGetPublications(AsyncJob):
         "polymorphic_identity": "SourceGetPublications",
     }
 
-    def __init__(source):
+    def __init__(self, source):
         db.session.refresh(source)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -692,7 +692,7 @@ class AcademicInitialise(AsyncJob):
         "polymorphic_identity": "AcademicInitialise",
     }
 
-    def __init__(academic):
+    def __init__(self, academic):
         db.session.refresh(academic)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -716,7 +716,7 @@ class AcademicRefresh(AsyncJob):
         "polymorphic_identity": "AcademicInitialise",
     }
 
-    def __init__(academic):
+    def __init__(self, academic):
         db.session.refresh(academic)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -742,7 +742,7 @@ class AcademicFindNewPotentialSources(AsyncJob):
         "polymorphic_identity": "AcademicFindNewPotentialSources",
     }
 
-    def __init__(academic):
+    def __init__(self, academic):
         db.session.refresh(academic)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -777,7 +777,7 @@ class AcademicEnsureSourcesArePotential(AsyncJob):
         "polymorphic_identity": "AcademicEnsureSourcesArePotential",
     }
 
-    def __init__(academic):
+    def __init__(self, academic):
         db.session.refresh(academic)
         super.__init__(
             scheduled=datetime.now(timezone.utc),
@@ -814,7 +814,7 @@ class PublicationRemoveUnused(AsyncJob):
         "polymorphic_identity": "PublicationRemoveUnused",
     }
 
-    def __init__():
+    def __init__(self):
         super.__init__(
             scheduled=datetime.now(timezone.utc),
             retry=True,
