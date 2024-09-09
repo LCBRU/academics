@@ -2,7 +2,7 @@ from flask import flash, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
-from sqlalchemy import delete, select, func
+from sqlalchemy import delete
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
 from academics.catalogs.jobs import AcademicRefresh, RefreshAll
@@ -256,6 +256,4 @@ def update_academic(id):
 
 @blueprint.route("/is_updating")
 def is_updating():
-    q = select(func.count(Academic.id)).where(Academic.updating == True)
-    return render_template("ui/updating.html", count=AsyncJobs.due_count()
-)
+    return render_template("ui/updating.html", count=AsyncJobs.due_count())
