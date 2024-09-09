@@ -30,15 +30,9 @@
             {{ render_dropdown_item('ui.reports', 'Reports', icon='fas fa-toilet-paper') }}
         </div>
     </li>
-
-    {% if updating %}
-        <div class="badge rounded-pill bg-warning text-dark fixed-top">Fetching data from Scopus</div>
-    {% endif %}
 {% endblock %}
 
 {% block adminlinks %}
-    {% if not updating %}
-        {{ render_dropdown_item('ui.update_all_academics', 'Update All', icon='fas fa-recycle') }}
-    {% endif %}
+    {{ render_dropdown_item('ui.update_all_academics', 'Update All', icon='fas fa-recycle') }}
     {{ render_dropdown_item('ui.trigger_refresh', 'Refresh', icon='fas fa-fish') }}
 {% endblock %}

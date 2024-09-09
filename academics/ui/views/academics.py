@@ -7,13 +7,12 @@ from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
 from academics.catalogs.jobs import AcademicRefresh, RefreshAll
 from academics.catalogs.scopus import scopus_author_search
-from academics.catalogs.service import refresh, updating
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length, DataRequired
 from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
-from lbrc_flask.async_jobs import AsyncJobs
+from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
@@ -82,7 +81,6 @@ def index():
         academics=academics,
         search_form=search_form,
         confirm_form=ConfirmForm(),
-        updating=updating(),
     )
 
 
@@ -127,15 +125,14 @@ def academic_edit(id):
 @roles_accepted('admin')
 def update_all_academics():
     AsyncJobs.schedule(RefreshAll())
-
+    run_jobs_asynch()
     return redirect(url_for('ui.index'))
 
 
 @blueprint.route("/trigger_refresh")
 @roles_accepted('admin')
 def trigger_refresh():
-    refresh()
-
+    run_jobs_asynch()
     return redirect(url_for('ui.index'))
 
 
@@ -218,6 +215,7 @@ def add_author_submit():
         db.session.commit()
 
         AsyncJobs.schedule(AcademicRefresh(academic))
+        run_jobs_asynch()
 
         return trigger_response('refreshSearch')
     
@@ -249,6 +247,7 @@ def update_academic(id):
     academic = db.get_or_404(Academic, id)
 
     AsyncJobs.schedule(AcademicRefresh(academic))
+    run_jobs_asynch()
 
     return refresh_response()
 
@@ -256,4 +255,5 @@ def update_academic(id):
 @blueprint.route("/is_updating")
 def is_updating():
     q = select(func.count(Academic.id)).where(Academic.updating == True)
-    return render_template("ui/updating.html", count=db.session.execute(q).scalar())
+    return render_template("ui/updating.html", count=AsyncJobs.due_count()
+)

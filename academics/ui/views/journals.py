@@ -3,7 +3,6 @@ from lbrc_flask.forms import SearchForm, boolean_coerce
 from lbrc_flask.database import db
 from sqlalchemy import func, select
 from wtforms import SelectField
-from academics.catalogs.service import updating
 from academics.model.publication import Journal
 from flask_security import roles_accepted
 
@@ -38,7 +37,6 @@ def journals():
         "ui/journal/index.html",
         journals=journals,
         search_form=search_form,
-        updating=updating(),
     )
 
 
