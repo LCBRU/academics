@@ -5,7 +5,6 @@ from academics.model.academic import Academic
 from lbrc_flask.celery import celery
 from celery.signals import after_setup_logger
 from lbrc_flask.async_jobs import AsyncJobs
-from academics.catalogs.jobs import AcademicEnsureSourcesArePotential, AcademicFindNewPotentialSources, PublicationRemoveUnused, SourceGetPublications, SourceRefresh
 
 
 @after_setup_logger.connect
@@ -29,32 +28,6 @@ def updating():
 def refresh():
     _process_updates.delay()
 
-
-def update_single_academic(academic: Academic):
-    AsyncJobs.schedule(AcademicFindNewPotentialSources(academic))
-
-    _process_updates.delay()
-
-
-def update_all():
-    for academic in Academic.query.all():
-        AsyncJobs.schedule(AcademicFindNewPotentialSources(academic))
-        AsyncJobs.schedule(AcademicEnsureSourcesArePotential(academic))
-
-        for s in academic.sources:
-            AsyncJobs.schedule(SourceRefresh(s))
-            AsyncJobs.schedule(SourceGetPublications(s))
-
-    AsyncJobs.schedule(PublicationRemoveUnused)
-
-    _process_updates.delay()
-
-
-def schedule_source_update(source):
-    AsyncJobs.schedule(SourceRefresh(source))
-    AsyncJobs.schedule(SourceGetPublications(source))
-
-    _process_updates.delay()
 
 @celery.task()
 def _process_updates():

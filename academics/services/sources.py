@@ -2,8 +2,9 @@ from sqlalchemy import select
 from academics.catalogs.data_classes import CatalogReference
 from lbrc_flask.database import db
 
-from academics.catalogs.service import schedule_source_update
+from academics.catalogs.jobs import SourceRefresh
 from academics.model.academic import AcademicPotentialSource, Source
+from lbrc_flask.async_jobs import AsyncJobs
 
 
 def add_sources_to_academic(catalog, catalog_identifiers, academic):
@@ -15,7 +16,7 @@ def add_sources_to_academic(catalog, catalog_identifiers, academic):
     create_potential_sources(sources, academic, not_match=False)
 
     for s in sources:
-        schedule_source_update(s)
+        AsyncJobs.schedule(SourceRefresh(s))
 
     db.session.commit()
 
@@ -37,6 +38,7 @@ def create_potential_sources(sources, academic, not_match=True):
 
     db.session.add_all(sources)
     db.session.add_all(potentials)
+
     db.session.commit()
 
 

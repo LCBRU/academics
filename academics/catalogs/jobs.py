@@ -17,6 +17,24 @@ from academics.model.institutions import Institution
 from academics.model.publication import CatalogPublication, NihrAcknowledgement, Publication
 
 
+class RefreshAll(AsyncJob):
+    __mapper_args__ = {
+        "polymorphic_identity": "RefreshAll",
+    }
+
+    def __init__():
+        super.__init__(
+            scheduled=datetime.now(timezone.utc),
+            retry=False,
+        )
+
+    def _run_actual(self):
+        for academic in db.session.execute(select(Academic)).scalars():
+            AsyncJobs.schedule(AcademicRefresh(academic))
+
+        AsyncJobs.schedule(PublicationRemoveUnused)
+
+
 class AffiliationRefresh(AsyncJob):
     __mapper_args__ = {
         "polymorphic_identity": "AffiliationRefresh",
@@ -219,6 +237,7 @@ class SourceRefresh(AsyncJob):
             source.error = True
 
         db.session.add(source)
+        AsyncJobs.schedule(SourceGetPublications(source))
         db.session.commit()
 
 
@@ -294,6 +313,32 @@ class AcademicInitialise(AsyncJob):
         academic.initialised = True
         db.session.add(academic)
         db.session.commit()
+
+
+class AcademicRefresh(AsyncJob):
+    __mapper_args__ = {
+        "polymorphic_identity": "AcademicInitialise",
+    }
+
+    def __init__(academic):
+        db.session.refresh(academic)
+        super.__init__(
+            scheduled=datetime.now(timezone.utc),
+            entity_id=academic.id,
+            retry=True,
+            retry_timedelta_period='days',
+            retry_timedelta_size='1',
+        )
+
+    def _run_actual(self):
+        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar()
+
+        AsyncJobs.schedule(AcademicFindNewPotentialSources(academic))
+        AsyncJobs.schedule(AcademicEnsureSourcesArePotential(academic))
+
+        for s in academic.sources:
+            AsyncJobs.schedule(SourceRefresh(s))
+            AsyncJobs.schedule(SourceGetPublications(s))
 
 
 class AcademicFindNewPotentialSources(AsyncJob):

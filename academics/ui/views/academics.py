@@ -5,13 +5,15 @@ from lbrc_flask.response import trigger_response, refresh_response
 from sqlalchemy import delete, select, func
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
+from academics.catalogs.jobs import AcademicRefresh, RefreshAll
 from academics.catalogs.scopus import scopus_author_search
-from academics.catalogs.service import refresh, update_all, update_single_academic, updating
+from academics.catalogs.service import refresh, updating
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length, DataRequired
 from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
+from lbrc_flask.async_jobs import AsyncJobs
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
@@ -124,8 +126,7 @@ def academic_edit(id):
 @blueprint.route("/update_all_academics")
 @roles_accepted('admin')
 def update_all_academics():
-    if not updating():
-        update_all()
+    AsyncJobs.schedule(RefreshAll())
 
     return redirect(url_for('ui.index'))
 
@@ -218,7 +219,7 @@ def add_author_submit():
             academic=academic,
         )
 
-        update_single_academic(academic)
+        AsyncJobs.schedule(AcademicRefresh(academic))
 
         return trigger_response('refreshSearch')
     
@@ -249,7 +250,7 @@ def delete_academic(id):
 def update_academic(id):
     academic = db.get_or_404(Academic, id)
 
-    update_single_academic(academic)
+    AsyncJobs.schedule(AcademicRefresh(academic))
 
     return refresh_response()
 

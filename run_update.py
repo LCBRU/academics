@@ -3,15 +3,17 @@
 import os
 from dotenv import load_dotenv
 
+from academics.catalogs.jobs import RefreshAll
+
 # Load environment variables from '.env' file.
 load_dotenv()
 
 from academics import create_app
-from academics.catalogs.service import update_all
+from lbrc_flask.async_jobs import AsyncJobs
 
 application = create_app()
 application.app_context().push()
 
 application.config['SERVER_NAME'] = os.environ["CELERY_SERVER_NAME"]
 
-update_all()
+AsyncJobs.schedule(RefreshAll())
