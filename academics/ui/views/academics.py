@@ -17,7 +17,7 @@ from lbrc_flask.async_jobs import AsyncJobs
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
-from academics.services.sources import add_sources_to_academic, create_potential_sources, get_sources_for_catalog_identifiers
+from academics.services.sources import create_potential_sources, get_sources_for_catalog_identifiers
 from .. import blueprint
 
 
