@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from itertools import chain, groupby
 from sqlalchemy import select
+from academics.catalogs.jobs import AffiliationRefresh, InstitutionRefresh, PublicationInitialise
 from academics.model.academic import Affiliation, Source
 from academics.model.catalog import CATALOG_SCIVAL
 from academics.model.institutions import Institution
@@ -9,6 +10,7 @@ from academics.model.publication import CatalogPublication, Journal, Keyword, Pu
 from lbrc_flask.database import db
 from datetime import date
 from unidecode import unidecode
+from lbrc_flask.async_jobs import AsyncJobs
 
 from academics.model.raw_data import RawData
 
@@ -221,7 +223,9 @@ def _publication_xref_for_pub_data_with_doi(pub_data):
     dois_for_cat_pubs_no_pubs = {pd.doi for pd in pub_data}
     new_pubs = {doi: Publication(doi=doi, refresh_full_details=True) for doi in dois_for_cat_pubs_no_pubs}
 
-    db.session.add_all(new_pubs.values())
+    for np in new_pubs.values:
+        db.session.add(np)
+        AsyncJobs.schedule(PublicationInitialise(np))
     db.session.commit()
 
     return {CatalogReference(pd): new_pubs[pd.doi] for pd in pub_data}
@@ -233,6 +237,7 @@ def _publication_xref_for_pub_data_with_no_doi(pub_data):
     for pd in pub_data:
         new_pub = Publication(refresh_full_details=True)
         db.session.add(new_pub)
+        AsyncJobs.schedule(PublicationInitialise(new_pub))
         db.session.commit()
         result[CatalogReference(pd)] = new_pub
 
@@ -277,7 +282,6 @@ def _institutions(institution_datas):
 
         new_i = Institution()
         i.update_institution(new_i)
-        new_i.refresh_full_details = True
 
         xref[new_i.catalog_identifier] = new_i
 
@@ -288,6 +292,7 @@ def _institutions(institution_datas):
             action=i.action,
             raw_text=i.raw_text,
         ))
+        AsyncJobs.schedule(InstitutionRefresh(new_i))
     
     db.session.commit()
 
@@ -351,7 +356,6 @@ def _affiliation_xref_for_author_data_list(author_datas):
                 name=a.name,
                 address=a.address,
                 country=a.country,
-                refresh_details=True,
             ))
             db.session.add(RawData(
                 catalog=a.catalog,
@@ -362,6 +366,9 @@ def _affiliation_xref_for_author_data_list(author_datas):
 
         db.session.add_all(new_affiliations)
         db.session.commit()
+
+        for a in new_affiliations:
+            AsyncJobs.schedule(AffiliationRefresh(a))
 
         xref = xref | {CatalogReference(a): a for a in new_affiliations}
 

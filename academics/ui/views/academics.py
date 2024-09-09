@@ -6,7 +6,7 @@ from sqlalchemy import delete, select, func
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
 from academics.catalogs.scopus import scopus_author_search
-from academics.catalogs.service import add_sources_to_academic, refresh, update_academics, update_single_academic, updating
+from academics.catalogs.service import refresh, update_all, update_single_academic, updating
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
 from wtforms.validators import Length, DataRequired
@@ -15,6 +15,7 @@ from flask_security import roles_accepted
 
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
+from academics.services.sources import add_sources_to_academic
 from .. import blueprint
 
 
@@ -124,7 +125,7 @@ def academic_edit(id):
 @roles_accepted('admin')
 def update_all_academics():
     if not updating():
-        update_academics()
+        update_all()
 
     return redirect(url_for('ui.index'))
 
@@ -203,12 +204,21 @@ def add_author_submit():
     form = AddAuthorEditForm()
 
     if form.validate_on_submit():
+        if form.academic_id.data:
+            academic = db.session.get(Academic, form.academic_id.data)
+
+        if not academic:
+            academic = Academic()
+            academic.themes = [db.session.get(Theme, form.themes.data)]
+            db.session.add(academic)
+        
         add_sources_to_academic(
             catalog=CATALOG_SCOPUS,
             catalog_identifiers=request.form.getlist('catalog_identifier'),
-            academic_id=form.academic_id.data,
-            themes=[db.session.get(Theme, form.themes.data)],
+            academic=academic,
         )
+
+        update_single_academic(academic)
 
         return trigger_response('refreshSearch')
     

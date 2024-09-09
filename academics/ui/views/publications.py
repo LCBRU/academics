@@ -8,6 +8,7 @@ from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.response import trigger_response, refresh_response
 from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
+from academics.catalogs.jobs import CatalogPublicationRefresh
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi
@@ -18,6 +19,7 @@ from academics.services.publication_searching import PublicationSearchForm, acad
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from wtforms.validators import Length, DataRequired, Optional
+from lbrc_flask.async_jobs import AsyncJobs
 
 from .. import blueprint
 
@@ -439,6 +441,7 @@ def catalog_publication_edit(id=None):
         catalog_publication.publication = publication
 
         db.session.add(catalog_publication)
+        AsyncJobs.schedule(CatalogPublicationRefresh(catalog_publication))
         db.session.commit()
 
         return refresh_response()
