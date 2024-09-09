@@ -419,7 +419,7 @@ class RefreshAll(AsyncJob):
     }
 
     def __init__(self):
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             retry=False,
         )
@@ -438,7 +438,7 @@ class AffiliationRefresh(AsyncJob):
 
     def __init__(self, affiliation):
         db.session.refresh(affiliation)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=affiliation.id,
             retry=True,
@@ -467,7 +467,7 @@ class InstitutionRefresh(AsyncJob):
 
     def __init__(self, institution):
         db.session.refresh(institution)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=institution.id,
             retry=True,
@@ -499,7 +499,7 @@ class PublicationGetMissingScopus(AsyncJob):
 
     def __init__(self, publication):
         db.session.refresh(publication)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=publication.id,
             retry=True,
@@ -521,7 +521,7 @@ class PublicationGetScivalInstitutions(AsyncJob):
 
     def __init__(self, publication):
         db.session.refresh(publication)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=publication.id,
             retry=True,
@@ -543,7 +543,7 @@ class PublicationInitialise(AsyncJob):
 
     def __init__(self, publication):
         db.session.refresh(publication)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=publication.id,
             retry=True,
@@ -573,7 +573,7 @@ class CatalogPublicationRefresh(AsyncJob):
 
     def __init__(self, catalog_publication):
         db.session.refresh(catalog_publication)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=catalog_publication.id,
             retry=True,
@@ -603,7 +603,7 @@ class SourceRefresh(AsyncJob):
 
     def __init__(self, source):
         db.session.refresh(source)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=source.id,
             retry=True,
@@ -644,7 +644,7 @@ class SourceGetPublications(AsyncJob):
 
     def __init__(self, source):
         db.session.refresh(source)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=source.id,
             retry=True,
@@ -694,7 +694,7 @@ class AcademicInitialise(AsyncJob):
 
     def __init__(self, academic):
         db.session.refresh(academic)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=academic.id,
             retry=True,
@@ -718,7 +718,7 @@ class AcademicRefresh(AsyncJob):
 
     def __init__(self, academic):
         db.session.refresh(academic)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=academic.id,
             retry=True,
@@ -744,7 +744,7 @@ class AcademicFindNewPotentialSources(AsyncJob):
 
     def __init__(self, academic):
         db.session.refresh(academic)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=academic.id,
             retry=True,
@@ -779,7 +779,7 @@ class AcademicEnsureSourcesArePotential(AsyncJob):
 
     def __init__(self, academic):
         db.session.refresh(academic)
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             entity_id=academic.id,
             retry=True,
@@ -815,7 +815,7 @@ class PublicationRemoveUnused(AsyncJob):
     }
 
     def __init__(self):
-        super.__init__(
+        super().__init__(
             scheduled=datetime.now(timezone.utc),
             retry=True,
             retry_timedelta_period='days',
