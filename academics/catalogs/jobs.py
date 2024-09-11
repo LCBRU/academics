@@ -428,7 +428,7 @@ class RefreshAll(AsyncJob):
         for academic in db.session.execute(select(Academic)).scalars():
             AsyncJobs.schedule(AcademicRefresh(academic))
 
-        AsyncJobs.schedule(PublicationRemoveUnused)
+        AsyncJobs.schedule(PublicationRemoveUnused())
 
 
 class AffiliationRefresh(AsyncJob):
