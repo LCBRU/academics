@@ -105,8 +105,8 @@ def _publication_xref_for_pub_data_with_no_doi(pub_data):
     for pd in pub_data:
         new_pub = Publication(refresh_full_details=True)
         db.session.add(new_pub)
-        AsyncJobs.schedule(PublicationInitialise(new_pub))
         db.session.commit()
+        AsyncJobs.schedule(PublicationInitialise(new_pub))
         result[CatalogReference(pd)] = new_pub
 
     return result
@@ -160,6 +160,7 @@ def _institutions(institution_datas):
             action=i.action,
             raw_text=i.raw_text,
         ))
+        db.session.commit()
         AsyncJobs.schedule(InstitutionRefresh(new_i))
     
     db.session.commit()
@@ -578,6 +579,9 @@ class PublicationInitialise(AsyncJob):
         if publication.is_nihr_acknowledged and publication.auto_nihr_acknowledgement is None and publication.nihr_acknowledgement is None:
             publication.nihr_acknowledgement = publication.auto_nihr_acknowledgement = NihrAcknowledgement.get_acknowledged_status()
 
+        db.session.add(publication)
+        db.session.commit()
+
         if publication.scopus_catalog_publication is None:
             AsyncJobs.schedule(PublicationGetMissingScopus(publication))
         AsyncJobs.schedule(PublicationGetScivalInstitutions(publication))
@@ -656,8 +660,8 @@ class SourceRefresh(AsyncJob):
             source.error = True
 
         db.session.add(source)
-        AsyncJobs.schedule(SourceGetPublications(source))
         db.session.commit()
+        AsyncJobs.schedule(SourceGetPublications(source))
 
 
 class SourceGetPublications(AsyncJob):
