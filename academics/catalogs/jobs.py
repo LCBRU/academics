@@ -93,8 +93,8 @@ def _publication_xref_for_pub_data_with_doi(pub_data):
 
     for np in new_pubs.values():
         db.session.add(np)
+        db.session.commit()
         AsyncJobs.schedule(PublicationInitialise(np))
-    db.session.commit()
 
     return {CatalogReference(pd): new_pubs[pd.doi] for pd in pub_data}
     
