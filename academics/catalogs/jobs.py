@@ -327,6 +327,7 @@ def save_publications(new_pubs):
                 catalog_identifier=p.catalog_identifier,
                 refresh_full_details=True,
             )
+            db.session.add(cat_pub)
             AsyncJobs.schedule(CatalogPublicationRefresh(cat_pub))
 
         cat_pub.publication_id=pub.id
