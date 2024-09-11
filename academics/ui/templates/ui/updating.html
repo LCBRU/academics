@@ -3,7 +3,7 @@
         hx-trigger="every 30s"
         hx-target="this"
         hx-swap="outerHTML">
-      <div class="flash message">Academics is fetching data from publication catalogues for {{ count }} academics</div>
+      <div class="flash message">Academics is fetching data from publication catalogues for {{ count }} items</div>
     </div>
 {% else %}
     <div hx-get="{{ url_for('ui.is_updating') }}"
