@@ -447,7 +447,10 @@ class AffiliationRefresh(AsyncJob):
         )
 
     def _run_actual(self):
-        affiliation = db.session.execute(select(Affiliation).where(Affiliation.id == self.entity_id)).scalar()
+        affiliation = db.session.execute(select(Affiliation).where(Affiliation.id == self.entity_id)).scalar_one_or_none()
+
+        if not affiliation:
+            return
         
         if affiliation.catalog == CATALOG_SCOPUS:
             aff_data = get_scopus_affiliation_data(affiliation.catalog_identifier)
@@ -476,7 +479,10 @@ class InstitutionRefresh(AsyncJob):
         )
 
     def _run_actual(self):
-        institution = db.session.execute(select(Institution).where(Institution.id == self.entity_id)).scalar()
+        institution = db.session.execute(select(Institution).where(Institution.id == self.entity_id)).scalar_one_or_none()
+
+        if not institution:
+            return
         
         if institution.catalog != CATALOG_SCIVAL:
             raise Exception(f'What?! Institution catalog is {institution.catalog}')
@@ -508,7 +514,11 @@ class PublicationGetMissingScopus(AsyncJob):
         )
 
     def _run_actual(self):
-        publication = db.session.execute(select(Publication).where(Publication.id == self.entity_id)).scalar()
+        publication = db.session.execute(select(Publication).where(Publication.id == self.entity_id)).scalar_one_or_none()
+
+        if not publication:
+            return
+
         if not publication.scopus_catalog_publication and publication.doi:
             if pub_data := get_scopus_publication_data(doi=publication.doi):
                 save_publications([pub_data])
@@ -530,7 +540,10 @@ class PublicationGetScivalInstitutions(AsyncJob):
         )
 
     def _run_actual(self):
-        publication = db.session.execute(select(Publication).where(Publication.id == self.entity_id)).scalar()
+        publication = db.session.execute(select(Publication).where(Publication.id == self.entity_id)).scalar_one_or_none()
+        if not publication:
+            return
+
         if publication.scopus_catalog_publication and not publication.institutions:
             institutions = get_scival_publication_institutions(publication.scopus_catalog_publication.catalog_identifier)
             publication.institutions = set(_institutions(institutions))
@@ -552,7 +565,10 @@ class PublicationInitialise(AsyncJob):
         )
 
     def _run_actual(self):
-        publication: Publication = db.session.execute(select(Publication).where(Publication.id == self.entity_id)).scalar()
+        publication: Publication = db.session.execute(select(Publication).where(Publication.id == self.entity_id)).scalar_one_or_none()
+        if not publication:
+            return
+
         publication.set_vancouver()
 
         if publication.best_catalog_publication.journal and publication.best_catalog_publication.journal.preprint and publication.preprint is None:
@@ -582,7 +598,10 @@ class CatalogPublicationRefresh(AsyncJob):
         )
 
     def _run_actual(self):
-        catalog_publication = db.session.execute(select(CatalogPublication).where(CatalogPublication.id == self.entity_id)).scalar()
+        catalog_publication = db.session.execute(select(CatalogPublication).where(CatalogPublication.id == self.entity_id)).scalar_one_or_none()
+        if not catalog_publication:
+            return
+
         pub_data = None
         if catalog_publication.catalog == CATALOG_SCOPUS:
             pub_data = get_scopus_publication_data(scopus_id=catalog_publication.catalog_identifier)
@@ -612,7 +631,10 @@ class SourceRefresh(AsyncJob):
         )
 
     def _run_actual(self):
-        source = db.session.execute(select(Source).where(Source.id == self.entity_id)).scalar()
+        source = db.session.execute(select(Source).where(Source.id == self.entity_id)).scalar_one_or_none()
+        if not source:
+            return
+
         author_data = None
 
         if source.catalog == CATALOG_SCOPUS:
@@ -653,8 +675,8 @@ class SourceGetPublications(AsyncJob):
         )
 
     def _run_actual(self):
-        source = db.session.execute(select(Source).where(Source.id == self.entity_id)).scalar()
-        if not source.academic:
+        source = db.session.execute(select(Source).where(Source.id == self.entity_id)).scalar_one_or_none()
+        if not source or not source.academic:
             return
 
         publication_datas = []
@@ -703,7 +725,10 @@ class AcademicInitialise(AsyncJob):
         )
 
     def _run_actual(self):
-        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar()
+        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar_one_or_none()
+        if not academic:
+            return
+        
         academic.ensure_initialisation()
         academic.updating = False
         academic.initialised = True
@@ -727,7 +752,9 @@ class AcademicRefresh(AsyncJob):
         )
 
     def _run_actual(self):
-        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar()
+        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar_one_or_none()
+        if not academic:
+            return
 
         AsyncJobs.schedule(AcademicFindNewPotentialSources(academic))
         AsyncJobs.schedule(AcademicEnsureSourcesArePotential(academic))
@@ -753,7 +780,9 @@ class AcademicFindNewPotentialSources(AsyncJob):
         )
 
     def _run_actual(self):
-        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar()
+        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar_one_or_none()
+        if not academic:
+            return
 
         if len(academic.last_name.strip()) < 1:
             return
@@ -788,7 +817,9 @@ class AcademicEnsureSourcesArePotential(AsyncJob):
         )
 
     def _run_actual(self):
-        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar()
+        academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar_one_or_none()
+        if not academic:
+            return
 
         missing_proposed_sources = list(db.session.execute(
             select(Source)
