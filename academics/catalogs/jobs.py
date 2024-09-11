@@ -327,6 +327,7 @@ def save_publications(new_pubs):
                 catalog_identifier=p.catalog_identifier,
                 refresh_full_details=True,
             )
+            AsyncJobs.schedule(CatalogPublicationRefresh(cat_pub))
 
         cat_pub.publication_id=pub.id
         cat_pub.doi = p.doi or ''
@@ -375,7 +376,6 @@ def save_publications(new_pubs):
 
         db.session.commit()
 
-        AsyncJobs.schedule(CatalogPublicationRefresh(cat_pub))
 
         # When there are lots of sources (authors) for a publication the
         # saving and deleting of these sources (and their associated affiliations)
@@ -652,7 +652,7 @@ class SourceRefresh(AsyncJob):
 
             author_data.update_source(source)
         else:
-            logging.warn(f'Source {source.display_name} not found so setting it to be in error')
+            logging.warning(f'Source {source.display_name} not found so setting it to be in error')
             source.error = True
 
         db.session.add(source)
