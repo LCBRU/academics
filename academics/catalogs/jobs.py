@@ -327,7 +327,6 @@ def save_publications(new_pubs):
                 catalog_identifier=p.catalog_identifier,
                 refresh_full_details=True,
             )
-            AsyncJobs.schedule(CatalogPublicationRefresh(cat_pub))
 
         cat_pub.publication_id=pub.id
         cat_pub.doi = p.doi or ''
@@ -376,6 +375,7 @@ def save_publications(new_pubs):
 
         db.session.commit()
 
+        AsyncJobs.schedule(CatalogPublicationRefresh(cat_pub))
 
         # When there are lots of sources (authors) for a publication the
         # saving and deleting of these sources (and their associated affiliations)
