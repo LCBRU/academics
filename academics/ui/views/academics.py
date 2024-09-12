@@ -215,8 +215,8 @@ def add_author_submit():
         
         sources = get_sources_for_catalog_identifiers(CATALOG_SCOPUS, request.form.getlist('catalog_identifier'))
         create_potential_sources(sources, academic, not_match=False)
-        db.session.commit()
         AsyncJobs.schedule(AcademicRefresh(academic))
+        db.session.commit()
 
         run_jobs_asynch()
 
