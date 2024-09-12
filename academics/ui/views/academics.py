@@ -2,7 +2,7 @@ from flask import flash, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
 from academics.catalogs.jobs import AcademicRefresh, RefreshAll
@@ -21,9 +21,11 @@ from .. import blueprint
 
 
 def _get_academic_choices():
-    academics = Academic.query.all()
-    academics = sorted(academics, key=lambda a: ' '.join([a.last_name, a.first_name]))
-
+    academics = db.session.execute(
+        select(Academic)
+        .where(Academic.initialised == True)
+        .order_by(Academic.last_name, Academic.first_name)
+    ).scalars()
     return [(0, 'New Academic')] + [(a.id, a.full_name) for a in academics]
 
 
