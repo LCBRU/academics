@@ -809,6 +809,8 @@ class AcademicFindNewPotentialSources(AsyncJob):
         logging.warning('F'*20)
         new_sources = _source_xref_for_author_data_list(new_source_datas).values()
 
+        logging.info([s.catalog_identifier for s in new_sources])
+
         logging.warning('G'*20)
         for s in new_sources:
             s.affiliations = affiliation_xref[CatalogReference(s)]

@@ -9,7 +9,7 @@ from lbrc_flask.database import db
 from lbrc_flask.forms import FlashingForm
 from flask_security import roles_accepted
 from lbrc_flask.response import refresh_response, trigger_response
-from lbrc_flask.async_jobs import AsyncJobs
+from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 
 
 class AcademicEditForm(FlashingForm):
@@ -31,12 +31,13 @@ def source_summary_details(id):
 
     s = db.get_or_404(Source, id)
 
-    if not s:
-        abort(404)
-
     if form.validate_on_submit():
         if form.has_value('academic_id'):
-            create_potential_sources([s], db.get_or_404(Academic, form.academic_id.data), not_match=False)
+            a = db.get_or_404(Academic, form.academic_id.data)
+            create_potential_sources([s], a, not_match=False)
+            s.academic = a
+            db.session.add(s)
+            db.session.commit()
 
         return refresh_response()
 
@@ -89,6 +90,8 @@ def academics_amend_potential_sources(id, academic_id, status):
     
     db.session.add(ps)
     db.session.commit()
+
+    run_jobs_asynch()
 
     return trigger_response('refreshModal')
 
