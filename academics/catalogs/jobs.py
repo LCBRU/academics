@@ -797,10 +797,12 @@ class AcademicFindNewPotentialSources(AsyncJob):
 
         logging.warning('D'*20)
 
-        new_source_datas = filter(
+        new_source_datas = list(filter(
             lambda s: s.is_local,
             [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
-        )
+        ))
+
+        logging.info(new_source_datas)
 
         logging.warning('E'*20)
         affiliation_xref = _affiliation_xref_for_author_data_list(new_source_datas)
