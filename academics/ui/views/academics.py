@@ -191,7 +191,7 @@ def add_author_search_results():
 @blueprint.route("/add_author", methods=['GET'])
 @roles_accepted('editor')
 def add_author():
-    form = AddAuthorEditForm()
+    form = AddAuthorEditForm(formdata=request.args)
 
     return render_template(
         "ui/academic/add_author.html",
@@ -215,8 +215,8 @@ def add_author_submit():
         
         sources = get_sources_for_catalog_identifiers(CATALOG_SCOPUS, request.form.getlist('catalog_identifier'))
         create_potential_sources(sources, academic, not_match=False)
-        AsyncJobs.schedule(AcademicRefresh(academic))
         db.session.commit()
+        AsyncJobs.schedule(AcademicRefresh(academic))
 
         run_jobs_asynch()
 
