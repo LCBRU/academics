@@ -5,7 +5,7 @@ from lbrc_flask.response import trigger_response, refresh_response
 from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import SelectField, SelectMultipleField
-from academics.catalogs.jobs import AcademicRefresh, RefreshAll
+from academics.catalogs.jobs import AcademicInitialise, AcademicRefresh, RefreshAll
 from academics.catalogs.scopus import scopus_author_search
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
@@ -215,7 +215,7 @@ def add_author_submit():
         
         sources = get_sources_for_catalog_identifiers(CATALOG_SCOPUS, request.form.getlist('catalog_identifier'))
         create_potential_sources(sources, academic, not_match=False)
-        AsyncJobs.schedule(AcademicRefresh(academic))
+        AsyncJobs.schedule(AcademicInitialise(academic))
         db.session.commit()
 
         run_jobs_asynch()

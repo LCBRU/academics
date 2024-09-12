@@ -785,25 +785,35 @@ class AcademicFindNewPotentialSources(AsyncJob):
         )
 
     def _run_actual(self):
+        logging.warning('A'*20)
         academic = db.session.execute(select(Academic).where(Academic.id == self.entity_id)).scalar_one_or_none()
+        logging.warning('B'*20)
         if not academic:
             return
 
+        logging.warning('C'*20)
         if len(academic.last_name.strip()) < 1:
             return
+
+        logging.warning('D'*20)
 
         new_source_datas = filter(
             lambda s: s.is_local,
             [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
         )
 
+        logging.warning('E'*20)
         affiliation_xref = _affiliation_xref_for_author_data_list(new_source_datas)
+        logging.warning('F'*20)
         new_sources = _source_xref_for_author_data_list(new_source_datas).values()
 
+        logging.warning('G'*20)
         for s in new_sources:
             s.affiliations = affiliation_xref[CatalogReference(s)]
 
+        logging.warning('H'*20)
         create_potential_sources(new_sources, academic, not_match=True)
+        logging.warning('I'*20)
 
 
 class AcademicEnsureSourcesArePotential(AsyncJob):
