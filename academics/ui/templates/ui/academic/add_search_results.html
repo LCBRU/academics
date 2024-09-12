@@ -11,7 +11,7 @@
             <tr>
                 <td>
                     {% if a.existing %}
-                        <span class="pill small">Already Imported</span>
+                        <span class="pill">Already Imported</span>
                     {% else %}
                         <form hx-get="{{ url_for('ui.add_author') }}">
                             <fieldset>
