@@ -802,7 +802,7 @@ class AcademicFindNewPotentialSources(AsyncJob):
             [*scopus_similar_authors(academic), *open_alex_similar_authors(academic)],
         ))
 
-        logging.info(new_source_datas)
+        logging.info([s.catalog_identifier for s in new_source_datas])
 
         logging.warning('E'*20)
         affiliation_xref = _affiliation_xref_for_author_data_list(new_source_datas)
