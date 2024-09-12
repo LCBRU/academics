@@ -743,7 +743,7 @@ class AcademicInitialise(AsyncJob):
 
 class AcademicRefresh(AsyncJob):
     __mapper_args__ = {
-        "polymorphic_identity": "AcademicInitialise",
+        "polymorphic_identity": "AcademicRefresh",
     }
 
     def __init__(self, academic):
