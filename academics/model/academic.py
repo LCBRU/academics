@@ -109,6 +109,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     initialised = db.Column(db.Boolean, default=False)
     error = db.Column(db.Boolean, default=False)
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
+    left_brc_date = db.Column(db.Date, nullable=True)
 
     themes = db.relationship(Theme, secondary='academics_themes', lazy="selectin")
 
@@ -332,6 +333,13 @@ class Source(AuditMixin, CommonMixin, db.Model):
     def has_left_brc(self):
         if self.academic:
             return self.academic.has_left_brc
+        else:
+            return None
+    
+    @property
+    def left_brc_date(self):
+        if self.academic:
+            return self.academic.left_brc_date
         else:
             return None
     

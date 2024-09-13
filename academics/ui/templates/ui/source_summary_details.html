@@ -14,6 +14,8 @@
             <dd>{{source.academic.full_name}}</dd>
             <dt>Has Left BRC</dt>
             <dd>{{source.has_left_brc | yes_no}}</dd>
+            <dt>Left BRC Date</dt>
+            <dd>{{source.left_brc_date | date_format}}</dd>
             <dt>Themes</dt>
             {% for t in source.academic.themes %}
                 <dd>{{t.name | blank_if_none}}</dd>

@@ -4,7 +4,7 @@ from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
 from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
-from wtforms import SelectField, SelectMultipleField
+from wtforms import DateField, SelectField, SelectMultipleField
 from academics.catalogs.jobs import AcademicInitialise, AcademicRefresh, RefreshAll
 from academics.catalogs.scopus import scopus_author_search
 from academics.model.academic import Academic, AcademicPotentialSource
@@ -57,6 +57,7 @@ class AcademicEditForm(FlashingForm):
     orcid = StringField("ORCID", validators=[Length(max=255)])
     themes = SelectMultipleField('Theme', coerce=int)
     has_left_brc = BooleanField('Has Left BRC', default=False)
+    left_brc_date = DateField('Date left BRC')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -98,6 +99,7 @@ def academic_edit(id):
         'google_scholar_id': academic.google_scholar_id,
         'orcid': academic.orcid,
         'has_left_brc': academic.has_left_brc,
+        'left_brc_date': academic.left_brc_date,
         'themes': [t.id for t in academic.themes]
     })
 
@@ -109,6 +111,7 @@ def academic_edit(id):
         academic.orcid = form.orcid.data
         academic.themes = [db.session.get(Theme, t) for t in form.themes.data]
         academic.has_left_brc = form.has_left_brc.data
+        academic.left_brc_date = form.left_brc_date.data
 
         db.session.add(academic)
         db.session.commit()

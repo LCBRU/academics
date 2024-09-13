@@ -50,9 +50,12 @@
         {% set cls = '' %}
     {% endif %}
 
-    <a  class="{{cls}}" href="javascript:;" title="Upload Publication DOIs" hx-get="{{ url_for('ui.source_summary_details', id=author.id ) }}" hx-target="body" hx-swap="beforeend" role="button">
+    <a class="{{cls}}" href="javascript:;" title="Upload Publication DOIs" hx-get="{{ url_for('ui.source_summary_details', id=author.id ) }}" hx-target="body" hx-swap="beforeend" role="button">
         <span class="pill small">{{ cps.ordinal + 1 }}</span>
         <span>{{ author.display_name }}</span>
+        {% if author.has_left_brc or author.left_brc_date %}
+            <span>(Left BRC {{author.left_brc_date | date_format}})</span>
+        {% endif %}
     </a>
 {% endmacro %}
 

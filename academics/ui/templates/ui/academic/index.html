@@ -34,6 +34,9 @@
                         <a class="academic_orcid {% if not a.orcid %}disabled{% endif %}" href="{{a.orcid_link}}" target="_blank">ORCID</a>
                         <a class="academic_google_scholar {% if not a.google_scholar_id %}disabled{% endif %}" href="{{a.google_scholar_link}}" target="_blank">Google Scholar</a>
                         <a class="academic_pubmed {% if not a.orcid %}disabled{% endif %}" href="{{a.pubmed_link}}" target="_blank">Pubmed</a>
+                        {% if a.has_left_brc or a.left_brc_date %}
+                            <span class="pill error">Left BRC {{a.left_brc_date | date_format}}</span>
+                        {% endif %}
                     </nav>
                     <div class="grid_stacked_center">
                         <h3>{{a.full_name}}</h3>
@@ -43,21 +46,23 @@
                             {{a.publication_count}} Combined Publications
                         </a>
                     </div>
-                    <nav class="link_list">
-                        {% if current_user.has_role('editor') %}
-                            {% set cls = 'user_cog' %}
-                            {% if a.has_new_potential_sources %}
-                                {% set cls = 'user_add text-danger' %}
+                    <div class="grid_stack_center">
+                        <nav class="link_list">
+                            {% if current_user.has_role('editor') %}
+                                {% set cls = 'user_cog' %}
+                                {% if a.has_new_potential_sources %}
+                                    {% set cls = 'user_add text-danger' %}
+                                {% endif %}
+    
+                                <a title="Edit Sources for {{ a.full_name }}" hx-get="{{ url_for('ui.academics_potential_sources', id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon {{cls}}"></a>
+                                <a title="Edit academic {{ a.full_name }}" hx-get="{{ url_for('ui.academic_edit', id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon edit"></a>
+                                <a title="Delete academic {{ a.full_name }}" hx-post="{{ url_for('ui.delete_academic', id=a.id) }}" hx-confirm="Are you sure you wish to delete '{{ a.full_name }}'?" href="javascript:;" class="icon delete"></a>
                             {% endif %}
-
-                            <a title="Edit Sources for {{ a.full_name }}" hx-get="{{ url_for('ui.academics_potential_sources', id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon {{cls}}"></a>
-                            <a title="Edit academic {{ a.full_name }}" hx-get="{{ url_for('ui.academic_edit', id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon edit"></a>
-                            <a title="Delete academic {{ a.full_name }}" hx-post="{{ url_for('ui.delete_academic', id=a.id) }}" hx-confirm="Are you sure you wish to delete '{{ a.full_name }}'?" href="javascript:;" class="icon delete"></a>
-                        {% endif %}
-                        {% if current_user.is_admin %}
-                            <a title="Update academic {{ a.full_name }}" hx-post="{{ url_for('ui.update_academic', id=a.id) }}" hx-confirm="Are you sure you wish to update '{{ a.full_name }}'?" href="javascript:;" class="icon redo"></a>
-                        {% endif %}
-                    </nav>
+                            {% if current_user.is_admin %}
+                                <a title="Update academic {{ a.full_name }}" hx-post="{{ url_for('ui.update_academic', id=a.id) }}" hx-confirm="Are you sure you wish to update '{{ a.full_name }}'?" href="javascript:;" class="icon redo"></a>
+                            {% endif %}
+                        </nav>
+                    </div>
                 </header>
 
                 <table class="source_table">
