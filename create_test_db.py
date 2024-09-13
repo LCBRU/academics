@@ -119,6 +119,11 @@ acknowledgements = [NihrAcknowledgement(name=a['name'], acknowledged=a['acknowle
         'acknowledged': False,
         'colour': '#9C27B0',
     },
+    {
+        'name': 'Not to be Submitted',
+        'acknowledged': False,
+        'colour': '#47535E',
+    },
 ]]
 
 # Acknowledgement
