@@ -228,7 +228,7 @@ def publication_export_pdf():
         .selectinload(FolderDoi.folder)
     )
 
-    publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
+    publications = db.session.execute(q.order_by(CatalogPublication.publication_period_start)).unique().scalars()
 
     return pdf_download(
         'ui/publication/publication_export.html',
@@ -249,7 +249,7 @@ def publication_author_report_pdf():
         .selectinload(Source.academic)
     )
 
-    publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
+    publications = db.session.execute(q.order_by(CatalogPublication.publication_period_start)).unique().scalars()
 
     academics = defaultdict(set)
 
