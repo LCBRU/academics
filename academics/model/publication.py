@@ -230,7 +230,7 @@ class Publication(db.Model, AuditMixin):
 
         issue_volume = '/'.join(filter(None, [self.best_catalog_publication.issue, self.best_catalog_publication.volume]))
 
-        parts.append(f'({self.best_catalog_publication.publication_cover_date:%B %y}{issue_volume}{pp})')
+        parts.append(f'({self.best_catalog_publication.publication_cover_date:%B %y} {issue_volume} {pp})')
 
         self.vancouver = '. '.join(parts)
 
