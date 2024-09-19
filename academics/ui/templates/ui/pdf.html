@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Academic Publications</title>
+    <title>{{ title }}</title>
 
     <style>
         @page {
@@ -84,36 +84,17 @@
 
 <body>
     <header>
-        <h1>Academics Publication Search</h1>
+        <h1>{{ title }}</h1>
         <p>
             Search filters:
-            {% for p in parameters %}
-                <span class="param_head">{{p[0]}}</span>
-                <span class="param_data">{{p[1]}}</span>
+            {% for k, v in parameters.items() %}
+                <span class="param_head">{{k}}</span>
+                <span class="param_data">{{v}}</span>
             {% endfor %}
         </p>
     </header>
 
-    {% for year, year_group in publications | groupby('best_catalog_publication.publication_cover_date.year') %}
-        {% for month, list in year_group | groupby('best_catalog_publication.publication_cover_date.month') %}
-            <h2>{{ month | month_name }} {{ year }}</h2>
-
-            {% for p in list %}
-                <div class="publications">
-                    <h3>{{p.title}}</h3>
-
-                    <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
-
-                    <p class="academics">
-                        BRC Authors:
-                        {% for a in p.best_catalog_publication.academics | sort(attribute='last_name,first_name') %}
-                            <span>{{ a.full_name }}</span>
-                        {% endfor %}
-                    </p>
-                </div>
-            {% endfor %}
-        {% endfor %}
-    {% endfor %}
+    {% block pdf_content %}{% endblock %}
 
 </body>
 </html>

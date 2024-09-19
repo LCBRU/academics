@@ -1,0 +1,25 @@
+{% extends "ui/pdf.html" %}
+{% set title = "Academics Publications" %}
+
+{% block pdf_contenty %}
+    {% for year, year_group in publications | groupby('best_catalog_publication.publication_cover_date.year') %}
+        {% for month, list in year_group | groupby('best_catalog_publication.publication_cover_date.month') %}
+            <h2>{{ month | month_name }} {{ year }}</h2>
+
+            {% for p in list %}
+                <div class="publications">
+                    <h3>{{p.title}}</h3>
+
+                    <p class="vancouver">{{p.vancouver | blank_if_none}}</p>
+
+                    <p class="academics">
+                        BRC Authors:
+                        {% for a in p.best_catalog_publication.academics | sort(attribute='last_name,first_name') %}
+                            <span>{{ a.full_name }}</span>
+                        {% endfor %}
+                    </p>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+{% endblock %}

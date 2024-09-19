@@ -201,6 +201,10 @@ class Publication(db.Model, AuditMixin):
     def best_catalog_publication(self):
         return self.scopus_catalog_publication or self.openalex_catalog_publication or self.manual_catalog_publication or None
 
+    @property
+    def academics(self):
+        return self.best_catalog_publication.academics
+
     def set_vancouver(self):
         if not self.best_catalog_publication:
             logging.warn(f'No best catalog publication for publication {self.id}')

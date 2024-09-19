@@ -1,0 +1,17 @@
+{% extends "ui/pdf.html" %}
+{% set title = "Publications by Academic" %}
+
+{% block pdf_content %}
+    {% for a, publications in academics.items() %}
+        <h2>{{a.full_name}}</h2>
+
+        {% for p in publications %}
+            <div class="publications">
+                {% set bp = p.best_catalog_publication %}
+                <h3>{{ bp.title }}</h3>
+                <p class="vancouver">{{ p.vancouver | blank_if_none }}</p>                    
+            </div>
+        {% endfor %}
+        
+    {% endfor %}
+{% endblock %}

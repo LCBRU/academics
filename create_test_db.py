@@ -191,11 +191,15 @@ for _ in range(randint(400, 600)):
         supplementary_authors=sample(academics, choice([0, 0, 0, 0, 1, 2])),
     )
 
+    cover_date=fake.date_between(start_date='-2y', end_date='today')
+
     cp = CatalogPublication(
         catalog=choice([CATALOG_SCOPUS, CATALOG_OPEN_ALEX]),
         catalog_identifier=''.join(choices(string.digits, k=randint(5, 10))),
         title=fake.sentence().title(),
-        publication_cover_date=fake.date_between(start_date='-2y', end_date='today'),
+        publication_cover_date=cover_date,
+        publication_period_start=cover_date,
+        publication_period_end=cover_date,
         subtype=choice(sub_types),
         publication=p,
         doi=doi,

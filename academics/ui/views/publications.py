@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 from flask import abort, current_app, jsonify, render_template, render_template_string, request, url_for
 from flask_security import roles_accepted
@@ -7,6 +8,7 @@ from lbrc_flask.forms import FlashingForm, MultiCheckboxField
 from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.response import trigger_response, refresh_response
+from lbrc_flask.data_conversions import ensure_list
 from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
 from academics.catalogs.jobs import CatalogPublicationRefresh
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
@@ -145,7 +147,6 @@ def publication_full_export_xlsx():
         'nihr acknowledgement': None,
     }
 
-
     search_form = PublicationSearchForm(formdata=request.args)
 
     q = publication_search_query(search_form)
@@ -227,31 +228,39 @@ def publication_export_pdf():
         .selectinload(FolderDoi.folder)
     )
 
-    parameters = []
-
-    if search_form.author_id.data:
-        author = db.get_or_404(Source, search_form.author_id.data)
-        parameters.append(('Author', author.display_name))
-
-    if search_form.theme_id.data:
-        theme = db.get_or_404(Theme, search_form.theme_id.data)
-        parameters.append(('Theme', theme.name))
-
-    publication_start_date = parse_date_or_none(search_form.publication_start_month.data)
-    if publication_start_date:
-        parameters.append(('Start Publication Date', f'{publication_start_date:%b %Y}'))
-
-    publication_end_date = parse_date_or_none(search_form.publication_end_month.data)
-    if publication_end_date:
-        parameters.append(('End Publication Date', f'{publication_end_date:%b %Y}'))
-
     publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
 
     return pdf_download(
-        'ui/publication/pdf.html',
-        title='Academics Publications',
+        'ui/publication/publication_export.html',
         publications=publications,
-        parameters=parameters,
+        parameters=search_form.values_description(),
+    )
+
+
+@blueprint.route("/publications/author_report/pdf")
+def publication_author_report_pdf():
+    search_form = PublicationSearchForm(formdata=request.args)
+    
+    q = publication_search_query(search_form)
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.catalog_publication_sources)
+        .selectinload(CatalogPublicationsSources.source)
+        .selectinload(Source.academic)
+    )
+
+    publications = db.session.execute(q.order_by(CatalogPublication.publication_cover_date)).unique().scalars()
+
+    academics = defaultdict(set)
+
+    for p in publications:
+        for a in p.academics:
+            academics[a].add(p)
+
+    return pdf_download(
+        'ui/publication/publications_by_academic.html',
+        academics=academics,
+        parameters=search_form.values_description(),
     )
 
 
