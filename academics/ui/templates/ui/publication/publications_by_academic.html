@@ -3,7 +3,17 @@
 
 {% block pdf_content %}
     {% for a, publications in academics.items() %}
-        <h2>{{a.full_name}}</h2>
+    <section class="page">
+        <header>
+            <h2>Publications for {{a.full_name}}</h2>
+            <p>
+                Search filters:
+                {% for k, v in parameters.items() %}
+                    <span class="param_head">{{k}}</span>
+                    <span class="param_data">{{v}}</span>
+                {% endfor %}
+            </p>
+        </header>
 
         {% for p in publications %}
             <div class="publications">
@@ -12,6 +22,6 @@
                 <p class="vancouver">{{ p.vancouver | blank_if_none }}</p>                    
             </div>
         {% endfor %}
-        
+    </section>
     {% endfor %}
 {% endblock %}

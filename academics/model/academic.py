@@ -128,6 +128,15 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             ])
         )
 
+    @property
+    def sort_name(self):
+        return ' '.join(
+            filter(len, [
+                self.last_name,
+                self.first_name,
+            ])
+        )
+
     def ensure_initialisation(self):
         if self.best_source.last_name:
             self.first_name = self.best_source.first_name or ''

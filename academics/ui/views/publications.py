@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from datetime import datetime
 from flask import abort, current_app, jsonify, render_template, render_template_string, request, url_for
 from flask_security import roles_accepted
@@ -259,7 +259,7 @@ def publication_author_report_pdf():
 
     return pdf_download(
         'ui/publication/publications_by_academic.html',
-        academics=academics,
+        academics=OrderedDict(sorted(academics.items(), key=lambda x: x[0].sort_name)),
         parameters=search_form.values_description(),
     )
 

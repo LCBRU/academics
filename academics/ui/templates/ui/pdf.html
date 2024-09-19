@@ -32,6 +32,10 @@
             border-bottom: 2px solid #222;
         }
 
+        section.page {
+            page-break-before: always;
+        }
+
         h1 {
             margin: 0;
             text-align: center;
@@ -95,6 +99,5 @@
     </header>
 
     {% block pdf_content %}{% endblock %}
-
 </body>
 </html>
