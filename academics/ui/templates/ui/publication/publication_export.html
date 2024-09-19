@@ -1,7 +1,7 @@
 {% extends "ui/pdf.html" %}
 {% set title = "Academics Publications" %}
 
-{% block pdf_contenty %}
+{% block pdf_content %}
     {% for year, year_group in publications | groupby('best_catalog_publication.publication_cover_date.year') %}
         {% for month, list in year_group | groupby('best_catalog_publication.publication_cover_date.month') %}
             <h2>{{ month | month_name }} {{ year }}</h2>
