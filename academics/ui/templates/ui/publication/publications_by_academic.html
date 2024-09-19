@@ -19,7 +19,8 @@
             <div class="publications">
                 {% set bp = p.best_catalog_publication %}
                 <h3>{{ bp.title }}</h3>
-                <p class="vancouver">{{ p.vancouver | blank_if_none }}</p>                    
+                <p class="vancouver">{{ p.vancouver | blank_if_none }}</p>
+                <a href="http://doi.org/{{ p.doi }}" target="_blank" title="View publication">http://doi.org/{{p.doi}}</a>
             </div>
         {% endfor %}
     </section>
