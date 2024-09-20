@@ -268,7 +268,7 @@ def publication_author_report_pdf():
 
         for a, pubs in academics.items():
             html = render_template(
-                'ui/publication/publications_by_academic2.html',
+                'ui/publication/publications_by_academic.html',
                 publications=pubs,
                 academic=a,
                 parameters=search_form.values_description(),
