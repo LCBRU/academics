@@ -2,6 +2,32 @@
 {% set title = "Publications by Academic" %}
 
 {% block pdf_content %}
+    <style>
+        .statuses {
+            margin-top: 1rem;
+        }
+
+        .statuses * {
+            padding: 0.5rem;
+            color: #FFFFFF;
+            margin-right: 0.5rem;
+        }
+
+        .preprint {
+            background-color: #FDCB14;
+            color: #222;
+        }
+
+        .open_access {
+            background-color: #FF8913;
+        }
+
+        .subtype {
+            background-color: #CED4DA;
+            color: #222;
+        }
+    </style>
+
     {% for a, publications in academics.items() %}
     <section class="page">
         <header>
@@ -19,8 +45,18 @@
             <div class="publications">
                 {% set bp = p.best_catalog_publication %}
                 <h3>{{ bp.title }}</h3>
-                <p class="vancouver">{{ p.vancouver | blank_if_none }}</p>
+                <p>{{ p.vancouver | blank_if_none }}</p>
                 <a href="http://doi.org/{{ p.doi }}" target="_blank" title="View publication">http://doi.org/{{p.doi}}</a>
+                <p class="statuses">
+                    <span class="subtype">{{ bp.subtype.description | title }}</span>
+                    <span style="background-color: {{p.nihr_acknowledgement.colour}};">{{ p.nihr_acknowledgement.name }}</span>
+                    {% if p.preprint %}
+                        <span class="preprint">Preprint</span>
+                    {% endif %}
+                    {% if bp.is_open_access %}
+                        <span class="open_access">Open Access</span>
+                    {% endif %}
+                </p>
             </div>
         {% endfor %}
     </section>

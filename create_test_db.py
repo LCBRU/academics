@@ -196,7 +196,7 @@ for _ in range(randint(400, 600)):
     cp = CatalogPublication(
         catalog=choice([CATALOG_SCOPUS, CATALOG_OPEN_ALEX]),
         catalog_identifier=''.join(choices(string.digits, k=randint(5, 10))),
-        title=fake.sentence().title(),
+        title=fake.sentence(nb_words=randint(16, 32)).title(),
         publication_cover_date=cover_date,
         publication_period_start=cover_date,
         publication_period_end=cover_date,
@@ -228,6 +228,11 @@ for _ in range(randint(400, 600)):
     catalog_publications.append(cp)
 
 db.session.add_all(catalog_publications)
+db.session.commit()
+
+for p in db.session.execute(select(Publication)).scalars():
+    p.set_vancouver()
+    db.session.add(p)
 db.session.commit()
 
 db.session.close()
