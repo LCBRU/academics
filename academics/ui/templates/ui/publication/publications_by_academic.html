@@ -28,37 +28,33 @@
         }
     </style>
 
-    {% for a, publications in academics.items() %}
-    <section class="page">
-        <header>
-            <h2>Publications for {{a.full_name}}</h2>
-            <p>
-                Search filters:
-                {% for k, v in parameters.items() %}
-                    <span class="param_head">{{k}}</span>
-                    <span class="param_data">{{v}}</span>
-                {% endfor %}
-            </p>
-        </header>
+    <header>
+        <h2>Publications for {{academic.full_name}}</h2>
+        <p>
+            Search filters:
+            {% for k, v in parameters.items() %}
+                <span class="param_head">{{k}}</span>
+                <span class="param_data">{{v}}</span>
+            {% endfor %}
+        </p>
+    </header>
 
-        {% for p in publications %}
-            <div class="publications">
-                {% set bp = p.best_catalog_publication %}
-                <h3>{{ bp.title }}</h3>
-                <p>{{ p.vancouver | blank_if_none }}</p>
-                <a href="http://doi.org/{{ p.doi }}" target="_blank" title="View publication">http://doi.org/{{p.doi}}</a>
-                <p class="statuses">
-                    <span class="subtype">{{ bp.subtype.description | title }}</span>
-                    <span style="background-color: {{p.nihr_acknowledgement.colour}};">{{ p.nihr_acknowledgement.name }}</span>
-                    {% if p.preprint %}
-                        <span class="preprint">Preprint</span>
-                    {% endif %}
-                    {% if bp.is_open_access %}
-                        <span class="open_access">Open Access</span>
-                    {% endif %}
-                </p>
-            </div>
-        {% endfor %}
-    </section>
+    {% for p in publications %}
+        <div class="publications">
+            {% set bp = p.best_catalog_publication %}
+            <h3>{{ bp.title }}</h3>
+            <p>{{ p.vancouver | blank_if_none }}</p>
+            <a href="http://doi.org/{{ p.doi }}" target="_blank" title="View publication">http://doi.org/{{p.doi}}</a>
+            <p class="statuses">
+                <span class="subtype">{{ bp.subtype.description | title }}</span>
+                <span style="background-color: {{p.nihr_acknowledgement.colour}};">{{ p.nihr_acknowledgement.name }}</span>
+                {% if p.preprint %}
+                    <span class="preprint">Preprint</span>
+                {% endif %}
+                {% if bp.is_open_access %}
+                    <span class="open_access">Open Access</span>
+                {% endif %}
+            </p>
+        </div>
     {% endfor %}
 {% endblock %}

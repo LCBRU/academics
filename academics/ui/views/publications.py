@@ -1,6 +1,10 @@
 from collections import OrderedDict, defaultdict
 from datetime import datetime
-from flask import abort, current_app, jsonify, render_template, render_template_string, request, url_for
+from pathlib import Path
+import shutil
+import tempfile
+from time import sleep
+from flask import abort, current_app, jsonify, render_template, render_template_string, request, send_file, url_for
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
@@ -9,6 +13,7 @@ from lbrc_flask.security import current_user_id
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.response import trigger_response, refresh_response
 from lbrc_flask.data_conversions import ensure_list
+from weasyprint import HTML
 from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
 from academics.catalogs.jobs import CatalogPublicationRefresh
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
@@ -22,6 +27,7 @@ from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from wtforms.validators import Length, DataRequired, Optional
 from lbrc_flask.async_jobs import AsyncJobs
+from werkzeug.utils import secure_filename
 
 from .. import blueprint
 
@@ -257,11 +263,26 @@ def publication_author_report_pdf():
         for a in p.academics:
             academics[a].add(p)
 
-    return pdf_download(
-        'ui/publication/publications_by_academic.html',
-        academics=OrderedDict(sorted(academics.items(), key=lambda x: x[0].sort_name)),
-        parameters=search_form.values_description(),
-    )
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        print('created temporary directory', tmpdirname)
+
+        for a, pubs in academics.items():
+            html = render_template(
+                'ui/publication/publications_by_academic2.html',
+                publications=pubs,
+                academic=a,
+                parameters=search_form.values_description(),
+            )
+            weasy_html = HTML(string=html, base_url=tmpdirname)
+            weasy_html.write_pdf(Path(tmpdirname) / secure_filename(a.full_name))
+
+        with tempfile.NamedTemporaryFile(delete=False) as zipfilename:
+            zipname = shutil.make_archive(zipfilename.name, 'zip', tmpdirname)
+            return send_file(
+                zipname,
+                as_attachment=True,
+                download_name=f'publication_author_report_{datetime.now():%Y%m%d_%H%M%S}.zip',
+                )
 
 
 @blueprint.route("/publication/author/options")
