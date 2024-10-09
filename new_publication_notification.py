@@ -24,19 +24,12 @@ today = date.today()
 last_week_end = today - timedelta(days=today.weekday() + 1)
 last_week_start = last_week_end - timedelta(days=6)
 
-print(last_week_end)
-print(last_week_start)
-
 q = (
     select(Publication)
     .where(Publication.catalog_publications.any(CatalogPublication.publication_cover_date.between(last_week_start, last_week_end)))
 )
 
-print(q)
-
 publications = list(db.session.execute(q).unique().scalars())
-
-print(publications)
 
 email(
     subject='New Publications Last Week',

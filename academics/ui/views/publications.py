@@ -1,18 +1,15 @@
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 import shutil
 import tempfile
-from time import sleep
 from flask import abort, current_app, jsonify, render_template, render_template_string, request, send_file, url_for
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
 from lbrc_flask.forms import FlashingForm, MultiCheckboxField
 from lbrc_flask.security import current_user_id
-from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.response import trigger_response, refresh_response
-from lbrc_flask.data_conversions import ensure_list
 from weasyprint import HTML
 from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
 from academics.catalogs.jobs import CatalogPublicationRefresh
@@ -21,7 +18,6 @@ from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Subtype
 from academics.model.security import User
-from academics.model.theme import Theme
 from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload

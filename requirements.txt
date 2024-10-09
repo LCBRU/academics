@@ -146,7 +146,7 @@ jsonschema==4.17.3
     # via lbrc-flask
 kombu==5.2.4
     # via celery
-lbrc-flask @ git+https://github.com/LCBRU/lbrc_flask.git@pyproject
+lbrc-flask @ git+https://github.com/LCBRU/lbrc_flask.git
     # via -r requirements.in
 mako==1.2.4
     # via alembic

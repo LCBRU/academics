@@ -106,7 +106,7 @@ def folder_remove_shared_user(id, user_id):
     db.session.add(f)
     db.session.commit()
 
-    return folder_details(id, 'users')
+    return refresh_response()
 
 
 @blueprint.route("/folder/<int:id>/add_shared_user/<int:user_id>", methods=['POST'])
@@ -120,50 +120,11 @@ def folder_add_shared_user(id, user_id):
     db.session.add(f)
     db.session.commit()
 
-    return folder_details(id, 'users')
+    return refresh_response()
 
 
 @blueprint.route("/folder/<int:folder_id>/doi/delete_publication/<path:doi>", methods=['POST'])
 def folder_delete_publication(folder_id, doi):
     remove_doi_from_folder(folder_id, doi)
 
-    return folder_details(folder_id, 'dois')
-
-
-@blueprint.route("/folder/<int:id>/details/<string:detail_selector>")
-@assert_folder_user()
-def folder_details(id, detail_selector):
-    template = '''
-        {% from "ui/folder/_details.html" import render_folder_details with context %}
-
-        {{ render_folder_details(folder, detail_selector, users, folders) }}
-    '''
-
-    q = select(Folder).where(
-            Folder.id == id
-        )
-    
-    if detail_selector == 'dois':
-        q = q.options(
-                selectinload(Folder.dois)
-                .selectinload(FolderDoi.publication)
-                .selectinload(Publication.folder_dois)
-                .selectinload(FolderDoi.folder)
-            ).options(
-                selectinload(Folder.dois)
-                .selectinload(FolderDoi.publication)
-                .selectinload(Publication.catalog_publications)
-                .selectinload(CatalogPublication.catalog_publication_sources)
-                .selectinload(CatalogPublicationsSources.source)
-                .selectinload(Source.academic)
-            )
-
-    folder = db.session.execute(q).scalar_one()
-
-    return render_template_string(
-        template,
-        folder=folder,
-        detail_selector=detail_selector,
-        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
-        folders=db.session.execute(select(Folder)).scalars().all(),
-    )
+    return refresh_response()

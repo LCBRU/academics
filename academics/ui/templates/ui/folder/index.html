@@ -26,29 +26,50 @@
 
     {{ pagination_summary(folders, 'folder') }}
 
-    <ul class="panel_list">
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Owner</th>
+                <th>Shared With</th>
+            </tr>
+        </thead>
+        <tbody>
         {% for f in folders.items %}
-            <li>
-                <header class="flex_two_left_grow">
-                    <h3>{{f.name}}</h3>
-                    <nav class="link_list">
-                        <a class="icon publication" href="{{ url_for('ui.publications', folder_id=f.id ) }}" title="Publications in {{ f.name }}"></a>
-                        <a class="icon upload" href="javascript:;" title="Upload Publication DOIs" hx-get="{{ url_for('ui.folder_upload_dois', id=f.id ) }}" hx-target="body" hx-swap="beforeend"></a>
-                        {% if f.owner == current_user %}
-                            <a class="icon edit" href="javascript:;" title="Edit Folder" hx-get="{{ url_for('ui.folder_edit', id=f.id ) }}" hx-target="body" hx-swap="beforeend"></a>
-                            <a class="icon delete" href="javascript:;" title="Delete Folder" hx-post="{{ url_for('ui.folder_delete', id=f.id ) }}" hx-confirm="Are you sure you want to delete folder {{f.name}}"></a>
-                        {% endif %}
-                    </nav>
-                </header>
-                <div>
-                    {% if f.owner != current_user %}
-                        <h5>Owned by {{f.owner.full_name}}</h4>
+            <tr>
+                <td>
+                    {% if f.owner == current_user %}
+                        <a class="icon edit" href="javascript:;" title="Edit Folder" hx-get="{{ url_for('ui.folder_edit', id=f.id ) }}" hx-target="body" hx-swap="beforeend"></a>
+                        <a class="icon delete" href="javascript:;" title="Delete Folder" hx-post="{{ url_for('ui.folder_delete', id=f.id ) }}" hx-confirm="Are you sure you want to delete folder {{f.name}}"></a>
+                    {% endif %}        
+                </td>
+                <td>{{f.name}}</td>
+                <td>{{f.owner.full_name}}</td>
+                <td class="grid_stacked_left">
+                    {% for u in f.shared_users | sort(attribute='full_name')%}
+                        <div class="dropdown">
+                            <a class="icon user" href="javascript:;" role="button">{{ u.full_name }}</a>
+                            <ul>
+                                <li><a href="javascript:;" hx-post="{{url_for('ui.folder_remove_shared_user', id=f.id, user_id=u.id)}}">Remove</a></li>
+                            </ul>
+                        </div>
+                    {% endfor %}
+                    {% if users | reject('in', f.shared_users) | list | length > 0 %}
+                        <div class="dropdown">
+                            <a class="icon user_add" href="javascript:;" role="button"></a>
+                            <ul>
+                                {% for u in users | reject('in', f.shared_users) | sort(attribute='full_name') %}
+                                    <li><a href="javascript:;" hx-post="{{url_for('ui.folder_add_shared_user', id=f.id, user_id=u.id)}}">Share with '{{u.full_name}}'</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% endif %}
-                </div>
-                {{ render_folder_details(f, 'users', users, folders) }}
-            </li>
+                </td>
+            </tr>
         {% endfor %}
-    </ul>
+        </tbody>
+    </table>
 </section>
 
 {{ render_pagination(folders, 'ui.folders', form=search_form) }}
