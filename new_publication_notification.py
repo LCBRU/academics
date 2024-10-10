@@ -4,6 +4,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import argparse
 from datetime import date, timedelta
 from flask import render_template
 from sqlalchemy import select
@@ -15,12 +16,19 @@ from academics.security import ROLE_NEW_PUBLICATION_RECIPIENT
 from academics.model.publication import CatalogPublication, Publication
 from academics import create_app
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-w", "--weeks", help="Number of previous weeks to report on", type=int, default=1)
+args = parser.parse_args()
+weeks = args.weeks
+
 application = create_app()
 application.app_context().push()
 
 today = date.today()
 last_week_end = today - timedelta(days=today.weekday() + 1)
 last_week_start = last_week_end - timedelta(days=6)
+if weeks > 1:
+    last_week_start -= timedelta(weeks=weeks-1)
 
 q = (
     select(Publication)
