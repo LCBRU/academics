@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-from datetime import date, timedelta
-from dateutil.relativedelta import relativedelta 
+# Load environment variables from '.env' file.
 from dotenv import load_dotenv
+load_dotenv()
+
+from datetime import date, timedelta
 from flask import render_template
 from sqlalchemy import select
 from lbrc_flask.database import db
@@ -13,10 +15,6 @@ from academics.security import ROLE_NEW_PUBLICATION_RECIPIENT
 from academics.model.publication import CatalogPublication, Publication
 from academics import create_app
 
-from dateutil.parser import parse
-
-# Load environment variables from '.env' file.
-load_dotenv()
 application = create_app()
 application.app_context().push()
 
