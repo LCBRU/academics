@@ -181,11 +181,14 @@ def best_catalog_publications():
 
 
 def catalog_publication_academics():
+    bcp = best_catalog_publications()
+
     qa = (
         select(CatalogPublicationsSources.catalog_publication_id, Source.academic_id)
         .select_from(CatalogPublicationsSources)
         .join(CatalogPublicationsSources.source)
         .where(Source.academic_id != None)
+        .where(CatalogPublicationsSources.catalog_publication_id.in_(bcp))
     )
 
     qsa = (
@@ -193,6 +196,7 @@ def catalog_publication_academics():
         .select_from(CatalogPublication)
         .join(CatalogPublication.publication)
         .join(Publication.supplementary_authors)
+        .where(CatalogPublication.id.in_(bcp))
     )
 
     return qa.union(qsa).alias()
