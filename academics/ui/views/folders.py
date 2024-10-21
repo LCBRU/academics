@@ -237,18 +237,18 @@ def folder_academics(folder_id):
         .group_by(FolderAcademic.id)
         .order_by(FolderAcademic.last_name, FolderAcademic.first_name)
         .options(with_expression(FolderAcademic.folder_publication_count, func.count(distinct(CatalogPublication.publication_id))))
-        .options(with_expression(FolderAcademic.folder_relevant_count, func.sum(case(
-            (FolderDoiUserRelevance.relevant, 1),
-            else_=0
-        ))))
-        .options(with_expression(FolderAcademic.folder_not_relevant_count, func.sum(case(
-            (FolderDoiUserRelevance.relevant == 0, 1),
-            else_=0
-        ))))
-        .options(with_expression(FolderAcademic.folder_unset_count, func.sum(case(
-            (FolderDoiUserRelevance.relevant == None, 1),
-            else_=0
-        ))))
+        .options(with_expression(FolderAcademic.folder_relevant_count, func.count(distinct(case(
+            (FolderDoiUserRelevance.relevant, CatalogPublication.publication_id),
+            else_=None
+        )))))
+        .options(with_expression(FolderAcademic.folder_not_relevant_count, func.count(distinct(case(
+            (FolderDoiUserRelevance.relevant == 0, CatalogPublication.publication_id),
+            else_=None
+        )))))
+        .options(with_expression(FolderAcademic.folder_unset_count, func.count(distinct(case(
+            (FolderDoiUserRelevance.relevant == None, CatalogPublication.publication_id),
+            else_=None
+        )))))
     )
 
     print(q)
