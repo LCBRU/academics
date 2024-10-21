@@ -2,9 +2,9 @@ from .. import blueprint
 from flask import abort, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from sqlalchemy import and_, case, distinct, func, literal_column, or_, select
-from sqlalchemy.orm import with_expression, Mapped, query_expression, relationship, foreign, joinedload
-from academics.model.academic import Academic
+from sqlalchemy import and_, case, distinct, func, or_, select
+from sqlalchemy.orm import with_expression, Mapped, query_expression, relationship, foreign, joinedload, selectinload
+from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
@@ -180,6 +180,13 @@ def folder_publications(folder_id, academic_id=None, theme_id=None):
         .join(CatalogPublication, CatalogPublication.id == cat_pubs.c.id)
         .join(CatalogPublication.publication)
         .options(joinedload(FolderPublication.folder_doi.and_(FolderDoi.folder_id == folder.id, FolderDoi.doi == Publication.doi)))
+    )
+
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.catalog_publication_sources)
+        .selectinload(CatalogPublicationsSources.source)
+        .selectinload(Source.academic)
     )
 
     q = q.order_by(CatalogPublication.publication_cover_date.asc(), CatalogPublication.id)
