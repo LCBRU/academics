@@ -182,7 +182,7 @@ def folder_publications(folder_id, academic_id=None, theme_id=None):
         .options(joinedload(FolderPublication.folder_doi.and_(FolderDoi.folder_id == folder.id, FolderDoi.doi == Publication.doi)))
     )
 
-    q = q.order_by(CatalogPublication.publication_cover_date.asc())
+    q = q.order_by(CatalogPublication.publication_cover_date.asc(), CatalogPublication.id)
 
     publications = db.paginate(
         select=q,
