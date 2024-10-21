@@ -72,6 +72,13 @@
                 </header>
                 <h3>{{cp.title}}</h3>
                 <h4>{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
+                {% if cp.doi %}
+                    <h4>
+                        <a href="http://doi.org/{{ cp.doi }}" target="_blank" title="View publication">
+                            http://doi.org/{{ cp.doi }}
+                        </a>
+                    </h4>
+                {% endif %}
                 <h5>{{cp.author_list}}</h5>
 
                 {% if p.folder_doi.user_statuses | rejectattr('relevant', 'false') | list | length > 0 %}
