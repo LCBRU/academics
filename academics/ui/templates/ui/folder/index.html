@@ -32,6 +32,7 @@
                 <th></th>
                 <th>Name</th>
                 <th>Owner</th>
+                <th>Publications</th>
                 <th>Shared With</th>
             </tr>
         </thead>
@@ -42,10 +43,14 @@
                     {% if f.owner == current_user %}
                         <a class="icon edit" href="javascript:;" title="Edit Folder" hx-get="{{ url_for('ui.folder_edit', id=f.id ) }}" hx-target="body" hx-swap="beforeend"></a>
                         <a class="icon delete" href="javascript:;" title="Delete Folder" hx-post="{{ url_for('ui.folder_delete', id=f.id ) }}" hx-confirm="Are you sure you want to delete folder {{f.name}}"></a>
-                    {% endif %}        
+                    {% endif %}
+                    <a class="icon users" title="Show Academics" href="{{ url_for('ui.folder_academics', folder_id=f.id ) }}"></a>
+                    <a class="icon themes" title="Show Themes" href="{{ url_for('ui.folder_themes', folder_id=f.id ) }}"></a>
+                    <a class="icon publication" title="Show Publications" href="{{ url_for('ui.folder_publications', folder_id=f.id ) }}"></a>
                 </td>
                 <td>{{f.name}}</td>
                 <td>{{f.owner.full_name}}</td>
+                <td>{{f.publication_count}}</td>
                 <td class="grid_stacked_left">
                     {% for u in f.shared_users | sort(attribute='full_name')%}
                         <div class="dropdown">

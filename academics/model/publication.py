@@ -308,3 +308,7 @@ class CatalogPublication(db.Model, AuditMixin):
     @property
     def affiliations(self):
         return set(chain.from_iterable([cps.source.affiliations for cps in self.catalog_publication_sources]))
+
+    @property
+    def author_list(self):
+        return ', '.join([s.source.full_name for s in self.catalog_publication_sources])

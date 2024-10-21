@@ -2,6 +2,7 @@ from flask import flash, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
+from lbrc_flask.security import system_user_id
 from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import DateField, SelectField, SelectMultipleField
@@ -9,11 +10,12 @@ from academics.catalogs.jobs import AcademicInitialise, AcademicRefresh, Refresh
 from academics.catalogs.scopus import scopus_author_search
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
-from wtforms.validators import Length, DataRequired
+from wtforms.validators import Length, DataRequired, Optional
 from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 
+from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
 from academics.services.sources import create_potential_sources, get_sources_for_catalog_identifiers
@@ -56,13 +58,16 @@ class AcademicEditForm(FlashingForm):
     google_scholar_id = StringField("Google Scholar ID", validators=[Length(max=255)])
     orcid = StringField("ORCID", validators=[Length(max=255)])
     themes = SelectMultipleField('Theme', coerce=int)
+    user_id = SelectField('User', coerce=int)
     has_left_brc = BooleanField('Has Left BRC', default=False)
-    left_brc_date = DateField('Date left BRC')
+    left_brc_date = DateField('Date left BRC', validators=[Optional()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
+        users = db.session.execute(select(User).where(User.id != system_user_id()).order_by(User.last_name, User.first_name)).scalars()
+        self.user_id.choices = [(0, '')] + [(u.id, u.full_name) for u in users]
 
 
 @blueprint.route("/")
@@ -100,7 +105,8 @@ def academic_edit(id):
         'orcid': academic.orcid,
         'has_left_brc': academic.has_left_brc,
         'left_brc_date': academic.left_brc_date,
-        'themes': [t.id for t in academic.themes]
+        'themes': [t.id for t in academic.themes],
+        "user_id": academic.user_id,
     })
 
     if form.validate_on_submit():
@@ -112,6 +118,7 @@ def academic_edit(id):
         academic.themes = [db.session.get(Theme, t) for t in form.themes.data]
         academic.has_left_brc = form.has_left_brc.data
         academic.left_brc_date = form.left_brc_date.data
+        academic.user_id = form.user_id.data
 
         db.session.add(academic)
         db.session.commit()

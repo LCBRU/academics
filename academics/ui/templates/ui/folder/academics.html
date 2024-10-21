@@ -1,0 +1,51 @@
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
+
+{% block menu_page_content %}
+
+<section class="container">
+    <header>
+        <h2>{{folder.name}} folder BRC Authors</h2>
+
+        <form method="GET" action="{{ url_for('ui.folder_academics', folder_id=folder.id) }}">
+            <fieldset>
+                {{ search_form.hidden_tag() }}
+                {{ render_form_fields(search_form) }}
+            </fieldset>
+        </form>
+    </header>
+
+    {{ pagination_summary(academics, 'academics') }}
+
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Publications</th>
+                <th>Relevant</th>
+                <th>Not Relevant</th>
+                <th>Unset</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in academics %}
+                <tr>
+                    <td>
+                        <a class="icon publication" title="Show Publications" href="{{ url_for('ui.folder_publications', folder_id=folder.id, academic_id=a.id ) }}"></a>
+                    </td>
+                    <td>{{ a.full_name }}</td>
+                    <td>{{ a.folder_publication_count }}</td>
+                    <td>{{ a.folder_relevant_count }}</td>
+                    <td>{{ a.folder_not_relevant_count }}</td>
+                    <td>{{ a.folder_unset_count }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{{ render_pagination(academics, 'ui.folder_academics', folder_id=folder.id, form=search_form) }}
+
+{% endblock %}

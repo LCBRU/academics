@@ -1,11 +1,13 @@
-from sqlalchemy import ForeignKey, Index, Unicode, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Unicode, UniqueConstraint, func, select
 from sqlalchemy.orm import backref
 from lbrc_flask.database import db
 from lbrc_flask.validators import is_invalid_doi
 
 from academics.model.publication import Publication
 from academics.model.security import User
-from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
+from sqlalchemy.orm import Mapped, mapped_column, relationship, backref, column_property
+from lbrc_flask.security import AuditMixin
+from lbrc_flask.model import CommonMixin
 
 
 folders__shared_users = db.Table(
@@ -25,12 +27,7 @@ class Folder(db.Model):
 
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete")) 
-
-    shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set)
-
-    @property
-    def publication_count(self):
-        return Publication.query.filter(Publication.folders.any(Folder.id == self.id)).count()
+    shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set, lazy="selectin")
 
 
 class FolderDoi(db.Model):
@@ -58,3 +55,28 @@ class FolderDoi(db.Model):
     @property
     def invalid_doi(self):
         return is_invalid_doi(self.doi)
+
+
+Folder.publication_count = column_property(
+        select(func.count(FolderDoi.doi))
+        .where(FolderDoi.folder_id == Folder.id)
+        .correlate_except(FolderDoi)
+        .scalar_subquery()
+    )
+
+
+class FolderDoiUserRelevance(AuditMixin, CommonMixin, db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    folder_doi_id = mapped_column(ForeignKey(FolderDoi.id), nullable=False, index=True)
+    folder_doi: Mapped[FolderDoi] = relationship(
+        foreign_keys=[folder_doi_id],
+        backref=backref(
+            "user_statuses",
+            collection_class=set,
+            cascade="all, delete",
+        )
+    )
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False, index=True)
+    user: Mapped[User] = relationship(foreign_keys=[user_id])
+
+    relevant: Mapped[bool] = mapped_column(Boolean)

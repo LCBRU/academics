@@ -76,7 +76,7 @@ def nihr_acknowledgement_select_choices():
 
 class PublicationSearchForm(SearchForm):
     theme_id = SelectField('Theme')
-    journal_id = SelectMultipleField('Journal', coerce=int, )
+    journal_id = SelectMultipleField('Journal', coerce=int)
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
     subtype_id = SelectMultipleField('Type')
@@ -180,6 +180,43 @@ def best_catalog_publications():
     )
 
 
+def catalog_publication_academics():
+    qa = (
+        select(CatalogPublicationsSources.catalog_publication_id, Source.academic_id)
+        .select_from(CatalogPublicationsSources)
+        .join(CatalogPublicationsSources.source)
+    )
+
+    qsa = (
+        select(CatalogPublication.id, Academic.id)
+        .select_from(CatalogPublication)
+        .join(CatalogPublication.publication)
+        .join(Publication.supplementary_authors)
+    )
+
+    return qa.union(qsa).alias()
+
+
+def catalog_publication_themes():
+    qa = (
+        select(CatalogPublicationsSources.catalog_publication_id, Theme.id.label('theme_id'))
+        .select_from(CatalogPublicationsSources)
+        .join(CatalogPublicationsSources.source)
+        .join(Source.academic)
+        .join(Academic.themes)
+    )
+
+    qsa = (
+        select(CatalogPublication.id, Theme.id)
+        .select_from(CatalogPublication)
+        .join(CatalogPublication.publication)
+        .join(Publication.supplementary_authors)
+        .join(Academic.themes)
+    )
+
+    return qa.union(qsa).alias()
+
+
 def publication_search_query(search_form):
     cat_pubs = catalog_publication_search_query(search_form)
 
@@ -207,26 +244,20 @@ def catalog_publication_search_query(search_form):
         ))
 
     if search_form.has_value('academic_id'):
-        q = q.where(or_(
-            CatalogPublication.id.in_(
-                select(CatalogPublicationsSources.catalog_publication_id)
-                .join(CatalogPublicationsSources.source)
-                .where(Source.academic_id.in_(ensure_list(search_form.academic_id.data)))
-            ),
-            CatalogPublication.publication_id.in_(
-                select(Publication.id)
-                .join(Publication.supplementary_authors)
-                .where(Academic.id.in_(ensure_list(search_form.academic_id.data)))
-            ),
-        ))
+        cpa = catalog_publication_academics()
+
+        q = q.where(CatalogPublication.id.in_(
+            select(cpa.c.catalog_publication_id)
+            .where(cpa.c.academic_id.in_(ensure_list(search_form.academic_id.data))))
+        )
 
     if search_form.has_value('theme_id'):
+        cpt = catalog_publication_themes()
+
         q = q.where(CatalogPublication.id.in_(
-            select(CatalogPublicationsSources.catalog_publication_id)
-            .join(CatalogPublicationsSources.source)
-            .join(Source.academic)
-            .where(Academic.themes.any(Theme.id == search_form.theme_id.data))
-        ))
+            select(cpt.c.catalog_publication_id)
+            .where(cpt.c.theme_id.in_(ensure_list(search_form.theme_id.data))))
+        )
 
     if  search_form.has_value('journal_id'):
         q = q.where(CatalogPublication.journal_id.in_(search_form.journal_id.data))

@@ -23,10 +23,15 @@
                         <a class="icon add" href="javascript:;" title="Add Supplementary Publication" hx-get="{{ url_for('ui.catalog_publication_edit' ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Publication</a>
                     {% endif %}
                     <button class="icon folder_add" formaction="{{ url_for('ui.publication_create_folder') }}" formmethod="post" title="Add Publications to Folder" type="submit">Add to Folder</button>
-                    <button class="icon download" formaction="{{ url_for('ui.publication_full_export_xlsx') }}" formmethod="get" title="Full Export" type="submit">Full Export</button>
-                    <button class="icon report" formaction="{{ url_for('ui.publication_full_annual_report_xlsx') }}" formmethod="get" title="Annual Report" type="submit">Annual Report</button>
-                    <button class="icon pdf" formaction="{{ url_for('ui.publication_export_pdf') }}" formmethod="get" title="PDF" type="submit">PDF</button>
-                    <button class="icon users" formaction="{{ url_for('ui.publication_author_report_pdf') }}" formmethod="get" title="PDF" type="submit">Author Report</button>
+
+                    <div class="dropdown">
+                        <a href="javascript:;" role="button">Export</a>
+                        <ul>
+                            <li><button class="icon pdf" formaction="{{ url_for('ui.publication_export_pdf') }}" formmethod="get" title="PDF" type="menu">PDF</button></li>
+                            <li><button class="icon report" formaction="{{ url_for('ui.publication_full_annual_report_xlsx') }}" formmethod="get" title="Annual Report" type="menu">Annual Report</button></li>
+                            <li><button class="icon download" formaction="{{ url_for('ui.publication_full_export_xlsx') }}" formmethod="get" title="Full Export" type="menu">Full Export</button></li>
+                        </ul>
+                    </div>
                 </div>
             </fieldset>
         </form>

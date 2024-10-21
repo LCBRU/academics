@@ -25,6 +25,8 @@ from wtforms.validators import Length, DataRequired, Optional
 from lbrc_flask.async_jobs import AsyncJobs
 from werkzeug.utils import secure_filename
 
+from academics.ui.views.folder_dois import add_doi_to_folder
+
 from .. import blueprint
 
 
@@ -51,6 +53,7 @@ class SupplementaryAuthorAddForm(FlashingForm):
 
 class PublicationAddForm(FlashingForm):
     doi = StringField('DOI', validators=[Length(max=50), DataRequired()])
+    folder_id = HiddenField('folder_id')
     title = TextAreaField('Title', validators=[Length(max=1000)])
     publication_cover_date = DateField('Publication Cover Date', validators=[Optional()])
 
@@ -448,7 +451,7 @@ def catalog_publication_edit(id=None):
         form = PublicationAddForm(obj=catalog_publication)
     else:
         catalog_publication = CatalogPublication(catalog=CATALOG_MANUAL)
-        form = PublicationAddForm()
+        form = PublicationAddForm(data=request.args)
 
     if form.validate_on_submit():
         publication = db.session.execute(select(Publication).where(Publication.doi == form.doi.data)).unique().scalar_one_or_none() or Publication(doi=form.doi.data, refresh_full_details=True)
@@ -467,8 +470,13 @@ def catalog_publication_edit(id=None):
         catalog_publication.publication = publication
 
         db.session.add(catalog_publication)
+        db.session.flush()
+
         AsyncJobs.schedule(CatalogPublicationRefresh(catalog_publication))
         db.session.commit()
+
+        if form.has_value('folder_id'):
+            add_doi_to_folder(form.folder_id.data, form.doi.data)
 
         return refresh_response()
 
@@ -490,5 +498,3 @@ def catalog_publication_delete(id):
     db.session.commit()
 
     return refresh_response()
-
-

@@ -1,0 +1,101 @@
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
+
+{% from "ui/publication/_details.html" import render_publication_title %}
+
+{% block menu_page_content %}
+
+<section class="container">
+    <header>
+        <h2>
+            {% if academic %}
+                <span>Publications in folder</span>
+                <a title="Folder Academics" href="{{ url_for('ui.folder_academics', folder_id=folder.id ) }}">{{folder.name}}</a>
+                <span>for {{ academic.full_name }}</span>
+            {% elif theme %}
+                <span>Publications in folder</span>
+                <a title="Folder Themes" href="{{ url_for('ui.folder_themes', folder_id=folder.id ) }}">{{folder.name}}</a>
+                <span>for {{ theme.name }}</span>
+            {% else %}
+                <span>Publication in folder {{folder.name}}</span>
+            {% endif %}
+        </h2>
+
+        <form method="GET" action="{{ url_for('ui.folder_academics', folder_id=folder.id) }}">
+            <fieldset>
+                {{ search_form.hidden_tag() }}
+                {{ render_form_fields(search_form) }}
+
+                <div class="button_bar" hx-target="body">
+                    <a class="icon add" href="javascript:;" title="Add Supplementary Publication" hx-get="{{ url_for('ui.catalog_publication_edit', folder_id=folder.id ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Publication</a>
+                </div>
+            </fieldset>
+        </form>
+    </header>
+
+    {{ pagination_summary(publications, 'publications') }}
+
+    <ul class="panel_list">
+        {% for p in publications.items %}
+            {% set cp = p.best_catalog_publication %}
+            <li>
+                <header class="flex_two_left_grow">
+                    <nav class="linked_list">
+                        {% if cp.catalog == 'manual' %}
+                            <a class="icon edit" href="javascript:;" hx-get="{{url_for('ui.catalog_publication_edit', id=cp.id)}}" hx-target="body" hx-swap="beforeend" title="Edit manual publication"></a>
+                        {% endif %}
+                    </nav>
+
+                    {% if p.current_user_relevance() is none %}
+                        {% set ur_cls = 'muted' %}
+                        {% set ur_name = 'Unset' %}
+                    {% else %}
+                        {% if p.current_user_relevance().relevant %}
+                            {% set ur_cls = '' %}
+                            {% set ur_name = 'Relevant' %}
+                        {% else %}
+                            {% set ur_cls = 'error' %}
+                            {% set ur_name = 'Not Relevant' %}
+                        {% endif %}
+                    {% endif %}
+
+                    <nav class="link_list">
+                        <div class="dropdown">
+                            <a href="javascript:;" class="{{ ur_cls }}" role="button">{{ ur_name }}</a>
+                            <ul>
+                                <li><a href="javascript:;" hx-post="{{url_for('ui.folder_doi_set_user_relevance', folder_id=folder.id, relevant=1, doi=p.doi )}}">Relevant</a></li>
+                                <li><a href="javascript:;" hx-post="{{url_for('ui.folder_doi_set_user_relevance', folder_id=folder.id, relevant=0, doi=p.doi )}}">Not Relevant</a></li>
+                            </ul>            
+                        </div>
+                    </nav>
+                </header>
+                <h3>{{cp.title}}</h3>
+                <h4>{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
+                <h5>{{cp.author_list}}</h5>
+
+                {% if p.folder_doi.user_statuses | rejectattr('relevant', 'false') | list | length > 0 %}
+                    <h4>Relevant</h4>
+                    <nav class="link_list">
+                        {% for r in p.folder_doi.user_statuses | rejectattr('relevant', 'false') | sort(attribute='user.full_name') %}
+                            <button type="button">{{ r.user.full_name }}</button>
+                        {% endfor %}
+                    </nav>
+                {% endif %}
+
+                {% if p.folder_doi.user_statuses | rejectattr('relevant', 'true') | list | length > 0 %}
+                    <h4>Not Relevant</h4>
+                    <nav class="link_list">
+                        {% for r in p.folder_doi.user_statuses | rejectattr('relevant', 'true') | sort(attribute='user.full_name') %}
+                            <button class="error" type="button">{{ r.user.full_name }}</button>
+                        {% endfor %}
+                    </nav>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>    
+</section>
+
+{{ render_pagination(publications, 'ui.folder_publications', folder_id=folder.id, form=search_form) }}
+
+{% endblock %}

@@ -7,6 +7,7 @@ from lbrc_flask.model import CommonMixin
 from lbrc_flask.database import db
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.publication import CatalogPublication, Publication
+from academics.model.security import User
 from academics.model.theme import Theme
 
 
@@ -110,6 +111,8 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     error = db.Column(db.Boolean, default=False)
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
     left_brc_date = db.Column(db.Date, nullable=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), index=True)
+    user: Mapped[User] = relationship(foreign_keys=[user_id])
 
     themes = db.relationship(Theme, secondary='academics_themes', lazy="selectin")
 

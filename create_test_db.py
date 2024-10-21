@@ -9,7 +9,7 @@ from academics.model.academic import Academic, Affiliation, CatalogPublicationsS
 from academics.model.publication import *
 from academics.model.security import User
 from academics.model.theme import Theme
-from academics.model.folder import Folder, FolderDoi
+from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.security import ROLE_EDITOR, ROLE_VALIDATOR, get_roles
 from faker import Faker
 fake = Faker()
@@ -233,6 +233,18 @@ db.session.commit()
 for p in db.session.execute(select(Publication)).scalars():
     p.set_vancouver()
     db.session.add(p)
+db.session.commit()
+
+other_users = list(db.session.execute(select(User).where(User.id > 2)).scalars())
+
+for p in db.session.execute(select(Publication)).scalars():
+    for f in p.folder_dois:
+        for u in sample(other_users, randint(0, len(other_users))):
+            db.session.add(FolderDoiUserRelevance(
+                folder_doi_id=f.id,
+                user=u,
+                relevant=choice([True, False]),
+            ))
 db.session.commit()
 
 db.session.close()

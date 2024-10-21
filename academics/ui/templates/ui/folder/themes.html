@@ -1,0 +1,45 @@
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
+
+{% block menu_page_content %}
+
+<section class="container">
+    <header>
+        <h2>{{folder.name}} folder BRC Themes</h2>
+
+        <form method="GET" action="{{ url_for('ui.folder_themes', folder_id=folder.id) }}">
+            <fieldset>
+                {{ search_form.hidden_tag() }}
+                {{ render_form_fields(search_form) }}
+            </fieldset>
+        </form>
+    </header>
+
+    {{ pagination_summary(themes, 'themes') }}
+
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Publications</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in themes %}
+                <tr>
+                    <td>
+                        <a class="icon publication" title="Show Publications" href="{{ url_for('ui.folder_publications', folder_id=folder.id, theme_id=t.id ) }}"></a>
+                    </td>
+                    <td>{{ t.name }}</td>
+                    <td>{{ t.folder_publication_count }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{{ render_pagination(themes, 'ui.folder_themes', folder_id=folder.id, form=search_form) }}
+
+{% endblock %}
