@@ -251,6 +251,8 @@ def folder_academics(folder_id):
         ))))
     )
 
+    print(q)
+
     academics = db.paginate(
         select=q,
         page=search_form.page.data,

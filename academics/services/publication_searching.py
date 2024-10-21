@@ -185,6 +185,7 @@ def catalog_publication_academics():
         select(CatalogPublicationsSources.catalog_publication_id, Source.academic_id)
         .select_from(CatalogPublicationsSources)
         .join(CatalogPublicationsSources.source)
+        .where(Source.academic_id != None)
     )
 
     qsa = (
