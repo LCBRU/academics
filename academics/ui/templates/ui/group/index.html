@@ -45,7 +45,7 @@
                 <td>{{g.owner.full_name}}</td>
                 <td>
                     <div class="grid_stacked_left">
-                        {% for a in g.academics | sort(attribute='full_name')%}
+                        {% for a in g.academics | sort(attribute='last_name,first_name, full_name')%}
                             <div class="dropdown">
                                 <a class="icon user" href="javascript:;" role="button">{{ a.full_name }}</a>
                                 <ul>
@@ -58,7 +58,7 @@
                 </td>
                 <td>
                     <div class="grid_stacked_left">
-                        {% for u in g.shared_users | sort(attribute='full_name')%}
+                        {% for u in g.shared_users | sort(attribute='last_name,first_name, full_name')%}
                             <div class="dropdown">
                                 <a class="icon user" href="javascript:;" role="button">{{ u.full_name }}</a>
                                 <ul>
