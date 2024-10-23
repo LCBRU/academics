@@ -1,14 +1,10 @@
 {% extends "ui/menu_page.html" %}
 {% from "lbrc/form_macros.html" import render_form_fields %}
 {% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
-{% from "ui/folder/_details.html" import render_folder_details with context %}
-{% from "ui/assets.html" import render_assets %}
 
 
 {% block menu_page_content %}
 <section class="container">
-    {{ render_assets() }}
-
     <header>
         <h2>Folders</h2>
 

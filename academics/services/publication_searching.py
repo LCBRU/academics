@@ -2,9 +2,9 @@ from itertools import cycle
 import logging
 from dateutil.relativedelta import relativedelta
 from flask import current_app, url_for
-from flask_login import current_user
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder
+from academics.model.group import Group
 from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
 from academics.model.catalog import primary_catalogs
 from lbrc_flask.validators import parse_date_or_none
@@ -16,7 +16,9 @@ from sqlalchemy import func, select
 from lbrc_flask.charting import BarChartItem, SeriesConfig, default_series_colors
 from lbrc_flask.database import db
 from cachetools import cached, TTLCache
+from lbrc_flask.security import current_user_id
 
+from academics.model.security import User
 from academics.model.theme import Theme
 
 
@@ -66,7 +68,22 @@ def journal_select_choices(search_string):
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
 def folder_select_choices():
-    return [(f.id, f.name.title()) for f in Folder.query.filter(Folder.owner == current_user).order_by(Folder.name).all()]
+    q = select(Folder).where(or_(
+        Folder.owner_id == current_user_id(),
+        Folder.shared_users.any(User.id == current_user_id()),
+    )).order_by(Folder.name)
+
+    return [(f.id, f.name.title()) for f in db.session.execute(q).scalars()]
+
+
+@cached(cache=TTLCache(maxsize=1, ttl=60))
+def group_select_choices():
+    q = select(Group).where(or_(
+        Group.owner_id == current_user_id(),
+        Group.shared_users.any(User.id == current_user_id()),
+    )).order_by(Group.name)
+    
+    return [(g.id, g.name.title()) for g in db.session.execute(q).scalars()]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
@@ -84,6 +101,7 @@ class PublicationSearchForm(SearchForm):
     keywords = SelectMultipleField('Keywords')
     author_id = HiddenField('Author')
     academic_id = SelectMultipleField('Academic')
+    group_id = SelectField('Group')
     folder_id = SelectField('Folder')
     preprint = SelectField(
         'Preprint',
@@ -106,6 +124,7 @@ class PublicationSearchForm(SearchForm):
         self.folder_id.choices = [('', '')] + folder_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
         self.academic_id.render_kw={'data-options-href': url_for('ui.publication_author_options'), 'style': 'width: 300px'}
+        self.group_id.choices = [('', '')] + group_select_choices()
 
 
 class PublicationSummarySearchForm(SearchForm):
@@ -129,6 +148,7 @@ class PublicationSummarySearchForm(SearchForm):
         ('catalog', 'Catalog'),
     ], default='total')
     theme_id = SelectField('Theme')
+    group_id = SelectField('Group')
     nihr_acknowledgement_ids = SelectMultipleField('Acknowledgements')
     subtype_id = SelectMultipleField('Type')
     academic_id = HiddenField()
@@ -148,6 +168,7 @@ class PublicationSummarySearchForm(SearchForm):
         self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
         self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.theme_id.choices = theme_select_choices()
+        self.group_id.choices = group_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
     
     @property
@@ -222,6 +243,26 @@ def catalog_publication_themes():
     return qa.union(qsa).alias()
 
 
+def catalog_publication_groups():
+    qa = (
+        select(CatalogPublicationsSources.catalog_publication_id, Group.id.label('group_id'))
+        .select_from(CatalogPublicationsSources)
+        .join(CatalogPublicationsSources.source)
+        .join(Source.academic)
+        .join(Academic.groups)
+    )
+
+    qsa = (
+        select(CatalogPublication.id, Group.id)
+        .select_from(CatalogPublication)
+        .join(CatalogPublication.publication)
+        .join(Publication.supplementary_authors)
+        .join(Academic.groups)
+    )
+
+    return qa.union(qsa).alias()
+
+
 def publication_search_query(search_form):
     cat_pubs = catalog_publication_search_query(search_form)
 
@@ -257,11 +298,19 @@ def catalog_publication_search_query(search_form):
         )
 
     if search_form.has_value('theme_id'):
-        cpt = catalog_publication_themes()
+        cpg = catalog_publication_themes()
 
         q = q.where(CatalogPublication.id.in_(
-            select(cpt.c.catalog_publication_id)
-            .where(cpt.c.theme_id.in_(ensure_list(search_form.theme_id.data))))
+            select(cpg.c.catalog_publication_id)
+            .where(cpg.c.theme_id.in_(ensure_list(search_form.theme_id.data))))
+        )
+
+    if search_form.has_value('group_id'):
+        cpg = catalog_publication_groups()
+
+        q = q.where(CatalogPublication.id.in_(
+            select(cpg.c.catalog_publication_id)
+            .where(cpg.c.group_id.in_(ensure_list(search_form.group_id.data))))
         )
 
     if  search_form.has_value('journal_id'):

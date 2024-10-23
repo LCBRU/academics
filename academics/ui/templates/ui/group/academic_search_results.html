@@ -1,0 +1,24 @@
+{% from "lbrc/pagination.html" import pagination_summary %}
+
+<p>
+    {{ pagination_summary(academics, 'academic') }}
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in academics.items %}
+        <tr>
+            <td>{{ a.full_name }}</td>
+            <td class="grid_stacked_left">
+                <a class="icon add" href="javascript:;" title="Add {{a.full_name}} to {{group.name}}" hx-post="{{ url_for('ui.group_add_acadmic', group_id=group.id, academic_id=a.id ) }}" role="button">Add</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

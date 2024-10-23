@@ -17,6 +17,7 @@
         {% endif %}
 
         <li><a href="{{url_for('ui.folders')}}" class="icon folder">Folders</a></li>
+        <li><a href="{{url_for('ui.groups')}}" class="icon folder">Groups</a></li>
 
         {% if current_user.is_admin %}
             <li><a href="{{url_for('ui.objectives')}}" class="icon check_list">Objectives</a></li>

@@ -18,7 +18,7 @@ from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Subtype
 from academics.model.security import User
-from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
+from academics.services.publication_searching import PublicationSearchForm, academic_select_choices, best_catalog_publications, folder_select_choices, group_select_choices, journal_select_choices, keyword_select_choices, publication_search_query
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from wtforms.validators import Length, DataRequired, Optional

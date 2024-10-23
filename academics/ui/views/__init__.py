@@ -3,6 +3,7 @@ __all__ = [
     "publications",
     "folders",
     "folder_dois",
+    "groups",
     "objectives",
     "reports",
     "sources",

@@ -1,0 +1,89 @@
+{% extends "ui/menu_page.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+{% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
+
+
+{% block menu_page_content %}
+<section class="container">
+    <header>
+        <h2>Groups</h2>
+
+        <form method="GET" action="{{ url_for('ui.groups') }}">
+            <fieldset>
+                {{ search_form.hidden_tag() }}
+                {{ render_form_fields(search_form) }}
+    
+                <div class="button_bar" hx-target="body">
+                    <a class="icon add" href="javascript:;" title="Add Group" hx-get="{{ url_for('ui.group_edit' ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Group</a>
+                </div>    
+            </fieldset>
+        </form>
+    </header>
+
+    {{ pagination_summary(groups, 'group') }}
+
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Owner</th>
+                <th>Academics</th>
+                <th>Shared With</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for g in groups.items %}
+            <tr>
+                <td>
+                    {% if g.owner == current_user %}
+                        <a class="icon edit" href="javascript:;" title="Edit Group" hx-get="{{ url_for('ui.group_edit', id=g.id ) }}" hx-target="body" hx-swap="beforeend"></a>
+                        <a class="icon delete" href="javascript:;" title="Delete Group" hx-post="{{ url_for('ui.group_delete', id=g.id ) }}" hx-confirm="Are you sure you want to delete group {{g.name}}"></a>
+                    {% endif %}
+                </td>
+                <td>{{g.name}}</td>
+                <td>{{g.owner.full_name}}</td>
+                <td>
+                    <div class="grid_stacked_left">
+                        {% for a in g.academics | sort(attribute='full_name')%}
+                            <div class="dropdown">
+                                <a class="icon user" href="javascript:;" role="button">{{ a.full_name }}</a>
+                                <ul>
+                                    <li><a href="javascript:;" hx-post="{{url_for('ui.group_delete_acadmic', group_id=g.id, academic_id=a.id)}}">Remove</a></li>
+                                </ul>
+                            </div>
+                        {% endfor %}
+                        <a class="icon user_add" href="javascript:;" title="Add Academic to Group" hx-get="{{ url_for('ui.group_acadmic_search', group_id=g.id ) }}" hx-target="body" hx-swap="beforeend" role="button"></a>
+                    </div>
+                </td>
+                <td>
+                    <div class="grid_stacked_left">
+                        {% for u in g.shared_users | sort(attribute='full_name')%}
+                            <div class="dropdown">
+                                <a class="icon user" href="javascript:;" role="button">{{ u.full_name }}</a>
+                                <ul>
+                                    <li><a href="javascript:;" hx-post="{{url_for('ui.group_remove_shared_user', id=g.id, user_id=u.id)}}">Remove</a></li>
+                                </ul>
+                            </div>
+                        {% endfor %}
+                        {% if users | reject('in', g.shared_users) | list | length > 0 %}
+                            <div class="dropdown">
+                                <a class="icon user_add" href="javascript:;" role="button"></a>
+                                <ul>
+                                    {% for u in users | reject('in', g.shared_users) | sort(attribute='full_name') %}
+                                        <li><a href="javascript:;" hx-post="{{url_for('ui.group_add_shared_user', id=g.id, user_id=u.id)}}">Share with '{{u.full_name}}'</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{{ render_pagination(groups, 'ui.groups', form=search_form) }}
+
+{% endblock %}

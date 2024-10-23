@@ -1,7 +1,7 @@
 from .. import blueprint
 from flask import abort, render_template, request, url_for
 from flask_login import current_user
-from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
+from lbrc_flask.forms import FlashingForm, SearchForm
 from sqlalchemy import and_, case, distinct, func, or_, select
 from sqlalchemy.orm import with_expression, Mapped, query_expression, relationship, foreign, joinedload, selectinload
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
@@ -51,8 +51,6 @@ def folders():
         search_form=search_form,
         folders=folders,
         users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
-        edit_folder_form=FolderEditForm(),
-        confirm_form=ConfirmForm(),
     )
 
 
@@ -62,11 +60,11 @@ def folders():
 def folder_edit(id=None):
     if id:
         folder = db.get_or_404(Folder, id)
-        title=f'Edit Academic'
+        title=f'Edit Folder'
     else:
         folder = Folder()
         folder.owner = current_user
-        title=f'Add Academic'
+        title=f'Add Folder'
 
     form = FolderEditForm(obj=folder)
 
