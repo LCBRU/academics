@@ -170,6 +170,7 @@ def group_acadmic_search_results(group_id, search_string=''):
         select(Academic)
         .where(Academic.id.not_in([a.id for a in g.academics]))
         .where((Academic.first_name + ' ' + Academic.last_name).like(f"%{search_string}%"))
+        .where(Academic.initialised == 1)
         .order_by(Academic.last_name, Academic.first_name)
     )
 
