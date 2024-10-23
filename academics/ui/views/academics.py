@@ -118,7 +118,7 @@ def academic_edit(id):
         academic.themes = [db.session.get(Theme, t) for t in form.themes.data]
         academic.has_left_brc = form.has_left_brc.data
         academic.left_brc_date = form.left_brc_date.data
-        academic.user_id = form.user_id.data
+        academic.user = db.session.execute(select(User).where(User.id == form.user_id.data)).scalar_one_or_none()
 
         db.session.add(academic)
         db.session.commit()
