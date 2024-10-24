@@ -4,7 +4,7 @@ from .. import blueprint
 from flask import render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from academics.model.academic import Academic
 from academics.model.security import User
 from academics.ui.views.decorators import assert_group_user
@@ -105,20 +105,6 @@ def group_remove_shared_user(id, user_id):
     return refresh_response()
 
 
-@blueprint.route("/group/<int:id>/add_shared_user/<int:user_id>", methods=['POST'])
-@assert_group_user()
-def group_add_shared_user(id, user_id):
-    u = db.get_or_404(User, user_id)
-    g = db.get_or_404(Group, id)
-
-    g.shared_users.add(u)
-
-    db.session.add(g)
-    db.session.commit()
-
-    return refresh_response()
-
-
 @blueprint.route("/group/<int:group_id>/academic/<int:academic_id>/delete", methods=['POST'])
 @assert_group_user()
 def group_delete_acadmic(group_id, academic_id):
@@ -186,3 +172,60 @@ def group_acadmic_search_results(group_id, search_string=''):
         group=g,
         academics=academics,
     )
+
+
+@blueprint.route("/group/<int:group_id>/shared_user/search")
+@assert_group_user()
+def group_shared_user_search(group_id):
+    g: Group = db.get_or_404(Group, group_id)
+
+    return render_template(
+        "lbrc/search.html",
+        title=f"Add Shared User to Group '{g.name}'",
+        results_url=url_for('ui.group_shared_user_search_results', group_id=g.id),
+    )
+
+
+@blueprint.route("/group/<int:group_id>/shared_user/search_results")
+@assert_group_user()
+def group_shared_user_search_results(group_id):
+    g: Group = db.get_or_404(Group, group_id)
+
+    search_string: str = get_value_from_all_arguments('search_string') or ''
+
+    q = (
+        select(User.id, func.concat(User.first_name, ' ', User.last_name).label('name'))
+        .where(User.id.not_in([u.id for u in g.shared_users]))
+        .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
+        .order_by(User.last_name, User.first_name)
+    )
+
+    results = db.paginate(
+        select=q,
+        page=1,
+        per_page=5,
+        error_out=False,
+    )
+
+    return render_template(
+        "lbrc/search_add_results.html",
+        add_title="Add shared user to group '{g.name}'",
+        url=url_for('ui.group_add_shared_user', group_id=g.id),
+        results=results,
+    )
+
+
+@blueprint.route("/group/<int:group_id>/add_shared_user", methods=['POST'])
+@assert_group_user()
+def group_add_shared_user(group_id):
+    g = db.get_or_404(Group, id)
+
+    id: int = get_value_from_all_arguments('int')
+    u: User = db.get_or_404(User, id)
+
+    g.shared_users.add(u)
+
+    db.session.add(g)
+    db.session.commit()
+
+    return refresh_response()
