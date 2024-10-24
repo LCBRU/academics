@@ -259,6 +259,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         return {s.catalog_identifier for s in self.sources if s.catalog_identifier and s.catalog == 'scopus'}
 
 
+class AcademicPicker(Academic):
+    @property
+    def name(self):
+        return self.full_name
+
+
 class Source(AuditMixin, CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("catalog", "catalog_identifier", name='ux__source__catalog__catalog_identifier'),

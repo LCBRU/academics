@@ -2,7 +2,6 @@ from sqlalchemy import Boolean, ForeignKey, Unicode, UniqueConstraint, func, sel
 from sqlalchemy.orm import backref
 from lbrc_flask.database import db
 from lbrc_flask.validators import is_invalid_doi
-
 from academics.model.publication import Publication
 from academics.model.security import User
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref, column_property

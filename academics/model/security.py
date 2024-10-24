@@ -10,3 +10,7 @@ class User(BaseUser):
     theme = db.relationship(Theme, lazy='selectin')
 
 
+class UserPicker(User):
+    @property
+    def name(self):
+        return self.full_name

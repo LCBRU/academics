@@ -60,7 +60,7 @@
 {% endmacro %}
 
 {% macro _render_supplementary_authors(publication) %}
-    {% for a in publication.supplementary_authors %}
+    {% for a in publication.supplementary_authors | sort(attribute='last_name,first_name') %}
         <div class="dropdown">
             <a href="javascript:;" role="button">{{ a.full_name }}</a>
             <ul>
@@ -68,5 +68,5 @@
             </ul>
         </div>
     {% endfor %}
-    <a class="icon add" href="javascript:;" hx-get="{{ url_for('ui.publication_add_supplementary_author', id=publication.id) }}" hx-target="body" hx-swap="beforeend" role="button"></a>
+    <a class="icon add" href="javascript:;" hx-get="{{ url_for('ui.publication_supplementary_author_search', publication_id=publication.id) }}" hx-target="body" hx-swap="beforeend" role="button"></a>
 {% endmacro %}

@@ -56,16 +56,7 @@
                             </ul>
                         </div>
                     {% endfor %}
-                    {% if users | reject('in', f.shared_users) | list | length > 0 %}
-                        <div class="dropdown">
-                            <a class="icon user_add" href="javascript:;" role="button"></a>
-                            <ul>
-                                {% for u in users | reject('in', f.shared_users) | sort(attribute='full_name') %}
-                                    <li><a href="javascript:;" hx-post="{{url_for('ui.folder_add_shared_user', id=f.id, user_id=u.id)}}">Share with '{{u.full_name}}'</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
+                    <a class="icon add" href="javascript:;" hx-get="{{ url_for('ui.folder_shared_user_search', folder_id=f.id) }}" hx-target="body" hx-swap="beforeend" role="button"></a>
                 </td>
             </tr>
         {% endfor %}

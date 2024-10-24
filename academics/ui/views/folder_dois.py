@@ -27,13 +27,6 @@ def publication_delete_folder(folder_id, doi):
     return render_publication_folders(doi)
 
 
-@blueprint.route("/folder/<int:folder_id>/doi/add/<path:doi>", methods=['POST'])
-def publication_add_folder(folder_id, doi):
-    add_doi_to_folder(folder_id, doi)
-
-    return render_publication_folders(doi)
-
-
 @blueprint.route("/folder/<int:id>/upload_dois", methods=['GET', 'POST'])
 @assert_folder_user()
 def folder_upload_dois(id):

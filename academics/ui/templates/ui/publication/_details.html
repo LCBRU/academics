@@ -99,7 +99,7 @@
 
     <div id="details_{{cp.publication_id}}" class="tabbed_display">
 
-        <div class="tabbed_display_tabs {{detail_selector}}" hx-target="#details_{{cp.publication_id}}" hx-swap="outerHTML">
+        <div class="tabbed_display_tabs {{detail_selector}}" hx-target="#details_{{cp.publication_id}}" hx-trigger="refreshDetails from:body" hx-swap="outerHTML"  hx-get="{{ url_for('ui.publication_details', id=cp.publication_id, detail_selector=details_selector) }}">
             {{ tabbed_display_tab(details_selector, 'funding', 'Funding Text', url_for('ui.publication_details', id=cp.publication_id, detail_selector='funding')) }}
             {{ tabbed_display_tab(details_selector, 'sponsors', 'Sponsors', url_for('ui.publication_details', id=cp.publication_id, detail_selector='sponsors')) }}
             {{ tabbed_display_tab(details_selector, 'affiliations', 'Affiliations', url_for('ui.publication_details', id=cp.publication_id, detail_selector='affiliations')) }}

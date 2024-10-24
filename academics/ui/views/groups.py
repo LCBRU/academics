@@ -5,8 +5,9 @@ from flask import render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from sqlalchemy import func, or_, select
-from academics.model.academic import Academic
-from academics.model.security import User
+from sqlalchemy.orm import Bundle
+from academics.model.academic import Academic, AcademicPicker
+from academics.model.security import User, UserPicker
 from academics.ui.views.decorators import assert_group_user
 from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
@@ -119,11 +120,13 @@ def group_delete_acadmic(group_id, academic_id):
     return refresh_response()
 
 
-@blueprint.route("/group/<int:group_id>/academic/<int:academic_id>/add", methods=['POST'])
+@blueprint.route("/group/<int:group_id>/academic/add", methods=['POST'])
 @assert_group_user()
-def group_add_acadmic(group_id, academic_id):
+def group_add_academic(group_id):
     g: Group = db.get_or_404(Group, group_id)
-    a: Academic = db.get_or_404(Academic, academic_id)
+
+    id: int = get_value_from_all_arguments('id')
+    a: Academic = db.get_or_404(Academic, id)
 
     g.academics.add(a)
 
@@ -139,21 +142,22 @@ def group_acadmic_search(group_id):
     g: Group = db.get_or_404(Group, group_id)
 
     return render_template(
-        "ui/group/academic_search.html",
-        group=g,
-        search_form=SearchForm(),
+        "lbrc/search.html",
+        title=f"Add Academic to Group '{g.name}'",
+        results_url=url_for('ui.group_acadmic_search_results', group_id=g.id),
     )
 
 
+@blueprint.route("/group/<int:group_id>/academic/search_results/<int:page>")
 @blueprint.route("/group/<int:group_id>/academic/search_results")
 @assert_group_user()
-def group_acadmic_search_results(group_id, search_string=''):
+def group_acadmic_search_results(group_id, page=1):
     g: Group = db.get_or_404(Group, group_id)
 
     search_string: str = get_value_from_all_arguments('search_string') or ''
 
     q = (
-        select(Academic)
+        select(AcademicPicker)
         .where(Academic.id.not_in([a.id for a in g.academics]))
         .where((Academic.first_name + ' ' + Academic.last_name).like(f"%{search_string}%"))
         .where(Academic.initialised == 1)
@@ -162,15 +166,18 @@ def group_acadmic_search_results(group_id, search_string=''):
 
     academics = db.paginate(
         select=q,
-        page=1,
+        page=page,
         per_page=5,
         error_out=False,
     )
 
     return render_template(
-        "ui/group/academic_search_results.html",
-        group=g,
-        academics=academics,
+        "lbrc/search_add_results.html",
+        add_title="Add academic to group '{g.name}'",
+        add_url=url_for('ui.group_add_academic', group_id=g.id),
+        results_url='ui.group_acadmic_search_results',
+        results_url_args={'group_id': g.id},
+        results=academics,
     )
 
 
@@ -186,15 +193,16 @@ def group_shared_user_search(group_id):
     )
 
 
+@blueprint.route("/group/<int:group_id>/shared_user/search_results/<int:page>")
 @blueprint.route("/group/<int:group_id>/shared_user/search_results")
 @assert_group_user()
-def group_shared_user_search_results(group_id):
+def group_shared_user_search_results(group_id, page=1):
     g: Group = db.get_or_404(Group, group_id)
 
     search_string: str = get_value_from_all_arguments('search_string') or ''
 
     q = (
-        select(User.id, func.concat(User.first_name, ' ', User.last_name).label('name'))
+        select(UserPicker)
         .where(User.id.not_in([u.id for u in g.shared_users]))
         .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
         .order_by(User.last_name, User.first_name)
@@ -202,7 +210,7 @@ def group_shared_user_search_results(group_id):
 
     results = db.paginate(
         select=q,
-        page=1,
+        page=page,
         per_page=5,
         error_out=False,
     )
@@ -210,7 +218,9 @@ def group_shared_user_search_results(group_id):
     return render_template(
         "lbrc/search_add_results.html",
         add_title="Add shared user to group '{g.name}'",
-        url=url_for('ui.group_add_shared_user', group_id=g.id),
+        add_url=url_for('ui.group_add_shared_user', group_id=g.id),
+        results_url='ui.group_shared_user_search_results',
+        results_url_args={'group_id': g.id},
         results=results,
     )
 
@@ -218,9 +228,9 @@ def group_shared_user_search_results(group_id):
 @blueprint.route("/group/<int:group_id>/add_shared_user", methods=['POST'])
 @assert_group_user()
 def group_add_shared_user(group_id):
-    g = db.get_or_404(Group, id)
+    g = db.get_or_404(Group, group_id)
 
-    id: int = get_value_from_all_arguments('int')
+    id: int = get_value_from_all_arguments('id')
     u: User = db.get_or_404(User, id)
 
     g.shared_users.add(u)

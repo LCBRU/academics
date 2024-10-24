@@ -7,7 +7,7 @@ from sqlalchemy.orm import with_expression, Mapped, query_expression, relationsh
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.model.publication import CatalogPublication, Publication
-from academics.model.security import User
+from academics.model.security import User, UserPicker
 from academics.model.theme import Theme
 from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes
 from academics.ui.views.decorators import assert_folder_user
@@ -17,6 +17,7 @@ from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from lbrc_flask.response import refresh_response
 from wtforms.validators import Length, DataRequired
+from lbrc_flask.requests import get_value_from_all_arguments
 
 
 class FolderEditForm(FlashingForm):
@@ -95,6 +96,50 @@ def folder_delete(id):
     return refresh_response()
 
 
+@blueprint.route("/folder/<int:folder_id>/shared_user/search")
+@assert_folder_user()
+def folder_shared_user_search(folder_id):
+    f: Folder = db.get_or_404(Folder, folder_id)
+
+    return render_template(
+        "lbrc/search.html",
+        title=f"Add Shared User to Folder '{f.name}'",
+        results_url=url_for('ui.folder_shared_user_search_results', folder_id=f.id),
+    )
+
+
+@blueprint.route("/folder/<int:folder_id>/shared_user/search_results/<int:page>")
+@blueprint.route("/folder/<int:folder_id>/shared_user/search_results")
+@assert_folder_user()
+def folder_shared_user_search_results(folder_id, page=1):
+    f: Folder = db.get_or_404(Folder, folder_id)
+
+    search_string: str = get_value_from_all_arguments('search_string') or ''
+
+    q = (
+        select(UserPicker)
+        .where(User.id.not_in([u.id for u in f.shared_users]))
+        .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
+        .order_by(User.last_name, User.first_name)
+    )
+
+    results = db.paginate(
+        select=q,
+        page=page,
+        per_page=5,
+        error_out=False,
+    )
+
+    return render_template(
+        "lbrc/search_add_results.html",
+        add_title="Add shared user to folder '{f.name}'",
+        add_url=url_for('ui.folder_add_shared_user', folder_id=f.id),
+        results_url='ui.folder_shared_user_search_results',
+        results_url_args={'folder_id': f.id},
+        results=results,
+    )
+
+
 @blueprint.route("/folder/<int:id>/remove_shared_user/<int:user_id>", methods=['POST'])
 @assert_folder_user()
 def folder_remove_shared_user(id, user_id):
@@ -109,11 +154,13 @@ def folder_remove_shared_user(id, user_id):
     return refresh_response()
 
 
-@blueprint.route("/folder/<int:id>/add_shared_user/<int:user_id>", methods=['POST'])
+@blueprint.route("/folder/<int:folder_id>/add_shared_user", methods=['POST'])
 @assert_folder_user()
-def folder_add_shared_user(id, user_id):
-    u = db.get_or_404(User, user_id)
-    f = db.get_or_404(Folder, id)
+def folder_add_shared_user(folder_id):
+    f = db.get_or_404(Folder, folder_id)
+
+    id: int = get_value_from_all_arguments('id')
+    u = db.get_or_404(User, id)
 
     f.shared_users.add(u)
 

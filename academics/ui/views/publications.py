@@ -13,7 +13,7 @@ from lbrc_flask.response import trigger_response, refresh_response
 from weasyprint import HTML
 from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
 from academics.catalogs.jobs import CatalogPublicationRefresh
-from academics.model.academic import Academic, CatalogPublicationsSources, Source
+from academics.model.academic import Academic, AcademicPicker, CatalogPublicationsSources, Source
 from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Subtype
@@ -24,6 +24,7 @@ from sqlalchemy.orm import selectinload
 from wtforms.validators import Length, DataRequired, Optional
 from lbrc_flask.async_jobs import AsyncJobs
 from werkzeug.utils import secure_filename
+from lbrc_flask.requests import get_value_from_all_arguments
 
 from academics.ui.views.folder_dois import add_doi_to_folder
 
@@ -418,29 +419,119 @@ def publication_delete_supplementary_author(id, academic_id):
     return trigger_response('refreshAuthors')
 
 
-@blueprint.route("/publication/<int:id>/supplementary_author/add", methods=['GET', 'POST'])
-def publication_add_supplementary_author(id):
-    publication = db.get_or_404(Publication, id)
-
-    form = SupplementaryAuthorAddForm(publication=publication)
-
-    if form.validate_on_submit():
-        academic = db.get_or_404(Academic, form.academic_id.data)
-        publication.supplementary_authors.append(academic)
-
-        db.session.add(publication)
-        db.session.commit()
-
-        return trigger_response('refreshAuthors')
+@blueprint.route("/publication/<int:publication_id>/supplementary_author/search")
+def publication_supplementary_author_search(publication_id):
+    p: Publication = db.get_or_404(Publication, publication_id)
 
     return render_template(
-        "lbrc/form_modal.html",
-        title='Add Supplementary Author',
-        form=form,
+        "lbrc/search.html",
+        title=f"Add Supplementary Author to Publication",
+        results_url=url_for('ui.publication_supplementary_author_search_results', publication_id=p.id),
         closing_events=['refreshAuthors'],
-        submit_label='Add',
-        url=url_for('ui.publication_add_supplementary_author', id=id),
     )
+
+
+@blueprint.route("/publication/<int:publication_id>/supplementary_author/search_results/<int:page>")
+@blueprint.route("/publication/<int:publication_id>/supplementary_author/search_results")
+def publication_supplementary_author_search_results(publication_id, page=1):
+    p: Publication = db.get_or_404(Publication, publication_id)
+
+    search_string: str = get_value_from_all_arguments('search_string') or ''
+
+    q = (
+        select(AcademicPicker)
+        .where(Academic.id.not_in([a.id for a in p.academics]))
+        .where(Academic.id.not_in([a.id for a in p.supplementary_authors]))
+        .where((Academic.first_name + ' ' + Academic.last_name).like(f"%{search_string}%"))
+        .where(Academic.initialised == 1)
+        .order_by(Academic.last_name, Academic.first_name)
+    )
+
+    academics = db.paginate(
+        select=q,
+        page=page,
+        per_page=5,
+        error_out=False,
+    )
+
+    return render_template(
+        "lbrc/search_add_results.html",
+        add_title="Add academic to publication",
+        add_url=url_for('ui.publication_add_supplementary_author', publication_id=p.id),
+        results_url='ui.publication_supplementary_author_search_results',
+        results_url_args={'publication_id': p.id},
+        results=academics,
+    )
+
+
+@blueprint.route("/publication/<int:publication_id>/supplementary_author/add", methods=['GET', 'POST'])
+def publication_add_supplementary_author(publication_id):
+    p: Publication = db.get_or_404(Publication, publication_id)
+
+    id: int = get_value_from_all_arguments('id')
+    a: Academic = db.get_or_404(Academic, id)
+
+    p.supplementary_authors.append(a)
+
+    db.session.add(p)
+    db.session.commit()
+
+    return trigger_response('refreshAuthors')
+
+
+@blueprint.route("/publication/<int:publication_id>/folder/search")
+def publication_folder_search(publication_id):
+    p: Publication = db.get_or_404(Publication, publication_id)
+
+    return render_template(
+        "lbrc/search.html",
+        title=f"Add Publication to Folder",
+        results_url=url_for('ui.publication_folder_search_results', publication_id=p.id),
+        closing_events=['refreshDetails'],
+    )
+
+
+@blueprint.route("/publication/<int:publication_id>/folder/search_results/<int:page>")
+@blueprint.route("/publication/<int:publication_id>/folder/search_results")
+def publication_folder_search_results(publication_id, page=1):
+    p: Publication = db.get_or_404(Publication, publication_id)
+
+    search_string: str = get_value_from_all_arguments('search_string') or ''
+
+    q = (
+        select(Folder)
+        .where(Folder.id.not_in([a.folder_id for a in p.folder_dois]))
+        .where(Folder.name.like(f"%{search_string}%"))
+        .order_by(Folder.name)
+    )
+
+    academics = db.paginate(
+        select=q,
+        page=page,
+        per_page=5,
+        error_out=False,
+    )
+
+    return render_template(
+        "lbrc/search_add_results.html",
+        add_title="Add publication to folder",
+        add_url=url_for('ui.publication_add_folder', publication_id=p.id),
+        results_url='ui.publication_folder_search_results',
+        results_url_args={'publication_id': p.id},
+        results=academics,
+    )
+
+
+@blueprint.route("/publication/<int:publication_id>/add_folder", methods=['POST'])
+def publication_add_folder(publication_id):
+    p: Publication = db.get_or_404(Publication, publication_id)
+
+    id: int = get_value_from_all_arguments('id')
+    f: Folder = db.get_or_404(Folder, id)
+
+    add_doi_to_folder(f.id, p.doi)
+
+    return trigger_response('refreshDetails')
 
 
 @blueprint.route("/catalog_publication/add", methods=['GET', 'POST'])
