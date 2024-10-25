@@ -586,6 +586,7 @@ class PublicationInitialise(AsyncJob):
         if publication.scopus_catalog_publication is None:
             AsyncJobs.schedule(PublicationGetMissingScopus(publication))
         AsyncJobs.schedule(PublicationGetScivalInstitutions(publication))
+        AsyncJobs.schedule(AutoFillFolders())
 
 
 class CatalogPublicationRefresh(AsyncJob):
@@ -616,8 +617,6 @@ class CatalogPublicationRefresh(AsyncJob):
 
         if pub_data:
             save_publications([pub_data])
-
-        AsyncJobs.schedule(AutoFillFolders())
 
         db.session.add(catalog_publication)
         db.session.commit()
