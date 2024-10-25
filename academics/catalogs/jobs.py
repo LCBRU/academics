@@ -6,7 +6,7 @@ from itertools import chain, groupby
 from lbrc_flask.async_jobs import AsyncJob, AsyncJobs
 from lbrc_flask.database import db
 from flask import current_app
-from sqlalchemy import delete, select
+from sqlalchemy import delete, extract, select
 from academics.services.publication_searching import best_catalog_publications
 from academics.services.sources import create_potential_sources
 from academics.catalogs.data_classes import CatalogReference
@@ -902,8 +902,10 @@ class AutoFillFolders(AsyncJob):
 
         db.session.commit()
 
-    def _add_publications_to_folder(self, folder):
+    def _add_publications_to_folder(self, folder: Folder):
         bcp = best_catalog_publications()
+        autofill_start = date(folder.autofill_year, 4, 1)
+        autofill_end = date(folder.autofill_year + 1, 3, 31)
 
         for p in db.session.execute(
             select(Publication)
@@ -914,6 +916,8 @@ class AutoFillFolders(AsyncJob):
                 select(FolderDoi.doi)
                 .where(FolderDoi.folder_id == folder.id)
             ))
+            .where(CatalogPublication.publication_period_start <= autofill_end)
+            .where(CatalogPublication.publication_period_end >= autofill_start)
         ).scalars():
             db.session.add(FolderDoi(
                 folder_id=folder.id,
