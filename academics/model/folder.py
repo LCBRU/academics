@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, ForeignKey, Unicode, UniqueConstraint, func, select
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Unicode, UniqueConstraint, func, select
 from sqlalchemy.orm import backref
 from lbrc_flask.database import db
 from lbrc_flask.validators import is_invalid_doi
@@ -23,6 +23,8 @@ class Folder(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000))
+    description: Mapped[str] = mapped_column(String(1000), nullable=True)
+    autofill_year: Mapped[int] = mapped_column(Integer, nullable=True)
 
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete")) 

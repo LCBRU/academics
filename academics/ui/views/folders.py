@@ -12,17 +12,25 @@ from academics.model.theme import Theme
 from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes
 from academics.ui.views.decorators import assert_folder_user
 from academics.ui.views.folder_dois import remove_doi_from_folder
-from wtforms import HiddenField, StringField
+from wtforms import HiddenField, SelectField, StringField, TextAreaField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from lbrc_flask.response import refresh_response
-from wtforms.validators import Length, DataRequired
+from wtforms.validators import Length, DataRequired, Optional
 from lbrc_flask.requests import get_value_from_all_arguments
+from datetime import date
 
 
 class FolderEditForm(FlashingForm):
     id = HiddenField('id')
     name = StringField('Name', validators=[Length(max=1000), DataRequired()])
+    description = TextAreaField('Description', validators=[Length(max=1000)])
+    autofill_year = SelectField('Autofill Year', coerce=int, default=None, validators=[Optional()])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.autofill_year.choices = [(0, '')] + [(y, f'April {y} to March {y+1}') for y in range(2024, date.today().year + 2)]
 
 
 @blueprint.route("/folders/")
@@ -71,6 +79,12 @@ def folder_edit(id=None):
 
     if form.validate_on_submit():
         folder.name = form.name.data
+        folder.description = form.description.data
+
+        if form.autofill_year.data:
+            folder.autofill_year = form.autofill_year.data
+        else:
+            folder.autofill_year = None
 
         db.session.add(folder)
         db.session.commit()

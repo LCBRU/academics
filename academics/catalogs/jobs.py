@@ -7,6 +7,7 @@ from lbrc_flask.async_jobs import AsyncJob, AsyncJobs
 from lbrc_flask.database import db
 from flask import current_app
 from sqlalchemy import delete, select
+from academics.services.publication_searching import best_catalog_publications
 from academics.services.sources import create_potential_sources
 from academics.catalogs.data_classes import CatalogReference
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
@@ -14,7 +15,7 @@ from academics.catalogs.scival import get_scival_institution, get_scival_publica
 from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, Source, CatalogPublicationsSources, catalog_publications_sources_affiliations, Affiliation, Source
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCIVAL, CATALOG_SCOPUS
-from academics.model.folder import FolderDoi
+from academics.model.folder import Folder, FolderDoi
 from academics.model.institutions import Institution
 from academics.model.publication import CatalogPublication, NihrAcknowledgement, Journal, Keyword, Publication, Sponsor, Subtype
 from lbrc_flask.validators import parse_date
@@ -616,6 +617,8 @@ class CatalogPublicationRefresh(AsyncJob):
         if pub_data:
             save_publications([pub_data])
 
+        AsyncJobs.schedule(AutoFillFolders())
+
         db.session.add(catalog_publication)
         db.session.commit()
 
@@ -875,3 +878,44 @@ class PublicationRemoveUnused(AsyncJob):
         )
 
         db.session.commit()
+
+
+class AutoFillFolders(AsyncJob):
+    __mapper_args__ = {
+        "polymorphic_identity": "AutoFillFolders",
+    }
+
+    def __init__(self):
+        super().__init__(
+            scheduled=datetime.now(timezone.utc),
+            retry=True,
+            retry_timedelta_period='days',
+            retry_timedelta_size='1',
+        )
+
+    def _run_actual(self):
+        for f in db.session.execute(
+            select(Folder)
+            .where(Folder.autofill_year != None)
+        ).scalars():
+            self._add_publications_to_folder(f)
+
+        db.session.commit()
+
+    def _add_publications_to_folder(self, folder):
+        bcp = best_catalog_publications()
+
+        for p in db.session.execute(
+            select(Publication)
+            .select_from(CatalogPublication)
+            .join(CatalogPublication.publication)
+            .where(CatalogPublication.id.in_(bcp))
+            .where(CatalogPublication.doi.not_in(
+                select(FolderDoi.doi)
+                .where(FolderDoi.folder_id == folder.id)
+            ))
+        ).scalars():
+            db.session.add(FolderDoi(
+                folder_id=folder.id,
+                doi=p.doi,
+            ))
