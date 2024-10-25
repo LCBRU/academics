@@ -906,8 +906,8 @@ class AutoFillFolders(AsyncJob):
         autofill_start = date(folder.autofill_year, 4, 1)
         autofill_end = date(folder.autofill_year + 1, 3, 31)
 
-        for p in db.session.execute(
-            select(Publication)
+        for cp in db.session.execute(
+            select(CatalogPublication)
             .select_from(CatalogPublication)
             .join(CatalogPublication.publication)
             .where(CatalogPublication.id.in_(bcp))
@@ -917,8 +917,9 @@ class AutoFillFolders(AsyncJob):
             ))
             .where(CatalogPublication.publication_period_start <= autofill_end)
             .where(CatalogPublication.publication_period_end >= autofill_start)
+            .where(CatalogPublication.doi != None)
         ).scalars():
             db.session.add(FolderDoi(
                 folder_id=folder.id,
-                doi=p.doi,
+                doi=cp.doi,
             ))
