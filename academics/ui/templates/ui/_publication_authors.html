@@ -9,7 +9,7 @@
         <div class="tabbed_display_tabs {{author_selector}}" hx-target="#authors_{{cp.publication_id}}" hx-swap="outerHTML" hx-trigger="refreshAuthors from:body" hx-get="{{ url_for('ui.publication_authors', id=cp.publication_id, author_selector=author_selector) }}">
             {{ tabbed_display_tab(author_selector, 'brc', 'BRC Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='brc')) }}
             {{ tabbed_display_tab(author_selector, 'all', 'All Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='all')) }}
-            {{ tabbed_display_tab(author_selector, 'supplementary', 'Suplementary Authors', url_for('ui.publication_authors', id=cp.publication_id, author_selector='supplementary')) }}
+            {{ tabbed_display_tab(author_selector, 'supplementary', 'Suplementary Contributor', url_for('ui.publication_authors', id=cp.publication_id, author_selector='supplementary')) }}
             <span>{{cp.author_count}} author(s)</span>
         </div>
         <div class="tabbed_display_content">

@@ -11,11 +11,12 @@ from academics.model.security import User, UserPicker
 from academics.model.theme import Theme
 from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes
 from academics.ui.views.decorators import assert_folder_user
-from academics.ui.views.folder_dois import remove_doi_from_folder
-from wtforms import HiddenField, SelectField, StringField, TextAreaField
+from academics.ui.views.folder_dois import add_doi_to_folder, remove_doi_from_folder
+from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from lbrc_flask.response import refresh_response
+from lbrc_flask.validators import is_invalid_doi
 from wtforms.validators import Length, DataRequired, Optional
 from lbrc_flask.requests import get_value_from_all_arguments
 from datetime import date
@@ -405,5 +406,88 @@ def folder_doi_set_user_relevance(folder_id, relevant, doi):
     
     db.session.add(fdur)
     db.session.commit()
+
+    return refresh_response()
+
+
+@blueprint.route("/folder/<int:folder_id>/publication/add_search")
+@assert_folder_user()
+def folder_add_publication_add_search(folder_id):
+    f: Folder = db.get_or_404(Folder, folder_id)
+
+    return render_template(
+        "lbrc/search.html",
+        title=f"Add Publication to Folder '{f.name}'",
+        search_placeholder='Search Publication DOI ...',
+        results_url=url_for('ui.folder_add_publication_add_search_results', folder_id=f.id),
+    )
+
+
+class FolderNewPublicationForm(FlashingForm):
+    folder_id = HiddenField('folder_id')
+    doi = HiddenField('doi')
+    title = TextAreaField('Title', validators=[Length(max=1000)])
+    publication_cover_date = DateField('Publication Cover Date', validators=[Optional()])
+
+
+class PublicationPicker(Publication):
+    @property
+    def name(self):
+        return self.doi
+
+
+@blueprint.route("/folder/<int:folder_id>/publication/add_search_results/<int:page>")
+@blueprint.route("/folder/<int:folder_id>/publication/add_search_results")
+@assert_folder_user()
+def folder_add_publication_add_search_results(folder_id, page=1):
+    f: Folder = db.get_or_404(Folder, folder_id)
+
+    search_string: str = get_value_from_all_arguments('search_string') or ''
+
+    q = (
+        select(PublicationPicker)
+        .where(Publication.doi.not_in([fd.doi for fd in f.dois]))
+        .where(Publication.doi.like(f"%{search_string}%"))
+        .order_by(Publication.doi)
+    )
+
+    results = db.paginate(
+        select=q,
+        page=page,
+        per_page=5,
+        error_out=False,
+    )
+
+    if results.total == 0:
+        if is_invalid_doi(search_string):
+            return "<h6>Invalid DOI</h6>"
+        else:
+            return render_template(
+                "lbrc/search_form_result.html",
+                url=url_for('ui.catalog_publication_edit'),
+                form=FolderNewPublicationForm(data={
+                    'folder_id': folder_id,
+                    'doi': search_string,
+                }),
+            )
+
+    return render_template(
+        "lbrc/search_add_results.html",
+        add_title="Add publication to folder '{f.name}'",
+        add_url=url_for('ui.folder_add_publication', folder_id=f.id),
+        results_url='ui.folder_add_publication_add_search_results',
+        results_url_args={'folder_id': f.id},
+        results=results,
+    )
+
+
+@blueprint.route("/folder/<int:folder_id>/publication/add", methods=['POST'])
+def folder_add_publication(folder_id):
+    f: Folder = db.get_or_404(Folder, folder_id)
+
+    id: int = get_value_from_all_arguments('id')
+    p: Publication = db.get_or_404(Publication, id)
+
+    add_doi_to_folder(f.id, p.doi)
 
     return refresh_response()

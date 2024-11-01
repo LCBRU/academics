@@ -3,6 +3,8 @@
 {% from "lbrc/pagination.html" import render_pagination, pagination_summary %}
 
 {% from "ui/publication/_details.html" import render_publication_title %}
+{% from "ui/_publication_authors.html" import render_publication_authors with context %}
+{% from "ui/assets.html" import render_assets %}
 
 {% block menu_page_content %}
 
@@ -28,7 +30,7 @@
                 {{ render_form_fields(search_form) }}
 
                 <div class="button_bar" hx-target="body">
-                    <a class="icon add" href="javascript:;" title="Add Supplementary Publication" hx-get="{{ url_for('ui.catalog_publication_edit', folder_id=folder.id ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Publication</a>
+                    <a class="icon add" href="javascript:;" title="Add Publication" hx-get="{{ url_for('ui.folder_add_publication_add_search', folder_id=folder.id ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Publication</a>
                 </div>
             </fieldset>
         </form>
@@ -36,15 +38,21 @@
 
     {{ pagination_summary(publications, 'publications') }}
 
+    {{ render_assets() }}
+
     <ul class="panel_list">
         {% for p in publications.items %}
             {% set cp = p.best_catalog_publication %}
             <li>
                 <header class="flex_two_left_grow">
-                    <nav class="linked_list">
+                    <nav class="link_list">
                         {% if cp.catalog == 'manual' %}
                             <a class="icon edit" href="javascript:;" hx-get="{{url_for('ui.catalog_publication_edit', id=cp.id)}}" hx-target="body" hx-swap="beforeend" title="Edit manual publication"></a>
                         {% endif %}
+                        <a href="http://doi.org/{{ cp.doi }}" target="_blank" title="View publication" role="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="2.0" width="1rem" height="1rem"><use href="#doi_logo" /></svg>
+                            {{cp.doi}}
+                        </a>
                     </nav>
 
                     {% if p.current_user_relevance() is none %}
@@ -61,6 +69,7 @@
                     {% endif %}
 
                     <nav class="link_list">
+                        <span>Is the publication below relevant to {{folder.name}}</span>
                         <div class="dropdown">
                             <a href="javascript:;" class="{{ ur_cls }}" role="button">{{ ur_name }}</a>
                             <ul>
@@ -72,14 +81,8 @@
                 </header>
                 <h3>{{cp.title}}</h3>
                 <h4>{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
-                {% if cp.doi %}
-                    <h4>
-                        <a href="http://doi.org/{{ cp.doi }}" target="_blank" title="View publication">
-                            http://doi.org/{{ cp.doi }}
-                        </a>
-                    </h4>
-                {% endif %}
-                <h5>{{cp.author_list}}</h5>
+
+                {{ render_publication_authors(p, 'brc') }}
 
                 {% if p.folder_doi.user_statuses | rejectattr('relevant', 'false') | list | length > 0 %}
                     <h4>Relevant</h4>
