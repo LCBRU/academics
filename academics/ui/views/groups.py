@@ -204,6 +204,7 @@ def group_shared_user_search_results(group_id, page=1):
     q = (
         select(UserPicker)
         .where(User.id.not_in([u.id for u in g.shared_users]))
+        .where(User.active == True)
         .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
         .order_by(User.last_name, User.first_name)
     )

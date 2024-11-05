@@ -134,6 +134,7 @@ def folder_shared_user_search_results(folder_id, page=1):
     q = (
         select(UserPicker)
         .where(User.id.not_in([u.id for u in f.shared_users]))
+        .where(User.active == True)
         .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
         .order_by(User.last_name, User.first_name)
     )
@@ -316,6 +317,7 @@ def folder_academics(folder_id):
             (FolderDoiUserRelevance.relevant == None, CatalogPublication.publication_id),
             else_=None
         )))))
+        .options(selectinload(Academic.user))
     )
 
     academics = db.paginate(

@@ -23,6 +23,7 @@
             <tr>
                 <th></th>
                 <th>Name</th>
+                <th>User</th>
                 <th>Publications</th>
                 <th>Relevant</th>
                 <th>Not Relevant</th>
@@ -36,6 +37,15 @@
                         <a class="icon publication" title="Show Publications" href="{{ url_for('ui.folder_publications', folder_id=folder.id, academic_id=a.id ) }}"></a>
                     </td>
                     <td>{{ a.full_name }}</td>
+                    <td>
+                        {% if a.user %}
+                            {{ a.user.full_name }}
+                        {% else %}
+                            {% if current_user.has_role('editor') %}
+                                <a title="Assign user to {{ a.full_name }}" hx-get="{{ url_for('ui.academic_user_search', academic_id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon user_add"></a>
+                            {% endif %}
+                        {% endif %}
+                    </td>
                     <td>{{ a.folder_publication_count }}</td>
                     <td>{{ a.folder_relevant_count }}</td>
                     <td>{{ a.folder_not_relevant_count }}</td>

@@ -14,8 +14,9 @@ from wtforms.validators import Length, DataRequired, Optional
 from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
+from lbrc_flask.requests import get_value_from_all_arguments
 
-from academics.model.security import User
+from academics.model.security import User, UserPicker
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
 from academics.services.sources import create_potential_sources, get_sources_for_catalog_identifiers
@@ -58,7 +59,7 @@ class AcademicEditForm(FlashingForm):
     google_scholar_id = StringField("Google Scholar ID", validators=[Length(max=255)])
     orcid = StringField("ORCID", validators=[Length(max=255)])
     themes = SelectMultipleField('Theme', coerce=int)
-    user_id = SelectField('User', coerce=int)
+    user_id = SelectField('User', coerce=int, render_kw={'class':' select2'})
     has_left_brc = BooleanField('Has Left BRC', default=False)
     left_brc_date = DateField('Date left BRC', validators=[Optional()])
 
@@ -66,7 +67,12 @@ class AcademicEditForm(FlashingForm):
         super().__init__(**kwargs)
 
         self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
-        users = db.session.execute(select(User).where(User.id != system_user_id()).order_by(User.last_name, User.first_name)).scalars()
+        users = db.session.execute(
+            select(User)
+            .where(User.id != system_user_id())
+            .order_by(User.last_name, User.first_name)
+            .where(User.active == True)
+            ).scalars()
         self.user_id.choices = [(0, '')] + [(u.id, u.full_name) for u in users]
 
 
@@ -106,7 +112,7 @@ def academic_edit(id):
         'has_left_brc': academic.has_left_brc,
         'left_brc_date': academic.left_brc_date,
         'themes': [t.id for t in academic.themes],
-        "user_id": academic.user_id,
+        "user_id": str(academic.user_id),
     })
 
     if form.validate_on_submit():
@@ -118,7 +124,10 @@ def academic_edit(id):
         academic.themes = [db.session.get(Theme, t) for t in form.themes.data]
         academic.has_left_brc = form.has_left_brc.data
         academic.left_brc_date = form.left_brc_date.data
-        academic.user = db.session.execute(select(User).where(User.id == form.user_id.data)).scalar_one_or_none()
+        academic.user = db.session.execute(
+            select(User)
+            .where(User.id == form.user_id.data)
+            ).scalar_one_or_none()
 
         db.session.add(academic)
         db.session.commit()
@@ -272,3 +281,68 @@ def update_academic(id):
 @blueprint.route("/is_updating")
 def is_updating():
     return render_template("ui/updating.html", count=AsyncJobs.due_count())
+
+
+@blueprint.route("/academic/<int:academic_id>/user/search")
+@roles_accepted('editor')
+def academic_user_search(academic_id):
+    a: Academic = db.get_or_404(Academic, academic_id)
+
+    return render_template(
+        "lbrc/search.html",
+        title=f"Assign user to '{a.full_name}'",
+        results_url=url_for('ui.academic_user_search_results', academic_id=a.id),
+    )
+
+
+@blueprint.route("/academic/<int:academic_id>/user/search_results/<int:page>")
+@blueprint.route("/academic/<int:academic_id>/user/search_results")
+@roles_accepted('editor')
+def academic_user_search_results(academic_id, page=1):
+    a: Academic = db.get_or_404(Academic, academic_id)
+
+    search_string: str = get_value_from_all_arguments('search_string') or ''
+
+    q = (
+        select(UserPicker)
+        .where(User.id.not_in(
+            select(Academic.user_id)
+            .where(Academic.initialised == True)
+            .where(Academic.user_id != None)
+            ))
+        .where(User.active == True)
+        .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
+        .order_by(User.last_name, User.first_name, User.id)
+    )
+
+    results = db.paginate(
+        select=q,
+        page=page,
+        per_page=5,
+        error_out=False,
+    )
+
+    return render_template(
+        "lbrc/search_add_results.html",
+        add_title="Assign user to '{a.full_name}'",
+        add_url=url_for('ui.academic_assign_user', academic_id=a.id),
+        results_url='ui.academic_user_search_results',
+        results_url_args={'academic_id': a.id},
+        results=results,
+    )
+
+
+@blueprint.route("/academic/<int:academic_id>/assign_user", methods=['POST'])
+@roles_accepted('editor')
+def academic_assign_user(academic_id):
+    a = db.get_or_404(Academic, academic_id)
+
+    id: int = get_value_from_all_arguments('id')
+    u = db.get_or_404(User, id)
+
+    a.user_id = u.id
+
+    db.session.add(a)
+    db.session.commit()
+
+    return refresh_response()
