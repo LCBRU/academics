@@ -23,7 +23,7 @@
             <li><a href="{{url_for('ui.objectives')}}" class="icon check_list">Objectives</a></li>
         {% endif %}
 
-        {% if current_user.is_admin %}
+        {% if current_user.has_role('editor') %}
             <li><a href="{{url_for('ui.journals')}}" class="icon book">Journals</a></li>
         {% endif %}
 
@@ -35,9 +35,9 @@
           </menu>
         </li>
       </menu>
-      {% if current_user.is_admin %}
-        <menu>
-            <li>
+      <menu>
+        {% if current_user.is_admin %}
+          <li>
                 <a>Admin</a>
                 <menu>
                     <li><a href="{{url_for('admin.index')}}">Maintenance</a></li>
@@ -47,14 +47,14 @@
                     <li><a href="{{url_for('ui.trigger_refresh')}}" class="icon fish">Refresh</a></li>
                 </menu>
             </li>
-            <li>
-                <a>{{ current_user.full_name }}</a>
-                <menu>
-                    <li><a href="{{ url_for_security('logout') }}">Log Out</a></li>
-                </menu>
-            </li>
-        </menu>
-       {% endif %}
+        {% endif %}
+        <li>
+            <a>{{ current_user.full_name }}</a>
+            <menu>
+                <li><a href="{{ url_for_security('logout') }}">Log Out</a></li>
+            </menu>
+        </li>
+      </menu>
     </div>
   </nav>
 
