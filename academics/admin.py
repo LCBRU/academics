@@ -17,7 +17,7 @@ class QuerySelectMultipleFieldSet(fields.QuerySelectMultipleField):
 
 class UserView(AdminCustomView):
     column_list = ["username", "first_name", "last_name", "active", "roles"]
-    form_columns = ["username", "roles", "theme"]
+    form_columns = ["username", "email", "roles", "theme", "active"]
 
     # form_args and form_overrides required to allow roles to be sets.
     form_args = {

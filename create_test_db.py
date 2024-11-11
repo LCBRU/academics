@@ -38,7 +38,9 @@ user = db.session.get(User, 2)
 
 other_users = [User(
     email=fake.email(),
-    username=''.join(fake.random_letters())
+    username=''.join(fake.random_letters()),
+    first_name=fake.first_name(),
+    last_name=fake.last_name(),
 ) for _ in range(randint(10, 20))]
 db.session.add_all(other_users)
 db.session.commit()

@@ -1,4 +1,3 @@
-import logging
 from sqlalchemy import select
 from academics.catalogs.data_classes import CatalogReference
 from lbrc_flask.database import db

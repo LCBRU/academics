@@ -1,13 +1,12 @@
-from typing import List
 from academics.model.group import Group
+from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 from flask import render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
-from sqlalchemy import func, or_, select
-from sqlalchemy.orm import Bundle
+from sqlalchemy import or_, select
 from academics.model.academic import Academic, AcademicPicker
-from academics.model.security import User, UserPicker
+from academics.model.security import User
 from academics.ui.views.decorators import assert_group_user
 from wtforms import HiddenField, StringField
 from lbrc_flask.database import db
@@ -199,15 +198,9 @@ def group_shared_user_search(group_id):
 def group_shared_user_search_results(group_id, page=1):
     g: Group = db.get_or_404(Group, group_id)
 
-    search_string: str = get_value_from_all_arguments('search_string') or ''
+    q = user_search_query(get_value_from_all_arguments('search_string') or '',)
 
-    q = (
-        select(UserPicker)
-        .where(User.id.not_in([u.id for u in g.shared_users]))
-        .where(User.active == True)
-        .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
-        .order_by(User.last_name, User.first_name)
-    )
+    q = q.where(User.id.not_in([u.id for u in g.shared_users]))
 
     results = db.paginate(
         select=q,
@@ -216,13 +209,12 @@ def group_shared_user_search_results(group_id, page=1):
         error_out=False,
     )
 
-    return render_template(
-        "lbrc/search_add_results.html",
-        add_title="Add shared user to group '{g.name}'",
+    return render_user_search_results(
+        results=results,
+        title="Add shared user to group '{g.name}'",
         add_url=url_for('ui.group_add_shared_user', group_id=g.id),
         results_url='ui.group_shared_user_search_results',
         results_url_args={'group_id': g.id},
-        results=results,
     )
 
 

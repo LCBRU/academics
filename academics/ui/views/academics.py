@@ -16,10 +16,11 @@ from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 from lbrc_flask.requests import get_value_from_all_arguments
 
-from academics.model.security import User, UserPicker
+from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
 from academics.services.sources import create_potential_sources, get_sources_for_catalog_identifiers
+from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 
 
@@ -67,12 +68,7 @@ class AcademicEditForm(FlashingForm):
         super().__init__(**kwargs)
 
         self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
-        users = db.session.execute(
-            select(User)
-            .where(User.id != system_user_id())
-            .order_by(User.last_name, User.first_name)
-            .where(User.active == True)
-            ).scalars()
+        users = db.session.execute(user_search_query(search_string='')).scalars()
         self.user_id.choices = [(0, '')] + [(u.id, u.full_name) for u in users]
 
 
@@ -301,19 +297,13 @@ def academic_user_search(academic_id):
 def academic_user_search_results(academic_id, page=1):
     a: Academic = db.get_or_404(Academic, academic_id)
 
-    search_string: str = get_value_from_all_arguments('search_string') or ''
+    q = user_search_query(get_value_from_all_arguments('search_string') or '',)
 
-    q = (
-        select(UserPicker)
-        .where(User.id.not_in(
-            select(Academic.user_id)
-            .where(Academic.initialised == True)
-            .where(Academic.user_id != None)
-            ))
-        .where(User.active == True)
-        .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
-        .order_by(User.last_name, User.first_name, User.id)
-    )
+    q = q.where(User.id.not_in(
+        select(Academic.user_id)
+        .where(Academic.initialised == True)
+        .where(Academic.user_id != None)
+        ))
 
     results = db.paginate(
         select=q,
@@ -322,13 +312,12 @@ def academic_user_search_results(academic_id, page=1):
         error_out=False,
     )
 
-    return render_template(
-        "lbrc/search_add_results.html",
-        add_title="Assign user to '{a.full_name}'",
+    return render_user_search_results(
+        results=results,
+        title="Assign user to '{a.full_name}'",
         add_url=url_for('ui.academic_assign_user', academic_id=a.id),
         results_url='ui.academic_user_search_results',
         results_url_args={'academic_id': a.id},
-        results=results,
     )
 
 

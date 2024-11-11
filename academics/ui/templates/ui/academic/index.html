@@ -29,24 +29,25 @@
     <ul class="panel_list">
         {% for a in academics.items %}
             <li>
-                <header class="flex_three_middle_grow">
-                    <nav class="link_list">
-                        <a class="academic_orcid {% if not a.orcid %}disabled{% endif %}" href="{{a.orcid_link}}" target="_blank">ORCID</a>
-                        <a class="academic_google_scholar {% if not a.google_scholar_id %}disabled{% endif %}" href="{{a.google_scholar_link}}" target="_blank">Google Scholar</a>
-                        <a class="academic_pubmed {% if not a.orcid %}disabled{% endif %}" href="{{a.pubmed_link}}" target="_blank">Pubmed</a>
-                        {% if a.has_left_brc or a.left_brc_date %}
-                            <span class="pill error">Left BRC {{a.left_brc_date | date_format}}</span>
-                        {% endif %}
-                    </nav>
-                    <div class="grid_stacked_center">
-                        <h3>{{a.full_name}}</h3>
+                <header class="flex_two_left_grow">
+                    <div class="grid_stacked_left">
+                        <h3>
+                            <span>{{a.full_name}} </span>
+                            {% if a.user %}
+                                <span>({{a.user.email}})</span>
+                            {% else %}
+                                {% if current_user.has_role('editor') %}
+                                    <a title="Assign user to {{ a.full_name }}" hx-get="{{ url_for('ui.academic_user_search', academic_id=a.id) }}" hx-target="body" hx-swap="beforeend" href="javascript:;" class="icon user_add"></a>
+                                {% endif %}
+                            {% endif %}
+                        </h3>
                         <h4>{{a.theme_summary}}</h4>
                         <a href="{{ url_for('ui.publications', academic_id=a.id ) }}">
                             <i class="far fa-newspaper"></i>
                             {{a.publication_count}} Combined Publications
                         </a>
                     </div>
-                    <div class="grid_stack_center">
+                    <div class="grid_stacked_right">
                         <nav class="link_list">
                             {% if current_user.has_role('editor') %}
                                 {% set cls = 'user_cog' %}
@@ -60,6 +61,14 @@
                             {% endif %}
                             {% if current_user.is_admin %}
                                 <a title="Update academic {{ a.full_name }}" hx-post="{{ url_for('ui.update_academic', id=a.id) }}" hx-confirm="Are you sure you wish to update '{{ a.full_name }}'?" href="javascript:;" class="icon redo"></a>
+                            {% endif %}
+                        </nav>
+                        <nav class="link_list">
+                            <a class="academic_orcid {% if not a.orcid %}disabled{% endif %}" href="{{a.orcid_link}}" target="_blank">ORCID</a>
+                            <a class="academic_google_scholar {% if not a.google_scholar_id %}disabled{% endif %}" href="{{a.google_scholar_link}}" target="_blank">Google Scholar</a>
+                            <a class="academic_pubmed {% if not a.orcid %}disabled{% endif %}" href="{{a.pubmed_link}}" target="_blank">Pubmed</a>
+                            {% if a.has_left_brc or a.left_brc_date %}
+                                <span class="pill error">Left BRC {{a.left_brc_date | date_format}}</span>
                             {% endif %}
                         </nav>
                     </div>

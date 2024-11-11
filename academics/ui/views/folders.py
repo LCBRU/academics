@@ -1,3 +1,4 @@
+from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 from flask import abort, render_template, request, url_for
 from flask_login import current_user
@@ -7,7 +8,7 @@ from sqlalchemy.orm import with_expression, Mapped, query_expression, relationsh
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.model.publication import CatalogPublication, Publication
-from academics.model.security import User, UserPicker
+from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes
 from academics.ui.views.decorators import assert_folder_user
@@ -129,15 +130,9 @@ def folder_shared_user_search(folder_id):
 def folder_shared_user_search_results(folder_id, page=1):
     f: Folder = db.get_or_404(Folder, folder_id)
 
-    search_string: str = get_value_from_all_arguments('search_string') or ''
+    q = user_search_query(get_value_from_all_arguments('search_string') or '',)
 
-    q = (
-        select(UserPicker)
-        .where(User.id.not_in([u.id for u in f.shared_users]))
-        .where(User.active == True)
-        .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
-        .order_by(User.last_name, User.first_name)
-    )
+    q = q.where(User.id.not_in([u.id for u in f.shared_users]))
 
     results = db.paginate(
         select=q,
@@ -146,13 +141,12 @@ def folder_shared_user_search_results(folder_id, page=1):
         error_out=False,
     )
 
-    return render_template(
-        "lbrc/search_add_results.html",
-        add_title="Add shared user to folder '{f.name}'",
+    return render_user_search_results(
+        results=results,
+        title="Add shared user to folder '{f.name}'",
         add_url=url_for('ui.folder_add_shared_user', folder_id=f.id),
         results_url='ui.folder_shared_user_search_results',
         results_url_args={'folder_id': f.id},
-        results=results,
     )
 
 
