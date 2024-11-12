@@ -15,12 +15,12 @@ from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 from lbrc_flask.requests import get_value_from_all_arguments
-
+from functools import partial
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
 from academics.services.sources import create_potential_sources, get_sources_for_catalog_identifiers
-from academics.ui.views.users import render_user_search_results, user_search_query
+from academics.ui.views.users import render_user_search_add, render_user_search_results, user_search_query
 from .. import blueprint
 
 
@@ -312,6 +312,11 @@ def academic_user_search_results(academic_id, page=1):
         error_out=False,
     )
 
+    if results.total == 0:
+        return render_user_search_add(
+            add_url=url_for('ui.academic_user_search_new', academic_id=a.id),
+        )
+
     return render_user_search_results(
         results=results,
         title="Assign user to '{a.full_name}'",
@@ -319,6 +324,23 @@ def academic_user_search_results(academic_id, page=1):
         results_url='ui.academic_user_search_results',
         results_url_args={'academic_id': a.id},
     )
+
+
+@blueprint.route("/academic/<int:academic_id>/user/search_new", methods=['GET', 'POST'])
+@roles_accepted('editor')
+def academic_user_search_new(academic_id):
+    a: Academic = db.get_or_404(Academic, academic_id)
+
+    return render_user_search_add(
+        add_url=url_for('ui.academic_user_search_new', academic_id=a.id),
+        success_callback=partial(academic_user_search_new_success, academic=a)
+    )
+
+
+def academic_user_search_new_success(user: User, academic: Academic):
+    academic.user = user
+    db.session.add(academic)
+    db.session.commit()
 
 
 @blueprint.route("/academic/<int:academic_id>/assign_user", methods=['POST'])
