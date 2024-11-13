@@ -106,6 +106,7 @@
             {{ tabbed_display_tab(details_selector, 'abstract', 'Abstract', url_for('ui.publication_details', id=cp.publication_id, detail_selector='abstract')) }}
             {{ tabbed_display_tab(details_selector, 'keywords', 'Keywords', url_for('ui.publication_details', id=cp.publication_id, detail_selector='keywords')) }}
             {{ tabbed_display_tab(details_selector, 'folders', 'Folders', url_for('ui.publication_details', id=cp.publication_id, detail_selector='folders')) }}
+            {{ tabbed_display_tab(details_selector, 'publication', 'Publication', url_for('ui.publication_details', id=cp.publication_id, detail_selector='publication')) }}
         </div>
         <div class="tabbed_display_content">
             {% if details_selector == 'funding' %}
@@ -144,6 +145,46 @@
                 </nav>
             {% elif details_selector == 'folders' %}
                 {{ render_publication_folders(cp.publication, folders) }}
+            {% elif details_selector == 'publication' %}
+                <dl class="column">
+                    <dt>DOI</dt>
+                    <dd>{{ cp.doi }}</dd>
+                </dl>
+                <h4>Catalogue</h4>
+                <dl class="column">
+                    <dt>Catalogue</dt>
+                    <dd>{{ cp.catalog.title() }}</dd>
+                    <dt>Catalogue Identifier</dt>
+                    <dd>{{ cp.catalog_identifier }}</dd>
+                </dl>
+                <h4>Journal</h4>
+                <dl class="column">
+                    <dt>Journal</dt>
+                    <dd>{{ cp.journal.name }}</dd>
+                    <dt>Volume</dt>
+                    <dd>{{ cp.volume }}</dd>
+                    <dt>Issue</dt>
+                    <dd>{{ cp.issue }}</dd>
+                    <dt>Pages</dt>
+                    <dd>{{ cp.pages }}</dd>
+                </dl>
+                <h4>Publication Date</h4>
+                <dl class="column">
+                    <dt>Cover Date</dt>
+                    <dd>{{ cp.publication_cover_date | date_format }}</dd>
+                    <dt>Date Text</dt>
+                    <dd>{{ cp.publication_date_text | blank_if_none }}</dd>
+                    <dt>Year</dt>
+                    <dd>{{ cp.publication_year | blank_if_none }}</dd>
+                    <dt>Month</dt>
+                    <dd>{{ cp.publication_month | blank_if_none }}</dd>
+                    <dt>Day</dt>
+                    <dd>{{ cp.publication_day | blank_if_none }}</dd>
+                    <dt>Period Start</dt>
+                    <dd>{{ cp.publication_period_start | date_format }}</dd>
+                    <dt>Period End</dt>
+                    <dd>{{ cp.publication_period_end | date_format }}</dd>
+                </dl>
             {% endif %}
         </div>
     </div>
