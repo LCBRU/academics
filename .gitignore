@@ -136,6 +136,8 @@ dump.json
 # redis
 dump.rdb
 
+.vscode
+
 *.sqlite3
 database.db
 src

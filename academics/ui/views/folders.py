@@ -11,9 +11,9 @@ from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes
-from academics.ui.views.decorators import assert_folder_user
+from academics.ui.views.decorators import assert_folder_user, assert_folder_user_or_author
 from academics.ui.views.folder_dois import add_doi_to_folder, remove_doi_from_folder
-from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
+from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from lbrc_flask.response import refresh_response
@@ -28,6 +28,7 @@ class FolderEditForm(FlashingForm):
     name = StringField('Name', validators=[Length(max=1000), DataRequired()])
     description = TextAreaField('Description', validators=[Length(max=1000)])
     autofill_year = SelectField('Autofill Year', coerce=int, default=None, validators=[Optional()])
+    author_access = BooleanField('Allow authors access')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -87,6 +88,8 @@ def folder_edit(id=None):
             folder.autofill_year = form.autofill_year.data
         else:
             folder.autofill_year = None
+        
+        folder.author_access = form.author_access.data
 
         db.session.add(folder)
         db.session.commit()
@@ -214,7 +217,7 @@ class FolderPublication(Publication):
 @blueprint.route("/folder/<int:folder_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/acadmic/<int:academic_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/publications")
-@assert_folder_user()
+@assert_folder_user_or_author()
 def folder_publications(folder_id, academic_id=None, theme_id=None):
     args = dict(**request.args, folder_id=folder_id, academic_id=academic_id, theme_id=theme_id)
     search_form = FolderPublicationSearch(

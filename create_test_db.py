@@ -36,12 +36,18 @@ init_users(admin_roles=[ROLE_VALIDATOR, ROLE_EDITOR])
 
 user = db.session.get(User, 2)
 
-other_users = [User(
-    email=fake.email(),
-    username=''.join(fake.random_letters()),
-    first_name=fake.first_name(),
-    last_name=fake.last_name(),
-) for _ in range(randint(10, 20))]
+other_users = []
+
+for _ in range(randint(10, 20)):
+    email = fake.email(domain='le.ac.uk')
+    other_users.append(User(
+        email=email,
+        username=email,
+        first_name=fake.first_name(),
+        last_name=fake.last_name(),
+        password='ct*i0*t*0',
+    ))
+
 db.session.add_all(other_users)
 db.session.commit()
 

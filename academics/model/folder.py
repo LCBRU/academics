@@ -25,11 +25,12 @@ class Folder(db.Model):
     name = db.Column(db.String(1000))
     description: Mapped[str] = mapped_column(String(1000), nullable=True)
     autofill_year: Mapped[int] = mapped_column(Integer, nullable=True)
+    author_access: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete")) 
     shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set, lazy="selectin")
-
+    
 
 class FolderDoi(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
