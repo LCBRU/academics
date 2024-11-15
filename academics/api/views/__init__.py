@@ -23,7 +23,7 @@ def api_academics():
     return [{
         'first_name': a.first_name,
         'last_name': a.last_name,
-        'theme': a.theme.name,
+        'themes': [t.name for t in a.themes],
         'orcid': a.orcid,
         'scopus_ids': list(a.all_scopus_ids()),
     } for a in db.session.scalars(q).all()]
