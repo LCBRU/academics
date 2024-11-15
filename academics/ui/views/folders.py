@@ -1,9 +1,10 @@
+from academics.services.folder import current_user_folders_search_query
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 from flask import abort, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm
-from sqlalchemy import and_, case, distinct, func, or_, select
+from sqlalchemy import and_, case, distinct, func, select
 from sqlalchemy.orm import with_expression, Mapped, query_expression, relationship, foreign, joinedload, selectinload
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
@@ -15,7 +16,7 @@ from academics.ui.views.decorators import assert_folder_user, assert_folder_user
 from academics.ui.views.folder_dois import add_doi_to_folder, remove_doi_from_folder
 from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField
 from lbrc_flask.database import db
-from lbrc_flask.security import current_user_id, system_user_id
+from lbrc_flask.security import current_user_id
 from lbrc_flask.response import refresh_response
 from lbrc_flask.validators import is_invalid_doi
 from wtforms.validators import Length, DataRequired, Optional
@@ -35,61 +36,39 @@ class FolderEditForm(FlashingForm):
 
         self.autofill_year.choices = [(0, '')] + [(y, f'April {y} to March {y+1}') for y in range(2024, date.today().year + 2)]
 
+    def populate_item(self, item):
+        item.name = self.name.data
+        item.description = self.description.data
+
+        if self.autofill_year.data:
+            item.autofill_year = self.autofill_year.data
+        else:
+            item.autofill_year = None
+        
+        item.author_access = self.author_access.data
+    
 
 @blueprint.route("/folders/")
 def folders():
     search_form = SearchForm(search_placeholder='Search Name', formdata=request.args)
-    
-    q = Folder.query
-
-    q = q.filter(or_(
-        Folder.owner_id == current_user_id(),
-        Folder.shared_users.any(User.id == current_user_id()),
-    ))
-
-    if search_form.search.data:
-        q = q.filter(Folder.name.like(f'%{search_form.search.data}%'))
-
-    q = q.order_by(Folder.name)
-
-    folders = q.paginate(
-        page=search_form.page.data,
-        per_page=5,
-        error_out=False,
-    )
 
     return render_template(
         "ui/folder/index.html",
         search_form=search_form,
-        folders=folders,
-        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
+        folders=db.paginate(
+            select=current_user_folders_search_query(search_form)
+        ),
     )
 
 
 @blueprint.route("/folder/<int:id>/edit", methods=['GET', 'POST'])
-@blueprint.route("/folder/add", methods=['GET', 'POST'])
 @assert_folder_user()
-def folder_edit(id=None):
-    if id:
-        folder = db.get_or_404(Folder, id)
-        title=f'Edit Folder'
-    else:
-        folder = Folder()
-        folder.owner = current_user
-        title=f'Add Folder'
-
+def folder_edit(id):
+    folder = db.get_or_404(Folder, id)
     form = FolderEditForm(obj=folder)
 
     if form.validate_on_submit():
-        folder.name = form.name.data
-        folder.description = form.description.data
-
-        if form.autofill_year.data:
-            folder.autofill_year = form.autofill_year.data
-        else:
-            folder.autofill_year = None
-        
-        folder.author_access = form.author_access.data
+        form.populate_item(folder)
 
         db.session.add(folder)
         db.session.commit()
@@ -98,9 +77,33 @@ def folder_edit(id=None):
 
     return render_template(
         "lbrc/form_modal.html",
-        title=title,
+        title='Edit Folder',
         form=form,
         url=url_for('ui.folder_edit', id=id),
+    )
+
+
+@blueprint.route("/folder/add", methods=['GET', 'POST'])
+@assert_folder_user()
+def folder_add():
+    form = FolderEditForm()
+
+    if form.validate_on_submit():
+        folder = Folder()
+        folder.owner = current_user
+
+        form.populate_item(folder)
+
+        db.session.add(folder)
+        db.session.commit()
+
+        return refresh_response()
+
+    return render_template(
+        "lbrc/form_modal.html",
+        title='Add Folder',
+        form=form,
+        url=url_for('ui.folder_add'),
     )
 
 
@@ -136,12 +139,7 @@ def folder_shared_user_search_results(folder_id, page=1):
     q = user_search_query(get_value_from_all_arguments('search_string') or '',)
     q = q.where(User.id.not_in([u.id for u in f.shared_users]))
 
-    results = db.paginate(
-        select=q,
-        page=page,
-        per_page=5,
-        error_out=False,
-    )
+    results = db.paginate(select=q)
 
     return render_user_search_results(
         results=results,
@@ -248,12 +246,7 @@ def folder_publications(folder_id, academic_id=None, theme_id=None):
 
     q = q.order_by(CatalogPublication.publication_cover_date.asc(), CatalogPublication.id)
 
-    publications = db.paginate(
-        select=q,
-        page=search_form.page.data,
-        per_page=10,
-        error_out=False,
-    )
+    publications = db.paginate(select=q, per_page=10)
 
     return render_template(
         "ui/folder/publications.html",
@@ -318,9 +311,7 @@ def folder_academics(folder_id):
 
     academics = db.paginate(
         select=q,
-        page=search_form.page.data,
         per_page=20,
-        error_out=False,
     )
 
     return render_template(
@@ -362,9 +353,7 @@ def folder_themes(folder_id):
 
     themes = db.paginate(
         select=q,
-        page=search_form.page.data,
         per_page=20,
-        error_out=False,
     )
 
     return render_template(
@@ -449,12 +438,7 @@ def folder_add_publication_add_search_results(folder_id, page=1):
         .order_by(Publication.doi)
     )
 
-    results = db.paginate(
-        select=q,
-        page=page,
-        per_page=5,
-        error_out=False,
-    )
+    results = db.paginate(select=q)
 
     if results.total == 0:
         if is_invalid_doi(search_string):

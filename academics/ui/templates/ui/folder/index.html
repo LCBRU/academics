@@ -14,7 +14,7 @@
                 {{ render_form_fields(search_form) }}
     
                 <div class="button_bar" hx-target="body">
-                    <a class="icon add" href="javascript:;" title="Add Folder" hx-get="{{ url_for('ui.folder_edit' ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Folder</a>
+                    <a class="icon add" href="javascript:;" title="Add Folder" hx-get="{{ url_for('ui.folder_add' ) }}" hx-target="body" hx-swap="beforeend" role="button">Add Folder</a>
                 </div>    
             </fieldset>
         </form>

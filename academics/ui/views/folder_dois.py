@@ -21,7 +21,7 @@ class UploadFolderDois(FlashingForm):
 
 
 @blueprint.route("/folder/<int:folder_id>/doi/delete/<path:doi>", methods=['POST'])
-def publication_delete_folder(folder_id, doi):
+def folderdoi_delete(folder_id, doi):
     remove_doi_from_folder(folder_id, doi)
 
     return render_publication_folders(doi)

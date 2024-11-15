@@ -5,7 +5,7 @@
                 <a href="javascript:;" class="icon folder" role="button">{{f.name}}</a>
                 <ul>
                     <li><a href="{{ url_for('ui.publications', folder_id=f.id ) }}">View Publications in this folder</a></li>
-                    <li><a href="javascript:;" hx-post="{{url_for('ui.publication_delete_folder', folder_id=f.id, doi=publication.doi)}}">Remove</a></li>
+                    <li><a href="javascript:;" hx-post="{{url_for('ui.folderdoi_delete', folder_id=f.id, doi=publication.doi)}}">Remove</a></li>
                 </ul>
             </div>
         {% endfor %}

@@ -43,6 +43,7 @@ class FolderDoi(db.Model):
             cascade="all, delete",
         )
     )
+    deleted: Mapped[bool] = mapped_column(Boolean)
     doi: Mapped[str] = mapped_column(Unicode(1000), nullable=False)
     publication: Mapped[Folder] = relationship(
         Publication,
