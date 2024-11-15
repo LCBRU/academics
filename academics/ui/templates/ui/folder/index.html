@@ -36,7 +36,7 @@
         {% for f in folders.items %}
             <tr>
                 <td>
-                    {% if f.owner == current_user %}
+                    {% if f.can_user_edit(current_user) %}
                         <a class="icon edit" href="javascript:;" title="Edit Folder" hx-get="{{ url_for('ui.folder_edit', id=f.id ) }}" hx-target="body" hx-swap="beforeend"></a>
                         <a class="icon delete" href="javascript:;" title="Delete Folder" hx-post="{{ url_for('ui.folder_delete', id=f.id ) }}" hx-confirm="Are you sure you want to delete folder {{f.name}}"></a>
                     {% endif %}

@@ -30,7 +30,10 @@ class Folder(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete")) 
     shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set, lazy="selectin")
-    
+
+    def can_user_edit(self, user):
+        return user == self.owner or user in self.shared_users
+
 
 class FolderDoi(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)

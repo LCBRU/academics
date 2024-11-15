@@ -1,17 +1,17 @@
-from academics.services.folder import current_user_folders_search_query
+from academics.services.folder import FolderAcademicSearchForm, FolderPublicationSearchForm, FolderThemeSearchForm, current_user_folders_search_query, folder_academics_search_query, folder_publication_search_query
+from academics.services.publication_searching import publication_picker_search_query
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 from flask import abort, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm
-from sqlalchemy import and_, case, distinct, func, select
-from sqlalchemy.orm import with_expression, Mapped, query_expression, relationship, foreign, joinedload, selectinload
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
 from academics.model.theme import Theme
-from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes
 from academics.ui.views.decorators import assert_folder_user, assert_folder_user_or_author
 from academics.ui.views.folder_dois import add_doi_to_folder, remove_doi_from_folder
 from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField
@@ -188,63 +188,24 @@ def folder_delete_publication(folder_id, doi):
     return refresh_response()
 
 
-class FolderPublicationSearch(SearchForm):
-    folder_id = HiddenField()
-    academic_id = HiddenField()
-    theme_id = HiddenField()
-    supress_validation_historic = HiddenField(default=False)
-
-
-class FolderPublication(Publication):
-    folder_doi: Mapped[FolderDoi] = relationship(
-        viewonly=True,
-        primaryjoin=lambda: FolderPublication.doi == foreign(FolderDoi.doi),
-        uselist=False,
-    )
-
-    def current_user_relevance(self):
-        result = None
-
-        for s in self.folder_doi.user_statuses:
-            if s.user_id == current_user_id():
-                result = s
-
-        return result
-
-
 @blueprint.route("/folder/<int:folder_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/acadmic/<int:academic_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/publications")
 @assert_folder_user_or_author()
 def folder_publications(folder_id, academic_id=None, theme_id=None):
-    args = dict(**request.args, folder_id=folder_id, academic_id=academic_id, theme_id=theme_id)
-    search_form = FolderPublicationSearch(
-        search_placeholder='Search Publications',
-        data=args,
-    )
+    search_form = FolderPublicationSearchForm()
 
     folder = db.get_or_404(Folder, folder_id)
     academic = db.session.execute(select(Academic).where(Academic.id == academic_id)).scalar_one_or_none()
     theme = db.session.execute(select(Theme).where(Theme.id == theme_id)).scalar_one_or_none()
 
-    cat_pubs = catalog_publication_search_query(search_form)
-
-    q = (
-        select(FolderPublication)
-        .select_from(cat_pubs)
-        .join(CatalogPublication, CatalogPublication.id == cat_pubs.c.id)
-        .join(CatalogPublication.publication)
-        .options(joinedload(FolderPublication.folder_doi.and_(FolderDoi.folder_id == folder.id, FolderDoi.doi == Publication.doi)))
-    )
-
+    q = folder_publication_search_query(folder=folder, search_form=search_form)
     q = q.options(
         selectinload(Publication.catalog_publications)
         .selectinload(CatalogPublication.catalog_publication_sources)
         .selectinload(CatalogPublicationsSources.source)
         .selectinload(Source.academic)
     )
-
-    q = q.order_by(CatalogPublication.publication_cover_date.asc(), CatalogPublication.id)
 
     publications = db.paginate(select=q, per_page=10)
 
@@ -258,56 +219,18 @@ def folder_publications(folder_id, academic_id=None, theme_id=None):
     )
 
 
-class FolderAcademic(Academic):
-    folder_publication_count: Mapped[int] = query_expression()
-    folder_relevant_count: Mapped[int] = query_expression()
-    folder_not_relevant_count: Mapped[int] = query_expression()
-    folder_unset_count: Mapped[int] = query_expression()
-
-
 @blueprint.route("/folder/<int:folder_id>/academics")
 @assert_folder_user()
 def folder_academics(folder_id):
-    args = dict(**request.args, folder_id=folder_id)
-    search_form = FolderPublicationSearch(
-        search_placeholder='Search Publications',
-        data=args,
-    )
+    search_form: FolderAcademicSearchForm = FolderAcademicSearchForm()
 
     folder = db.get_or_404(Folder, folder_id)
 
-    cpa = catalog_publication_academics()
-
-    q = (
-        select(FolderAcademic)
-        .select_from(cpa)
-        .join(CatalogPublication, CatalogPublication.id == cpa.c.catalog_publication_id)
-        .join(CatalogPublication.publication)
-        .join(Academic, Academic.id == cpa.c.academic_id)
-        .join(Publication.folder_dois)
-        .join(FolderDoi.folder)
-        .join(FolderDoiUserRelevance, and_(
-            FolderDoiUserRelevance.folder_doi_id == FolderDoi.id,
-            FolderDoiUserRelevance.user_id == Academic.user_id,
-        ), isouter=True)
-        .where(Folder.id == folder_id)
-        .group_by(FolderAcademic.id)
-        .order_by(FolderAcademic.last_name, FolderAcademic.first_name)
-        .options(with_expression(FolderAcademic.folder_publication_count, func.count(distinct(CatalogPublication.publication_id))))
-        .options(with_expression(FolderAcademic.folder_relevant_count, func.count(distinct(case(
-            (FolderDoiUserRelevance.relevant, CatalogPublication.publication_id),
-            else_=None
-        )))))
-        .options(with_expression(FolderAcademic.folder_not_relevant_count, func.count(distinct(case(
-            (FolderDoiUserRelevance.relevant == 0, CatalogPublication.publication_id),
-            else_=None
-        )))))
-        .options(with_expression(FolderAcademic.folder_unset_count, func.count(distinct(case(
-            (FolderDoiUserRelevance.relevant == None, CatalogPublication.publication_id),
-            else_=None
-        )))))
-        .options(selectinload(Academic.user))
+    q = folder_academics_search_query(
+        folder_id=folder.id,
+        search_form=search_form,
     )
+    q = q.options(selectinload(Academic.user))
 
     academics = db.paginate(
         select=q,
@@ -322,34 +245,13 @@ def folder_academics(folder_id):
     )
 
 
-class FolderTheme(Theme):
-    folder_publication_count: Mapped[int] = query_expression()
-
-
 @blueprint.route("/folder/<int:folder_id>/themes")
 @assert_folder_user()
 def folder_themes(folder_id):
-    args = dict(**request.args, folder_id=folder_id)
-    search_form = FolderPublicationSearch(
-        search_placeholder='Search Publications',
-        data=args,
-    )
-
+    search_form=FolderThemeSearchForm()
     folder = db.get_or_404(Folder, folder_id)
 
-    cpt = catalog_publication_themes()
-
-    q = (
-        select(FolderTheme)
-        .select_from(cpt)
-        .join(CatalogPublication, CatalogPublication.id == cpt.c.catalog_publication_id)
-        .join(CatalogPublication.publication)
-        .join(Theme, Theme.id == cpt.c.theme_id)
-        .where(Publication.folders.any(Folder.id == folder_id))
-        .group_by(FolderTheme.id)
-        .order_by(FolderTheme.name)
-        .options(with_expression(FolderTheme.folder_publication_count, func.count(distinct(CatalogPublication.publication_id))))
-    )
+    q = folder_publication_search_query(folder_id=folder_id, search_form=search_form)
 
     themes = db.paginate(
         select=q,
@@ -431,11 +333,9 @@ def folder_add_publication_add_search_results(folder_id, page=1):
 
     search_string: str = get_value_from_all_arguments('search_string') or ''
 
-    q = (
-        select(PublicationPicker)
-        .where(Publication.doi.not_in([fd.doi for fd in f.dois]))
-        .where(Publication.doi.like(f"%{search_string}%"))
-        .order_by(Publication.doi)
+    q = publication_picker_search_query(
+        search_string=search_string,
+        exclude_dois=[fd.doi for fd in f.dois],
     )
 
     results = db.paginate(select=q)

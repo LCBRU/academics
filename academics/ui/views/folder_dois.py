@@ -92,14 +92,15 @@ def add_doi_to_folder(folder_id, doi):
 
 
 def remove_doi_from_folder(folder_id, doi):
-    fd = db.session.execute(
+    fd: FolderDoi = db.session.execute(
         select(FolderDoi)
         .where(FolderDoi.folder_id == folder_id)
         .where(FolderDoi.doi == doi)
     ).scalar_one_or_none()
 
     if fd:
-        db.session.delete(fd)
+        fd.deleted = True
+        db.session.add(fd)
         db.session.commit()
 
 

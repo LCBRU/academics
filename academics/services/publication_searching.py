@@ -768,3 +768,20 @@ def publication_count_value(results):
         bucket=p['bucket'],
         count=p['publications']
     ) for p in results]
+
+
+class PublicationPicker(Publication):
+    @property
+    def name(self):
+        return self.doi
+
+
+def publication_picker_search_query(search_string: str, exclude_dois: list[str]):
+    q = (
+        select(PublicationPicker)
+        .where(Publication.doi.not_in(exclude_dois))
+        .where(Publication.doi.like(f"%{search_string}%"))
+        .order_by(Publication.doi)
+    )
+
+    return q
