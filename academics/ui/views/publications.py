@@ -530,6 +530,7 @@ def publication_add_folder(publication_id):
     f: Folder = db.get_or_404(Folder, id)
 
     add_doi_to_folder(f.id, p.doi)
+    db.session.commit()
 
     return trigger_response('refreshDetails')
 
@@ -571,6 +572,7 @@ def catalog_publication_edit(id=None):
 
         if form.has_value('folder_id'):
             add_doi_to_folder(form.folder_id.data, form.doi.data)
+            db.session.commit()
 
         return refresh_response()
 

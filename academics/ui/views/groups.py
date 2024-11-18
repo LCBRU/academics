@@ -1,4 +1,5 @@
 from academics.model.group import Group
+from academics.services.groups import is_group_name_duplicate
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 from flask import render_template, request, url_for
@@ -8,7 +9,7 @@ from sqlalchemy import or_, select
 from academics.model.academic import Academic, AcademicPicker
 from academics.model.security import User
 from academics.ui.views.decorators import assert_group_user
-from wtforms import HiddenField, StringField
+from wtforms import HiddenField, StringField, validators
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from lbrc_flask.response import refresh_response
@@ -16,9 +17,14 @@ from wtforms.validators import Length, DataRequired
 from lbrc_flask.requests import get_value_from_all_arguments
 
 
+def group_name_unique_validator(form, field):
+    if is_group_name_duplicate(name=form.name.data, group_id=form.id.data):
+        raise validators.ValidationError('Group name has already been used')
+
+
 class GroupEditForm(FlashingForm):
     id = HiddenField('id')
-    name = StringField('Name', validators=[Length(max=1000), DataRequired()])
+    name = StringField('Name', validators=[Length(max=1000), DataRequired(), group_name_unique_validator])
 
 
 @blueprint.route("/groups/")

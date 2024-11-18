@@ -46,7 +46,6 @@ class FolderDoi(db.Model):
             cascade="all, delete",
         )
     )
-    deleted: Mapped[bool] = mapped_column(Boolean)
     doi: Mapped[str] = mapped_column(Unicode(1000), nullable=False)
     publication: Mapped[Folder] = relationship(
         Publication,
@@ -61,6 +60,29 @@ class FolderDoi(db.Model):
     @property
     def invalid_doi(self):
         return is_invalid_doi(self.doi)
+
+
+class FolderExcludedDoi(db.Model, AuditMixin, CommonMixin):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    folder_id = mapped_column(ForeignKey(Folder.id), nullable=False, index=True)
+    folder: Mapped[Folder] = relationship(
+        foreign_keys=[folder_id],
+        backref=backref(
+            "excluded_dois",
+            collection_class=set,
+            cascade="all, delete",
+        )
+    )
+    doi: Mapped[str] = mapped_column(Unicode(1000), nullable=False)
+    publication: Mapped[Folder] = relationship(
+        Publication,
+        foreign_keys=[doi],
+        primaryjoin='FolderExcludedDoi.doi == Publication.doi',
+        backref=backref(
+            "excluded_folder_dois",
+            collection_class=set,
+        )
+    )
 
 
 Folder.publication_count = column_property(

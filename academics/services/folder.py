@@ -1,8 +1,10 @@
+from datetime import datetime, timezone
+from typing import Optional
 from lbrc_flask.database import db
 from sqlalchemy import and_, case, distinct, func, or_, select
 from wtforms import HiddenField
 from academics.model.academic import Academic
-from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
+from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance, FolderExcludedDoi
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
 from academics.model.theme import Theme
@@ -139,7 +141,10 @@ def folder_publication_search_query(folder: Folder, search_form: FolderPublicati
         .select_from(cat_pubs)
         .join(CatalogPublication, CatalogPublication.id == cat_pubs.c.id)
         .join(CatalogPublication.publication)
-        .options(joinedload(FolderPublication.folder_doi.and_(FolderDoi.folder_id == folder.id, FolderDoi.doi == Publication.doi)))
+        .options(joinedload(FolderPublication.folder_doi.and_(
+            FolderDoi.folder_id == folder.id,
+            FolderDoi.doi == Publication.doi,
+        )))
         .order_by(CatalogPublication.publication_cover_date.asc(), CatalogPublication.id)
     )
 
@@ -158,7 +163,7 @@ class FolderThemeSearchForm(SearchForm):
             )
 
 
-def folder_publication_search_query(folder_id: int, search_form: FolderThemeSearchForm):
+def folder_theme_search_query(folder: Folder, search_form: FolderThemeSearchForm):
     cpt = catalog_publication_themes()
 
     q = (
@@ -167,7 +172,7 @@ def folder_publication_search_query(folder_id: int, search_form: FolderThemeSear
         .join(CatalogPublication, CatalogPublication.id == cpt.c.catalog_publication_id)
         .join(CatalogPublication.publication)
         .join(Theme, Theme.id == cpt.c.theme_id)
-        .where(Publication.folders.any(Folder.id == folder_id))
+        .where(Publication.folders.any(Folder.id == folder.id))
         .group_by(FolderTheme.id)
         .order_by(FolderTheme.name)
         .options(with_expression(FolderTheme.folder_publication_count, func.count(distinct(CatalogPublication.publication_id))))
@@ -177,3 +182,75 @@ def folder_publication_search_query(folder_id: int, search_form: FolderThemeSear
         q = q.where(Theme.name.like(f"%{w}%"))
 
     return q
+
+
+def add_doi_to_folder(folder_id, doi):
+    fd = get_folder_doi(folder_id, doi)
+
+    if not fd:
+        db.session.add(FolderDoi(
+            folder_id=folder_id,
+            doi=doi,
+        ))
+
+
+def remove_doi_from_folder(folder_id, doi):
+    fd = get_folder_doi(folder_id, doi)
+
+    if fd:
+        db.session.delete(fd)
+        exclude_doi_from_folder(folder_id, doi)
+
+
+def exclude_doi_from_folder(folder_id, doi):
+    edf = get_folder_excluded_doi(folder_id, doi)
+
+    if not edf:
+        db.session.add(FolderExcludedDoi(
+            folder_id=folder_id,
+            doi=doi,
+        ))
+
+
+def get_folder_excluded_doi(folder_id, doi) -> FolderExcludedDoi:
+    return db.session.execute(
+        select(FolderExcludedDoi)
+        .where(FolderExcludedDoi.folder_id == folder_id)
+        .where(FolderExcludedDoi.doi == doi)
+    ).scalar_one_or_none()
+
+
+def get_folder_doi(folder_id, doi) -> FolderDoi:
+    return db.session.execute(
+        select(FolderDoi)
+        .where(FolderDoi.folder_id == folder_id)
+        .where(FolderDoi.doi == doi)
+    ).scalar_one_or_none()
+
+
+def create_publication_folder(publications):
+    folder = Folder(
+        name=f'Publication Search {datetime.now(timezone.utc):%Y%m%d_%H%M%S}',
+        owner_id=current_user_id(),
+    )
+    db.session.add(folder)
+    db.session.flush()
+
+    db.session.add_all([
+        FolderDoi(folder_id=folder.id, doi=p.doi) for p in publications
+    ])
+
+    return folder
+
+
+def is_folder_name_duplicate(name: str, folder_id: Optional[int]):
+    q = (
+        select(func.count(Folder.id))
+        .where(Folder.name == name)
+        .where(Folder.owner_id == current_user_id())
+    )
+
+    if folder_id is not None:
+        q = q.where(Folder.id != folder_id)
+
+    return db.session.execute(q).scalar() > 0

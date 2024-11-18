@@ -1,4 +1,4 @@
-from academics.services.folder import FolderAcademicSearchForm, FolderPublicationSearchForm, FolderThemeSearchForm, current_user_folders_search_query, folder_academics_search_query, folder_publication_search_query
+from academics.services.folder import FolderAcademicSearchForm, FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_academics_search_query, folder_publication_search_query, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
 from academics.services.publication_searching import publication_picker_search_query
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
@@ -13,8 +13,7 @@ from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.ui.views.decorators import assert_folder_user, assert_folder_user_or_author
-from academics.ui.views.folder_dois import add_doi_to_folder, remove_doi_from_folder
-from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField
+from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField, validators
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id
 from lbrc_flask.response import refresh_response
@@ -24,9 +23,14 @@ from lbrc_flask.requests import get_value_from_all_arguments
 from datetime import date
 
 
+def folder_name_unique_validator(form, field):
+    if is_folder_name_duplicate(name=form.name.data, folder_id=form.id.data):
+        raise validators.ValidationError('Folder name has already been used')
+
+
 class FolderEditForm(FlashingForm):
     id = HiddenField('id')
-    name = StringField('Name', validators=[Length(max=1000), DataRequired()])
+    name = StringField('Name', validators=[Length(max=1000), DataRequired(), folder_name_unique_validator])
     description = TextAreaField('Description', validators=[Length(max=1000)])
     autofill_year = SelectField('Autofill Year', coerce=int, default=None, validators=[Optional()])
     author_access = BooleanField('Allow authors access')
@@ -184,6 +188,7 @@ def folder_add_shared_user(folder_id):
 @assert_folder_user()
 def folder_delete_publication(folder_id, doi):
     remove_doi_from_folder(folder_id, doi)
+    db.session.commit()
 
     return refresh_response()
 
@@ -251,7 +256,7 @@ def folder_themes(folder_id):
     search_form=FolderThemeSearchForm()
     folder = db.get_or_404(Folder, folder_id)
 
-    q = folder_publication_search_query(folder_id=folder_id, search_form=search_form)
+    q = folder_theme_search_query(folder=folder, search_form=search_form)
 
     themes = db.paginate(
         select=q,
@@ -319,16 +324,10 @@ class FolderNewPublicationForm(FlashingForm):
     publication_cover_date = DateField('Publication Cover Date', validators=[Optional()])
 
 
-class PublicationPicker(Publication):
-    @property
-    def name(self):
-        return self.doi
-
-
 @blueprint.route("/folder/<int:folder_id>/publication/add_search_results/<int:page>")
 @blueprint.route("/folder/<int:folder_id>/publication/add_search_results")
 @assert_folder_user()
-def folder_add_publication_add_search_results(folder_id, page=1):
+def folder_add_publication_add_search_results(folder_id):
     f: Folder = db.get_or_404(Folder, folder_id)
 
     search_string: str = get_value_from_all_arguments('search_string') or ''
@@ -371,5 +370,6 @@ def folder_add_publication(folder_id):
     p: Publication = db.get_or_404(Publication, id)
 
     add_doi_to_folder(f.id, p.doi)
+    db.session.commmit()
 
     return refresh_response()

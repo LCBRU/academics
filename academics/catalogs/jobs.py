@@ -15,7 +15,7 @@ from academics.catalogs.scival import get_scival_institution, get_scival_publica
 from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, Source, CatalogPublicationsSources, catalog_publications_sources_affiliations, Affiliation, Source
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCIVAL, CATALOG_SCOPUS
-from academics.model.folder import Folder, FolderDoi
+from academics.model.folder import Folder, FolderDoi, FolderExcludedDoi
 from academics.model.institutions import Institution
 from academics.model.publication import CatalogPublication, NihrAcknowledgement, Journal, Keyword, Publication, Sponsor, Subtype
 from lbrc_flask.validators import parse_date
@@ -914,6 +914,10 @@ class AutoFillFolders(AsyncJob):
             .where(CatalogPublication.doi.not_in(
                 select(FolderDoi.doi)
                 .where(FolderDoi.folder_id == folder.id)
+            ))
+            .where(CatalogPublication.doi.not_in(
+                select(FolderExcludedDoi.doi)
+                .where(FolderExcludedDoi.folder_id == folder.id)
             ))
             .where(CatalogPublication.publication_period_start <= autofill_end)
             .where(CatalogPublication.publication_period_end >= autofill_start)
