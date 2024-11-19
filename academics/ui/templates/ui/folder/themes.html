@@ -31,6 +31,10 @@
                 <tr>
                     <td>
                         <a class="icon publication" title="Show Publications" href="{{ url_for('ui.folder_publications', folder_id=folder.id, theme_id=t.id ) }}"></a>
+
+                        {% if folder.can_user_edit(current_user) %}
+                            <a class="icon email" title="Email publications" hx-get="{{ url_for('ui.folder_theme_email_search', folder_id=folder.id, theme_id=t.id ) }}" hx-target="body" hx-swap="beforeend" href="javascript:;"></a>
+                        {% endif %}
                     </td>
                     <td>{{ t.name }}</td>
                     <td>{{ t.folder_publication_count }}</td>

@@ -3,7 +3,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import current_app, url_for
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
-from academics.model.folder import Folder
+from academics.model.folder import Folder, FolderDoi
 from academics.model.group import Group
 from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
 from academics.model.catalog import primary_catalogs
@@ -83,7 +83,7 @@ def group_select_choices():
         Group.shared_users.any(User.id == current_user_id()),
     )).order_by(Group.name)
     
-    return [(g.id, g.name.title()) for g in db.session.execute(q).scalars()]
+    return [('', '')] + [(g.id, g.name.title()) for g in db.session.execute(q).scalars()]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
@@ -202,14 +202,14 @@ def best_catalog_publications():
 
 
 def catalog_publication_academics():
-    bcp = best_catalog_publications()
+    bcp = best_catalog_publications().cte('best_catalog_publication')
 
     qa = (
         select(CatalogPublicationsSources.catalog_publication_id, Source.academic_id)
         .select_from(CatalogPublicationsSources)
         .join(CatalogPublicationsSources.source)
         .where(Source.academic_id != None)
-        .where(CatalogPublicationsSources.catalog_publication_id.in_(bcp))
+        .where(CatalogPublicationsSources.catalog_publication_id.in_(select(bcp.c.id)))
     )
 
     qsa = (
@@ -217,7 +217,7 @@ def catalog_publication_academics():
         .select_from(CatalogPublication)
         .join(CatalogPublication.publication)
         .join(Publication.supplementary_authors)
-        .where(CatalogPublication.id.in_(bcp))
+        .where(CatalogPublication.id.in_(select(bcp.c.id)))
     )
 
     return qa.union(qsa).alias()
@@ -785,3 +785,27 @@ def publication_picker_search_query(search_string: str, exclude_dois: list[str])
     )
 
     return q
+
+
+def publication_folder_query():
+    q = (
+        select(
+            Publication.id.label('publication_id'),
+            FolderDoi.folder_id
+        ).select_from(FolderDoi)
+        .join(FolderDoi.publication)
+    )
+
+    return q
+
+
+def publication_academics_query():
+    catpub_academics_query = catalog_publication_academics()
+    pub_fol_query = publication_folder_query().subquery()
+
+    return (
+        select(pub_fol_query.c.publication_id, catpub_academics_query.c.academic_id)
+        .select_from(pub_fol_query)
+        .join(CatalogPublication, CatalogPublication.publication_id == pub_fol_query.c.publication_id)
+        .join(catpub_academics_query, catpub_academics_query.c.catalog_publication_id == CatalogPublication.id)
+    )

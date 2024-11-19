@@ -62,7 +62,7 @@ class PublicationAddForm(FlashingForm):
 @blueprint.route("/publications/")
 def publications():
     search_form = PublicationSearchForm(formdata=request.args)
-    
+
     q = publication_search_query(search_form)
 
     q = q.options(

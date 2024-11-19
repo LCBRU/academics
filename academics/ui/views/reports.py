@@ -16,21 +16,25 @@ from .. import blueprint
 def reports():
     search_form = PublicationSummarySearchForm(formdata=request.args)
 
-    return render_template("ui/reports/reports.html", search_form=search_form, report_defs=get_report_defs(search_form))
+    return render_template(
+        "ui/reports/reports.html",
+        search_form=search_form,
+        report_defs=get_report_defs(search_form),
+    )
 
 
 def get_report_defs(search_form):
     report_defs = []
 
     if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
-        q = academic_search_query(search_form).with_only_columns(Academic.id)
+        q = academic_search_query(search_form.data).with_only_columns(Academic.id)
 
         for theme_id in db.session.execute(q).scalars():
             x = search_form.values_as_dict()
             x['academic_id'] = theme_id
             report_defs.append(x)
     elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
-        q = theme_search_query(search_form).with_only_columns(Theme.id)
+        q = theme_search_query(search_form.data).with_only_columns(Theme.id)
 
         for theme_id in db.session.execute(q).scalars():
             x = search_form.values_as_dict()

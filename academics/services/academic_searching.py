@@ -1,8 +1,9 @@
 from lbrc_flask.forms import SearchForm
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from wtforms import SelectField
 from academics.model.academic import Academic
 from academics.model.theme import Theme
+from academics.services.folder import folder_academic_query
 
 
 class AcademicSearchForm(SearchForm):
@@ -14,31 +15,48 @@ class AcademicSearchForm(SearchForm):
         self.theme_id.choices = [('', ''), (-1, '[Unset]')] + [(t.id, t.name) for t in Theme.query.all()]
 
 
-def academic_search_query(search_form):
+def academic_search_query(search_data):
     q = select(Academic).where(Academic.initialised == True)
 
-    if search_form.search.data:
-        q = q.where((Academic.first_name + ' ' + Academic.last_name).like("%{}%".format(search_form.search.data)))
+    if x := search_data.get('search'):
+        for word in x.split():
+            q = q.where(or_(
+                Academic.first_name.like(f"%{word}%"),
+                Academic.last_name.like(f"%{word}%"),
+            ))
 
-    if search_form.has_value('theme_id'):
-        if search_form.theme_id.data == -1:
+    if x := search_data.get('theme_id'):
+        x = int(x)
+
+        if x == -1:
             q = q.where(~Academic.themes.any())
         else:
-            q = q.where(Academic.themes.any(Theme.id == search_form.theme_id.data))
+            q = q.where(Academic.themes.any(Theme.id == x))
+
+    if x := search_data.get('folder_id'):
+        x = int(x)
+
+        faq = folder_academic_query()
+
+        q = q.where(Academic.id.in_(
+            select(faq.c.academic_id)
+            .where(faq.c.folder_id == x)
+        ))
 
     q = q.order_by(Academic.last_name).order_by(Academic.first_name)
 
     return q
 
 
-def theme_search_query(search_form):
+def theme_search_query(search_data):
     q = select(Theme)
 
-    if search_form.search.data:
-        q = q.where(Theme.name.like("%{}%".format(search_form.search.data)))
+    if x := search_data.get('search'):
+        for word in x.split():
+            q = q.where(Theme.name.like(f"%{word}%"))
 
-    if search_form.has_value('theme_id'):
-        q = q.where(Theme.id == search_form.theme_id.data)
+    if x := search_data.get('theme_id'):
+        q = q.where(Theme.id == x)
 
     q = q.order_by(Theme.name)
 

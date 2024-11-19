@@ -76,7 +76,7 @@ class AcademicEditForm(FlashingForm):
 def index():
     search_form = AcademicSearchForm(formdata=request.args)
 
-    q = academic_search_query(search_form)
+    q = academic_search_query(search_form.data)
     q = q.options(selectinload(Academic.sources))
 
     academics = db.paginate(

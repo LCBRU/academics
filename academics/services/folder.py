@@ -1,14 +1,14 @@
 from datetime import datetime, timezone
 from typing import Optional
 from lbrc_flask.database import db
-from sqlalchemy import and_, case, distinct, func, or_, select
+from sqlalchemy import distinct, func, or_, select
 from wtforms import HiddenField
-from academics.model.academic import Academic
-from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance, FolderExcludedDoi
+from academics.model.academic import Academic, CatalogPublicationsSources, Source
+from academics.model.folder import Folder, FolderDoi, FolderExcludedDoi
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
 from academics.model.theme import Theme
-from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes
+from academics.services.publication_searching import catalog_publication_academics, catalog_publication_search_query, catalog_publication_themes, publication_folder_query
 from lbrc_flask.security import current_user_id
 from sqlalchemy.orm import with_expression, Mapped, query_expression, relationship, foreign, joinedload
 from lbrc_flask.forms import SearchForm
@@ -42,63 +42,6 @@ def current_user_folders_search_query(search_form):
 
     if search_form.search.data:
         q = q.where(Folder.name.like(f'%{search_form.search.data}%'))
-
-    return q
-
-
-class FolderAcademic(Academic):
-    folder_publication_count: Mapped[int] = query_expression()
-    folder_relevant_count: Mapped[int] = query_expression()
-    folder_not_relevant_count: Mapped[int] = query_expression()
-    folder_unset_count: Mapped[int] = query_expression()
-
-
-class FolderAcademicSearchForm(SearchForm):
-    def __init__(self, **kwargs):
-        super().__init__(
-            search_placeholder="Search Folder Academics",
-            data=all_args(),
-        )
-
-
-def folder_academics_search_query(folder_id: int, search_form: FolderAcademicSearchForm):
-    cpa = catalog_publication_academics()
-
-    q = (
-        select(FolderAcademic)
-        .select_from(cpa)
-        .join(CatalogPublication, CatalogPublication.id == cpa.c.catalog_publication_id)
-        .join(CatalogPublication.publication)
-        .join(Academic, Academic.id == cpa.c.academic_id)
-        .join(Publication.folder_dois)
-        .join(FolderDoi.folder)
-        .join(FolderDoiUserRelevance, and_(
-            FolderDoiUserRelevance.folder_doi_id == FolderDoi.id,
-            FolderDoiUserRelevance.user_id == Academic.user_id,
-        ), isouter=True)
-        .where(Folder.id == folder_id)
-        .group_by(Academic.id)
-        .order_by(Academic.last_name, Academic.first_name)
-        .options(with_expression(FolderAcademic.folder_publication_count, func.count(distinct(CatalogPublication.publication_id))))
-        .options(with_expression(FolderAcademic.folder_relevant_count, func.count(distinct(case(
-            (FolderDoiUserRelevance.relevant, CatalogPublication.publication_id),
-            else_=None
-        )))))
-        .options(with_expression(FolderAcademic.folder_not_relevant_count, func.count(distinct(case(
-            (FolderDoiUserRelevance.relevant == 0, CatalogPublication.publication_id),
-            else_=None
-        )))))
-        .options(with_expression(FolderAcademic.folder_unset_count, func.count(distinct(case(
-            (FolderDoiUserRelevance.relevant == None, CatalogPublication.publication_id),
-            else_=None
-        )))))
-    )
-
-    for w in search_form.search_words:
-        q = q.where(or_(
-            Academic.first_name.like(f"%{w}%"),
-            Academic.last_name.like(f"%{w}%"),
-        ))
 
     return q
 
@@ -254,3 +197,20 @@ def is_folder_name_duplicate(name: str, folder_id: Optional[int]):
         q = q.where(Folder.id != folder_id)
 
     return db.session.execute(q).scalar() > 0
+
+
+def folder_academic_query():
+    pfq = publication_folder_query()
+
+    q = (
+        select(
+            pfq.c.folder_id,
+            Academic.id.label('academic_id'),
+        ).select_from(pfq)
+        .join(CatalogPublication, CatalogPublication.publication_id == pfq.c.publication_id)
+        .join(CatalogPublication.catalog_publication_sources)
+        .join(CatalogPublicationsSources.source)
+        .join(Source.academic)
+    )
+
+    return q

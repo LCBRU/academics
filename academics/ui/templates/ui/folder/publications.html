@@ -49,7 +49,7 @@
                         {% if folder.can_user_edit(current_user) %}
                             <a class="icon delete" href="javascript:;" title="Delete Publication from Folder" hx-post="{{ url_for('ui.folder_delete_publication', folder_id=folder.id, doi=cp.doi ) }}" hx-confirm="Are you sure you want to delete this publication from folder {{folder.name}}" role="button"></a>
                         {% endif %}
-                        {% if cp.catalog == 'manual' %}
+                        {% if cp.catalog == 'manual' and folder.can_user_edit(current_user) %}
                             <a class="icon edit" href="javascript:;" hx-get="{{url_for('ui.catalog_publication_edit', id=cp.id)}}" hx-target="body" hx-swap="beforeend" title="Edit manual publication"></a>
                         {% endif %}
                         <a href="http://doi.org/{{ cp.doi }}" target="_blank" title="View publication" role="button">

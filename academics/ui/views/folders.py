@@ -1,4 +1,6 @@
-from academics.services.folder import FolderAcademicSearchForm, FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_academics_search_query, folder_publication_search_query, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
+from academics.services.academic_searching import academic_search_query
+from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
+from academics.services.folder_academics import folder_academics_search_query_with_folder_summary
 from academics.services.publication_searching import publication_picker_search_query
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
@@ -7,7 +9,7 @@ from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from academics.model.academic import Academic, CatalogPublicationsSources, Source
+from academics.model.academic import Academic, AcademicPicker, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
@@ -227,13 +229,13 @@ def folder_publications(folder_id, academic_id=None, theme_id=None):
 @blueprint.route("/folder/<int:folder_id>/academics")
 @assert_folder_user()
 def folder_academics(folder_id):
-    search_form: FolderAcademicSearchForm = FolderAcademicSearchForm()
+    search_form: SearchForm = SearchForm("Search Folder Academics")
 
     folder = db.get_or_404(Folder, folder_id)
 
-    q = folder_academics_search_query(
+    q = folder_academics_search_query_with_folder_summary(
         folder_id=folder.id,
-        search_form=search_form,
+        search_string=search_form.search.data,
     )
     q = q.options(selectinload(Academic.user))
 
@@ -274,14 +276,11 @@ def folder_themes(folder_id):
 @blueprint.route("/folder/<int:folder_id>/relevant/<int:relevant>/doi/<path:doi>", methods=['POST'])
 @assert_folder_user()
 def folder_doi_set_user_relevance(folder_id, relevant, doi):
-    fd = db.session.execute(
+    fd = db.one_or_404(
         select(FolderDoi)
         .where(FolderDoi.folder_id == folder_id)
         .where(FolderDoi.doi == doi)
-        ).scalar_one_or_none()
-
-    if fd is None:
-        abort(404)
+        )
 
     fdur = db.session.execute(
         select(FolderDoiUserRelevance)
@@ -292,11 +291,10 @@ def folder_doi_set_user_relevance(folder_id, relevant, doi):
     if fdur is None:
         fdur = FolderDoiUserRelevance(
             folder_doi_id=fd.id,
-            user_id=current_user_id(),
-            relevant=relevant,
+            user_id=current_user_id()
         )
-    else:
-        fdur.relevant = relevant != 0
+
+    fdur.relevant = (relevant != 0)
     
     db.session.add(fdur)
     db.session.commit()
@@ -372,4 +370,54 @@ def folder_add_publication(folder_id):
     add_doi_to_folder(f.id, p.doi)
     db.session.commmit()
 
+    return refresh_response()
+
+
+
+@blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/email_search")
+@assert_folder_user()
+def folder_theme_email_search(folder_id, theme_id):
+    f: Folder = db.get_or_404(Folder, folder_id)
+    t: Theme = db.get_or_404(Theme, theme_id)
+
+    return render_template(
+        "lbrc/search.html",
+        title=f"Email '{f.name}' Folder Publications for '{t.name}' to Academics",
+        search_placeholder='Search Folder Academics ...',
+        results_url=url_for('ui.folder_theme_email_search_results', folder_id=f.id, theme_id=t.id),
+    )
+
+
+@blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/email_search_results/<int:page>")
+@blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/email_search_results")
+@assert_folder_user()
+def folder_theme_email_search_results(folder_id, theme_id, page=1):
+    f: Folder = db.get_or_404(Folder, folder_id)
+    t: Theme = db.get_or_404(Theme, theme_id)
+
+    q = academic_search_query({
+        'folder_id': f.id,
+        'theme_id': t.id,
+        'search': get_value_from_all_arguments('search_string') or '',
+    })
+
+    q = q.with_only_columns(AcademicPicker)
+
+    results = db.paginate(select=q, page=page)
+
+    return render_user_search_results(
+        results=results,
+        title="Add shared user to folder '{f.name}'",
+        add_url=url_for('ui.folder_add_shared_user', folder_id=f.id),
+        results_url='ui.folder_theme_email_search_results',
+        results_url_args={'folder_id': f.id, 'theme_id': t.id},
+    )
+
+
+@blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/email_lead", methods=['POST'])
+def folder_email_theme_lead(folder_id, theme_id):
+    f: Folder = db.get_or_404(Folder, folder_id)
+    t: Theme = db.get_or_404(Theme, theme_id)
+
+    # TODO
     return refresh_response()
