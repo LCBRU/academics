@@ -1,0 +1,34 @@
+{% from "lbrc/pagination.html" import pagination_summary, render_pagination_htmx %}
+
+<div id="search_results_results" hx-target="#search_results_results" hx-swap="outerHTML">
+    <p>
+        {{ pagination_summary(results, 'result') }}
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results.items %}
+            <tr>
+                <td>{{ r.name }}</td>
+                <td class="grid_stacked_left">
+                    <form hx-post="{{ url_for('ui.folder_email_theme_lead', folder_id=folder.id, theme_id=theme.id ) }}">
+                        <input type="hidden" name="id" value="{{ r.id }}">
+                        <button class="icon email" type="submit" title="{{ add_title }}">Send</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p>
+        {% set rargs = results_url_args or {} %}
+        {{ render_pagination_htmx(results, results_url, **rargs) }}
+    </p>
+</div>

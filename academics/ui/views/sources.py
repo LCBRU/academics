@@ -1,7 +1,7 @@
 from flask import abort, render_template
 from sqlalchemy import select
 from wtforms import SelectField
-from academics.catalogs.jobs import AcademicRefresh
+from academics.jobs.catalogs import AcademicRefresh
 from academics.model.academic import Academic, AcademicPotentialSource, Source
 from academics.services.sources import create_potential_sources
 from .. import blueprint

@@ -12,7 +12,7 @@ from lbrc_flask.security import current_user_id
 from lbrc_flask.response import trigger_response, refresh_response
 from weasyprint import HTML
 from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
-from academics.catalogs.jobs import CatalogPublicationRefresh
+from academics.jobs.catalogs import CatalogPublicationRefresh
 from academics.model.academic import Academic, AcademicPicker, CatalogPublicationsSources, Source
 from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi

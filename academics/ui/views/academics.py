@@ -2,11 +2,10 @@ from flask import flash, render_template, request, redirect, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
-from lbrc_flask.security import system_user_id
 from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import DateField, SelectField, SelectMultipleField
-from academics.catalogs.jobs import AcademicInitialise, AcademicRefresh, RefreshAll
+from academics.jobs.catalogs import AcademicInitialise, AcademicRefresh, RefreshAll
 from academics.catalogs.scopus import scopus_author_search
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS

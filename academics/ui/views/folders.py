@@ -381,7 +381,9 @@ def folder_theme_email_search(folder_id, theme_id):
     t: Theme = db.get_or_404(Theme, theme_id)
 
     return render_template(
-        "lbrc/search.html",
+        "ui/folder/email_academics.html",
+        folder=f,
+        theme=t,
         title=f"Email '{f.name}' Folder Publications for '{t.name}' to Academics",
         search_placeholder='Search Folder Academics ...',
         results_url=url_for('ui.folder_theme_email_search_results', folder_id=f.id, theme_id=t.id),
@@ -405,12 +407,11 @@ def folder_theme_email_search_results(folder_id, theme_id, page=1):
 
     results = db.paginate(select=q, page=page)
 
-    return render_user_search_results(
+    return render_template(
+        "ui/folder/email_academics_results.html",
+        folder=f,
+        theme=t,
         results=results,
-        title="Add shared user to folder '{f.name}'",
-        add_url=url_for('ui.folder_add_shared_user', folder_id=f.id),
-        results_url='ui.folder_theme_email_search_results',
-        results_url_args={'folder_id': f.id, 'theme_id': t.id},
     )
 
 
@@ -418,6 +419,19 @@ def folder_theme_email_search_results(folder_id, theme_id, page=1):
 def folder_email_theme_lead(folder_id, theme_id):
     f: Folder = db.get_or_404(Folder, folder_id)
     t: Theme = db.get_or_404(Theme, theme_id)
+
+    id: int = get_value_from_all_arguments('id')
+
+    # TODO
+    return refresh_response()
+
+
+@blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/email_authors", methods=['POST'])
+def folder_email_authors(folder_id, theme_id):
+    f: Folder = db.get_or_404(Folder, folder_id)
+    t: Theme = db.get_or_404(Theme, theme_id)
+
+    id: int = get_value_from_all_arguments('id')
 
     # TODO
     return refresh_response()

@@ -1,0 +1,40 @@
+{% extends "lbrc/modal.html" %}
+{% from "lbrc/form_macros.html" import render_form_fields %}
+
+{% block content %}
+<h2>Email Authors</h2>
+
+<dl class="columns">
+    <dt>Folder</dt>
+    <dd>{{folder.name}}</dd>
+    <dt>Theme</dt>
+    <dd>{{theme.name}}</dd>
+</dl>
+
+<div class="flex_two_left_grow">
+    <h4>Email publication list to each BRC author</h4>
+    <a class="icon email" href="javascript:;" title="Email publication list to each BRC author" hx-post="{{ url_for('ui.folder_email_authors', folder_id=folder.id, theme_id=theme.id ) }}" role="button">Send</a>
+</div>
+
+<hr>
+
+<h4>Or select an academic to email a list of all publications for this theme within this folder</h4>
+
+<form>
+    <fieldset>
+        <input
+            type="search"
+            placeholder="{{search_placeholder or 'Search ...'}}"
+            name="search_string"
+            id="search_string"
+            hx-trigger="input changed delay:500ms"
+            hx-get="{{ results_url }}"
+            hx-target="#search_results" >
+            </fieldset>
+</form>
+
+<div id="search_results" hx-get="{{ results_url }}" hx-trigger="load"></div>
+
+{% endblock %}
+
+
