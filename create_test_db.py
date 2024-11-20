@@ -150,6 +150,23 @@ academics = [Academic(
 db.session.add_all(academics)
 db.session.commit()
 
+# Academic Users
+for a in db.session.execute(select(Academic)).scalars():
+    if randint(1, 10) < 9:
+        email = f"{a.first_name}.{a.last_name}@le.ac.uk".lower()
+        u = User(
+            email = email,
+            username = email,
+            first_name = a.first_name,
+            last_name = a.last_name,
+        )
+
+        a.user = u
+        db.session.add(u)
+        db.session.add(a)
+
+db.session.commit()
+
 # Sources
 sources = []
 

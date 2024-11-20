@@ -39,9 +39,9 @@ publications = list(db.session.execute(q).unique().scalars())
 
 email(
     subject='New Publications Last Week',
-    message=render_template('email/new_publications.txt', publications=publications),
+    message=render_template('email/new_publications/new_publications.txt', publications=publications),
     recipients=[u.email for u in get_users_for_role(ROLE_NEW_PUBLICATION_RECIPIENT)],
     # recipients=['rab63@leicester.ac.uk'],
-    html_template='email/new_publications.html',
+    html_template='email/new_publications/new_publications.html',
     publications=publications,
 )

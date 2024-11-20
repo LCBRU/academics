@@ -1,10 +1,11 @@
+from academics.jobs.emails import email_theme_folder_publication_list
 from academics.services.academic_searching import academic_search_query
 from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
 from academics.services.folder_academics import folder_academics_search_query_with_folder_summary
 from academics.services.publication_searching import publication_picker_search_query
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
-from flask import abort, render_template, request, url_for
+from flask import abort, flash, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm
 from sqlalchemy import select
@@ -403,6 +404,8 @@ def folder_theme_email_search_results(folder_id, theme_id, page=1):
         'search': get_value_from_all_arguments('search_string') or '',
     })
 
+    q = q.where(Academic.user_id != None)
+
     q = q.with_only_columns(AcademicPicker)
 
     results = db.paginate(select=q, page=page)
@@ -420,9 +423,18 @@ def folder_email_theme_lead(folder_id, theme_id):
     f: Folder = db.get_or_404(Folder, folder_id)
     t: Theme = db.get_or_404(Theme, theme_id)
 
-    id: int = get_value_from_all_arguments('id')
+    academic_id: int = get_value_from_all_arguments('id')
 
-    # TODO
+    a: Academic = db.get_or_404(Academic, academic_id)
+
+    email_theme_folder_publication_list.delay(
+        folder_id=f.id,
+        theme_id=t.id,
+        user_id=a.user_id,
+    )
+
+    flash(f"Email sent to {a.user.email} for publications in the theme '{t.name}' for folder '{f.name}'")
+
     return refresh_response()
 
 
