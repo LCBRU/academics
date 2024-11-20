@@ -428,7 +428,10 @@ def folder_email_theme_lead(folder_id, theme_id):
     a: Academic = db.get_or_404(Academic, academic_id)
 
     email_theme_folder_publication_list.delay(
-        folder_id=f.id,
+        # folder_id=f.id,
+        # theme_id=t.id,
+        # user_id=a.user_id,
+        folder_id=99999,
         theme_id=t.id,
         user_id=a.user_id,
     )
