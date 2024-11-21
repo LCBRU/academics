@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>{{folder.name}} publications for {{theme.name}}</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.5em;
+            max-width: 50rem;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0;
+            margin-bottom: 4px;
+        }
+
+        h1 {
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-top: 0;
+        }
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" crossorigin="anonymous">
+</head>
+
+<body>
+	<h1>Your publications in folder '{{folder.name}}' for the '{{theme.name}}' theme</h1>
+
+    <p>
+        As part of the reporting to the NIHR of progress against
+        our objectives, we collect details of newly published articles
+        authored by BRC affiliated researchers.
+    </p>
+
+    <p>
+        As this is an automated process, we need your help
+        to validate that the publications are relevant to
+        the objectives of your theme and add any publications
+        that are missing.
+    </p>
+
+    <p>
+        Attached is an SOP with details of how the system works.
+        Please use this link
+        (<a title="Theme publications" href="{{ url_for('ui.folder_publications', folder_id=folder.id, theme_id=theme.id, academic_id=academic.id ) }}">{{ url_for('ui.folder_publications', folder_id=folder.id, theme_id=theme.id, academic_id=academic.id ) }}</a>)
+        to view and assess your authored publications
+    </p>
+
+</body>
+</html>

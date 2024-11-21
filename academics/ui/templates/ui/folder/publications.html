@@ -11,16 +11,12 @@
 <section class="container">
     <header>
         <h2>
+            <span>Publications in folder '{{folder.name}}'</span>
+            {% if theme %}
+                <span> for theme '{{ theme.name }}'</span>
+            {% endif %}
             {% if academic %}
-                <span>Publications in folder</span>
-                <a title="Folder Academics" href="{{ url_for('ui.folder_academics', folder_id=folder.id ) }}">{{folder.name}}</a>
-                <span>for {{ academic.full_name }}</span>
-            {% elif theme %}
-                <span>Publications in folder</span>
-                <a title="Folder Themes" href="{{ url_for('ui.folder_themes', folder_id=folder.id ) }}">{{folder.name}}</a>
-                <span>for {{ theme.name }}</span>
-            {% else %}
-                <span>Publication in folder {{folder.name}}</span>
+                <span> for {{ academic.full_name }}</span>
             {% endif %}
         </h2>
 

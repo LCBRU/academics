@@ -43,6 +43,14 @@ def academic_search_query(search_data):
             .where(faq.c.folder_id == x)
         ))
 
+    if x := search_data.get('is_user'):
+        x = bool(x)
+
+        if x:
+            q = q.where(Academic.user_id != None)
+        else:
+            q = q.where(Academic.user_id == None)
+
     q = q.order_by(Academic.last_name).order_by(Academic.first_name)
 
     return q

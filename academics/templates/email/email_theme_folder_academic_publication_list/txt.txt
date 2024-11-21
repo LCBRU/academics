@@ -1,0 +1,5 @@
+# {{folder.name}} publications for {{theme.name}}
+
+Please can you check the relevance of publications in the
+folder '{{folder.name}}' for the theme '{{theme.name}}' using the
+link {{ url_for('ui.folder_publications', folder_id=folder.id, theme_id=theme.id, academic_id=academic.id ) }}

@@ -1,4 +1,4 @@
-from academics.jobs.emails import email_theme_folder_publication_list
+from academics.jobs.emails import email_theme_folder_academics_publication, email_theme_folder_publication_list
 from academics.services.academic_searching import academic_search_query
 from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
 from academics.services.folder_academics import folder_academics_search_query_with_folder_summary
@@ -199,6 +199,7 @@ def folder_delete_publication(folder_id, doi):
 @blueprint.route("/folder/<int:folder_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/acadmic/<int:academic_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/publications")
+@blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/acadmic/<int:academic_id>/publications")
 @assert_folder_user_or_author()
 def folder_publications(folder_id, academic_id=None, theme_id=None):
     search_form = FolderPublicationSearchForm()
@@ -402,9 +403,8 @@ def folder_theme_email_search_results(folder_id, theme_id, page=1):
         'folder_id': f.id,
         'theme_id': t.id,
         'search': get_value_from_all_arguments('search_string') or '',
+        'is_user': True,
     })
-
-    q = q.where(Academic.user_id != None)
 
     q = q.with_only_columns(AcademicPicker)
 
@@ -428,10 +428,7 @@ def folder_email_theme_lead(folder_id, theme_id):
     a: Academic = db.get_or_404(Academic, academic_id)
 
     email_theme_folder_publication_list.delay(
-        # folder_id=f.id,
-        # theme_id=t.id,
-        # user_id=a.user_id,
-        folder_id=99999,
+        folder_id=f.id,
         theme_id=t.id,
         user_id=a.user_id,
     )
@@ -446,7 +443,11 @@ def folder_email_authors(folder_id, theme_id):
     f: Folder = db.get_or_404(Folder, folder_id)
     t: Theme = db.get_or_404(Theme, theme_id)
 
-    id: int = get_value_from_all_arguments('id')
+    email_theme_folder_academics_publication.delay(
+        folder_id=f.id,
+        theme_id=t.id,
+    )
 
-    # TODO
+    flash(f"Email sent to all authors of publications in the theme '{t.name}' for folder '{f.name}'")
+
     return refresh_response()
