@@ -24,7 +24,6 @@ def folder_academics_search_query_with_folder_summary(search_data):
         .join(CatalogPublication.publication)
         .join(Academic, Academic.id == cpa.c.academic_id)
         .join(Publication.folder_dois)
-        .join(FolderDoi.folder)
         .join(FolderDoiUserRelevance, and_(
             FolderDoiUserRelevance.folder_doi_id == FolderDoi.id,
             FolderDoiUserRelevance.user_id == Academic.user_id,
@@ -48,7 +47,7 @@ def folder_academics_search_query_with_folder_summary(search_data):
 
     if x := search_data.get('folder_id'):
         x = int(x)
-        q = q.where(Folder.id == x)
+        q = q.where(FolderDoi.folder_id == x)
 
     if x := search_data.get('search'):
         for word in x.split():
