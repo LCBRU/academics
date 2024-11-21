@@ -33,7 +33,7 @@ def folder_academics_search_query_with_folder_summary(search_data):
         .order_by(Academic.last_name, Academic.first_name)
         .options(with_expression(FolderAcademic.folder_publication_count, func.count(distinct(CatalogPublication.publication_id))))
         .options(with_expression(FolderAcademic.folder_relevant_count, func.count(distinct(case(
-            (FolderDoiUserRelevance.relevant == 1, FolderDoiUserRelevance.publication_id),
+            (FolderDoiUserRelevance.relevant == 1, CatalogPublication.publication_id),
             else_=None
         )))))
         .options(with_expression(FolderAcademic.folder_not_relevant_count, func.count(distinct(case(
