@@ -29,6 +29,6 @@
 
     <p>
         {% set rargs = results_url_args or {} %}
-        {{ render_pagination_htmx(results, 'ui.folder_theme_email_search_results', **rargs) }}
+        {{ render_pagination_htmx(results, 'ui.folder_theme_email_search_results', folder_id=folder.id, theme_id=theme.id) }}
     </p>
 </div>
