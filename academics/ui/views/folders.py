@@ -235,10 +235,10 @@ def folder_academics(folder_id):
 
     folder = db.get_or_404(Folder, folder_id)
 
-    q = folder_academics_search_query_with_folder_summary(
-        folder_id=folder.id,
-        search_string=search_form.search.data,
-    )
+    q = folder_academics_search_query_with_folder_summary({
+        'folder_id': folder.id,
+        'search': search_form.search.data,
+    })
     q = q.options(selectinload(Academic.user))
 
     academics = db.paginate(

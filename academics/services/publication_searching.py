@@ -186,23 +186,30 @@ class ValidationSearchForm(SearchForm):
     supress_validation_historic = HiddenField()
 
 
-def best_catalog_publications():
-    catalog_publications = (
+def best_catalog_publications(search_data=None):
+    q = (
         select(
             CatalogPublication.id,
             func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
         )
-    ).alias()
+    )
+
+    search_data = search_data or {}
+
+    if x := search_data.get('folder_id'):
+        x = int(x)
+        q = q.join(CatalogPublication.publication)
+        q = q.where(Publication.folders.any(Folder.id == x))
 
     return (
-        select(catalog_publications.c.id)
-        .select_from(catalog_publications)
-        .where(catalog_publications.c.priority == 1)
+        select(q.c.id)
+        .select_from(q)
+        .where(q.c.priority == 1)
     )
 
 
-def catalog_publication_academics():
-    bcp = best_catalog_publications().cte('best_catalog_publication')
+def catalog_publication_academics(search_data=None):
+    bcp = best_catalog_publications(search_data).cte("best_catalog_publications")
 
     qa = (
         select(CatalogPublicationsSources.catalog_publication_id, Source.academic_id)
@@ -219,6 +226,17 @@ def catalog_publication_academics():
         .join(Publication.supplementary_authors)
         .where(CatalogPublication.id.in_(select(bcp.c.id)))
     )
+
+    search_data = search_data or {}
+
+    if x := search_data.get('folder_id'):
+        x = int(x)
+
+        qa = qa.join(CatalogPublicationsSources.catalog_publication)
+        qa = qa.join(CatalogPublication.publication)
+        qa = qa.where(Publication.folder_dois.any(FolderDoi.folder_id == x))
+
+        qsa = qsa.where(Publication.folder_dois.any(FolderDoi.folder_id == x))
 
     return qa.union(qsa).alias()
 
@@ -787,7 +805,7 @@ def publication_picker_search_query(search_string: str, exclude_dois: list[str])
     return q
 
 
-def publication_folder_query():
+def publication_folder_query(search_data=None):
     q = (
         select(
             Publication.id.label('publication_id'),
@@ -796,12 +814,18 @@ def publication_folder_query():
         .join(FolderDoi.publication)
     )
 
+    search_data = search_data or {}
+
+    if x := search_data.get('folder_id'):
+        x = int(x)
+        q = q.where(FolderDoi.folder_id == x)
+
     return q
 
 
-def publication_academics_query():
-    catpub_academics_query = catalog_publication_academics()
-    pub_fol_query = publication_folder_query().subquery()
+def publication_academics_query(search_data=None):
+    catpub_academics_query = catalog_publication_academics(search_data)
+    pub_fol_query = publication_folder_query(search_data).subquery()
 
     return (
         select(pub_fol_query.c.publication_id, catpub_academics_query.c.academic_id)
