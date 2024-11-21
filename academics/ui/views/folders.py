@@ -408,7 +408,11 @@ def folder_theme_email_search_results(folder_id, theme_id, page=1):
 
     q = q.with_only_columns(AcademicPicker)
 
+    print(q)
+
     results = db.paginate(select=q, page=page)
+
+    print(results)
 
     return render_template(
         "ui/folder/email_academics_results.html",
