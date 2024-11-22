@@ -13,15 +13,18 @@ from lbrc_flask.response import refresh_response
 
 class UserEditForm(FlashingForm):
     id = HiddenField('id')
-    email = EmailField('Email', validators=[Length(max=255), DataRequired()])
-    first_name = StringField('First Name', validators=[Length(max=255), DataRequired()])
-    last_name = StringField('Last Name', validators=[Length(max=255), DataRequired()])
+    email = EmailField('Email', validators=[Length(max=255), DataRequired()], render_kw={'autocomplete': 'off'})
+    first_name = StringField('First Name', validators=[Length(max=255), DataRequired()], render_kw={'autocomplete': 'off'})
+    last_name = StringField('Last Name', validators=[Length(max=255), DataRequired()], render_kw={'autocomplete': 'off'})
     theme = SelectField('Theme', coerce=int, default=0, validators=[DataRequired()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
+        themes = db.session.execute(
+            select(Theme).order_by(Theme.name)
+        )
+        self.theme.choices = [(0, '')] + [(t.id, t.name) for t in themes]
 
 
 def render_user_search_results(
