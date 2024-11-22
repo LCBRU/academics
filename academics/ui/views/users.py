@@ -23,7 +23,7 @@ class UserEditForm(FlashingForm):
 
         themes = db.session.execute(
             select(Theme).order_by(Theme.name)
-        )
+        ).scalars()
         self.theme.choices = [(0, '')] + [(t.id, t.name) for t in themes]
 
 
