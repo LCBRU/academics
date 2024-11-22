@@ -1,6 +1,6 @@
 from typing import Optional
 from flask import render_template
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from wtforms import EmailField, HiddenField, SelectField, StringField
 from lbrc_flask.forms import FlashingForm
 from wtforms.validators import Length, DataRequired
@@ -73,14 +73,24 @@ def render_user_search_add(add_url: str, success_callback: Optional[callable]=No
     )
 
 
-def user_search_query(search_string: str):
+def user_search_query(search_data):
+    search_data = search_data or {}
+
     q =  (
         select(UserPicker)
         .where(User.active == True)
-        .where((User.first_name + ' ' + User.last_name).like(f"%{search_string}%"))
         .where(User.id != system_user_id())
         .order_by(User.last_name, User.first_name, User.id)
     )
-    
+
+    if x := search_data.get('search'):
+        for word in x.split():
+            q = q.where(or_(
+                User.first_name.like(f"%{word}%"),
+                User.last_name.like(f"%{word}%"),
+                User.email.like(f"%{word}%"),
+                User.username.like(f"%{word}%"),
+            ))
+
     return q
 

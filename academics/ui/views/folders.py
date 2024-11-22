@@ -143,7 +143,9 @@ def folder_shared_user_search(folder_id):
 def folder_shared_user_search_results(folder_id, page=1):
     f: Folder = db.get_or_404(Folder, folder_id)
 
-    q = user_search_query(get_value_from_all_arguments('search_string') or '',)
+    q = user_search_query({
+        'search': get_value_from_all_arguments('search_string') or '',
+    })
     q = q.where(User.id.not_in([u.id for u in f.shared_users]))
 
     results = db.paginate(select=q)

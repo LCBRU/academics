@@ -112,7 +112,10 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     has_left_brc = db.Column(db.Boolean, default=False, nullable=False)
     left_brc_date = db.Column(db.Date, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id), index=True, nullable=True)
-    user: Mapped[User] = relationship(foreign_keys=[user_id])
+    user: Mapped[User] = relationship(
+        foreign_keys=[user_id],
+        backref=backref("academic", uselist=False)
+    )
 
     themes = db.relationship(Theme, secondary='academics_themes', lazy="selectin")
 

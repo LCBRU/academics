@@ -204,7 +204,9 @@ def group_shared_user_search(group_id):
 def group_shared_user_search_results(group_id, page=1):
     g: Group = db.get_or_404(Group, group_id)
 
-    q = user_search_query(get_value_from_all_arguments('search_string') or '',)
+    q = user_search_query({
+        'search': get_value_from_all_arguments('search_string') or '',
+    })
 
     q = q.where(User.id.not_in([u.id for u in g.shared_users]))
 
