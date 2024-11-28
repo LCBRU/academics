@@ -601,7 +601,7 @@ class PublicationReGuessStatus(AsyncJob):
                 select(CatalogPublication.publication_id)
                 .where(CatalogPublication.publication_cover_date > '2024-04-01')
             ))
-        )
+        ).scalars()
 
         i = 0
         for p in pubs:
