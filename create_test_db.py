@@ -57,7 +57,7 @@ db.session.add_all(sub_types)
 db.session.commit()
 
 # Themes
-themes = [Theme(name=w) for w in unique_words()]
+themes = [Theme(name=w) for w in list(unique_words())[:5]]
 db.session.add_all(themes)
 db.session.commit()
 
@@ -100,37 +100,42 @@ acknowledgements = [NihrAcknowledgement(name=a['name'], acknowledged=a['acknowle
     {
         'name': 'NIHR Acknowledged',
         'acknowledged': True,
-        'colour': '#F44336',
+        'colour': '#F44336', # mid red
     },
     {
         'name': 'BRC Investigators Not A Primary Author',
         'acknowledged': False,
-        'colour': '#3F51B5',
+        'colour': '#3F51B5', # Mid blue
     },
     {
         'name': 'Need Senior Review',
         'acknowledged': False,
-        'colour': '#009688',
+        'colour': '#009688', # teal
     },
     {
         'name': 'NIHR Not Acknowledged',
         'acknowledged': False,
-        'colour': '#8BC34A',
+        'colour': '#8BC34A', # light green
     },
     {
         'name': 'No BRC Investigator On Publication Or Not Relevant',
         'acknowledged': False,
-        'colour': '#FF5722',
+        'colour': '#FF5722', # orangey red
     },
     {
         'name': 'Unable To Check - Full Paper Not Available',
         'acknowledged': False,
-        'colour': '#9C27B0',
+        'colour': '#9C27B0', # purple
     },
     {
         'name': 'Not to be Submitted',
         'acknowledged': False,
-        'colour': '#47535E',
+        'colour': '#47535E', # dark grey blue
+    },
+    {
+        'name': 'Supplementary Material',
+        'acknowledged': False,
+        'colour': '#3f5921', # dark green
     },
 ]]
 

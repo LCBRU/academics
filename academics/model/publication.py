@@ -1,6 +1,7 @@
 from itertools import chain
 import logging
 from datetime import date
+import re
 from typing import Optional
 from lbrc_flask.security import AuditMixin
 from lbrc_flask.database import db
@@ -42,8 +43,19 @@ class NihrAcknowledgement(db.Model):
     colour = db.Column(db.String(50))
 
     @classmethod
+    def get_acknowledgement_by_name(cls, name):
+        return db.session.execute(
+            select(NihrAcknowledgement)
+            .where(NihrAcknowledgement.name == name)
+        ).scalar_one_or_none()
+
+    @classmethod
     def get_acknowledged_status(cls):
-        return NihrAcknowledgement.query.filter_by(name='NIHR Acknowledged').one()
+        return cls.get_acknowledgement_by_name('NIHR Acknowledged')
+
+    @classmethod
+    def get_supplementary_status(cls):
+        return cls.get_acknowledgement_by_name('Supplementary Material')
 
 
 class Subtype(db.Model):
@@ -235,11 +247,100 @@ class Publication(db.Model, AuditMixin):
         self.vancouver = '. '.join(parts)
 
     @property
+    def is_acknowledgement_unset(self):
+        return self.auto_nihr_acknowledgement is None and self.nihr_acknowledgement is None
+
+    @property
+    def is_preprint_unset(self):
+        return self.preprint is None
+
+    def set_status_from_guess(self):
+        if not self.is_acknowledgement_unset:
+            return
+        
+        if self.is_nihr_acknowledged:
+            self.nihr_acknowledgement = self.auto_nihr_acknowledgement = NihrAcknowledgement.get_acknowledged_status()
+        if self.is_supplementary:
+            self.nihr_acknowledgement = self.auto_nihr_acknowledgement = NihrAcknowledgement.get_supplementary_status()
+
+    def set_preprint_from_guess(self):
+        if not self.is_preprint_unset:
+            return
+        
+        if self.best_catalog_publication.journal:
+            self.preprint = self.best_catalog_publication.journal.preprint
+
+    @property
     def is_nihr_acknowledged(self):
         return any(chain(
             [s.is_nihr for s in self.best_catalog_publication.sponsors],
             [a.is_nihr for a in self.best_catalog_publication.affiliations]
         ))
+
+    SUPPLEMENTARY_TITLE_ENDER = [
+        r'abstract',
+        r'errat',
+        r'call for abstract',
+        r'cheminform abstract',
+        r'lsc abstract',
+        r'late.breaking abstract',
+        r'conference abstract',
+        r'addend[^\s]*',
+        r'table \d+',
+        r'figure \d+',
+        r'suppl[^\s]*',
+    ]
+
+    # Matches any type of bracket
+    SUPPLEMENTARY_TEXT_PREPROCESS_REGEX = r"[\{\[\(\)\]\}]"
+
+    @property
+    def is_supplementary(self):
+        if self._is_title_supplementary(self.best_catalog_publication.title):
+            return True
+
+        if self._is_issue_supplementary(self.best_catalog_publication.issue):
+            return True
+
+        if self._is_page_supplementary(self.best_catalog_publication.page):
+            return True
+
+        return False
+    
+    def _is_title_supplementary(self, title):
+        title = re.sub(self.SUPPLEMENTARY_TEXT_PREPROCESS_REGEX, '', title)
+
+        if self._is_match_start_or_end(title, self.SUPPLEMENTARY_TITLE_ENDER):
+            return True
+
+        # Does title start with a code of the format 'X999' with any number of numbers?
+        if re.search(r'^[A-Z]\d+', title, re.IGNORECASE):
+            return True
+        
+        return False
+
+    def _is_issue_supplementary(self, issue):
+        issue = re.sub(self.SUPPLEMENTARY_TEXT_PREPROCESS_REGEX, '', issue)
+
+        if re.search(r'suppl', issue, re.IGNORECASE):
+            return True
+
+        return False
+    
+    def _is_page_supplementary(self, page):
+        # Does page title start with one of these letter?
+        if re.search(r'^[ice]', page, re.IGNORECASE):
+            return True
+
+        return False
+    
+    def _is_match_start_or_end(self, text, regexes):
+        for r in regexes:
+            # text starts or ends with the pattern
+            if re.search(f"^{r}|{r}$", text, re.IGNORECASE):
+                return True
+
+        return False
 
 
 class CatalogPublication(db.Model, AuditMixin):

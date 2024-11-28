@@ -570,12 +570,8 @@ class PublicationInitialise(AsyncJob):
             return
 
         publication.set_vancouver()
-
-        if publication.best_catalog_publication.journal and publication.best_catalog_publication.journal.preprint and publication.preprint is None:
-            publication.preprint = True
-
-        if publication.is_nihr_acknowledged and publication.auto_nihr_acknowledgement is None and publication.nihr_acknowledgement is None:
-            publication.nihr_acknowledgement = publication.auto_nihr_acknowledgement = NihrAcknowledgement.get_acknowledged_status()
+        publication.set_preprint_from_guess()
+        publication.set_status_from_guess()
 
         db.session.add(publication)
         db.session.commit()
@@ -583,6 +579,33 @@ class PublicationInitialise(AsyncJob):
         if publication.scopus_catalog_publication is None:
             AsyncJobs.schedule(PublicationGetMissingScopus(publication))
         AsyncJobs.schedule(PublicationGetScivalInstitutions(publication))
+
+
+class PublicationReGuessStatus(AsyncJob):
+    __mapper_args__ = {
+        "polymorphic_identity": "PublicationReGuessStatus",
+    }
+
+    def __init__(self):
+        super().__init__(
+            scheduled=datetime.now(timezone.utc),
+            retry=True,
+            retry_timedelta_period='days',
+            retry_timedelta_size='1',
+        )
+
+    def _run_actual(self):
+        pubs: list[Publication] = db.session.execute(
+            select(Publication)
+            .where(Publication.id.in_(
+                select(CatalogPublication.publication_id)
+                .where(CatalogPublication.publication_cover_date > '2024-04-01')
+            ))
+        )
+
+        print('='*40)
+        print(len(list(pubs)))
+        print('='*40)
 
 
 class CatalogPublicationRefresh(AsyncJob):

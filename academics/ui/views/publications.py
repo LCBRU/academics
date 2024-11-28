@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 import shutil
 import tempfile
-from flask import abort, current_app, jsonify, render_template, render_template_string, request, send_file, url_for
+from flask import abort, current_app, jsonify, redirect, render_template, render_template_string, request, send_file, url_for
 from flask_security import roles_accepted
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
@@ -12,7 +12,7 @@ from lbrc_flask.security import current_user_id
 from lbrc_flask.response import trigger_response, refresh_response
 from weasyprint import HTML
 from wtforms import DateField, HiddenField, SelectField, StringField, TextAreaField
-from academics.jobs.catalogs import CatalogPublicationRefresh
+from academics.jobs.catalogs import CatalogPublicationRefresh, PublicationReGuessStatus
 from academics.model.academic import Academic, AcademicPicker, CatalogPublicationsSources, Source
 from academics.model.catalog import CATALOG_MANUAL
 from academics.model.folder import Folder, FolderDoi
@@ -22,12 +22,10 @@ from academics.services.publication_searching import PublicationSearchForm, acad
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from wtforms.validators import Length, DataRequired, Optional
-from lbrc_flask.async_jobs import AsyncJobs
 from werkzeug.utils import secure_filename
 from lbrc_flask.requests import get_value_from_all_arguments
-
+from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 from academics.ui.views.folder_dois import add_doi_to_folder
-
 from .. import blueprint
 
 
@@ -594,3 +592,12 @@ def catalog_publication_delete(id):
     db.session.commit()
 
     return refresh_response()
+
+
+@blueprint.route("/redo_publication_statuses")
+@roles_accepted('admin')
+def redo_publication_statuses():
+    AsyncJobs.schedule(PublicationReGuessStatus())
+    db.session.commit()
+    run_jobs_asynch()
+    return redirect(url_for('ui.index'))
