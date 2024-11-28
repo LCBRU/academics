@@ -603,9 +603,14 @@ class PublicationReGuessStatus(AsyncJob):
             ))
         )
 
-        print('='*40)
-        print(len(list(pubs)))
-        print('='*40)
+        i = 0
+        for p in pubs:
+            if p.is_supplementary:
+                i = i + 1
+                print(f'==== doing {i}  ====')
+                p.auto_nihr_acknowledgement_id = p.nihr_acknowledgement_id = NihrAcknowledgement.get_supplementary_status()
+                db.session.add(p)
+        db.session.commit()
 
 
 class CatalogPublicationRefresh(AsyncJob):
