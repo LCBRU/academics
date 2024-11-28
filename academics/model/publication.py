@@ -302,7 +302,7 @@ class Publication(db.Model, AuditMixin):
         if self._is_issue_supplementary(self.best_catalog_publication.issue):
             return True
 
-        if self._is_page_supplementary(self.best_catalog_publication.page):
+        if self._is_page_supplementary(self.best_catalog_publication.pages):
             return True
 
         return False
