@@ -608,7 +608,7 @@ class PublicationReGuessStatus(AsyncJob):
             if p.is_supplementary:
                 i = i + 1
                 print(f'==== doing {i}  ====')
-                p.auto_nihr_acknowledgement_id = p.nihr_acknowledgement_id = NihrAcknowledgement.get_supplementary_status()
+                p.auto_nihr_acknowledgement_id = p.nihr_acknowledgement_id = NihrAcknowledgement.get_supplementary_status().id
                 db.session.add(p)
         db.session.commit()
 
