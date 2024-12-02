@@ -790,8 +790,12 @@ def publication_count_value(results):
 
 class PublicationPicker(Publication):
     @property
+    def info(self):
+        return f"DOI: {self.doi}"
+
+    @property
     def name(self):
-        return self.doi
+        return self.vancouver
 
 
 def publication_picker_search_query(search_string: str, exclude_dois: list[str]):

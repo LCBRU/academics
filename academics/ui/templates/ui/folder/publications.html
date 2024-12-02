@@ -78,7 +78,8 @@
                         </div>
                     </nav>
                 </header>
-                <h3>{{cp.title}}</h3>
+
+                <h3><a href="{{ url_for('ui.publications', search=p.doi) }}">{{cp.title}}</a></h3>
                 <h4>{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
 
                 {{ render_publication_authors(p, 'brc') }}

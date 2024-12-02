@@ -2,7 +2,7 @@ from academics.jobs.emails import email_theme_folder_academics_publication, emai
 from academics.services.academic_searching import academic_search_query
 from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
 from academics.services.folder_academics import folder_academics_search_query_with_folder_summary
-from academics.services.publication_searching import publication_picker_search_query
+from academics.services.publication_searching import nihr_acknowledgement_select_choices, publication_picker_search_query
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 from flask import abort, flash, render_template, request, url_for
@@ -12,11 +12,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from academics.model.academic import Academic, AcademicPicker, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
-from academics.model.publication import CatalogPublication, Publication
+from academics.model.publication import CatalogPublication, NihrAcknowledgement, Publication
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.ui.views.decorators import assert_folder_user, assert_folder_user_or_author
-from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField, validators
+from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField, validators, SelectMultipleField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id
 from lbrc_flask.response import refresh_response
@@ -33,15 +33,17 @@ def folder_name_unique_validator(form, field):
 
 class FolderEditForm(FlashingForm):
     id = HiddenField('id')
+    author_access = BooleanField('Folder Visible to publication authors')
     name = StringField('Name', validators=[Length(max=1000), DataRequired(), folder_name_unique_validator])
     description = TextAreaField('Description', validators=[Length(max=1000)])
-    autofill_year = SelectField('Autofill Year', coerce=int, default=None, validators=[Optional()])
-    author_access = BooleanField('Allow authors access')
+    autofill_year = SelectField('Autofill From Year', coerce=int, default=None, validators=[Optional()])
+    excluded_acknowledgement_statuses = SelectMultipleField('Autofill Excludes Acknowledgement Statuses', coerce=int, default=None, validators=[Optional()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.autofill_year.choices = [(0, '')] + [(y, f'April {y} to March {y+1}') for y in range(2024, date.today().year + 2)]
+        self.excluded_acknowledgement_statuses.choices = nihr_acknowledgement_select_choices()
 
     def populate_item(self, item):
         item.name = self.name.data
@@ -52,6 +54,7 @@ class FolderEditForm(FlashingForm):
         else:
             item.autofill_year = None
         
+        item.excluded_acknowledgement_statuses = {db.session.get(NihrAcknowledgement, n) for n in self.excluded_acknowledgement_statuses.data}
         item.author_access = self.author_access.data
     
 
@@ -72,7 +75,15 @@ def folders():
 @assert_folder_user()
 def folder_edit(id):
     folder = db.get_or_404(Folder, id)
-    form = FolderEditForm(obj=folder)
+
+    form = FolderEditForm(data={
+        'id': folder.id,
+        'author_access': folder.author_access,
+        'name': folder.name,
+        'description': folder.description,
+        'autofill_year': folder.autofill_year,
+        'excluded_acknowledgement_statuses': [s.id for s in folder.excluded_acknowledgement_statuses],
+    })
 
     if form.validate_on_submit():
         form.populate_item(folder)

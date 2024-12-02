@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, ForeignKey, Integer, String, Unicode, UniqueCons
 from sqlalchemy.orm import backref
 from lbrc_flask.database import db
 from lbrc_flask.validators import is_invalid_doi
-from academics.model.publication import Publication
+from academics.model.publication import NihrAcknowledgement, Publication
 from academics.model.security import User
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref, column_property
 from lbrc_flask.security import AuditMixin
@@ -13,6 +13,13 @@ folders__shared_users = db.Table(
     'folders__shared_users',
     db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
     db.Column('user_id', db.Integer(), db.ForeignKey(User.id), primary_key=True),
+)
+
+
+folders__excluded_acknowledgement_statuses = db.Table(
+    'folders__excluded_acknowledgement_statuses',
+    db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
+    db.Column('nihr_acknowledgement_id', db.Integer(), db.ForeignKey(NihrAcknowledgement.id), primary_key=True),
 )
 
 
@@ -28,8 +35,9 @@ class Folder(db.Model):
     author_access: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
-    owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete")) 
+    owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
     shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set, lazy="selectin")
+    excluded_acknowledgement_statuses = db.relationship(NihrAcknowledgement, secondary=folders__excluded_acknowledgement_statuses, collection_class=set, lazy="selectin")
 
     def can_user_edit(self, user):
         return user == self.owner or user in self.shared_users

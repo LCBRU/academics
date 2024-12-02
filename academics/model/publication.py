@@ -219,7 +219,7 @@ class Publication(db.Model, AuditMixin):
 
     def set_vancouver(self):
         if not self.best_catalog_publication:
-            logging.warn(f'No best catalog publication for publication {self.id}')
+            logging.warning(f'No best catalog publication for publication {self.id}')
             self.vancouver = '[No Best Catalog Publication]'
             return
 
