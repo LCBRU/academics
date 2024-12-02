@@ -82,6 +82,8 @@ class AutoFillFolders(AsyncJob):
             .where(CatalogPublication.publication_period_start <= autofill_end)
             .where(CatalogPublication.publication_period_end >= autofill_start)
             .where(CatalogPublication.doi != None)
+            .where(Publication.auto_nihr_acknowledgement_id.not_in(
+                [s.id for s in folder.excluded_acknowledgement_statuses]))
         ).scalars():
             db.session.add(FolderDoi(
                 folder_id=folder.id,
