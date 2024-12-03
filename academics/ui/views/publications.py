@@ -592,12 +592,3 @@ def catalog_publication_delete(id):
     db.session.commit()
 
     return refresh_response()
-
-
-@blueprint.route("/redo_publication_statuses")
-@roles_accepted('admin')
-def redo_publication_statuses():
-    AsyncJobs.schedule(PublicationReGuessStatus())
-    db.session.commit()
-    run_jobs_asynch()
-    return redirect(url_for('ui.index'))
