@@ -85,7 +85,7 @@ class AutoFillFolders(AsyncJob):
         )
 
         if len(folder.excluded_acknowledgement_statuses) > 0:
-            q = q.where(Publication.auto_nihr_acknowledgement_id.not_in(
+            q = q.where(Publication.only_include_acknowledgement_statuses.in_(
                 [s.id for s in folder.excluded_acknowledgement_statuses]))
 
         for cp in db.session.execute(q).scalars():
