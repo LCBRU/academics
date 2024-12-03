@@ -16,8 +16,8 @@ folders__shared_users = db.Table(
 )
 
 
-folders__excluded_acknowledgement_statuses = db.Table(
-    'folders__excluded_acknowledgement_statuses',
+folders__only_include_acknowledgement_statuses = db.Table(
+    'folders__only_include_acknowledgement_statuses',
     db.Column('folder_id', db.Integer(), db.ForeignKey('folder.id'), primary_key=True),
     db.Column('nihr_acknowledgement_id', db.Integer(), db.ForeignKey(NihrAcknowledgement.id), primary_key=True),
 )
@@ -37,7 +37,7 @@ class Folder(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
     owner = db.relationship(User, backref=db.backref("folders", cascade="all,delete"))
     shared_users = db.relationship(User, secondary=folders__shared_users, backref=db.backref("shared_folders"), collection_class=set, lazy="selectin")
-    excluded_acknowledgement_statuses = db.relationship(NihrAcknowledgement, secondary=folders__excluded_acknowledgement_statuses, collection_class=set, lazy="selectin")
+    only_include_acknowledgement_statuses = db.relationship(NihrAcknowledgement, secondary=folders__only_include_acknowledgement_statuses, collection_class=set, lazy="selectin")
 
     def can_user_edit(self, user):
         return user == self.owner or user in self.shared_users

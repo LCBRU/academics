@@ -66,7 +66,7 @@ class AutoFillFolders(AsyncJob):
         autofill_start = date(folder.autofill_year, 4, 1)
         autofill_end = date(folder.autofill_year + 1, 3, 31)
 
-        for cp in db.session.execute(
+        q = (
             select(CatalogPublication)
             .select_from(CatalogPublication)
             .join(CatalogPublication.publication)
@@ -82,9 +82,13 @@ class AutoFillFolders(AsyncJob):
             .where(CatalogPublication.publication_period_start <= autofill_end)
             .where(CatalogPublication.publication_period_end >= autofill_start)
             .where(CatalogPublication.doi != None)
-            .where(Publication.auto_nihr_acknowledgement_id.not_in(
+        )
+
+        if len(folder.excluded_acknowledgement_statuses) > 0:
+            q = q.where(Publication.auto_nihr_acknowledgement_id.not_in(
                 [s.id for s in folder.excluded_acknowledgement_statuses]))
-        ).scalars():
+
+        for cp in db.session.execute(q).scalars():
             db.session.add(FolderDoi(
                 folder_id=folder.id,
                 doi=cp.doi,

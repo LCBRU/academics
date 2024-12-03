@@ -37,13 +37,13 @@ class FolderEditForm(FlashingForm):
     name = StringField('Name', validators=[Length(max=1000), DataRequired(), folder_name_unique_validator])
     description = TextAreaField('Description', validators=[Length(max=1000)])
     autofill_year = SelectField('Autofill From Year', coerce=int, default=None, validators=[Optional()])
-    excluded_acknowledgement_statuses = SelectMultipleField('Autofill Excludes Acknowledgement Statuses', coerce=int, default=None, validators=[Optional()])
+    only_include_acknowledgement_statuses = SelectMultipleField('Autofill Include Only Acknowledgement Statuses', coerce=int, default=None, validators=[Optional()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.autofill_year.choices = [(0, '')] + [(y, f'April {y} to March {y+1}') for y in range(2024, date.today().year + 2)]
-        self.excluded_acknowledgement_statuses.choices = nihr_acknowledgement_select_choices()
+        self.only_include_acknowledgement_statuses.choices = nihr_acknowledgement_select_choices()
 
     def populate_item(self, item):
         item.name = self.name.data
@@ -54,7 +54,7 @@ class FolderEditForm(FlashingForm):
         else:
             item.autofill_year = None
         
-        item.excluded_acknowledgement_statuses = {db.session.get(NihrAcknowledgement, n) for n in self.excluded_acknowledgement_statuses.data}
+        item.only_include_acknowledgement_statuses = {db.session.get(NihrAcknowledgement, n) for n in self.only_include_acknowledgement_statuses.data}
         item.author_access = self.author_access.data
     
 
@@ -82,7 +82,7 @@ def folder_edit(id):
         'name': folder.name,
         'description': folder.description,
         'autofill_year': folder.autofill_year,
-        'excluded_acknowledgement_statuses': [s.id for s in folder.excluded_acknowledgement_statuses],
+        'only_include_acknowledgement_statuses': [s.id for s in folder.only_include_acknowledgement_statuses],
     })
 
     if form.validate_on_submit():
