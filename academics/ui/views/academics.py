@@ -1,11 +1,11 @@
-from flask import flash, render_template, request, redirect, url_for
+from flask import flash, render_template, request, url_for
 from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
 from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
 from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
 from wtforms import DateField, SelectField, SelectMultipleField
-from academics.jobs.catalogs import AcademicInitialise, AcademicRefresh, RefreshAll
+from academics.jobs.catalogs import AcademicInitialise, AcademicRefresh
 from academics.catalogs.scopus import scopus_author_search
 from academics.model.academic import Academic, AcademicPotentialSource
 from academics.model.publication import CATALOG_SCOPUS
@@ -137,22 +137,6 @@ def academic_edit(id):
         form=form,
         url=url_for('ui.academic_edit', id=id),
     )
-
-
-@blueprint.route("/update_all_academics")
-@roles_accepted('admin')
-def update_all_academics():
-    AsyncJobs.schedule(RefreshAll())
-    db.session.commit()
-    run_jobs_asynch()
-    return redirect(url_for('ui.index'))
-
-
-@blueprint.route("/trigger_refresh")
-@roles_accepted('admin')
-def trigger_refresh():
-    run_jobs_asynch()
-    return redirect(url_for('ui.index'))
 
 
 @blueprint.route("/add_author_search")

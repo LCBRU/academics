@@ -8,4 +8,5 @@ __all__ = [
     "reports",
     "sources",
     "journals",
+    "jobs",
 ]
