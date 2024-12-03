@@ -84,9 +84,9 @@ class AutoFillFolders(AsyncJob):
             .where(CatalogPublication.doi != None)
         )
 
-        if len(folder.excluded_acknowledgement_statuses) > 0:
+        if len(folder.only_include_acknowledgement_statuses) > 0:
             q = q.where(Publication.only_include_acknowledgement_statuses.in_(
-                [s.id for s in folder.excluded_acknowledgement_statuses]))
+                [s.id for s in folder.only_include_acknowledgement_statuses]))
 
         for cp in db.session.execute(q).scalars():
             db.session.add(FolderDoi(
