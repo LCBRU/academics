@@ -52,7 +52,10 @@
         <li>
             <a>{{ current_user.full_name }}</a>
             <menu>
-                <li><a href="{{ url_for_security('logout') }}">Log Out</a></li>
+              {% if not current_user.ldap_user %}
+                <li><a href="{{ url_for_security('change_password') }}">Change Password</a></li>
+              {% endif %}
+            <li><a href="{{ url_for_security('logout') }}">Log Out</a></li>
             </menu>
         </li>
       </menu>

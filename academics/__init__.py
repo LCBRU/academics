@@ -10,6 +10,9 @@ from lbrc_flask import init_lbrc_flask, ReverseProxied
 from lbrc_flask.security import init_security, Role, init_roles
 from lbrc_flask.celery import init_celery
 from lbrc_flask.database import db
+from flask import render_template
+from lbrc_flask.security.forms import LbrcLoginForm, LbrcForgotPasswordForm
+
 
 
 def create_app(config=Config):
@@ -29,7 +32,44 @@ def create_app(config=Config):
 
         db.session.commit()
 
+    @app.route("/table_based_login")
+    def table_based_login():
+        return render_template(
+            "security/table_based_login.html",
+            login_user_form=LbrcLoginForm(),
+        )
+    
+    @app.route("/uol_login")
+    def uol_login():
+        return render_template(
+            "security/uol_login.html",
+            login_user_form=LbrcLoginForm(),
+        )
+    
+    @app.route("/uhl_login")
+    def uhl_login():
+        return render_template(
+            "security/uhl_login.html",
+            login_user_form=LbrcLoginForm(),
+        )
+    
+    @app.route("/forgotten_password")
+    def forgotten_password():
+        return render_template(
+            "security/forgotten_password.html",
+            forgot_password_form=LbrcForgotPasswordForm(),
+        )
+    
+    @app.route("/first_login")
+    def first_login():
+        return render_template(
+            "security/first_login.html",
+            forgot_password_form=LbrcForgotPasswordForm(),
+        )
+    
     app.register_blueprint(ui_blueprint)
     app.register_blueprint(api_blueprint, url_prefix='/api')
 
     return app
+
+

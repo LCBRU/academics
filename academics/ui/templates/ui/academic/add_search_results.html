@@ -1,3 +1,7 @@
+{% from "lbrc/errors.html" import render_errors %}
+
+{{ render_errors(get_flashed_messages(with_categories=true)) }}
+
 <table>
     <thead>
         <tr>
