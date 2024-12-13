@@ -16,7 +16,7 @@ from academics.model.publication import CatalogPublication, NihrAcknowledgement,
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.ui.views.decorators import assert_folder_user, assert_folder_user_or_author
-from wtforms import BooleanField, DateField, HiddenField, SelectField, StringField, TextAreaField, validators, SelectMultipleField
+from wtforms import BooleanField, DateField, HiddenField, RadioField, StringField, TextAreaField, validators, SelectMultipleField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id
 from lbrc_flask.response import refresh_response
@@ -24,6 +24,7 @@ from lbrc_flask.validators import is_invalid_doi
 from wtforms.validators import Length, DataRequired, Optional
 from lbrc_flask.requests import get_value_from_all_arguments
 from datetime import date
+from lbrc_flask.forms import MultiCheckboxField
 
 
 def folder_name_unique_validator(form, field):
@@ -36,13 +37,13 @@ class FolderEditForm(FlashingForm):
     author_access = BooleanField('Folder Visible to publication authors')
     name = StringField('Name', validators=[Length(max=1000), DataRequired(), folder_name_unique_validator])
     description = TextAreaField('Description', validators=[Length(max=1000)])
-    autofill_year = SelectField('Autofill From Year', coerce=int, default=None, validators=[Optional()])
-    only_include_acknowledgement_statuses = SelectMultipleField('Autofill Include Only Acknowledgement Statuses', coerce=int, default=None, validators=[Optional()])
+    autofill_year = RadioField('Autofill From Year', coerce=int, default=None, validators=[Optional()])
+    only_include_acknowledgement_statuses = MultiCheckboxField('Autofill Include Only Acknowledgement Statuses', coerce=int, default=0, validators=[Optional()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.autofill_year.choices = [(0, '')] + [(y, f'April {y} to March {y+1}') for y in range(2024, date.today().year + 2)]
+        self.autofill_year.choices = [(0, 'Do not Autofill')] + [(y, f'April {y} to March {y+1}') for y in range(2024, date.today().year + 2)]
         self.only_include_acknowledgement_statuses.choices = nihr_acknowledgement_select_choices()
 
     def populate_item(self, item):

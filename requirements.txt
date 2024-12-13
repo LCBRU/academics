@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+-e git+https://github.com/LCBRU/lbrc_flask.git#egg=lbrc_flask
+    # via -r requirements.in
 alembic==1.11.1
     # via
     #   -r requirements.in
@@ -146,8 +148,6 @@ jsonschema==4.17.3
     # via lbrc-flask
 kombu==5.2.4
     # via celery
-lbrc-flask @ git+https://github.com/LCBRU/lbrc_flask.git
-    # via -r requirements.in
 mako==1.2.4
     # via alembic
 markdown==3.4.1

@@ -1,5 +1,5 @@
 requests
-git+https://github.com/LCBRU/lbrc_flask.git
+-e git+https://github.com/LCBRU/lbrc_flask.git#egg=lbrc_flask
 Flask
 sqlalchemy
 pymysql

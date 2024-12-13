@@ -1,11 +1,11 @@
-from flask import redirect, render_template, request, url_for
+from flask import render_template, request, url_for
 from lbrc_flask.forms import FlashingForm, SearchForm, ConfirmForm
 from academics.model.objective import Objective
 from academics.model.security import User
 
 from academics.model.theme import Theme
 from .. import blueprint
-from wtforms import HiddenField, StringField
+from wtforms import HiddenField, RadioField, StringField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id, system_user_id
 from wtforms import SelectField
@@ -35,16 +35,14 @@ class ObjectiveSearchForm(SearchForm):
 class ObjectiveEditForm(FlashingForm):
     id = HiddenField('id')
     name = StringField('Name', validators=[DataRequired(), Length(max=500)])
-    theme_id = SelectField('Theme', coerce=int)
+    theme_id = RadioField('Theme', coerce=int)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        choices = [(t.id, t.name) for t in Theme.query.all()]
+        print(self.theme_id.widget)
 
-        if choices:
-            self.theme_id.choices = choices
-            self.theme_id.default = choices[0][0]
+        self.theme_id.choices = [(t.id, t.name) for t in Theme.query.all()]
 
 
 @blueprint.route("/objectives/")

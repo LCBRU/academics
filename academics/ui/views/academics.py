@@ -4,7 +4,7 @@ from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
 from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
-from wtforms import DateField, SelectField, SelectMultipleField
+from wtforms import DateField, SelectField
 from academics.jobs.catalogs import AcademicInitialise, AcademicRefresh
 from academics.catalogs.scopus import scopus_author_search
 from academics.model.academic import Academic, AcademicPotentialSource
@@ -20,6 +20,7 @@ from academics.model.theme import Theme
 from academics.services.academic_searching import AcademicSearchForm, academic_search_query
 from academics.services.sources import create_potential_sources, get_sources_for_catalog_identifiers
 from academics.ui.views.users import render_user_search_add, user_search_query
+from lbrc_flask.forms import MultiCheckboxField
 from .. import blueprint
 
 
@@ -43,7 +44,7 @@ class AddAuthorForm(FlashingForm):
 class AddAuthorEditForm(FlashingForm):
     catalog_identifier = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
-    themes = SelectField('Theme', coerce=int, default=0, validators=[DataRequired()])
+    themes = MultiCheckboxField('Theme', coerce=int, validators=[DataRequired()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -58,7 +59,7 @@ class AcademicEditForm(FlashingForm):
     initials = StringField("Initials", validators=[Length(max=255)])
     google_scholar_id = StringField("Google Scholar ID", validators=[Length(max=255)])
     orcid = StringField("ORCID", validators=[Length(max=255)])
-    themes = SelectMultipleField('Theme', coerce=int)
+    themes = MultiCheckboxField('Theme', coerce=int)
     user_id = SelectField('User', coerce=int, render_kw={'class':' select2'})
     has_left_brc = BooleanField('Has Left BRC', default=False)
     left_brc_date = DateField('Date left BRC', validators=[Optional()])
@@ -70,7 +71,7 @@ class AcademicEditForm(FlashingForm):
         users = db.session.execute(user_search_query({
             'search': get_value_from_all_arguments('search_string') or '',
         })).scalars()
-        self.user_id.choices = [(0, '')] + [(u.id, u.full_name) for u in users]
+        self.user_id.choices = [(0, '[Not a User]')] + [(u.id, u.full_name) for u in users]
 
 
 @blueprint.route("/")
