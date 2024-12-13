@@ -1,17 +1,17 @@
+from flask_login import current_user
 from sqlalchemy import and_, case, distinct, func, or_, select
 from academics.model.academic import Academic
 from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.model.publication import CatalogPublication, Publication
 from academics.services.publication_searching import catalog_publication_academics
 from sqlalchemy.orm import with_expression, Mapped, query_expression
-
+from lbrc_flask.database import db
 
 class FolderAcademic(Academic):
     folder_publication_count: Mapped[int] = query_expression()
     folder_relevant_count: Mapped[int] = query_expression()
     folder_not_relevant_count: Mapped[int] = query_expression()
     folder_unset_count: Mapped[int] = query_expression()
-
 
 
 def folder_academics_search_query_with_folder_summary(search_data):
@@ -57,3 +57,10 @@ def folder_academics_search_query_with_folder_summary(search_data):
             ))
 
     return q
+
+
+def is_current_user_a_folder_academic(folder):
+    folder_academics = db.session.execute(
+        folder_academics_search_query_with_folder_summary({'folder_id': folder.id})
+    ).scalars()
+    return current_user in [fa.user for fa in folder_academics]

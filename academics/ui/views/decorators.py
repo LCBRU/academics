@@ -7,6 +7,7 @@ from lbrc_flask.database import db
 from academics.model.folder import Folder
 from academics.model.group import Group
 from academics.services.folder import folder_author_users
+from academics.services.folder_academics import folder_academics_search_query_with_folder_summary, is_current_user_a_folder_academic
 
 
 def assert_folder_user():
@@ -19,7 +20,8 @@ def assert_folder_user():
                 folder = db.get_or_404(Folder, folder_id)
 
                 if current_user not in [folder.owner] + list(folder.shared_users):
-                    abort(403)
+                    if not is_current_user_a_folder_academic(folder):
+                        abort(403)
 
             return f(*args, **kwargs)
 
