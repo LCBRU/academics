@@ -9,7 +9,7 @@
         <h2>Objectives</h2>
 
         <form method="GET" action="{{ url_for('ui.objectives') }}">
-            <fieldset>
+            <fieldset class="columns">
                 {{ search_form.hidden_tag() }}
                 {{ render_form_fields(search_form) }}
     

@@ -9,7 +9,7 @@
         <h2>Academics</h2>
 
         <form action="{{ url_for('ui.index') }}" method="GET" enctype="multipart/form-data">
-            <fieldset>
+            <fieldset class="columns">
                 {{ render_form_fields(search_form) }}
 
                 <div class="button_bar">
