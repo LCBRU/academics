@@ -93,6 +93,10 @@ def email_theme_folder_academic_publication_list(self, folder_id: int, theme_id:
                 folder=folder,
                 theme=theme,
                 academic=academic,
+                attachements=[
+                    Path('static/pdf/Academics - Assess Publication Relevance to BRC Objectives.pdf'),
+                    Path('static/pdf/Academics - Logging In.pdf'),
+                ]
             )
 
     except Exception as e:
