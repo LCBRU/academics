@@ -4,7 +4,7 @@ from lbrc_flask.database import db
 from lbrc_flask.response import trigger_response, refresh_response
 from sqlalchemy import delete, select
 from wtforms.fields.simple import HiddenField, StringField, BooleanField
-from wtforms import DateField, SelectField
+from wtforms import DateField, RadioField, SelectField
 from academics.jobs.catalogs import AcademicInitialise, AcademicRefresh
 from academics.catalogs.scopus import scopus_author_search
 from academics.model.academic import Academic, AcademicPotentialSource
@@ -44,13 +44,13 @@ class AddAuthorForm(FlashingForm):
 class AddAuthorEditForm(FlashingForm):
     catalog_identifier = HiddenField()
     academic_id = SelectField('Academic', choices=[], default=0)
-    themes = MultiCheckboxField('Theme', coerce=int, validators=[DataRequired()])
+    themes = RadioField('Theme', coerce=int, validators=[DataRequired()])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.academic_id.choices = _get_academic_choices()
-        self.themes.choices = [(0, '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
 
 
 class AcademicEditForm(FlashingForm):

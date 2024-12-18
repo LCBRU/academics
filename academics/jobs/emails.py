@@ -1,3 +1,4 @@
+from pathlib import Path
 from flask import current_app, render_template
 from lbrc_flask.database import db
 from lbrc_flask.celery import celery
@@ -9,6 +10,7 @@ from academics.model.folder import Folder
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.services.academic_searching import academic_search_query
+from flask_mail import Attachment
 
 
 @celery.task(
@@ -30,6 +32,10 @@ def email_theme_folder_publication_list(self, folder_id: int, theme_id: int, use
             html_template='email/email_theme_folder_publication_list/html.html',
             folder=folder,
             theme=theme,
+            attachements=[
+                Path('static/pdf/Academics - Assess Publication Relevance to BRC Objectives.pdf'),
+                Path('static/pdf/Academics - Logging In.pdf'),
+            ]
         )
 
     except Exception as e:

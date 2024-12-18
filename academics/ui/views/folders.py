@@ -62,19 +62,19 @@ class FolderEditForm(FlashingForm):
 @blueprint.route("/folders/")
 def folders():
     search_form = SearchForm(search_placeholder='Search Name', formdata=request.args)
+    q = current_user_folders_search_query(search_form)
 
     return render_template(
         "ui/folder/index.html",
         search_form=search_form,
-        folders=db.paginate(
-            select=current_user_folders_search_query(search_form)
-        ),
+        folders=db.paginate(select=q),
     )
 
 
 @blueprint.route("/folder/<int:id>/edit", methods=['GET', 'POST'])
 @assert_folder_user()
 def folder_edit(id):
+
     folder = db.get_or_404(Folder, id)
 
     form = FolderEditForm(data={
