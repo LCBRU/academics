@@ -8,7 +8,7 @@
         <h2>Reports</h2>
 
         <form method="GET" action="{{ url_for('ui.reports') }}">
-            <fieldset>
+            <fieldset class="columns">
                 {{ search_form.hidden_tag() }}
                 {{ render_form_fields(search_form) }}
             </fieldset>
