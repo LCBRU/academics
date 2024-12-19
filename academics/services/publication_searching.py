@@ -558,6 +558,10 @@ def get_publication_by_theme(search_form):
         Theme, Theme.id == cpg.c.theme_id
     ).distinct()
 
+    print('*'*100)
+    print(pub_themes)
+    print('*'*100)
+
     pub_themes = pub_themes.cte('pubs')
 
     if search_form.suppress_multithemes.data == '1' or search_form.has_value('theme_id'):
