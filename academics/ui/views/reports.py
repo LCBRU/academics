@@ -23,6 +23,29 @@ def reports():
     )
 
 
+@blueprint.route("/report/image_panel", methods=['GET', 'POST'])
+def image_panel():
+    search_form = PublicationSummarySearchForm(formdata=request.args)
+
+    print(search_form.data)
+
+    return render_template(
+        "ui/reports/image.html",
+        search_form=search_form,
+    )
+
+
+@blueprint.route("/report/table_panel", methods=['GET', 'POST'])
+def table_panel():
+    search_form = PublicationSummarySearchForm(formdata=request.args)
+
+    return render_template(
+        "ui/reports/table.html",
+        title=get_publication_chart_title(search_form),
+        search_form=search_form,
+    )
+
+
 def get_report_defs(search_form):
     report_defs = []
 
@@ -52,30 +75,12 @@ def get_report_defs(search_form):
 def report_image(type='png'):
     search_form = PublicationSummarySearchForm(formdata=request.args)
 
-    if search_form.is_summary_type_academic:
-        a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
-        type_title = a.full_name
-    elif search_form.is_summary_type_theme:
-        t : Theme = Theme.query.get_or_404(search_form.theme_id.data)
-        type_title = t.name
-    else:
-        type_title = 'BRC'
+    publication_title = get_publication_chart_title(search_form)
 
     type_duplicate_message = {
         search_form.SUMMARY_TYPE__ACADEMIC: '(NB: publications may be associated with multiple academics)',
         search_form.SUMMARY_TYPE__THEME: '(NB: publications may be associated with multiple themes)',
         search_form.SUMMARY_TYPE__BRC: '',
-    }
-
-    group_by_title = {
-        'total': None,
-        'acknowledgement': 'by Acknowledgement Status',
-        'type': 'by Publication Type',
-        'external_collaboration': 'by External Collaboration',
-        'industry_collaboration': 'by Industrial Collaboration',
-        'international_collaboration': 'by International Collaboration',
-        'theme_collaboration': 'by Theme Collaboration',
-        'catalog': 'by Catalog',
     }
 
     c = publication_count(search_form)
@@ -84,7 +89,7 @@ def report_image(type='png'):
     series_config = all_series_configs(search_form)
 
     bc: BarChart = BarChart(
-        title= ' '.join(filter(None, [type_title, 'Publications', group_by_title[search_form.group_by.data]])),
+        title=publication_title,
         items=items,
         y_title='Publications',
         x_title=f'Publication Count = {c}{type_duplicate_message[search_form.summary_type]}',
@@ -102,8 +107,34 @@ def report_image(type='png'):
         return bc.send_svg()
     elif type == 'attachment':
         return bc.send_as_attachment()
+    elif type == 'table':
+        return bc.send_table()
     else:
         return bc.send()
+
+
+def get_publication_chart_title(search_form):
+    if search_form.is_summary_type_academic:
+        a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
+        type_title = a.full_name
+    elif search_form.is_summary_type_theme:
+        t : Theme = Theme.query.get_or_404(search_form.theme_id.data)
+        type_title = t.name
+    else:
+        type_title = 'BRC'
+
+    group_by_title = {
+        PublicationSummarySearchForm.GROUP_BY__TOTAL: None,
+        PublicationSummarySearchForm.GROUP_BY__ACKNOWLEDGEMENT: 'by Acknowledgement Status',
+        PublicationSummarySearchForm.GROUP_BY__TYPE: 'by Publication Type',
+        PublicationSummarySearchForm.GROUP_BY__EXTERNAL_COLLABORATION: 'by External Collaboration',
+        PublicationSummarySearchForm.GROUP_BY__INDUSTRY_COLLABORATION: 'by Industrial Collaboration',
+        PublicationSummarySearchForm.GROUP_BY__INTERNATIONAL_COLLABORATION: 'by International Collaboration',
+        PublicationSummarySearchForm.GROUP_BY__THEME_COLLABORATION: 'by Theme Collaboration',
+        PublicationSummarySearchForm.GROUP_BY__CATALOG: 'by Catalog',
+    }
+
+    return ' '.join(filter(None, [type_title, 'Publications', group_by_title[search_form.group_by.data]]))
 
 
 @blueprint.route("/academics/export/csv")

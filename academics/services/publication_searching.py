@@ -830,7 +830,7 @@ def by_catalog(publications):
 def by_total(publications):
     q = select(
         publications.c.bucket,
-        literal('').label('series'),
+        literal('Publications').label('series'),
         func.count().label('publications'),
         func.count().label('total_count'),
     ).group_by(publications.c.bucket)

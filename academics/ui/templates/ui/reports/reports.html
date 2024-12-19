@@ -16,14 +16,22 @@
     </header> 
 
     {% for r in report_defs %}
-        <div class="chart">
+        <div class="chart" hx-target="#content_{{loop.index}}">
             <nav class="link_list">
                 <a class="icon publication" href='{{ url_for("ui.publications", **r) }}' title="View Publications"></a>
-                <a class="icon download" href="{{ url_for('ui.report_image', type='attachment', **r) }}" title="Download"></a>
+                <a class="icon download" href="{{ url_for('ui.report_image', type='attachment', **r) }}" title="Download Chart"></a>
+                <a class="icon chart" href="javascript:;" hx-get="{{ url_for('ui.image_panel', **r) }}" title="Show Chart"></a>
+                <a class="icon table" href="javascript:;" hx-get="{{ url_for('ui.table_panel', **r) }}" title="Show Table"></a>
             </nav>
-            <img src="{{ url_for('ui.report_image', **r) }}" class="loading" width="1100" height="400" />
+
+            <div id="content_{{loop.index}}"
+                hx-get="{{ url_for('ui.image_panel', **r) }}"
+                hx-trigger="load"
+                hx-swap="innerHTML">
+            </div>
             <hr>
         </div>
+    
     {% endfor %}
 
 </section>

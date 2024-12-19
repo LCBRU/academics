@@ -1,0 +1,2 @@
+<h3>{{title}}</h3>
+<div hx-get="{{ url_for('ui.report_image', type='table', **search_form.values_as_dict()) }}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
