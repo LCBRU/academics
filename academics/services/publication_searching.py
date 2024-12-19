@@ -477,6 +477,7 @@ def catalog_publication_search_query(search_form):
 def publication_count(search_form):
     pubs = catalog_publication_search_query(search_form).alias()
     q = select(func.count()).select_from(pubs)
+
     return db.session.execute(q).scalar()
 
 
@@ -559,7 +560,7 @@ def get_publication_by_theme(search_form):
 
     pub_themes = pub_themes.cte('pubs')
 
-    if search_form.suppress_multithemes.data == '1':
+    if search_form.suppress_multithemes.data == '1' or search_form.has_value('theme_id'):
         return pub_themes
     else:
         multi_theme = select(

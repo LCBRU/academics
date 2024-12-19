@@ -52,10 +52,10 @@ def get_report_defs(search_form):
 def report_image(type='png'):
     search_form = PublicationSummarySearchForm(formdata=request.args)
 
-    if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
+    if search_form.is_summary_type_academic:
         a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
         type_title = a.full_name
-    elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
+    elif search_form.is_summary_type_theme:
         t : Theme = Theme.query.get_or_404(search_form.theme_id.data)
         type_title = t.name
     else:
