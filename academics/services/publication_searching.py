@@ -132,26 +132,36 @@ class PublicationSummarySearchForm(SearchForm):
     SUMMARY_TYPE__THEME = 'THEME'
     SUMMARY_TYPE__BRC = 'BRC'
 
+    GROUP_BY__TOTAL = 'total'
+    GROUP_BY__ACKNOWLEDGEMENT = 'acknowledgement'
+    GROUP_BY__TYPE = 'type'
+    GROUP_BY__EXTERNAL_COLLABORATION = 'external_collaboration'
+    GROUP_BY__INDUSTRY_COLLABORATION = 'industry_collaboration'
+    GROUP_BY__INTERNATIONAL_COLLABORATION = 'international_collaboration'
+    GROUP_BY__THEME_COLLABORATION = 'theme_collaboration'
+    GROUP_BY__CATALOG = 'catalog'
+
     total = SelectField('Total By', choices=[
         (SUMMARY_TYPE__BRC, 'BRC'),
         (SUMMARY_TYPE__THEME, 'Theme'),
         (SUMMARY_TYPE__ACADEMIC, 'Academic')
     ], default='BRC')
     group_by = SelectField('Group By', choices=[
-        ('total', 'Total'),
-        ('acknowledgement', 'Acknowledgement Status'),
-        ('type', 'Publication Type'),
-        ('external_collaboration', 'External Collaboration'),
-        ('industry_collaboration', 'Industrial Collaboration'),
-        ('international_collaboration', 'International Collaboration'),
-        ('theme_collaboration', 'Theme Collaboration'),
-        ('catalog', 'Catalog'),
+        (GROUP_BY__TOTAL, 'Total'),
+        (GROUP_BY__ACKNOWLEDGEMENT, 'Acknowledgement Status'),
+        (GROUP_BY__TYPE, 'Publication Type'),
+        (GROUP_BY__EXTERNAL_COLLABORATION, 'External Collaboration'),
+        (GROUP_BY__INDUSTRY_COLLABORATION, 'Industrial Collaboration'),
+        (GROUP_BY__INTERNATIONAL_COLLABORATION, 'International Collaboration'),
+        (GROUP_BY__THEME_COLLABORATION, 'Theme Collaboration'),
+        (GROUP_BY__CATALOG, 'Catalog'),
     ], default='total')
     theme_id = SelectField('Theme')
     group_id = SelectField('Group')
     nihr_acknowledgement_ids = SelectMultipleField('Acknowledgements')
     subtype_id = SelectMultipleField('Type')
     academic_id = HiddenField()
+    suppress_multithemes = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
     supress_validation_historic = BooleanField('Suppress Historic')
@@ -173,12 +183,56 @@ class PublicationSummarySearchForm(SearchForm):
     
     @property
     def summary_type(self):
-        if self.has_value('academic_id') or self.total.data == self.SUMMARY_TYPE__ACADEMIC:
+        if self.has_value('academic_id') or (self.total.data or '').lower() == self.SUMMARY_TYPE__ACADEMIC.lower():
             return self.SUMMARY_TYPE__ACADEMIC
-        elif self.has_value('theme_id') or self.total.data == self.SUMMARY_TYPE__THEME:
+        elif self.has_value('theme_id') or (self.total.data or '').lower() == self.SUMMARY_TYPE__THEME.lower():
             return self.SUMMARY_TYPE__THEME
         else:
             return self.SUMMARY_TYPE__BRC
+
+    @property
+    def is_summary_type_academic(self):
+        return self.summary_type == self.SUMMARY_TYPE__ACADEMIC
+
+    @property
+    def is_summary_type_theme(self):
+        return self.summary_type == self.SUMMARY_TYPE__THEME
+
+    @property
+    def is_summary_type_brc(self):
+        return self.summary_type == self.SUMMARY_TYPE__BRC
+
+    @property
+    def is_group_by_total(self):
+        return self.group_by.data.lower() == self.GROUP_BY__TOTAL.lower()
+
+    @property
+    def is_group_by_acknowledgement(self):
+        return self.group_by.data.lower() == self.GROUP_BY__ACKNOWLEDGEMENT.lower()
+
+    @property
+    def is_group_by_type(self):
+        return self.group_by.data.lower() == self.GROUP_BY__TYPE.lower()
+
+    @property
+    def is_group_by_external_collaboration(self):
+        return self.group_by.data.lower() == self.GROUP_BY__EXTERNAL_COLLABORATION.lower()
+
+    @property
+    def is_group_by_industry_collaboration(self):
+        return self.group_by.data.lower() == self.GROUP_BY__INDUSTRY_COLLABORATION.lower()
+
+    @property
+    def is_group_by_international_collaboration(self):
+        return self.group_by.data.lower() == self.GROUP_BY__INTERNATIONAL_COLLABORATION.lower()
+
+    @property
+    def is_group_by_theme_collaboration(self):
+        return self.group_by.data.lower() == self.GROUP_BY__THEME_COLLABORATION.lower()
+
+    @property
+    def is_group_by_catalog(self):
+        return self.group_by.data.lower() == self.GROUP_BY__CATALOG.lower()
 
 
 class ValidationSearchForm(SearchForm):
@@ -427,26 +481,26 @@ def publication_count(search_form):
 
 
 def publication_summary(search_form):
-    if search_form.summary_type == search_form.SUMMARY_TYPE__ACADEMIC:
+    if search_form.is_summary_type_academic:
         publications = get_publication_by_academic(search_form)
-    elif search_form.summary_type == search_form.SUMMARY_TYPE__THEME:
+    elif search_form.is_summary_type_theme:
         publications = get_publication_by_theme(search_form)
     else:
         publications = get_publication_by_brc(search_form)
 
-    if search_form.group_by.data == "acknowledgement":
+    if search_form.is_group_by_acknowledgement:
         results = by_acknowledge_status(publications)
-    elif search_form.group_by.data == "type":
+    elif search_form.is_group_by_type:
         results = by_publication_type(publications)
-    elif search_form.group_by.data == "industry_collaboration":
+    elif search_form.is_group_by_industry_collaboration:
         results = by_industrial_collaboration(publications)
-    elif search_form.group_by.data == "international_collaboration":
+    elif search_form.is_group_by_international_collaboration:
         results = by_international_collaboration(publications)
-    elif search_form.group_by.data == "external_collaboration":
+    elif search_form.is_group_by_external_collaboration:
         results = by_external_collaboration(publications)
-    elif search_form.group_by.data == "theme_collaboration":
+    elif search_form.is_group_by_theme_collaboration:
         results = by_theme_collaboration(publications)
-    elif search_form.group_by.data == "catalog":
+    elif search_form.is_group_by_catalog:
         results = by_catalog(publications)
     else:
         results = by_total(publications)
@@ -505,16 +559,19 @@ def get_publication_by_theme(search_form):
 
     pub_themes = pub_themes.cte('pubs')
 
-    multi_theme = select(
-        pub_themes.c.id,
-        func.group_concat(pub_themes.c.bucket.distinct().op('ORDER BY pubs.bucket SEPARATOR')(literal_column('" / "'))).label("bucket")
-    ).group_by(
-        pub_themes.c.id
-    ).having(func.count() > 1)
+    if search_form.suppress_multithemes.data == '1':
+        return pub_themes
+    else:
+        multi_theme = select(
+            pub_themes.c.id,
+            func.group_concat(pub_themes.c.bucket.distinct().op('ORDER BY pubs.bucket SEPARATOR')(literal_column('" / "'))).label("bucket")
+        ).group_by(
+            pub_themes.c.id
+        ).having(func.count() > 1)
 
-    return multi_theme.union_all(
-        select(pub_themes)
-    ).cte()
+        return multi_theme.union_all(
+            select(pub_themes)
+        ).cte()
 
 
 def get_publication_by_academic(search_form):
