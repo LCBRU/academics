@@ -295,7 +295,8 @@ def catalog_publication_academics(search_data=None):
     return qa.union(qsa).alias()
 
 
-def catalog_publication_themes():
+def catalog_publication_themes(search_data=None):
+
     qa = (
         select(CatalogPublicationsSources.catalog_publication_id, Theme.id.label('theme_id'))
         .select_from(CatalogPublicationsSources)
@@ -311,6 +312,13 @@ def catalog_publication_themes():
         .join(Publication.supplementary_authors)
         .join(Academic.themes)
     )
+
+    search_data = search_data or {}
+
+    if x := search_data.get('theme_id'):
+        x = int(x)
+        qa = qa.where(Theme.id == x)
+        qsa = qsa.where(Theme.id == x)
 
     return qa.union(qsa).alias()
 
@@ -370,7 +378,7 @@ def catalog_publication_search_query(search_form):
         )
 
     if search_form.has_value('theme_id'):
-        cpg = catalog_publication_themes()
+        cpg = catalog_publication_themes(search_form.data)
 
         q = q.where(CatalogPublication.id.in_(
             select(cpg.c.catalog_publication_id)
@@ -537,6 +545,7 @@ def all_series_configs(search_form):
 
 def get_publication_by_theme(search_form):
     cat_pubs = catalog_publication_search_query(search_form).alias()
+    cpg = catalog_publication_themes(search_form.data)
 
     pub_themes = select(
         CatalogPublication.id,
@@ -544,19 +553,10 @@ def get_publication_by_theme(search_form):
     ).select_from(
         cat_pubs
     ).join(
-        CatalogPublication, CatalogPublication.id == cat_pubs.c.id
+        cpg, cpg.c.catalog_publication_id == cat_pubs.c.id
     ).join(
-        CatalogPublication.catalog_publication_sources
-    ).join(
-        CatalogPublicationsSources.source
-    ).join(
-        Source.academic
-    ).join(
-        Academic.themes
+        Theme, Theme.id == cpg.c.theme_id
     ).distinct()
-
-    if search_form.has_value('theme_id'):
-        pub_themes = pub_themes.where(Theme.id == search_form.theme_id.data)
 
     pub_themes = pub_themes.cte('pubs')
 
@@ -867,6 +867,8 @@ def publication_picker_search_query(search_string: str, exclude_dois: list[str])
     return q
 
 
+
+
 def publication_folder_query(search_data=None):
     q = (
         select(
@@ -885,13 +887,13 @@ def publication_folder_query(search_data=None):
     return q
 
 
-def publication_academics_query(search_data=None):
-    catpub_academics_query = catalog_publication_academics(search_data)
-    pub_fol_query = publication_folder_query(search_data).subquery()
+# def publication_academics_query(search_data=None):
+#     catpub_academics_query = catalog_publication_academics(search_data)
+#     pub_fol_query = publication_folder_query(search_data).subquery()
 
-    return (
-        select(pub_fol_query.c.publication_id, catpub_academics_query.c.academic_id)
-        .select_from(pub_fol_query)
-        .join(CatalogPublication, CatalogPublication.publication_id == pub_fol_query.c.publication_id)
-        .join(catpub_academics_query, catpub_academics_query.c.catalog_publication_id == CatalogPublication.id)
-    )
+#     return (
+#         select(pub_fol_query.c.publication_id, catpub_academics_query.c.academic_id)
+#         .select_from(pub_fol_query)
+#         .join(CatalogPublication, CatalogPublication.publication_id == pub_fol_query.c.publication_id)
+#         .join(catpub_academics_query, catpub_academics_query.c.catalog_publication_id == CatalogPublication.id)
+#     )
