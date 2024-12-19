@@ -244,7 +244,7 @@ def best_catalog_publications(search_data=None):
     q = (
         select(
             CatalogPublication.id,
-            func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc()]).label('priority')
+            func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc(), CatalogPublication.id.desc()]).label('priority')
         )
     )
 
@@ -557,10 +557,6 @@ def get_publication_by_theme(search_form):
     ).join(
         Theme, Theme.id == cpg.c.theme_id
     ).distinct()
-
-    print('*'*100)
-    print(pub_themes)
-    print('*'*100)
 
     pub_themes = pub_themes.cte('pubs')
 
