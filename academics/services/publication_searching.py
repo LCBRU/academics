@@ -548,7 +548,7 @@ def get_publication_by_theme(search_form):
     cpg = catalog_publication_themes(search_form.data)
 
     pub_themes = select(
-        CatalogPublication.id,
+        cat_pubs.c.id,
         Theme.name.label('bucket')
     ).select_from(
         cat_pubs
