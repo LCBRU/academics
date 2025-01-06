@@ -1,5 +1,5 @@
 from lbrc_flask.database import db
-from academics.jobs.catalogs import PublicationReGuessStatus, RefreshAll
+from academics.jobs.catalogs import PublicationReGuessStatus, RefreshAll, InstitutionRefreshAll
 from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 from lbrc_flask.response import refresh_response
@@ -39,6 +39,16 @@ def auto_fill_folders():
 @roles_accepted('admin')
 def redo_publication_statuses():
     AsyncJobs.schedule(PublicationReGuessStatus())
+    db.session.commit()
+
+    run_jobs_asynch()
+    return refresh_response()
+
+
+@blueprint.route("/refresh_institutions")
+@roles_accepted('admin')
+def refresh_institutions():
+    AsyncJobs.schedule(InstitutionRefreshAll())
     db.session.commit()
 
     run_jobs_asynch()

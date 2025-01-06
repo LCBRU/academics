@@ -463,6 +463,28 @@ class AffiliationRefresh(AsyncJob):
         db.session.commit()
 
 
+class InstitutionRefreshAll(AsyncJob):
+    __mapper_args__ = {
+        "polymorphic_identity": "InstitutionRefreshAll",
+    }
+
+    def __init__(self):
+        super().__init__(
+            scheduled=datetime.now(timezone.utc),
+            retry=True,
+            retry_timedelta_period='days',
+            retry_timedelta_size='7',
+        )
+
+    def _run_actual(self):
+        insts: list[Institution] = db.session.execute(
+            select(Institution)
+        ).scalars()
+
+        for i in insts:
+            AsyncJobs.schedule(InstitutionRefresh(i))
+
+
 class InstitutionRefresh(AsyncJob):
     __mapper_args__ = {
         "polymorphic_identity": "InstitutionRefresh",
