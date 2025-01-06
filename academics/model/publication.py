@@ -329,7 +329,7 @@ class Publication(db.Model, AuditMixin):
     
     def _is_page_supplementary(self, page):
         # Does page title start with one of these letter?
-        if re.search(r'^[ice]', page, re.IGNORECASE):
+        if re.search(r'^[ic]', page, re.IGNORECASE):
             return True
 
         return False
