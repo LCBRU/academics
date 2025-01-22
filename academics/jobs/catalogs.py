@@ -744,14 +744,14 @@ class SourceGetPublications(AsyncJob):
 
         keyfunc = lambda a: a.catalog
 
-        for cat, pubs in groupby(sorted(publication_datas, key=keyfunc), key=keyfunc):
-            q = select(CatalogPublication).where(
-                CatalogPublication.catalog_identifier.in_(p.catalog_identifier for p in pubs)
-            ).where(
-                CatalogPublication.catalog == cat
-            )
+        # for cat, pubs in groupby(sorted(publication_datas, key=keyfunc), key=keyfunc):
+        #     q = select(CatalogPublication).where(
+        #         CatalogPublication.catalog_identifier.in_(p.catalog_identifier for p in pubs)
+        #     ).where(
+        #         CatalogPublication.catalog == cat
+        #     )
 
-            existing = existing | {CatalogReference(cp) for cp in db.session.execute(q).unique().scalars()}
+        #     existing = existing | {CatalogReference(cp) for cp in db.session.execute(q).unique().scalars()}
 
         new_pubs = [p for p in publication_datas if CatalogReference(p) not in existing]
 
