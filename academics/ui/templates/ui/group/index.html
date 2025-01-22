@@ -10,7 +10,6 @@
 
         <form method="GET" action="{{ url_for('ui.groups') }}">
             <fieldset>
-                {{ search_form.hidden_tag() }}
                 {{ render_form_fields(search_form) }}
     
                 <div class="button_bar" hx-target="body">
