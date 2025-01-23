@@ -3,6 +3,7 @@ from typing import Optional
 from lbrc_flask.database import db
 from sqlalchemy import distinct, func, or_, select
 from wtforms import HiddenField
+from academics.jobs.catalogs import CatalogPublicationRefresh
 from academics.model.academic import Academic, CatalogPublicationsSources, Source
 from academics.model.folder import Folder, FolderDoi, FolderExcludedDoi
 from academics.model.publication import CatalogPublication, Publication
@@ -13,6 +14,7 @@ from lbrc_flask.security import current_user_id
 from sqlalchemy.orm import with_expression, Mapped, query_expression, relationship, foreign, joinedload
 from lbrc_flask.forms import SearchForm
 from lbrc_flask.requests import all_args
+from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 
 
 def folder_author_users(folder):
@@ -214,3 +216,20 @@ def folder_academic_query():
     )
 
     return q
+
+
+def folder_scheule_update_publications(folder):
+    q = (
+        select(CatalogPublication)
+        .where(CatalogPublication.doi.in_(
+            select(FolderDoi.doi)
+            .where(FolderDoi.folder_id == folder.id)
+        ))
+    )
+
+    for cp in db.session.execute(q).scalars():
+        AsyncJobs.schedule(CatalogPublicationRefresh(cp))
+    
+    db.session.commit()
+
+    run_jobs_asynch()

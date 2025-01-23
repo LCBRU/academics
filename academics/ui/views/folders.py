@@ -1,11 +1,11 @@
 from academics.jobs.emails import email_theme_folder_academics_publication, email_theme_folder_publication_list
 from academics.services.academic_searching import academic_search_query
-from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
+from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_scheule_update_publications, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
 from academics.services.folder_academics import folder_academics_search_query_with_folder_summary
 from academics.services.publication_searching import nihr_acknowledgement_select_choices, publication_picker_search_query
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
-from flask import abort, flash, render_template, request, url_for
+from flask import flash, render_template, request, url_for
 from flask_login import current_user
 from lbrc_flask.forms import FlashingForm, SearchForm
 from sqlalchemy import select
@@ -133,6 +133,18 @@ def folder_delete(id):
 
     db.session.delete(folder)
     db.session.commit()
+
+    return refresh_response()
+
+
+@blueprint.route("/folder/<int:id>/update_publications", methods=['POST'])
+@assert_folder_user()
+def folder_update_publications(id):
+    print(id)
+    print('%'*100)
+    folder = db.get_or_404(Folder, id)
+
+    folder_scheule_update_publications(folder)
 
     return refresh_response()
 
