@@ -35,6 +35,10 @@
 
 <div id="search_results" hx-get="{{ results_url }}" hx-trigger="load"></div>
 
+<hr>
+
+<h4><a class="icon email" href="javascript:;" title="Email publication list to yourself" hx-post="{{ url_for('ui.folder_email_yourself', folder_id=folder.id, theme_id=theme.id ) }}">Or email yourself</a></h4>
+
 {% endblock %}
 
 

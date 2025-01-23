@@ -37,6 +37,12 @@ class FundingAcr(db.Model):
 
 
 class NihrAcknowledgement(db.Model):
+    STRICT_STATEMENT_REGEX = [
+        'This (study|research) is funded by the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre. The views expressed are those of the author\(s\) and not necessarily those of the NIHR or the Department of Health and Social Care',
+        'This study has been delivered through the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre. The views expressed are those of the author\(s\) and not necessarily those of the .+, the NIHR or the Department of Health and Social Care',
+        'The research was carried out at the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre',
+    ]
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000))
     acknowledged = db.Column(db.Boolean)
@@ -56,6 +62,14 @@ class NihrAcknowledgement(db.Model):
     @classmethod
     def get_supplementary_status(cls):
         return cls.get_acknowledgement_by_name('Supplementary Material')
+
+    @staticmethod
+    def get_strict_match(text):
+        for i, statement in enumerate(NihrAcknowledgement.STRICT_STATEMENT_REGEX, start=1):
+            if re.search(statement, text):
+                return i
+        
+        return None
 
 
 class Subtype(db.Model):
@@ -121,7 +135,6 @@ institutions__publications = db.Table(
     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
 )
 
-
 class Publication(db.Model, AuditMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     validation_historic: Mapped[bool] = mapped_column(default=False, nullable=True)
@@ -135,6 +148,8 @@ class Publication(db.Model, AuditMixin):
 
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
     nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[nihr_acknowledgement_id])
+
+    strict_nihr_acknowledgement_match: Mapped[int] = mapped_column(nullable=True)
 
     preprint: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
@@ -262,6 +277,9 @@ class Publication(db.Model, AuditMixin):
             self.nihr_acknowledgement = self.auto_nihr_acknowledgement = NihrAcknowledgement.get_acknowledged_status()
         if self.is_supplementary:
             self.nihr_acknowledgement = self.auto_nihr_acknowledgement = NihrAcknowledgement.get_supplementary_status()
+
+    def set_strict_from_guess(self):
+        self.strict_nihr_acknowledgement_match = NihrAcknowledgement.get_strict_match(self.best_catalog_publication.funding_text)
 
     def set_preprint_from_guess(self):
         if not self.is_preprint_unset:

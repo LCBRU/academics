@@ -452,6 +452,22 @@ def folder_email_theme_lead(folder_id, theme_id):
     return refresh_response()
 
 
+@blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/email_yourself", methods=['POST'])
+def folder_email_yourself(folder_id, theme_id):
+    f: Folder = db.get_or_404(Folder, folder_id)
+    t: Theme = db.get_or_404(Theme, theme_id)
+
+    email_theme_folder_publication_list.delay(
+        folder_id=f.id,
+        theme_id=t.id,
+        user_id=current_user_id(),
+    )
+
+    flash(f"Email sent to {current_user.email} for publications in the theme '{t.name}' for folder '{f.name}'")
+
+    return refresh_response()
+
+
 @blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/email_authors", methods=['POST'])
 def folder_email_authors(folder_id, theme_id):
     f: Folder = db.get_or_404(Folder, folder_id)

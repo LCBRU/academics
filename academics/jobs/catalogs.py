@@ -594,6 +594,7 @@ class PublicationInitialise(AsyncJob):
         publication.set_vancouver()
         publication.set_preprint_from_guess()
         publication.set_status_from_guess()
+        publication.set_strict_from_guess()
 
         db.session.add(publication)
         db.session.commit()
@@ -632,7 +633,8 @@ class PublicationReGuessStatus(AsyncJob):
                 i = i + 1
                 print(f'==== doing {i}  ====')
                 p.auto_nihr_acknowledgement_id = p.nihr_acknowledgement_id = NihrAcknowledgement.get_supplementary_status().id
-                db.session.add(p)
+            p.strict_nihr_acknowledgement_match = NihrAcknowledgement.get_strict_match(p.best_catalog_publication.funding_text)
+            db.session.add(p)
         db.session.commit()
 
 
