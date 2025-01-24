@@ -7,7 +7,7 @@
 
 <div class="flex_two_left_grow">
     <h3><a href="{{ url_for('ui.publications', search=publication.doi) }}">{{cp.title}}</a></h3>
-    <h4>{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_cover_date | date_format}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
+    <h4>{{cp.journal.name | blank_if_none | title_case}} ({{cp.publication_date_text}} {{cp.issue_volume | blank_if_none}} {{cp.pp | blank_if_none}})</h4>
 </div>
 {% endmacro %}
 
