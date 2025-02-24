@@ -1,5 +1,6 @@
 __all__ = [
     "academics",
+    "exports",
     "publications",
     "folders",
     "folder_dois",

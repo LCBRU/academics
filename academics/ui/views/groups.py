@@ -110,6 +110,7 @@ def group_remove_shared_user(id, user_id):
 
     return refresh_response()
 
+# Group Academics
 
 @blueprint.route("/group/<int:group_id>/academic/<int:academic_id>/delete", methods=['POST'])
 @assert_group_user()
@@ -185,6 +186,7 @@ def group_acadmic_search_results(group_id, page=1):
         results=academics,
     )
 
+# Shared Users
 
 @blueprint.route("/group/<int:group_id>/shared_user/search")
 @assert_group_user()

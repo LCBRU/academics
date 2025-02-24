@@ -35,6 +35,7 @@
                         {% if folder.can_user_edit(current_user) %}
                             <a class="icon email" title="Email publications" hx-get="{{ url_for('ui.folder_theme_email_search', folder_id=folder.id, theme_id=t.id ) }}" hx-target="body" hx-swap="beforeend" href="javascript:;"></a>
                         {% endif %}
+                        <a class="icon excel" title="Export Publications" href="{{ url_for('ui.publication_full_export_xlsx', folder_id=folder.id, theme_id=t.id ) }}"></a>
                     </td>
                     <td>{{ t.name }}</td>
                     <td>{{ t.folder_publication_count }}</td>

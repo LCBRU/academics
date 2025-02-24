@@ -140,8 +140,6 @@ def folder_delete(id):
 @blueprint.route("/folder/<int:id>/update_publications", methods=['POST'])
 @assert_folder_user()
 def folder_update_publications(id):
-    print(id)
-    print('%'*100)
     folder = db.get_or_404(Folder, id)
 
     folder_scheule_update_publications(folder)
@@ -183,20 +181,6 @@ def folder_shared_user_search_results(folder_id, page=1):
     )
 
 
-@blueprint.route("/folder/<int:id>/remove_shared_user/<int:user_id>", methods=['POST'])
-@assert_folder_user()
-def folder_remove_shared_user(id, user_id):
-    u = db.get_or_404(User, user_id)
-    f = db.get_or_404(Folder, id)
-
-    f.shared_users.remove(u)
-
-    db.session.add(f)
-    db.session.commit()
-
-    return refresh_response()
-
-
 @blueprint.route("/folder/<int:folder_id>/add_shared_user", methods=['POST'])
 @assert_folder_user()
 def folder_add_shared_user(folder_id):
@@ -206,6 +190,20 @@ def folder_add_shared_user(folder_id):
     u = db.get_or_404(User, id)
 
     f.shared_users.add(u)
+
+    db.session.add(f)
+    db.session.commit()
+
+    return refresh_response()
+
+
+@blueprint.route("/folder/<int:id>/remove_shared_user/<int:user_id>", methods=['POST'])
+@assert_folder_user()
+def folder_remove_shared_user(id, user_id):
+    u = db.get_or_404(User, user_id)
+    f = db.get_or_404(Folder, id)
+
+    f.shared_users.remove(u)
 
     db.session.add(f)
     db.session.commit()
