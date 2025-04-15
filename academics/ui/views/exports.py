@@ -6,6 +6,7 @@ import tempfile
 from flask import render_template, request, send_file
 from lbrc_flask.database import db
 from lbrc_flask.export import excel_download, pdf_download
+from lbrc_flask.lookups import NullObject
 from weasyprint import HTML
 from academics.model.academic import CatalogPublicationsSources, Source
 from academics.model.folder import FolderDoi
@@ -60,8 +61,8 @@ def publication_full_export_xlsx():
         'catalog': p.best_catalog_publication.catalog,
         'catalog_identifier': p.best_catalog_publication.catalog_identifier,
         'doi': p.doi,
-        'journal': p.best_catalog_publication.journal.name,
-        'type': p.best_catalog_publication.subtype.description,
+        'journal': NullObject(p.best_catalog_publication.journal).name,
+        'type': NullObject(p.best_catalog_publication.subtype).description,
         'volume': p.best_catalog_publication.volume,
         'issue': p.best_catalog_publication.issue,
         'pages': p.best_catalog_publication.pages,
