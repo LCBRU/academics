@@ -2,8 +2,10 @@ from flask import render_template, request
 from lbrc_flask.charting import BarChart
 from lbrc_flask.database import db
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from lbrc_flask.export import csv_download
 from academics.model.academic import Academic
+from academics.model.publication import CatalogPublication, Journal, NihrAcknowledgement, Publication, Subtype
 from academics.model.theme import Theme
 from academics.services.academic_searching import academic_search_query, theme_search_query
 from academics.services.publication_searching import PublicationSearchForm, PublicationSummarySearchForm, publication_count, publication_search_query, publication_summary, all_series_configs
@@ -171,6 +173,26 @@ def reports_pdf():
         title='Academics Publications',
         publications=publications,
         parameters=search_form.values_as_dict(),
+    )
+
+
+@blueprint.route("/reports/test")
+def reports_test():
+    q = select(
+        CatalogPublication.title,
+        CatalogPublication.doi,
+        NihrAcknowledgement.name,
+    ).join(
+        CatalogPublication.publication
+    ).join(
+        Publication.nihr_acknowledgement,
+    )
+
+    results = db.session.execute(q).mappings()
+
+    return render_template(
+        'ui/reports/test.html',
+        results=results,
     )
 
 
