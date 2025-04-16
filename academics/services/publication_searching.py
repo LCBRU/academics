@@ -73,7 +73,7 @@ def folder_select_choices():
         Folder.shared_users.any(User.id == current_user_id()),
     )).order_by(Folder.name)
 
-    return [(-1, '[Not in a folder]')] + [(f.id, f.name.title()) for f in db.session.execute(q).scalars()]
+    return [(-1, '[Not in any folders]')] + [(f.id, f.name.title()) for f in db.session.execute(q).scalars()]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
