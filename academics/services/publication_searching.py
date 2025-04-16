@@ -73,7 +73,7 @@ def folder_select_choices():
         Folder.shared_users.any(User.id == current_user_id()),
     )).order_by(Folder.name)
 
-    return [(f.id, f.name.title()) for f in db.session.execute(q).scalars()]
+    return [(-1, '[Not in a folder]')] + [(f.id, f.name.title()) for f in db.session.execute(q).scalars()]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
@@ -455,7 +455,10 @@ def catalog_publication_search_query(search_form):
         q = q.where(or_(*status_filter))
 
     if search_form.has_value('folder_id'):
-        q = q.where(Publication.folders.any(Folder.id == search_form.folder_id.data))
+        if search_form.folder_id.data == '-1':
+            q = q.where(~Publication.folders.any())
+        else:
+            q = q.where(Publication.folders.any(Folder.id == search_form.folder_id.data))
 
     if search_form.supress_validation_historic.data == True:
         logging.debug(f'Supressing Historic Publications')
