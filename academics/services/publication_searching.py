@@ -164,13 +164,14 @@ class PublicationSummarySearchForm(SearchForm):
     suppress_multithemes = HiddenField()
     publication_start_month = MonthField('Publication Start Month')
     publication_end_month = MonthField('Publication End Month')
-    supress_validation_historic = BooleanField('Suppress Historic')
+    folder_id = SelectField('Folder')
     preprint = SelectField(
         'Preprint',
         choices=[('', ''), ('True', 'Yes'), ('False', 'No')],
         coerce=boolean_coerce,
         default=None,
     )
+    supress_validation_historic = BooleanField('Suppress Historic')
 
     def __init__(self, **kwargs):
         super().__init__(search_placeholder='Search Title, Journal or DOI', **kwargs)
@@ -180,6 +181,7 @@ class PublicationSummarySearchForm(SearchForm):
         self.theme_id.choices = theme_select_choices()
         self.group_id.choices = group_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
+        self.folder_id.choices = [('', '')] + folder_select_choices()
     
     @property
     def summary_type(self):
