@@ -6,7 +6,7 @@ from academics.model.academic import Academic, CatalogPublicationsSources, Sourc
 from academics.model.folder import Folder, FolderDoi
 from academics.model.group import Group
 from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Subtype, CatalogPublication
-from academics.model.catalog import primary_catalogs
+from academics.model.catalog import CATALOG_MANUAL, primary_catalogs
 from lbrc_flask.validators import parse_date_or_none
 from lbrc_flask.data_conversions import ensure_list
 from sqlalchemy import case, literal, literal_column, or_
@@ -263,6 +263,16 @@ def best_catalog_publications(search_data=None):
         .where(q.c.priority == 1)
     )
 
+
+def manual_only_catalog_publications():
+    q = (
+        select(CatalogPublication)
+        .where(CatalogPublication.catalog == CATALOG_MANUAL)
+        .join(CatalogPublication.publication)
+        .where(Publication.catalog_publications.all_(CatalogPublication.catalog == CATALOG_MANUAL))
+    )
+
+    return q
 
 def catalog_publication_academics(search_data=None):
     bcp = best_catalog_publications(search_data).cte("best_catalog_publications")

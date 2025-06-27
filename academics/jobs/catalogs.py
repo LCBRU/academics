@@ -7,13 +7,14 @@ from lbrc_flask.async_jobs import AsyncJob, AsyncJobs
 from lbrc_flask.database import db
 from flask import current_app
 from sqlalchemy import delete, select
+from academics.services.publication_searching import manual_only_catalog_publications
 from academics.services.sources import create_potential_sources
 from academics.catalogs.data_classes import CatalogReference
 from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
 from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
 from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
 from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, Source, CatalogPublicationsSources, catalog_publications_sources_affiliations, Affiliation, Source
-from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCIVAL, CATALOG_SCOPUS
+from academics.model.catalog import CATALOG_MANUAL, CATALOG_OPEN_ALEX, CATALOG_SCIVAL, CATALOG_SCOPUS
 from academics.model.institutions import Institution
 from academics.model.publication import CatalogPublication, NihrAcknowledgement, Journal, Keyword, Publication, Sponsor, Subtype
 from lbrc_flask.validators import parse_date
@@ -429,6 +430,22 @@ class RefreshAll(AsyncJob):
         for academic in db.session.execute(select(Academic)).scalars():
             AsyncJobs.schedule(AcademicRefresh(academic))
 
+        AsyncJobs.schedule(ManaualCatalogPublicationsFindScopus())
+
+class ManaualCatalogPublicationsFindScopus(AsyncJob):
+    __mapper_args__ = {
+        "polymorphic_identity": "ManaualCatalogPublicationsFindScopus",
+    }
+
+    def __init__(self):
+        super().__init__(
+            scheduled=datetime.now(timezone.utc),
+            retry=False,
+        )
+
+    def _run_actual(self):
+        for cp in db.session.execute(manual_only_catalog_publications()).scalars():
+            AsyncJobs.schedule(PublicationGetMissingScopus(cp.publication))
 
 
 class AffiliationRefresh(AsyncJob):

@@ -1,5 +1,5 @@
 from lbrc_flask.database import db
-from academics.jobs.catalogs import PublicationReGuessStatus, RefreshAll, InstitutionRefreshAll
+from academics.jobs.catalogs import ManaualCatalogPublicationsFindScopus, PublicationReGuessStatus, RefreshAll, InstitutionRefreshAll
 from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 from lbrc_flask.response import refresh_response
@@ -29,6 +29,16 @@ def run_outstanding_jobs():
 @roles_accepted('admin')
 def auto_fill_folders():
     AsyncJobs.schedule(AutoFillFolders())
+    db.session.commit()
+    
+    run_jobs_asynch()
+    return refresh_response()
+
+
+@blueprint.route("/jobs/manaual_catalog_publications_find_scopus")
+@roles_accepted('admin')
+def manaual_catalog_publications_find_scopus():
+    AsyncJobs.schedule(ManaualCatalogPublicationsFindScopus())
     db.session.commit()
     
     run_jobs_asynch()
