@@ -1,8 +1,11 @@
+import re
+from string import whitespace
 from academics.jobs.emails import email_theme_folder_academics_publication, email_theme_folder_publication_list
 from academics.services.academic_searching import academic_search_query
-from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_scheule_update_publications, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
+from academics.services.folder import FolderPublicationSearchForm, FolderThemeSearchForm, add_doi_to_folder, add_dois_to_folder, current_user_folders_search_query, folder_publication_search_query, folder_scheule_update_publications, folder_theme_search_query, is_folder_name_duplicate, remove_doi_from_folder
 from academics.services.folder_academics import folder_academics_search_query_with_folder_summary
 from academics.services.publication_searching import nihr_acknowledgement_select_choices, publication_picker_search_query
+from academics.services.publications import add_manual_doi_publications_if_missing
 from academics.ui.views.users import render_user_search_results, user_search_query
 from .. import blueprint
 from flask import flash, render_template, request, url_for
@@ -16,7 +19,7 @@ from academics.model.publication import CatalogPublication, NihrAcknowledgement,
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.ui.views.decorators import assert_folder_user, assert_folder_user_or_author
-from wtforms import BooleanField, DateField, HiddenField, RadioField, StringField, TextAreaField, validators, SelectMultipleField
+from wtforms import BooleanField, DateField, HiddenField, RadioField, StringField, TextAreaField, ValidationError, validators, SelectMultipleField
 from lbrc_flask.database import db
 from lbrc_flask.security import current_user_id
 from lbrc_flask.response import refresh_response
@@ -491,3 +494,67 @@ def folder_email_authors(folder_id, theme_id):
     flash(f"Email sent to all authors of publications in the theme '{t.name}' for folder '{f.name}'")
 
     return refresh_response()
+
+
+class FolderAddDois(FlashingForm):
+    id = HiddenField('id')
+    dois_combined = TextAreaField('DOIs')
+    skip_invalid = BooleanField('Skip Invalid DOIs')
+
+    def validate_dois_combined(form, field):
+        invalid_dois = [doi for doi in form._all_dois if is_invalid_doi(doi)]
+
+        if invalid_dois and not form.skip_invalid.data:
+            raise ValidationError(f'DOIs contains invalid DOIs: {invalid_dois}')
+
+    @property
+    def _all_dois(self):
+        junk = [
+            ' ',
+            'doi:',
+            'http://doi.org/',
+            'https://doi.org/',
+        ]
+
+        results = []
+
+        for doi in self.dois_combined.data.split():
+            for j in junk:
+                doi = doi.replace(j, '')
+            
+            if doi:
+                results.append(doi)
+        
+        return results
+
+    @property
+    def valid_dois(self):
+        return [doi.lower() for doi in self._all_dois if not is_invalid_doi(doi)]
+
+
+@blueprint.route("/folder/<int:id>/add_dois", methods=['GET', 'POST'])
+@assert_folder_user()
+def folder_add_dois(id):
+
+    folder = db.get_or_404(Folder, id)
+
+    form = FolderAddDois(data={
+        'id': folder.id,
+    })
+
+    if form.validate_on_submit():
+        add_manual_doi_publications_if_missing(form.valid_dois)
+        add_dois_to_folder(form.id.data, form.valid_dois)
+
+        db.session.commit()
+
+        return refresh_response()
+
+    return render_template(
+        "lbrc/form_modal.html",
+        title='Add DOIs to Folder',
+        form=form,
+        url=url_for('ui.folder_add_dois', id=id),
+    )
+
+

@@ -18,6 +18,7 @@ from sqlalchemy.orm import selectinload
 from wtforms.validators import Length, DataRequired, Optional
 from lbrc_flask.requests import get_value_from_all_arguments
 from lbrc_flask.async_jobs import AsyncJobs
+from academics.services.publications import update_manual_publication
 from academics.ui.views.folder_dois import add_doi_to_folder
 from .. import blueprint
 
@@ -381,29 +382,7 @@ def catalog_publication_edit(id=None):
         form = PublicationAddForm(data=request.args)
 
     if form.validate_on_submit():
-        publication = db.session.execute(
-            select(Publication)
-            .where(Publication.doi == form.doi.data)
-        ).unique().scalar_one_or_none() or Publication(doi=form.doi.data, refresh_full_details=True)
-
-        catalog_publication.catalog_identifier = form.doi.data
-        catalog_publication.doi = form.doi.data
-        catalog_publication.title = form.title.data or ''
-        catalog_publication.publication_cover_date = form.publication_cover_date.data or datetime.now()
-        catalog_publication.abstract = ''
-        catalog_publication.volume = ''
-        catalog_publication.issue = ''
-        catalog_publication.pages = ''
-        catalog_publication.funding_text = ''
-        catalog_publication.href = ''
-        catalog_publication.refresh_full_details = True
-        catalog_publication.publication = publication
-
-        db.session.add(catalog_publication)
-        db.session.flush()
-
-        AsyncJobs.schedule(CatalogPublicationRefresh(catalog_publication))
-        db.session.commit()
+        update_manual_publication(catalog_publication, form.doi.data, form.title.data, form.publication_cover_date.data)
 
         if form.has_value('folder_id'):
             add_doi_to_folder(form.folder_id.data, form.doi.data)
@@ -419,7 +398,6 @@ def catalog_publication_edit(id=None):
         submit_label='Add' if id is None else 'Save',
         url=url_for('ui.catalog_publication_edit', id=id),
     )
-
 
 @blueprint.route("/catalog_publication/<int:id>/delete", methods=['POST'])
 def catalog_publication_delete(id):

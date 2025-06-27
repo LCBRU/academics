@@ -12,8 +12,6 @@ argon2-cffi-bindings==21.2.0
     # via argon2-cffi
 arrow==1.3.0
     # via lbrc-flask
-async-timeout==5.0.1
-    # via redis
 attrs==25.3.0
     # via
     #   jsonschema
@@ -33,14 +31,16 @@ blinker==1.9.0
     #   flask
     #   flask-mail
     #   flask-principal
-brotli==1.1.0
-    # via fonttools
 cachetools==5.5.2
     # via -r requirements.in
 cairocffi==1.7.1
-    # via cairosvg
+    # via
+    #   cairosvg
+    #   weasyprint
 cairosvg==2.7.1
-    # via lbrc-flask
+    # via
+    #   lbrc-flask
+    #   weasyprint
 celery==5.5.0
     # via
     #   -r requirements.in
@@ -69,6 +69,8 @@ click-plugins==1.1.1
     # via celery
 click-repl==0.3.0
     # via celery
+coverage==7.9.1
+    # via pytest-cov
 cssselect2==0.8.0
     # via
     #   cairosvg
@@ -85,6 +87,8 @@ email-validator==2.2.0
     #   lbrc-flask
 et-xmlfile==2.0.0
     # via openpyxl
+execnet==2.1.1
+    # via pytest-xdist
 faker==37.1.0
     # via
     #   -r requirements.in
@@ -120,7 +124,7 @@ flask-sqlalchemy==3.1.1
     # via
     #   flask-security-too
     #   lbrc-flask
-flask-weasyprint==1.1.0
+flask-weasyprint==1.0.0
     # via
     #   -r requirements.in
     #   lbrc-flask
@@ -128,12 +132,12 @@ flask-wtf==1.2.2
     # via
     #   flask-security-too
     #   lbrc-flask
-fonttools==4.56.0
-    # via weasyprint
 greenlet==3.1.1
     # via sqlalchemy
 hatchling==1.27.0
     # via lbrc-flask
+html5lib==1.1
+    # via weasyprint
 idna==3.10
     # via
     #   email-validator
@@ -156,7 +160,7 @@ jsonschema-specifications==2024.10.1
     # via jsonschema
 kombu==5.5.2
     # via celery
-lbrc-flask @ git+https://github.com/LCBRU/lbrc_flask.git@b6f6b83bb9bf38394abc3668cd16087e0ba5126c#egg=lbrc_flask
+lbrc-flask @ git+https://github.com/LCBRU/lbrc_flask.git@ed44d28a40f0b39d90dc52b4defa27080be7b9d3#egg=lbrc_flask
     # via -r requirements.in
 ldap3==2.9.1
     # via lbrc-flask
@@ -199,6 +203,7 @@ pluggy==1.5.0
     # via
     #   hatchling
     #   pytest
+    #   pytest-cov
 prompt-toolkit==3.0.50
     # via click-repl
 pyalex==0.18
@@ -207,8 +212,6 @@ pyasn1==0.6.1
     # via ldap3
 pycparser==2.22
     # via cffi
-pydyf==0.11.0
-    # via weasyprint
 pygal==3.0.5
     # via lbrc-flask
 pygments==2.19.1
@@ -220,6 +223,13 @@ pymysql==1.1.1
 pyphen==0.17.2
     # via weasyprint
 pytest==8.3.5
+    # via
+    #   lbrc-flask
+    #   pytest-cov
+    #   pytest-xdist
+pytest-cov==6.2.1
+    # via lbrc-flask
+pytest-xdist==3.7.0
     # via lbrc-flask
 python-dateutil==2.9.0.post0
     # via
@@ -251,9 +261,13 @@ rpds-py==0.24.0
     #   jsonschema
     #   referencing
 setuptools==78.1.0
-    # via lbrc-flask
+    # via
+    #   lbrc-flask
+    #   weasyprint
 six==1.17.0
-    # via python-dateutil
+    # via
+    #   html5lib
+    #   python-dateutil
 soupsieve==2.6
     # via beautifulsoup4
 sqlalchemy==2.0.40
@@ -270,8 +284,6 @@ tinycss2==1.4.0
     #   cairosvg
     #   cssselect2
     #   weasyprint
-tinyhtml5==2.0.0
-    # via weasyprint
 trove-classifiers==2025.3.19.19
     # via hatchling
 types-python-dateutil==2.9.0.20241206
@@ -300,16 +312,17 @@ vine==5.1.0
     #   kombu
 wcwidth==0.2.13
     # via prompt-toolkit
-weasyprint==65.0
+weasyprint==52.5
     # via
     #   -r requirements.in
     #   flask-weasyprint
+    #   lbrc-flask
 webencodings==0.5.1
     # via
     #   bleach
     #   cssselect2
+    #   html5lib
     #   tinycss2
-    #   tinyhtml5
 werkzeug==3.1.3
     # via
     #   flask
@@ -324,5 +337,3 @@ xlrd==2.0.1
     # via lbrc-flask
 zipp==3.21.0
     # via importlib-metadata
-zopfli==0.2.3.post1
-    # via fonttools

@@ -11,6 +11,7 @@ from weasyprint import HTML
 from academics.model.academic import CatalogPublicationsSources, Source
 from academics.model.folder import FolderDoi
 from academics.model.publication import CatalogPublication, Publication
+from academics.model.theme import Theme
 from academics.services.publication_searching import PublicationSearchForm, publication_search_query
 from sqlalchemy.orm import selectinload
 from werkzeug.utils import secure_filename
@@ -102,6 +103,62 @@ def publication_full_annual_report_xlsx():
         'Publication Reference': p.vancouver,
         'DOI': p.doi,
     } for p in db.session.execute(q).unique().mappings())
+
+    return excel_download('Academics_Publications', headers.keys(), publication_details)
+
+
+@blueprint.route("/export/publications/dashboard")
+def publication_dashboard_report_xlsx():
+    # Use of dictionary instead of set to maintain order of headers
+    headers = {
+        'DOI': None,
+        'NIHR Acknowledgement': None,
+        'Theme': None,
+        'External Collaboration': None,
+        'Industrial Collaboration': None,
+        'International Collaboration': None,
+        'Theme Collaboration': None,
+    }
+
+    search_form = PublicationSearchForm(formdata=request.args)
+
+    q = publication_search_query(search_form)
+
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.catalog_publication_sources)
+        .selectinload(CatalogPublicationsSources.source)
+    )
+    q = q.options(
+        selectinload(Publication.catalog_publications)
+        .selectinload(CatalogPublication.sponsors)
+    )
+    q = q.options(
+        selectinload(Publication.nihr_acknowledgement)
+    )
+
+    publication_details = []
+
+    for p in db.session.execute(q).unique().scalars():
+        p: Publication
+
+        themes = p.themes
+
+        if not themes:
+            themes = ['']
+
+        for t in themes:
+            t: Theme
+
+            publication_details.append({
+                'DOI': p.doi,
+                'NIHR Acknowledgement': p.nihr_acknowledgement_name,
+                'Theme': t,
+                'External Collaboration': 'Yes' if p.is_external_collaboration else 'No',
+                'Industrial Collaboration': 'Yes' if p.is_industrial_collaboration else 'No',
+                'International Collaboration': 'Yes' if p.is_international_collaboration else 'No',
+                'Theme Collaboration': 'Yes' if p.is_theme_collaboration else 'No',
+            })
 
     return excel_download('Academics_Publications', headers.keys(), publication_details)
 

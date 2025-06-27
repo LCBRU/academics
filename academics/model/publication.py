@@ -14,6 +14,7 @@ from academics.model.institutions import Institution
 from sqlalchemy.ext.associationproxy import association_proxy
 
 
+
 DOI_URL = 'doi.org'
 ORCID_URL = 'orcid.org'
 
@@ -161,6 +162,13 @@ class Publication(db.Model, AuditMixin):
 
     folders = association_proxy('folder_dois', 'folder')
 
+    @property
+    def nihr_acknowledgement_name(self) -> str:
+        if self.nihr_acknowledgement:
+            return self.nihr_acknowledgement.name
+        else:
+            return ''
+
     @hybrid_property
     def is_industrial_collaboration(self):
         if self.institutions:
@@ -212,6 +220,10 @@ class Publication(db.Model, AuditMixin):
             .where(func.coalesce(Institution.home_institution, 0) == 0)).exists(),
             ).label("is_external_collaboration")
 
+    @hybrid_property
+    def is_theme_collaboration(self):
+        return len(self.themes) > 1
+
     @property
     def scopus_catalog_publication(self):
         return next((cp for cp in self.catalog_publications if cp.catalog == CATALOG_SCOPUS), None)
@@ -232,6 +244,10 @@ class Publication(db.Model, AuditMixin):
     def academics(self):
         return self.best_catalog_publication.academics
 
+    @property
+    def themes(self):
+        return self.best_catalog_publication.themes
+    
     def set_vancouver(self):
         if not self.best_catalog_publication:
             logging.warning(f'No best catalog publication for publication {self.id}')
@@ -419,6 +435,10 @@ class CatalogPublication(db.Model, AuditMixin):
     @property
     def academics(self):
         return filter(None, (cps.source.academic for cps in self.catalog_publication_sources))
+
+    @property
+    def themes(self):
+        return set(chain.from_iterable([a.themes for a in self.academics]))
 
     @property
     def author_count(self):

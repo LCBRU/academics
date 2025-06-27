@@ -129,6 +129,11 @@ def folder_theme_search_query(folder: Folder, search_form: FolderThemeSearchForm
     return q
 
 
+def add_dois_to_folder(folder_id, dois):
+    for doi in dois:
+        add_doi_to_folder(folder_id, doi)
+
+
 def add_doi_to_folder(folder_id, doi):
     fd = get_folder_doi(folder_id, doi)
 
