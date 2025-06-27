@@ -142,7 +142,7 @@ def publication_dashboard_report_xlsx():
     for p in db.session.execute(q).unique().scalars():
         p: Publication
 
-        themes = p.themes
+        themes = [t.name for t in p.themes]
 
         if not themes:
             themes = ['']
