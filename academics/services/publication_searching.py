@@ -269,8 +269,10 @@ def manual_only_catalog_publications():
         select(CatalogPublication)
         .where(CatalogPublication.catalog == CATALOG_MANUAL)
         .join(CatalogPublication.publication)
-        .where(Publication.catalog_publications.all_(CatalogPublication.catalog == CATALOG_MANUAL))
+        .where(~Publication.catalog_publications.any(CatalogPublication.catalog != CATALOG_MANUAL))
     )
+
+    print(q)
 
     return q
 

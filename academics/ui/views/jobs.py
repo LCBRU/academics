@@ -5,6 +5,7 @@ from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
 from lbrc_flask.response import refresh_response
 
 from academics.jobs.publications import AutoFillFolders
+from academics.services.publication_searching import manual_only_catalog_publications
 from .. import blueprint
 
 
