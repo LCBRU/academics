@@ -202,7 +202,7 @@ class Publication(db.Model, AuditMixin):
     @hybrid_property
     def is_external_collaboration(self):
         if self.institutions:
-            return any([i.home_organisation for i in self.institutions]) and any([not i.home_organisation for i in self.institutions])
+            return any([i.home_institution for i in self.institutions]) and any([not i.home_institution for i in self.institutions])
         else:
             None
 
