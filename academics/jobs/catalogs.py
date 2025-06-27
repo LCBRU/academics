@@ -432,6 +432,7 @@ class RefreshAll(AsyncJob):
 
         AsyncJobs.schedule(ManaualCatalogPublicationsFindScopus())
 
+
 class ManaualCatalogPublicationsFindScopus(AsyncJob):
     __mapper_args__ = {
         "polymorphic_identity": "ManaualCatalogPublicationsFindScopus",
