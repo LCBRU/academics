@@ -81,12 +81,7 @@ def index():
     q = academic_search_query(search_form.data)
     q = q.options(selectinload(Academic.sources))
 
-    academics = db.paginate(
-        select=q,
-        page=search_form.page.data,
-        per_page=5,
-        error_out=False,
-    )
+    academics = db.paginate(select=q)
 
     return render_template(
         "ui/academic/index.html",
