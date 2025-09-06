@@ -34,7 +34,6 @@ class ThemeProvider(BaseProvider):
 class UserCreator(BaseUserCreator):
     def __init__(self):
         super().__init__(User)
-        print('A'*10)
         self.faker.add_provider(ThemeProvider)
     
     def get(self, **kwargs):

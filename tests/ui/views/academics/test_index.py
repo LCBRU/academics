@@ -1,5 +1,9 @@
 import pytest
 from lbrc_flask.pytest.testers import IndexTester, RequiresLoginGetTester, PanelListRowResultsTester
+from lbrc_flask.database import db
+from sqlalchemy import select, func
+
+from academics.model.academic import Academic
 
 
 class AcademicIndexTester:
@@ -15,6 +19,7 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
 
     @pytest.mark.parametrize("item_count", IndexTester.page_edges())
     def test__get__no_filters(self, item_count):
+        print(db.session.execute(select(func.count(Academic.id))).scalar())
         self.faker.academic().get_list_in_db(item_count=item_count)
         self.get_and_assert_standards(expected_count=item_count)
 
