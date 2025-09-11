@@ -36,10 +36,6 @@ class TestAcademicEditPost(AcademicEditViewTester, FlaskPostViewTester):
     def test__post__valid(self):
         expected = self.item_creator.get(packtype=None, pack_shipment=None, pack_action=None)
 
-        self.assert_actual_equals_expected(expected, expected)
-
-        assert False
-
         expected.packtype_id = self.standard_packtypes[0].id
         data = self.get_data_from_object(expected)
         data['pack_type'] = str(expected.packtype_id)
