@@ -167,19 +167,21 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             return f'https://scholar.google.com/citations?user={self.google_scholar_id}'
         else:
             return "https://scholar.google.com/intl/en/scholar/citations.html"
-        
+
+    @property
+    def pubmed_search_name(self):
+        regex = re.compile('[^a-zA-Z ]')
+        return ' '.join(filter(None, [
+            regex.sub('', self.last_name or ''),
+            regex.sub('', self.initials or ''),
+        ]))
+
     @property
     def pubmed_link(self):
         if self.orcid:
             return f'https://pubmed.ncbi.nlm.nih.gov/?term=orcid {self.orcid}[auid]'
         else:
-            regex = re.compile('[^a-zA-Z ]')
-            name = ' '.join(filter(None, [
-                regex.sub('', self.last_name or ''),
-                regex.sub('', self.initials or ''),
-            ]))
-
-            return f"https://pubmed.ncbi.nlm.nih.gov/?term={name}[au]"
+            return f"https://pubmed.ncbi.nlm.nih.gov/?term={self.pubmed_search_name}[au]"
              
         
     @property

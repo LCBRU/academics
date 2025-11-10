@@ -51,7 +51,7 @@ def academic_search_query(search_data):
         else:
             q = q.where(Academic.user_id == None)
 
-    q = q.order_by(Academic.last_name).order_by(Academic.first_name)
+    q = q.order_by(Academic.last_name).order_by(Academic.first_name).order_by(Academic.id)
 
     return q
 

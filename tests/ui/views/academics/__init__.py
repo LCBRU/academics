@@ -1,38 +1,39 @@
 from sqlalchemy import func, select
 from lbrc_flask.database import db
-from lbrc_flask.pytest.testers import ResultHtmlType
 from lbrc_flask.pytest.form_tester import FormTester, FormTesterTextField
 
 from academics.model.academic import Academic
 
 
 class AcademicFormTester(FormTester):
-    def __init__(self):
-        super().__init__(fields=[
-            FormTesterTextField(
-                field_name='first_name',
-                field_title='First Name',
-                is_mandatory=True,
-            ),
-            FormTesterTextField(
-                field_name='last_name',
-                field_title='Last Name',
-                is_mandatory=True,
-            ),
-            FormTesterTextField(
-                field_name='initials',
-                field_title='Initials',
-                is_mandatory=True,
-            ),
-            FormTesterTextField(
-                field_name='orcid',
-                field_title='ORCID',
-            ),
-            FormTesterTextField(
-                field_name='google_scholar_id',
-                field_title='Google Scholar ID',
-            ),
-        ])
+    def __init__(self, has_csrf=False):
+        super().__init__(
+            fields=[
+                FormTesterTextField(
+                    field_name='first_name',
+                    field_title='First Name',
+                    is_mandatory=True,
+                ),
+                FormTesterTextField(
+                    field_name='last_name',
+                    field_title='Last Name',
+                    is_mandatory=True,
+                ),
+                FormTesterTextField(
+                    field_name='initials',
+                    field_title='Initials',
+                ),
+                FormTesterTextField(
+                    field_name='orcid',
+                    field_title='ORCID',
+                ),
+                FormTesterTextField(
+                    field_name='google_scholar_id',
+                    field_title='Google Scholar ID',
+                ),
+            ],
+            has_csrf=has_csrf,
+        )
 
 
 class AcademicViewTester:
@@ -57,7 +58,7 @@ class AcademicViewTester:
         actual.error == expected.error
         actual.has_left_brc == expected.has_left_brc
         actual.left_brc_date == expected.left_brc_date
-        
+
         if actual.user is None:
             actual_user_id = actual.user_id
         else:
@@ -69,11 +70,3 @@ class AcademicViewTester:
             expected_user_id = expected.user.id
 
         assert actual_user_id == expected_user_id
-
-    @property
-    def result_html_type(self):
-        return ResultHtmlType.MODAL
-    
-    def assert_form(self, soup):
-        AcademicFormTester().assert_inputs(soup)
-

@@ -61,6 +61,11 @@ class AcademicFakeCreator(FakeCreator):
 
         if has_left_brc and left_brc_date is None:
             left_brc_date = self.faker.date()
+        
+        user_id = kwargs.get('user_id')
+
+        if (user := kwargs.get('user')) is not None:
+            user_id = user.id
 
         result = self.cls(
             first_name = kwargs.get('first_name') or self.faker.first_name(),
@@ -68,12 +73,13 @@ class AcademicFakeCreator(FakeCreator):
             initials = kwargs.get('initials') or ''.join(self.faker.random_letters(length=self.faker.random_int(min=0, max=3))),
             orcid = kwargs.get('orcid') or ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15))),
             google_scholar_id = kwargs.get('google_scholar_id') or ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15))),
-            updating = kwargs.get('updating') or False,
-            initialised = kwargs.get('initialised') or True,
-            error = kwargs.get('error') or False,
+            updating = self.get_value_or_default(kwargs, 'updating', False),
+            initialised = self.get_value_or_default(kwargs, 'initialised', True),
+            error = self.get_value_or_default(kwargs, 'error', False),
             has_left_brc = has_left_brc,
             left_brc_date = left_brc_date,
-            user = self.faker.user().get_value_or_get(kwargs, 'user'),
+            user = user,
+            user_id = user_id
         )
 
         return result

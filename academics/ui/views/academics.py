@@ -54,8 +54,8 @@ class AddAuthorEditForm(FlashingForm):
 
 
 class AcademicEditForm(FlashingForm):
-    first_name = StringField("First Name", validators=[Length(max=500)])
-    last_name = StringField("Last Name", validators=[Length(max=500)])
+    first_name = StringField("First Name", validators=[Length(max=500), DataRequired()])
+    last_name = StringField("Last Name", validators=[Length(max=500), DataRequired()])
     initials = StringField("Initials", validators=[Length(max=255)])
     google_scholar_id = StringField("Google Scholar ID", validators=[Length(max=255)])
     orcid = StringField("ORCID", validators=[Length(max=255)])
@@ -117,10 +117,13 @@ def academic_edit(id):
         academic.themes = [db.session.get(Theme, t) for t in form.themes.data]
         academic.has_left_brc = form.has_left_brc.data
         academic.left_brc_date = form.left_brc_date.data
-        academic.user = db.session.execute(
+
+        user = db.session.execute(
             select(User)
             .where(User.id == form.user_id.data)
             ).scalar_one_or_none()
+        
+        academic.user = user
 
         db.session.add(academic)
         db.session.commit()

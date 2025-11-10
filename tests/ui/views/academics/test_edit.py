@@ -1,9 +1,10 @@
 import pytest
-from lbrc_flask.pytest.testers import RequiresLoginGetTester, FlaskPostViewTester, FlaskFormGetViewTester
+from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester, ModalContentAsserter, ModalFormErrorContentAsserter
 from lbrc_flask.pytest.asserts import assert__refresh_response
 from lbrc_flask.pytest.form_tester import FormTesterField
 from sqlalchemy import select
 from lbrc_flask.database import db
+from academics.model.academic import Academic
 from tests.ui.views.academics import AcademicFormTester, AcademicViewTester
 
 
@@ -15,10 +16,10 @@ class AcademicEditViewBaseTester(AcademicViewTester):
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
         self.existing = faker.academic().get_in_db()
-        self.parameters = dict(id=self.existing.id)
+        self.parameters['id'] = self.existing.id
 
 
-class TestAcademicEditRequiresLogin(AcademicEditViewBaseTester, RequiresLoginGetTester):
+class TestAcademicEditRequiresLogin(AcademicEditViewBaseTester, RequiresLoginTester):
     ...
 
 
@@ -28,24 +29,26 @@ class AcademicEditViewTester(AcademicEditViewBaseTester):
         pass
 
 
-class TestAcademicEditGet(AcademicEditViewTester, FlaskFormGetViewTester):
-    ...
+class TestAcademicEditGet(AcademicEditViewTester, FlaskViewLoggedInTester):
+    @pytest.mark.app_crsf(True)
+    def test__get__has_form(self):
+        resp = self.get()
 
+        AcademicFormTester(has_csrf=True).assert_all(resp)
+        
 
-class TestAcademicEditPost(AcademicEditViewTester, FlaskPostViewTester):
+class TestAcademicEditPost(AcademicEditViewTester, FlaskViewLoggedInTester):
     def test__post__valid(self):
-        expected = self.item_creator.get(packtype=None, pack_shipment=None, pack_action=None)
-
-        expected.packtype_id = self.standard_packtypes[0].id
+        new_user = self.faker.user().get_in_db()
+        expected = self.faker.academic().get(user_id=new_user.id)
         data = self.get_data_from_object(expected)
-        data['pack_type'] = str(expected.packtype_id)
 
         resp = self.post(data)
 
         assert__refresh_response(resp)
         self.assert_db_count(1)
 
-        actual = db.session.execute(select(Pack)).scalar()
+        actual = db.session.execute(select(Academic)).scalar()
 
         self.assert_actual_equals_expected(expected, actual)
 
@@ -53,13 +56,14 @@ class TestAcademicEditPost(AcademicEditViewTester, FlaskPostViewTester):
         "missing_field", AcademicFormTester().mandatory_fields_edit,
     )
     def test__post__missing_mandatory_field(self, missing_field: FormTesterField):
-        expected = self.item_creator.get(packtype=None, pack_shipment=None, pack_action=None)
+        expected = self.faker.academic().get()
         data = self.get_data_from_object(expected)
         data[missing_field.field_name] = ''
 
         resp = self.post(data)
 
-        self.assert_standards(resp)
-        self.assert_form(resp.soup)
-        self.assert__error__required_field(resp, missing_field.field_title)
+        AcademicFormTester().assert_all(resp)
+        ModalContentAsserter().assert_all(resp)
+        ModalFormErrorContentAsserter().assert_missing_required_field(resp, missing_field.field_title)
+
         self.assert_db_count(1)

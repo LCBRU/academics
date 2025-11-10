@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from random import randint, sample, choices, choice
 import string
-from dotenv import load_dotenv
 from lbrc_flask.database import db
 from lbrc_flask.security import init_roles, init_users
-from academics.model.academic import Academic, Affiliation, CatalogPublicationsSources, Source
-from academics.model.publication import *
-from academics.model.security import User
-from academics.model.theme import Theme
-from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
 from academics.security import ROLE_EDITOR, ROLE_VALIDATOR, get_roles
 from faker import Faker
 fake = Faker()
 
-
-load_dotenv()
 
 def unique_words():
     return {fake.word().title() for _ in range(randint(20, 40))}
@@ -26,6 +21,12 @@ def unique_companies():
 
 
 from academics import create_app
+from academics.model.academic import Academic, Affiliation, CatalogPublicationsSources, Source
+from academics.model.publication import *
+from academics.model.security import User
+from academics.model.theme import Theme
+from academics.model.folder import Folder, FolderDoi, FolderDoiUserRelevance
+
 
 application = create_app()
 application.app_context().push()
