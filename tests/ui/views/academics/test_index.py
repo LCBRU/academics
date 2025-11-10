@@ -128,6 +128,20 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
         )
 
 
+    @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
+    @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
+    @pytest.mark.parametrize("count_without", [1, 23])
+    def test__get__other_searches(self, item_count, current_page, count_without):
+        assert False
+
+
+    @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
+    @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
+    @pytest.mark.parametrize("count_without", [1, 23])
+    def test__get__different_numbers_of_sources(self, item_count, current_page, count_without):
+        assert False
+
+
 class TestAcademicEditorIndex(AcademicIndexTester, IndexTester):
     @property
     def content_asserter(self):
