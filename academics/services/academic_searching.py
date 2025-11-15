@@ -4,7 +4,7 @@ from wtforms import SelectField
 from academics.model.academic import Academic
 from academics.model.theme import Theme
 from academics.services.folder import folder_academic_query
-
+from lbrc_flask.database import db
 
 class AcademicSearchForm(SearchForm):
     theme_id = SelectField('Theme')
@@ -27,7 +27,6 @@ def academic_search_query(search_data):
 
     if x := search_data.get('theme_id'):
         x = int(x)
-
         if x == -1:
             q = q.where(~Academic.themes.any())
         else:

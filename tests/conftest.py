@@ -7,7 +7,7 @@ from lbrc_flask.security import add_user_to_role
 from academics import create_app
 from academics.config import TestConfig
 from academics.security import init_authorization
-from tests.faker import AcademicProvider, UserProvider
+from tests.faker import AcademicProvider, FolderProvider, ThemeProvider, UserProvider
 from academics.security import ROLE_EDITOR
 
 
@@ -41,5 +41,7 @@ def faker():
     result.add_provider(UserProvider)
     result.add_provider(LbrcFlaskFakerProvider)
     result.add_provider(AcademicProvider)
+    result.add_provider(ThemeProvider)
+    result.add_provider(FolderProvider)
 
     yield result

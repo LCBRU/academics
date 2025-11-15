@@ -108,18 +108,15 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
     @pytest.mark.parametrize("count_without", [1, 23])
     def test__get__first_name(self, item_count, current_page, count_without):
-        search_name = 'fred'
-        first_names = cycle(['fred', 'freddy', 'alfred'])
-
-        academics = []
-        for i in range(item_count):
-            academics.append(
-                self.faker.academic().get_in_db(first_name=next(first_names), last_name='smith')
-            )
+        academics = self.academics_with_name_combinations(
+            item_count,
+            ['fred', 'freddy', 'alfred'],
+            ['smith'],
+        )
 
         academics_without = self.faker.academic().get_list_in_db(item_count=count_without, first_name='John', last_name='Smith')
 
-        self.parameters['search'] = search_name
+        self.parameters['search'] = 'fred'
 
         self.get_and_assert(current_page, academics)
 
@@ -127,18 +124,15 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
     @pytest.mark.parametrize("count_without", [1, 23])
     def test__get__last_name(self, item_count, current_page, count_without):
-        search_name = 'smith'
-        last_names = cycle(['smith', 'smithe', 'locksmith'])
-
-        academics = []
-        for i in range(item_count):
-            academics.append(
-                self.faker.academic().get_in_db(last_name=next(last_names), first_name='Mary')
-            )
+        academics = self.academics_with_name_combinations(
+            item_count,
+            ['mary'],
+            ['smith', 'smithe', 'locksmith'],
+        )
 
         academics_without = self.faker.academic().get_list_in_db(item_count=count_without, first_name='John', last_name='Jones')
 
-        self.parameters['search'] = search_name
+        self.parameters['search'] = 'smith'
 
         self.get_and_assert(current_page, academics)
 
@@ -146,19 +140,15 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
     @pytest.mark.parametrize("count_without", [1, 23])
     def test__get__both_names(self, item_count, current_page, count_without):
-        search_name = 'fred smith'
-        first_names = cycle(['fred', 'freddy', 'alfred'])
-        last_names = cycle(['smith', 'smithe', 'locksmith'])
-
-        academics = []
-        for i in range(item_count):
-            academics.append(
-                self.faker.academic().get_in_db(last_name=next(last_names), first_name=next(first_names))
-            )
+        academics = self.academics_with_name_combinations(
+            item_count,
+            ['fred', 'freddy', 'alfred'],
+            ['smith', 'smithe', 'locksmith'],
+        )
 
         academics_without = self.faker.academic().get_list_in_db(item_count=count_without, first_name='John', last_name='Jones')
 
-        self.parameters['search'] = search_name
+        self.parameters['search'] = 'fred smith'
 
         self.get_and_assert(current_page, academics)
 
@@ -166,19 +156,15 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
     @pytest.mark.parametrize("count_without", [1, 23])
     def test__get__both_names_reversed(self, item_count, current_page, count_without):
-        search_name = 'smith fred'
-        first_names = cycle(['fred', 'freddy', 'alfred'])
-        last_names = cycle(['smith', 'smithe', 'locksmith'])
-
-        academics = []
-        for i in range(item_count):
-            academics.append(
-                self.faker.academic().get_in_db(last_name=next(last_names), first_name=next(first_names))
-            )
+        academics = self.academics_with_name_combinations(
+            item_count,
+            ['fred', 'freddy', 'alfred'],
+            ['smith', 'smithe', 'locksmith'],
+        )
 
         academics_without = self.faker.academic().get_list_in_db(item_count=count_without, first_name='John', last_name='Jones')
 
-        self.parameters['search'] = search_name
+        self.parameters['search'] = 'smith fred'
 
         self.get_and_assert(current_page, academics)
 
@@ -198,12 +184,35 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
 
         self.get_and_assert(current_page, [])
 
-    # @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
-    # @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
-    # @pytest.mark.parametrize("count_without", [1, 23])
-    # def test__get__other_searches(self, item_count, current_page, count_without):
-    #     assert False
+    @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
+    @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
+    @pytest.mark.parametrize("count_without", [1, 23])
+    def test__get__theme(self, item_count, current_page, count_without):
+        the_theme = self.faker.theme().get_in_db()
+        other_theme = self.faker.theme().get_in_db()
+        academics = self.faker.academic().get_list_in_db(item_count=item_count, theme=the_theme)
+        academics_without = self.faker.academic().get_list_in_db(item_count=count_without)
+        academics_withother = self.faker.academic().get_list_in_db(item_count=count_without, theme=other_theme)
 
+        self.parameters['theme_id'] = the_theme.id
+
+        self.get_and_assert(current_page, academics)
+
+    @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
+    @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
+    @pytest.mark.parametrize("count_with", [1, 23])
+    def test__get__without_theme(self, item_count, current_page, count_with):
+        print('%A')
+        other_theme = self.faker.theme().get_in_db()
+        print('%B')
+        academics = self.faker.academic().get_list_in_db(item_count=item_count)
+        print('%C')
+        academics_without = self.faker.academic().get_list_in_db(item_count=count_with, theme=other_theme)
+        print('%D')
+
+        self.parameters['theme_id'] = -1
+
+        self.get_and_assert(current_page, academics)
 
     # @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
     # @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
