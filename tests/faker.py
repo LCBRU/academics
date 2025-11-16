@@ -1,20 +1,15 @@
 from random import choices, randint
 import string
-
-from faker import Faker
 from academics.model.academic import Academic
 from faker.providers import BaseProvider
 from lbrc_flask.pytest.faker import FakeCreator, UserCreator as BaseUserCreator
-from functools import cache
 from academics.model.folder import Folder
 from academics.model.security import User
 from academics.model.theme import Theme
 
 
 class ThemeCreator(FakeCreator):
-    @property
-    def cls(self):
-        return Theme
+    cls = Theme
     
     def get(self, **kwargs):
         existing = self.count_in_db()
@@ -26,74 +21,33 @@ class ThemeCreator(FakeCreator):
         )
 
         return result
-
-
-class ThemeProvider(BaseProvider):
-    __provider__ = 'ThemeProvider'.lower()
-
-    @cache
-    def theme(self):
-        return ThemeCreator(self)
 
 
 class FolderCreator(FakeCreator):
-    @property
-    def cls(self):
-        return Folder
+    cls = Folder
     
     def get(self, **kwargs):
-        existing = self.count_in_db()
-
-        name = self.faker.unique.word()
-
-        result = self.cls(
-            name = kwargs.get('name') or f"{name}_{existing}",
+        return self.cls(
+            name = kwargs.get('name') or self.faker.unique.word(),
         )
-
-        return result
-
-
-class FolderProvider(BaseProvider):
-    __provider__ = 'FolderProvider'.lower()
-
-    @cache
-    def folder(self):
-        return FolderCreator(self)
 
 
 class UserCreator(BaseUserCreator):
-    @property
-    def cls(self):
-        return User
+    cls = User
     
     def get(self, **kwargs):
         result = super().get(**kwargs)
 
-        print('Theme count in user', self.faker.theme().count_in_db())
         result.theme = self.faker.theme().get_value_or_get(kwargs, 'theme')
-
-        print('Theme in user', result.theme)
 
         if (folder := kwargs.get('folder')) is not None:
             result.folders.append(folder)
 
-        print('Theme count in user after', self.faker.theme().count_in_db())
-
         return result
 
 
-class UserProvider(BaseProvider):
-    __provider__ = 'UserProvider'.lower()
-
-    @cache
-    def user(self):
-        return UserCreator(self)
-
-
 class AcademicFakeCreator(FakeCreator):
-    @property
-    def cls(self):
-        return Academic
+    cls = Academic
     
     def get(self, create_user=False, **kwargs):
         has_left_brc = kwargs.get('has_left_brc') or False
@@ -131,9 +85,15 @@ class AcademicFakeCreator(FakeCreator):
         return result
 
 
-class AcademicProvider(BaseProvider):
-    __provider__ = 'AcademicProvider'.lower()
-
-    @cache
+class AcademicsProvider(BaseProvider):
     def academic(self):
         return AcademicFakeCreator(self)
+
+    def theme(self):
+        return ThemeCreator(self)
+
+    def user(self):
+        return UserCreator(self)
+
+    def folder(self):
+        return FolderCreator(self)
