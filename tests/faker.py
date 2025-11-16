@@ -12,15 +12,9 @@ class ThemeCreator(FakeCreator):
     cls = Theme
     
     def get(self, **kwargs):
-        existing = self.count_in_db()
-
-        name = self.faker.unique.word()
-
-        result = self.cls(
-            name = kwargs.get('name') or f"{name}_{existing}",
+        return self.cls(
+            name = kwargs.get('name') or self.faker.unique.word(),
         )
-
-        return result
 
 
 class FolderCreator(FakeCreator):
