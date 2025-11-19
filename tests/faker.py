@@ -1,5 +1,6 @@
 from random import choices, randint
 import string
+from functools import cache
 from academics.model.academic import Academic
 from faker.providers import BaseProvider
 from lbrc_flask.pytest.faker import FakeCreator, UserCreator as BaseUserCreator
@@ -80,14 +81,18 @@ class AcademicFakeCreator(FakeCreator):
 
 
 class AcademicsProvider(BaseProvider):
+    @cache
     def academic(self):
         return AcademicFakeCreator(self)
 
+    @cache
     def theme(self):
         return ThemeCreator(self)
 
+    @cache
     def user(self):
         return UserCreator(self)
 
+    @cache
     def folder(self):
         return FolderCreator(self)
