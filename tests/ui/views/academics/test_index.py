@@ -202,13 +202,9 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
     @pytest.mark.parametrize("count_with", [1, 23])
     def test__get__without_theme(self, item_count, current_page, count_with):
-        print('%A')
         other_theme = self.faker.theme().get_in_db()
-        print('%B')
         academics = self.faker.academic().get_list_in_db(item_count=item_count)
-        print('%C')
         academics_without = self.faker.academic().get_list_in_db(item_count=count_with, theme=other_theme)
-        print('%D')
 
         self.parameters['theme_id'] = -1
 
