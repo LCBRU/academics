@@ -2,7 +2,7 @@
 #    uv pip compile requirements.dev -o requirements.txt
 -e /home/richard/Projects/LCBRU/lbrc_flask
     # via -r requirements.dev
-alembic==1.16.5
+alembic==1.17.2
     # via lbrc-flask
 amqp==5.3.1
     # via kombu
@@ -10,40 +10,40 @@ argon2-cffi==25.1.0
     # via flask-security-too
 argon2-cffi-bindings==25.1.0
     # via argon2-cffi
-arrow==1.3.0
+arrow==1.4.0
     # via lbrc-flask
-attrs==25.3.0
+attrs==25.4.0
     # via
     #   jsonschema
     #   referencing
-bcrypt==4.3.0
+bcrypt==5.0.0
     # via
     #   flask-security-too
     #   lbrc-flask
-beautifulsoup4==4.13.5
+beautifulsoup4==4.14.3
     # via lbrc-flask
-billiard==4.2.1
+billiard==4.2.4
     # via celery
-bleach==6.2.0
+bleach==6.3.0
     # via flask-security-too
 blinker==1.9.0
     # via
     #   flask
     #   flask-mail
     #   flask-principal
-brotli==1.1.0
+brotli==1.2.0
     # via fonttools
-cachetools==6.2.0
+cachetools==6.2.2
     # via -r requirements.dev
 cairocffi==1.7.1
     # via cairosvg
 cairosvg==2.8.2
     # via lbrc-flask
-celery==5.5.3
+celery==5.6.0
     # via
     #   -r requirements.dev
     #   lbrc-flask
-certifi==2025.8.3
+certifi==2025.11.12
     # via requests
 cffi==2.0.0
     # via
@@ -52,9 +52,9 @@ cffi==2.0.0
     #   weasyprint
 chardet==5.2.0
     # via lbrc-flask
-charset-normalizer==3.4.3
+charset-normalizer==3.4.4
     # via requests
-click==8.2.1
+click==8.3.1
     # via
     #   celery
     #   click-didyoumean
@@ -67,7 +67,7 @@ click-plugins==1.1.1.2
     # via celery
 click-repl==0.3.0
     # via celery
-coverage==7.10.6
+coverage==7.13.0
     # via pytest-cov
 cssselect2==0.8.0
     # via
@@ -85,16 +85,17 @@ email-validator==2.3.0
     #   lbrc-flask
 et-xmlfile==2.0.0
     # via openpyxl
-execnet==2.1.1
+exceptiongroup==1.3.1
+    # via celery
+execnet==2.1.2
     # via pytest-xdist
-faker==37.6.0
+faker==38.2.0
     # via lbrc-flask
 flask==3.1.2
     # via
     #   flask-admin
     #   flask-login
     #   flask-mail
-    #   flask-mailman
     #   flask-principal
     #   flask-security-too
     #   flask-sqlalchemy
@@ -106,12 +107,12 @@ flask-admin==2.0.0a4
 flask-login==0.6.3
     # via flask-security-too
 flask-mail==0.10.0
-    # via lbrc-flask
-flask-mailman==1.1.1
-    # via flask-security-too
+    # via
+    #   flask-security-too
+    #   lbrc-flask
 flask-principal==0.4.0
     # via flask-security-too
-flask-security-too==5.6.2
+flask-security-too==5.7.1
     # via lbrc-flask
 flask-sqlalchemy==3.1.1
     # via
@@ -123,21 +124,21 @@ flask-wtf==1.2.2
     # via
     #   flask-security-too
     #   lbrc-flask
-fonttools==4.59.2
+fonttools==4.61.0
     # via weasyprint
-greenlet==3.2.4
+greenlet==3.3.0
     # via sqlalchemy
-hatchling==1.27.0
+hatchling==1.28.0
     # via lbrc-flask
-idna==3.10
+humanize==4.14.0
+    # via lbrc-flask
+idna==3.11
     # via
     #   email-validator
     #   requests
 importlib-metadata==8.7.0
     # via pygal
-importlib-resources==6.5.2
-    # via flask-security-too
-iniconfig==2.1.0
+iniconfig==2.3.0
     # via pytest
 itsdangerous==2.2.0
     # via
@@ -151,21 +152,21 @@ jsonschema==4.25.1
     # via lbrc-flask
 jsonschema-specifications==2025.9.1
     # via jsonschema
-kombu==5.5.4
+kombu==5.6.1
     # via celery
 ldap3==2.9.1
     # via lbrc-flask
-libpass==1.9.1.post0
+libpass==1.9.3
     # via flask-security-too
-lxml==6.0.1
+lxml==6.0.2
     # via lbrc-flask
 mako==1.3.10
     # via alembic
-markdown==3.9
+markdown==3.10
     # via lbrc-flask
 markdown-it-py==4.0.0
     # via rich
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via
     #   flask
     #   flask-admin
@@ -176,7 +177,7 @@ markupsafe==3.0.2
     #   wtforms
 mdurl==0.1.2
     # via markdown-it-py
-numpy==2.3.3
+numpy==2.3.5
     # via pandas
 openpyxl==3.1.5
     # via lbrc-flask
@@ -185,11 +186,11 @@ packaging==25.0
     #   hatchling
     #   kombu
     #   pytest
-pandas==2.3.2
+pandas==2.3.3
     # via -r requirements.dev
 pathspec==0.12.1
     # via hatchling
-pillow==11.3.0
+pillow==12.0.0
     # via
     #   cairosvg
     #   weasyprint
@@ -200,15 +201,15 @@ pluggy==1.6.0
     #   pytest-cov
 prompt-toolkit==3.0.52
     # via click-repl
-pyalex==0.18
+pyalex==0.19
     # via -r requirements.dev
 pyasn1==0.6.1
     # via ldap3
 pycparser==2.23
     # via cffi
-pydyf==0.11.0
+pydyf==0.12.1
     # via weasyprint
-pygal==3.0.5
+pygal==3.1.0
     # via lbrc-flask
 pygments==2.19.2
     # via
@@ -218,7 +219,7 @@ pymysql==1.1.2
     # via lbrc-flask
 pyphen==0.17.2
     # via weasyprint
-pytest==8.4.2
+pytest==9.0.2
     # via
     #   lbrc-flask
     #   pytest-cov
@@ -233,15 +234,15 @@ python-dateutil==2.9.0.post0
     #   celery
     #   lbrc-flask
     #   pandas
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via lbrc-flask
 pytz==2025.2
     # via
     #   lbrc-flask
     #   pandas
-redis==5.2.1
+redis==6.4.0
     # via kombu
-referencing==0.36.2
+referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -250,9 +251,9 @@ requests==2.32.5
     #   -r requirements.dev
     #   elsapy
     #   pyalex
-rich==14.1.0
+rich==14.2.0
     # via lbrc-flask
-rpds-py==0.27.1
+rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
@@ -262,25 +263,20 @@ six==1.17.0
     # via python-dateutil
 soupsieve==2.8
     # via beautifulsoup4
-sqlalchemy==2.0.43
+sqlalchemy==2.0.45
     # via
     #   alembic
     #   flask-security-too
     #   flask-sqlalchemy
-    #   sqlalchemy-utils
-sqlalchemy-utils==0.42.0
-    # via flask-security-too
-tinycss2==1.4.0
+tinycss2==1.5.1
     # via
     #   cairosvg
     #   cssselect2
     #   weasyprint
 tinyhtml5==2.0.0
     # via weasyprint
-trove-classifiers==2025.9.11.17
+trove-classifiers==2025.12.1.14
     # via hatchling
-types-python-dateutil==2.9.0.20250822
-    # via arrow
 typing-extensions==4.15.0
     # via
     #   alembic
@@ -288,12 +284,15 @@ typing-extensions==4.15.0
     #   sqlalchemy
 tzdata==2025.2
     # via
+    #   arrow
     #   faker
     #   kombu
     #   pandas
+tzlocal==5.3.1
+    # via celery
 unidecode==1.4.0
     # via -r requirements.dev
-urllib3==2.5.0
+urllib3==2.6.2
     # via
     #   pyalex
     #   requests
@@ -302,9 +301,9 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
-wcwidth==0.2.13
+wcwidth==0.2.14
     # via prompt-toolkit
-weasyprint==66.0
+weasyprint==67.0
     # via
     #   flask-weasyprint
     #   lbrc-flask
@@ -314,7 +313,7 @@ webencodings==0.5.1
     #   cssselect2
     #   tinycss2
     #   tinyhtml5
-werkzeug==3.1.3
+werkzeug==3.1.4
     # via
     #   flask
     #   flask-admin
@@ -331,5 +330,5 @@ xlwt==1.3.0
     # via lbrc-flask
 zipp==3.23.0
     # via importlib-metadata
-zopfli==0.2.3.post1
+zopfli==0.4.0
     # via fonttools

@@ -310,6 +310,8 @@ class Source(AuditMixin, CommonMixin, db.Model):
             return f'https://www.scopus.com/authid/detail.uri?authorId={self.catalog_identifier}'
         elif self.catalog == CATALOG_OPEN_ALEX:
             return f'https://openalex.org/authors/{self.catalog_identifier}'
+        else:
+            return ''
 
     @property
     def publication_count(self):
