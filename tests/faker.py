@@ -1,7 +1,7 @@
 from random import choices, randint
 import string
 from functools import cache
-from academics.model.academic import Academic
+from academics.model.academic import Academic, Source
 from faker.providers import BaseProvider
 from lbrc_flask.pytest.faker import FakeCreator, UserCreator as BaseUserCreator
 from academics.model.folder import Folder
@@ -80,6 +80,43 @@ class AcademicFakeCreator(FakeCreator):
         return result
 
 
+class SourceFakeCreator(FakeCreator):
+    cls = Source
+    
+    def get(self, **kwargs):
+
+        academic_id = kwargs.get('academic_id')
+
+        if (academic := kwargs.get('academic')) is not None:
+            academic_id = academic.id
+
+        first_name = kwargs.get('first_name') or self.faker.first_name()
+        last_name = kwargs.get('last_name') or self.faker.last_name()
+        initials = kwargs.get('initials') or ''.join(self.faker.random_letters(length=self.faker.random_int(min=0, max=3)))
+        display_name = kwargs.get('display_name') or f'{last_name}, {first_name} {initials}'
+
+        result = self.cls(
+            catalog = kwargs.get('catalog') or self.faker.company(),
+            catalog_identifier = kwargs.get('catalog_identifier') or ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15))),
+            academic = academic,
+            academic_id = academic_id,
+
+            first_name = first_name,
+            last_name = last_name,
+            initials = initials,
+            display_name = display_name,
+
+            href = kwargs.get('href') or self.faker.url(),
+            orcid = kwargs.get('orcid') or ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15))),
+
+            citation_count = kwargs.get('citation_count') or randint(1, 500),
+            document_count = kwargs.get('document_count') or randint(1, 500),
+            h_index = kwargs.get('h_index') or randint(1, 100),
+        )
+
+        return result
+
+
 class AcademicsProvider(BaseProvider):
     @cache
     def academic(self):
@@ -96,3 +133,7 @@ class AcademicsProvider(BaseProvider):
     @cache
     def folder(self):
         return FolderCreator(self)
+
+    @cache
+    def source(self):
+        return SourceFakeCreator(self)

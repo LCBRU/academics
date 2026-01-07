@@ -210,11 +210,16 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
 
         self.get_and_assert(current_page, academics)
 
-    # @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
-    # @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
-    # @pytest.mark.parametrize("count_without", [1, 23])
-    # def test__get__different_numbers_of_sources(self, item_count, current_page, count_without):
-    #     assert False
+    @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
+    @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
+    @pytest.mark.parametrize("sources_per_academic", [1, 2, 5])
+    def test__get__different_numbers_of_sources(self, item_count, current_page, sources_per_academic):
+        academics = self.faker.academic().get_list_in_db(item_count=item_count)
+
+        for a in academics:
+            self.faker.source().get_list_in_db(item_count=sources_per_academic, academic=a)
+
+        self.get_and_assert(current_page, academics)
 
 
 class TestAcademicEditorIndex(AcademicIndexTester, IndexTester):
