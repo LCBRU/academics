@@ -4,27 +4,32 @@ from lbrc_flask.pytest.form_tester import FormTester, FormTesterSearchField, For
 from tests.ui.views.academics import AcademicViewTester
 
 
-class AddAuthorSubmitViewBaseTester(AcademicViewTester):
+class DeleteAcademicViewBaseTester(AcademicViewTester):
     @property
     def endpoint(self):
-        return 'ui.add_author_submit'
+        return 'ui.delete_academic'
+
+    @pytest.fixture(autouse=True)
+    def set_existing(self, client, faker):
+        self.existing = faker.academic().get_in_db()
+        self.parameters['id'] = self.existing.id
 
 
-class TestAddAuthorSubmitRequiresLogin(AddAuthorSubmitViewBaseTester, RequiresLoginTester):
+class TestDeleteAcademicRequiresLogin(DeleteAcademicViewBaseTester, RequiresLoginTester):
     @property
     def request_method(self):
         return self.post
     
 
-class AddAuthorSubmitViewTester(AddAuthorSubmitViewBaseTester):
+class DeleteAcademicViewTester(DeleteAcademicViewBaseTester):
     @pytest.fixture(autouse=True)
     def set_editor_user(self, editor_user):
         pass
 
 
-class TestAddAuthorSubmitPost(AddAuthorSubmitViewTester, FlaskViewLoggedInTester):
+class TestDeleteAcademicPost(DeleteAcademicViewTester, FlaskViewLoggedInTester):
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.post()
 
-        # To do: Add tests for submitting stuff here
+        # To do: Add tests for deleting stuff here

@@ -4,7 +4,7 @@ from lbrc_flask.pytest.form_tester import FormTester, FormTesterSearchField, For
 from tests.ui.views.academics import AcademicViewTester
 
 
-class AddAuthorSearchFormTester(FormTester):
+class AddAcademicSearchFormTester(FormTester):
     def __init__(self, has_csrf=False):
         super().__init__(
             fields=[
@@ -18,25 +18,25 @@ class AddAuthorSearchFormTester(FormTester):
         )
 
 
-class AddAuthorSearchViewBaseTester(AcademicViewTester):
+class AddAcademicSearchViewBaseTester(AcademicViewTester):
     @property
     def endpoint(self):
         return 'ui.add_author_search'
 
 
-class TestAddAuthorSearchRequiresLogin(AddAuthorSearchViewBaseTester, RequiresLoginTester):
+class TestAddAcademicSearchRequiresLogin(AddAcademicSearchViewBaseTester, RequiresLoginTester):
     ...
 
 
-class AddAuthorSearchViewTester(AddAuthorSearchViewBaseTester):
+class AddAcademicSearchViewTester(AddAcademicSearchViewBaseTester):
     @pytest.fixture(autouse=True)
     def set_editor_user(self, editor_user):
         pass
 
 
-class TestAddAuthorSearchGet(AddAuthorSearchViewTester, FlaskViewLoggedInTester):
+class TestAddAcademicSearchGet(AddAcademicSearchViewTester, FlaskViewLoggedInTester):
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
 
-        AddAuthorSearchFormTester(has_csrf=False).assert_all(resp)
+        AddAcademicSearchFormTester(has_csrf=False).assert_all(resp)

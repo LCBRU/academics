@@ -8,7 +8,7 @@ from tests.ui.views.academics import AcademicViewTester
 from lbrc_flask.database import db
 
 
-class AddAuthorFormTester(FormTester):
+class AddAcademicFormTester(FormTester):
     def __init__(self, has_csrf=False):
         super().__init__(
             fields=[
@@ -27,25 +27,25 @@ class AddAuthorFormTester(FormTester):
         )
 
 
-class AddAuthorViewBaseTester(AcademicViewTester):
+class AddAcademicViewBaseTester(AcademicViewTester):
     @property
     def endpoint(self):
         return 'ui.add_author'
 
 
-class TestAddAuthorRequiresLogin(AddAuthorViewBaseTester, RequiresLoginTester):
+class TestAddAcademicRequiresLogin(AddAcademicViewBaseTester, RequiresLoginTester):
     ...
 
 
-class AddAuthorViewTester(AddAuthorViewBaseTester):
+class AddAcademicViewTester(AddAcademicViewBaseTester):
     @pytest.fixture(autouse=True)
     def set_editor_user(self, editor_user):
         pass
 
 
-class TestAddAuthorGet(AddAuthorViewTester, FlaskViewLoggedInTester):
+class TestAddAcademicGet(AddAcademicViewTester, FlaskViewLoggedInTester):
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
 
-        AddAuthorFormTester(has_csrf=True).assert_all(resp)
+        AddAcademicFormTester(has_csrf=True).assert_all(resp)
