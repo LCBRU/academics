@@ -3,8 +3,7 @@ import re
 from typing import Iterable
 from flask import url_for
 import pytest
-from lbrc_flask.pytest.testers import IndexTester, RequiresLoginTester, PanelListContentAsserter, PagedResultSet
-
+from lbrc_flask.pytest.testers import IndexTester, RequiresLoginTester, PanelListContentAsserter, PagedResultSet, TableContentAsserter, ResultSet
 from academics.model.academic import Academic
 
 
@@ -54,8 +53,14 @@ class AcademicNotAdminRowContentAsserter(PanelListContentAsserter):
         assert header.find('a', attrs={'href': expected_result.google_scholar_link}) is not None
         assert header.find('a', attrs={'href': expected_result.pubmed_link}) is not None
 
+        left_brc_pill = header.find('span', string=re.compile('Left BRC'))
+        if expected_result.has_left_brc:
+            assert left_brc_pill is not None
+        else:
+            assert left_brc_pill is None
+
     def assert_details(self, row, expected_result: Academic, header):
-        pass
+        AcademicSourceRowContentAsserter(result_set=ResultSet(expected_result.sources_by_h_index)).assert_all(row)
 
 
 class AcademicEditorRowContentAsserter(AcademicNotAdminRowContentAsserter):
@@ -65,6 +70,62 @@ class AcademicEditorRowContentAsserter(AcademicNotAdminRowContentAsserter):
         assert header.find('a', attrs={'hx-get': url_for('ui.academics_potential_sources', id=expected_result.id)}) is not None
         assert header.find('a', attrs={'hx-get': url_for('ui.academic_edit', id=expected_result.id)}) is not None
         assert header.find('a', attrs={'hx-post': url_for('ui.delete_academic', id=expected_result.id)}) is not None
+
+
+class AcademicSourceRowContentAsserter(TableContentAsserter):
+    def get_container(self, soup):
+        # This is a hack!
+        # The table content asserter works on a response, but
+        # in AcademicNotAdminRowContentAsserter assert_details we only have the row soup
+        return soup.find_all('tbody')[0]
+
+    def assert_row_details(self, row, expected_result):
+        assert row is not None
+        assert expected_result is not None
+
+        cells = row.find_all('td')
+        assert len(cells) == 5
+
+        name_cell = cells[0]
+        assert name_cell is not None
+        assert name_cell.find(string=re.compile(expected_result.full_name))
+        
+        orcid_cell = name_cell.find('div', attrs={'class': 'orcid'})
+        assert orcid_cell is not None
+
+        orcid_link = name_cell.find('a')
+        assert orcid_link is not None
+        assert orcid_link['href'] == expected_result.orcid_link
+        assert orcid_link.text.strip() == expected_result.orcid
+
+        orcid_mismatch_icon = orcid_cell.find('i', attrs={'title': 'ORCID Mismatch with Sources'})
+        if expected_result.orcid_mismatch:
+            assert orcid_mismatch_icon is not None
+        else:   
+            assert orcid_mismatch_icon is None
+
+        publication_count_cell = cells[1]
+        assert publication_count_cell is not None
+
+        publication_count_link = publication_count_cell.find('a', attrs={'href': url_for('ui.publications', author_id=expected_result.id)})
+        assert publication_count_link is not None
+        assert publication_count_link.text.strip() == str(expected_result.publication_count)
+
+        citations_cell = cells[2]
+        assert citations_cell is not None
+        assert citations_cell.text.strip() == str(expected_result.citation_count)
+
+        h_index_cell = cells[3]
+        assert h_index_cell is not None
+        assert h_index_cell.text.strip() == str(expected_result.h_index)
+
+        catalogue_cell = cells[4]
+        assert catalogue_cell is not None
+
+        catatlogue_link = catalogue_cell.find('a')
+        assert catatlogue_link is not None
+        assert catatlogue_link['href'] == expected_result.author_url
+        assert catatlogue_link.text.strip() == expected_result.catalog.title()
 
 
 class TestSiteIndexRequiresLogin(AcademicIndexTester, RequiresLoginTester):
@@ -237,3 +298,27 @@ class TestAcademicEditorIndex(AcademicIndexTester, IndexTester):
         academics = self.faker.academic().get_list_in_db(item_count=item_count)
 
         self.get_and_assert(current_page, academics)
+
+
+class TestAcademicSourcesIndex(AcademicIndexTester, IndexTester):
+    @property
+    def content_asserter(self):
+        return AcademicNotAdminRowContentAsserter
+    
+    @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
+    @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
+    @pytest.mark.parametrize("sources_per_academic", [1, 2, 3])
+    def test__get__different_numbers_of_sources(self, item_count, current_page, sources_per_academic):
+        academics = self.faker.academic().get_list_in_db(item_count=item_count)
+
+        for a in academics:
+            self.faker.source().get_list_in_db(item_count=sources_per_academic, academic=a)
+
+        self.get_and_assert(current_page, academics)
+
+    def test__get__orcid_mismatch(self):
+        academic = self.faker.academic().get_in_db(orcid="0000-0002-1825-0099")
+
+        self.faker.source().get_in_db(academic=academic, orcid="0000-0002-1825-0097")
+
+        self.get_and_assert(1, [academic])
