@@ -330,6 +330,7 @@ def academic_user_search_new(academic_id):
         success_callback=partial(academic_user_search_new_success, academic=a)
     )
 
+
 def academic_user_search_new_success(user: User, academic: Academic):
     academic.user = user
     db.session.add(academic)

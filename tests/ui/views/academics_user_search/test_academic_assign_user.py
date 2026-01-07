@@ -3,32 +3,35 @@ from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTest
 from tests.ui.views.academics import AcademicViewTester
 
 
-class DeleteAcademicViewBaseTester(AcademicViewTester):
+class AcademicAssignUserViewBaseTester(AcademicViewTester):
     @property
     def endpoint(self):
-        return 'ui.delete_academic'
+        return 'ui.academic_assign_user'
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
         self.existing = faker.academic().get_in_db()
-        self.parameters['id'] = self.existing.id
+        self.parameters['academic_id'] = self.existing.id
+
+        self.user = faker.user().get_in_db()
+        self.parameters['id'] = self.user.id
 
 
-class TestDeleteAcademicRequiresLogin(DeleteAcademicViewBaseTester, RequiresLoginTester):
+class TestAcademicAssignUserRequiresLogin(AcademicAssignUserViewBaseTester, RequiresLoginTester):
     @property
     def request_method(self):
         return self.post
     
 
-class DeleteAcademicViewTester(DeleteAcademicViewBaseTester):
+class AcademicAssignUserViewTester(AcademicAssignUserViewBaseTester):
     @pytest.fixture(autouse=True)
     def set_editor_user(self, editor_user):
         pass
 
 
-class TestDeleteAcademicPost(DeleteAcademicViewTester, FlaskViewLoggedInTester):
+class TestAcademicAssignUserPost(AcademicAssignUserViewTester, FlaskViewLoggedInTester):
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.post()
 
-        # To do: Add tests for deleting stuff here
+        # To do: Add tests for assigning users to academics here
