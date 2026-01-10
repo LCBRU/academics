@@ -38,10 +38,53 @@ class FundingAcr(db.Model):
 
 
 class NihrAcknowledgement(db.Model):
+    DEFAULT_VALUES = [
+        {
+            'name': 'NIHR Acknowledged',
+            'acknowledged': True,
+            'colour': '#F44336', # mid red
+        },
+        {
+            'name': 'BRC Investigators Not A Primary Author',
+            'acknowledged': False,
+            'colour': '#3F51B5', # Mid blue
+        },
+        {
+            'name': 'Need Senior Review',
+            'acknowledged': False,
+            'colour': '#009688', # teal
+        },
+        {
+            'name': 'NIHR Not Acknowledged',
+            'acknowledged': False,
+            'colour': '#8BC34A', # light green
+        },
+        {
+            'name': 'No BRC Investigator On Publication Or Not Relevant',
+            'acknowledged': False,
+            'colour': '#FF5722', # orangey red
+        },
+        {
+            'name': 'Unable To Check - Full Paper Not Available',
+            'acknowledged': False,
+            'colour': '#9C27B0', # purple
+        },
+        {
+            'name': 'Not to be Submitted',
+            'acknowledged': False,
+            'colour': '#47535E', # dark grey blue
+        },
+        {
+            'name': 'Supplementary Material',
+            'acknowledged': False,
+            'colour': '#3f5921', # dark green
+        },
+    ]
+
     STRICT_STATEMENT_REGEX = [
-        'This (study|research) is funded by the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre. The views expressed are those of the author\(s\) and not necessarily those of the NIHR or the Department of Health and Social Care',
-        'This study has been delivered through the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre. The views expressed are those of the author\(s\) and not necessarily those of the .+, the NIHR or the Department of Health and Social Care',
-        'The research was carried out at the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre',
+        r'This (study|research) is funded by the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre. The views expressed are those of the author\(s\) and not necessarily those of the NIHR or the Department of Health and Social Care',
+        r'This study has been delivered through the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre. The views expressed are those of the author\(s\) and not necessarily those of the .+, the NIHR or the Department of Health and Social Care',
+        r'The research was carried out at the National Institute for Health and Care Research \(NIHR\) Leicester Biomedical Research Centre',
     ]
 
     id = db.Column(db.Integer, primary_key=True)
@@ -74,6 +117,12 @@ class NihrAcknowledgement(db.Model):
 
 
 class Subtype(db.Model):
+    DEFAULT_VALUES = [
+        {'code': 'article', 'description': 'article'},
+        {'code': 'book', 'description': 'book'},
+        {'code': 'correction', 'description': 'correction'},
+    ]
+
     __table_args__ = (
         UniqueConstraint("description", name='ux__subtype__description'),
     )

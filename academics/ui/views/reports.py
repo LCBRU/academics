@@ -29,8 +29,6 @@ def reports():
 def image_panel():
     search_form = PublicationSummarySearchForm(formdata=request.args)
 
-    print(search_form.data)
-
     return render_template(
         "ui/reports/image.html",
         search_form=search_form,

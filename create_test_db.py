@@ -8,8 +8,14 @@ import string
 from lbrc_flask.database import db
 from lbrc_flask.security import init_roles, init_users
 from academics.security import ROLE_EDITOR, ROLE_VALIDATOR, get_roles
+from lbrc_flask.pytest.faker import LbrcFlaskFakerProvider
+from tests.faker import AcademicsProvider
+from academics.model.catalog import primary_catalogs
 from faker import Faker
-fake = Faker()
+
+fake: Faker = Faker("en_GB")
+fake.add_provider(LbrcFlaskFakerProvider)
+fake.add_provider(AcademicsProvider)
 
 
 def unique_words():
@@ -41,242 +47,102 @@ other_users = []
 
 for _ in range(randint(10, 20)):
     email = fake.email(domain='le.ac.uk')
-    other_users.append(User(
+    other_users.append(fake.user().get_in_db(
         email=email,
-        username=email,
-        first_name=fake.first_name(),
-        last_name=fake.last_name(),
         password='ct*i0*t*0',
     ))
 
-db.session.add_all(other_users)
-db.session.commit()
+all_users = [user] + other_users
 
 # Sub Types
-sub_types = [Subtype(code=st, description=st) for st in ['article', 'book', 'correction']]
-db.session.add_all(sub_types)
-db.session.commit()
+fake.subtype().create_defaults()
+sub_types = list(db.session.execute(select(Subtype)).scalars())
 
 # Themes
-themes = [Theme(name=w) for w in list(unique_words())[:5]]
-db.session.add_all(themes)
-db.session.commit()
+fake.theme().create_defaults()
+themes = list(db.session.execute(select(Theme)).scalars())
 
 # Folders
-folders = [Folder(
-    name=w,
-    owner=user,
-    shared_users=set(sample(other_users, randint(0, len(other_users) // 2)))
-) for w in unique_words()]
-db.session.add_all(folders)
-db.session.commit()
+for u in all_users:
+    not_owner_users = [ou for ou in all_users if ou != u]
 
-# Journal
-journals = [Journal(name=fake.bs().title(), preprint=(randint(1, 10) >= 9)) for _ in range(randint(20, 40))]
-db.session.add_all(journals)
-db.session.commit()
-
-# Sponsor
-sponsors = [Sponsor(name=c) for c in unique_companies()]
-sponsors.append(Sponsor(name='Leicester NIHR'))
-sponsors.append(Sponsor(name='Nottingham National Institute for Health Research'))
-sponsors.append(Sponsor(name='Northampton National Institute for Health and Care Research'))
-db.session.add_all(sponsors)
-db.session.commit()
-
-# Keyword
-keywords = [Keyword(keyword=w) for w in unique_words()]
-db.session.add_all(keywords)
-db.session.commit()
-
-# Affiliations
-affiliations = [Affiliation(name=c, home_organisation=(randint(1, 10) >=9)) for c in unique_companies()]
-affiliations.append(Affiliation(name='Leicester NIHR'))
-affiliations.append(Affiliation(name='Nottingham National Institute for Health Research'))
-affiliations.append(Affiliation(name='Northampton National Institute for Health and Care Research'))
-db.session.add_all(affiliations)
-db.session.commit()
-
-acknowledgements = [NihrAcknowledgement(name=a['name'], acknowledged=a['acknowledged'], colour=a['colour']) for a in [
-    {
-        'name': 'NIHR Acknowledged',
-        'acknowledged': True,
-        'colour': '#F44336', # mid red
-    },
-    {
-        'name': 'BRC Investigators Not A Primary Author',
-        'acknowledged': False,
-        'colour': '#3F51B5', # Mid blue
-    },
-    {
-        'name': 'Need Senior Review',
-        'acknowledged': False,
-        'colour': '#009688', # teal
-    },
-    {
-        'name': 'NIHR Not Acknowledged',
-        'acknowledged': False,
-        'colour': '#8BC34A', # light green
-    },
-    {
-        'name': 'No BRC Investigator On Publication Or Not Relevant',
-        'acknowledged': False,
-        'colour': '#FF5722', # orangey red
-    },
-    {
-        'name': 'Unable To Check - Full Paper Not Available',
-        'acknowledged': False,
-        'colour': '#9C27B0', # purple
-    },
-    {
-        'name': 'Not to be Submitted',
-        'acknowledged': False,
-        'colour': '#47535E', # dark grey blue
-    },
-    {
-        'name': 'Supplementary Material',
-        'acknowledged': False,
-        'colour': '#3f5921', # dark green
-    },
-]]
-
-# Acknowledgement
-db.session.add_all(acknowledgements)
-db.session.commit()
-
-# Academics
-academics = [Academic(
-    first_name=fake.first_name(),
-    last_name=fake.last_name(),
-    initialised=True,
-    themes=sample(themes, randint(1, 3)),
-    has_left_brc=(randint(1, 10) >= 9))
-    for _ in range(randint(10, 20))]
-
-db.session.add_all(academics)
-db.session.commit()
-
-# Academic Users
-for a in db.session.execute(select(Academic)).scalars():
-    if randint(1, 10) < 9:
-        email = f"{a.first_name}.{a.last_name}@le.ac.uk".lower()
-        u = User(
-            email = email,
-            username = email,
-            first_name = a.first_name,
-            last_name = a.last_name,
+    for _ in range(randint(1, 4)):
+        fake.folder().get_in_db(
+            owner=u,
+            shared_users=set(sample(not_owner_users, randint(0, len(not_owner_users) // 2)))
         )
 
-        a.user = u
-        db.session.add(u)
-        db.session.add(a)
+folders = list(db.session.execute(select(Folder)).scalars())
 
-db.session.commit()
+# Journal
+journals = fake.journal().get_list_in_db(item_count=randint(20, 40))
+
+# Sponsor
+fake.sponsor().get_list_in_db(item_count=randint(20, 40))
+fake.sponsor().get_in_db(name='Leicester NIHR')
+fake.sponsor().get_in_db(name='Nottingham National Institute for Health Research')
+fake.sponsor().get_in_db(name='Northampton National Institute for Health and Care Research')
+sponsors = list(db.session.execute(select(Sponsor)).scalars())
+
+# Keyword
+keywords = fake.keyword().get_list_in_db(
+    item_count=randint(20, 40)
+)
+
+# Affiliations
+fake.affiliation().get_list_in_db(item_count=randint(20, 40))
+fake.affiliation().get_in_db(name='Leicester NIHR')
+fake.affiliation().get_in_db(name='Nottingham National Institute for Health Research')
+fake.affiliation().get_in_db(name='Northampton National Institute for Health and Care Research')
+affiliations = list(db.session.execute(select(Affiliation)).scalars())
+
+# NIHR Acknowledgements
+fake.nihr_acknowledgement().create_defaults()
+acknowledgements = list(db.session.execute(select(NihrAcknowledgement)).scalars())
+
+# Academics
+academics = [
+    fake.academic().get_in_db(
+        initialised=True,
+        has_left_brc=(randint(1, 10) >= 9),
+        create_user=(randint(1, 10) >= 9),
+    )
+    for _ in range(randint(20, 40))
+]
 
 # Sources
 sources = []
 
 for a in academics:
-    for _ in range(randint(1,5)):
-        sources.append(Source(
+    sources.extend(
+        fake.source().get_list_in_db(
+            item_count=randint(1, 5),
             academic=a,
-            first_name=a.first_name,
-            last_name=a.last_name,
-            display_name=f'{a.first_name} {a.last_name}',
-            catalog=choice([CATALOG_SCOPUS, CATALOG_OPEN_ALEX]),
-            catalog_identifier=''.join(choices(string.digits, k=randint(5, 10))),
-            citation_count=randint(1, 1000),
-            document_count=randint(1, 1000),
-            h_index=randint(1, 100),
-            affiliations=sample(affiliations, randint(1, len(affiliations))),
-            orcid=''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15))),
-        ))
-    for _ in range(randint(5,20)):
-        sources.append(Source(
-            academic=None,
-            first_name=a.first_name,
-            last_name=a.last_name,
-            display_name=f'{a.first_name} {a.last_name}',
-            catalog=choice([CATALOG_SCOPUS, CATALOG_OPEN_ALEX]),
-            catalog_identifier=''.join(choices(string.digits, k=randint(5, 10))),
-            citation_count=randint(1, 1000),
-            document_count=randint(1, 1000),
-            h_index=randint(1, 100),
-            affiliations=sample(affiliations, randint(1, len(affiliations))),
-            orcid=''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15))),
-        ))
+    ))
 
-db.session.add_all(sources)
-db.session.commit()
+# Additional Sources not linked to academics
+sources.extend(
+    fake.source().get_list_in_db(
+        item_count=randint(200, 300),
+        academic=None,
+    )
+)
 
-
-catalog_publications = []
-
+# Publications and Catalog Publications
 for _ in range(randint(400, 600)):
-    doi = f'10.{randint(4,6)}/{"".join(choices(string.ascii_lowercase, k=randint(5, 10)))}'
+    p = fake.publication().get_in_db()
 
-    p = Publication(
-        doi=doi,
-        nihr_acknowledgement=choice(acknowledgements + [None]),
-        preprint=choice([False, False, False, True]),
-        supplementary_authors=sample(academics, choice([0, 0, 0, 0, 1, 2])),
-    )
+    for s in sample(academics, choice([0, 0, 0, 0, 1, 2])):
+        p.supplementary_authors.append(s)
 
-    cover_date=fake.date_between(start_date='-2y', end_date='today')
-
-    cp = CatalogPublication(
-        catalog=choice([CATALOG_SCOPUS, CATALOG_OPEN_ALEX]),
-        catalog_identifier=''.join(choices(string.digits, k=randint(5, 10))),
-        title=fake.sentence(nb_words=randint(16, 32)).title(),
-        publication_cover_date=cover_date,
-        publication_period_start=cover_date,
-        publication_period_end=cover_date,
-        subtype=choice(sub_types),
-        publication=p,
-        doi=doi,
-        abstract=fake.paragraph(nb_sentences=randint(10, 20)),
-        volume=randint(1,12),
-        issue=randint(1,30),
-        pages=f'p{randint(1,100)}',
-        funding_text=fake.paragraph(nb_sentences=randint(3, 10)),
-        href=fake.uri(),
-        journal=choice(journals),
-        is_open_access=choice([True, False]),
-        sponsors=set(sample(sponsors, randint(1, len(sponsors) // 4)))
-    )
-    cp.keywords = set(sample(keywords, randint(1, len(keywords) // 2)))
-
-    for i, s in enumerate(sample(sources, randint(1, len(sources) // 5))):
-        cp.catalog_publication_sources.append(CatalogPublicationsSources(
-            catalog_publication=cp,
-            source=s,
-            ordinal=i,
-        ))
-    
-    for f in sample(folders, randint(0, len(folders) // 4)):
-        db.session.add(FolderDoi(folder=f, doi=p.doi))
-
-    catalog_publications.append(cp)
-
-db.session.add_all(catalog_publications)
-db.session.commit()
-
-for p in db.session.execute(select(Publication)).scalars():
-    p.set_vancouver()
     db.session.add(p)
-db.session.commit()
+    db.session.commit()
 
-other_users = list(db.session.execute(select(User).where(User.id > 2)).scalars())
-
-for p in db.session.execute(select(Publication)).scalars():
-    for f in p.folder_dois:
-        for u in sample(other_users, randint(0, len(other_users))):
-            db.session.add(FolderDoiUserRelevance(
-                folder_doi_id=f.id,
-                user=u,
-                relevant=choice([True, False]),
-            ))
-db.session.commit()
+    # for catalog in sample(primary_catalogs(), randint(1, len(primary_catalogs()))):
+    #     fake.catalog_publication().get_in_db(
+    #         publication=p,
+    #         catalog=catalog,
+    #     )
 
 db.session.close()
 

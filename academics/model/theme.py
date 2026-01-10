@@ -5,6 +5,16 @@ from lbrc_flask.database import db
 
 
 class Theme(AuditMixin, CommonMixin, db.Model):
+    DEFAULT_VALUES = [
+        {'name': 'Cardiology'},
+        {'name': 'Lifestyle'},
+        {'name': 'Respirator'},
+        {'name': 'Precision Medicine'},
+        {'name': 'Cancer'},
+        {'name': 'Data MLTcs Ethnic Health'},
+        {'name': 'Environment'},
+    ]
+
     __table_args__ = (
         UniqueConstraint("name", name='ux__theme__name'),
     )
