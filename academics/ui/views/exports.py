@@ -228,5 +228,3 @@ def publication_author_report_pdf():
                 as_attachment=True,
                 download_name=f'publication_author_report_{datetime.now():%Y%m%d_%H%M%S}.zip',
                 )
-
-

@@ -100,7 +100,7 @@ def validation(page=1):
     q = (
         select(Publication)
         .join(Publication.catalog_publications)
-        .where(CatalogPublication.id.in_(best_catalog_publications()))
+        .where(CatalogPublication.id.in_(best_catalog_publications().subquery()))
         .where(CatalogPublication.subtype_id.in_([s.id for s in Subtype.get_validation_types()]))
         .where(CatalogPublication.publication_cover_date >= current_app.config['HISTORIC_PUBLICATION_CUTOFF'])
         .where(Publication.nihr_acknowledgement_id == None)

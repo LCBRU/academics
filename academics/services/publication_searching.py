@@ -243,12 +243,10 @@ class ValidationSearchForm(SearchForm):
 
 
 def best_catalog_publications(search_data=None):
-    q = (
-        select(
+    q = select(
             CatalogPublication.id,
             func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc(), CatalogPublication.id.desc()]).label('priority')
-        )
-    )
+        ).subquery()
 
     search_data = search_data or {}
 
@@ -358,7 +356,7 @@ def catalog_publication_groups():
 
 
 def publication_search_query(search_form):
-    cat_pubs = catalog_publication_search_query(search_form)
+    cat_pubs = catalog_publication_search_query(search_form).subquery()
 
     q = (
         select(Publication)

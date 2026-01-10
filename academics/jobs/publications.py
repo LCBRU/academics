@@ -62,7 +62,7 @@ class AutoFillFolders(AsyncJob):
         db.session.commit()
 
     def _add_publications_to_folder(self, folder: Folder):
-        bcp = best_catalog_publications()
+        bcp = best_catalog_publications().subquery()
         autofill_start = date(folder.autofill_year, 4, 1)
         autofill_end = date(folder.autofill_year + 1, 3, 31)
 

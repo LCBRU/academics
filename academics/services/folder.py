@@ -79,7 +79,7 @@ class FolderPublication(Publication):
 
 
 def folder_publication_search_query(folder: Folder, search_form: FolderPublicationSearchForm):
-    cat_pubs = catalog_publication_search_query(search_form)
+    cat_pubs = catalog_publication_search_query(search_form).subquery()
 
     q = (
         select(FolderPublication)
