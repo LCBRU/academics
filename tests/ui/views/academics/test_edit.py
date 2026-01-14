@@ -5,10 +5,11 @@ from lbrc_flask.pytest.form_tester import FormTesterField
 from sqlalchemy import select
 from lbrc_flask.database import db
 from academics.model.academic import Academic
+from academics.security import ROLE_EDITOR
 from tests.ui.views.academics import AcademicFormTester, AcademicViewTester
 
 
-class AcademicEditViewBaseTester(AcademicViewTester):
+class AcademicEditViewTester(AcademicViewTester):
     @property
     def endpoint(self):
         return 'ui.academic_edit'
@@ -19,17 +20,14 @@ class AcademicEditViewBaseTester(AcademicViewTester):
         self.parameters['id'] = self.existing.id
 
 
-class TestAcademicEditRequiresLogin(AcademicEditViewBaseTester, RequiresLoginTester):
+class TestAcademicEditRequiresLogin(AcademicEditViewTester, RequiresLoginTester):
     ...
 
 
-class AcademicEditViewTester(AcademicEditViewBaseTester):
-    @pytest.fixture(autouse=True)
-    def set_editor_user(self, editor_user):
-        pass
-
-
 class TestAcademicEditGet(AcademicEditViewTester, FlaskViewLoggedInTester):
+    def user_to_login(self, faker):
+        return faker.user().get_in_db(rolename=ROLE_EDITOR)
+
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
@@ -38,6 +36,9 @@ class TestAcademicEditGet(AcademicEditViewTester, FlaskViewLoggedInTester):
         
 
 class TestAcademicEditPost(AcademicEditViewTester, FlaskViewLoggedInTester):
+    def user_to_login(self, faker):
+        return faker.user().get_in_db(rolename=ROLE_EDITOR)
+
     def test__post__valid(self):
         new_user = self.faker.user().get_in_db()
         expected = self.faker.academic().get(user_id=new_user.id)

@@ -1,10 +1,11 @@
 from unittest.mock import patch
 import pytest
 from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester
+from academics.security import ROLE_EDITOR
 from tests.ui.views.academics import AcademicViewTester
 
 
-class UpdateAcademicViewBaseTester(AcademicViewTester):
+class UpdateAcademicViewTester(AcademicViewTester):
     @property
     def endpoint(self):
         return 'ui.update_academic'
@@ -15,19 +16,16 @@ class UpdateAcademicViewBaseTester(AcademicViewTester):
         self.parameters['id'] = self.existing.id
 
 
-class TestUpdateAcademicRequiresLogin(UpdateAcademicViewBaseTester, RequiresLoginTester):
+class TestUpdateAcademicRequiresLogin(UpdateAcademicViewTester, RequiresLoginTester):
     @property
     def request_method(self):
         return self.post
     
 
-class UpdateAcademicViewTester(UpdateAcademicViewBaseTester):
-    @pytest.fixture(autouse=True)
-    def set_editor_user(self, editor_user):
-        pass
-
-
 class TestUpdateAcademicPost(UpdateAcademicViewTester, FlaskViewLoggedInTester):
+    def user_to_login(self, faker):
+        return faker.user().get_in_db(rolename=ROLE_EDITOR)
+
     @pytest.mark.app_crsf(True)
     @patch('academics.ui.views.academics.run_jobs_asynch') # Mocking as cereal tasks do not work in testing
     def test__get__has_form(self, run_jobs_asynch):

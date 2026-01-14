@@ -1,6 +1,7 @@
 import pytest
 from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester
 from lbrc_flask.pytest.form_tester import FormTester, FormTesterSearchField, FormTesterCheckboxField
+from academics.security import ROLE_EDITOR
 from tests.ui.views.academics import AcademicViewTester
 
 
@@ -28,13 +29,10 @@ class TestAddAcademicSearchRequiresLogin(AddAcademicSearchViewBaseTester, Requir
     ...
 
 
-class AddAcademicSearchViewTester(AddAcademicSearchViewBaseTester):
-    @pytest.fixture(autouse=True)
-    def set_editor_user(self, editor_user):
-        pass
+class TestAddAcademicSearchGet(AddAcademicSearchViewBaseTester, FlaskViewLoggedInTester):
+    def user_to_login(self, faker):
+        return faker.user().get_in_db(rolename=ROLE_EDITOR)
 
-
-class TestAddAcademicSearchGet(AddAcademicSearchViewTester, FlaskViewLoggedInTester):
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()

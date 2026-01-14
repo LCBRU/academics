@@ -3,6 +3,7 @@ from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTest
 from lbrc_flask.pytest.form_tester import FormTester, FormTesterSelectField, FormTesterRadioField
 from sqlalchemy import select
 from academics.model.theme import Theme
+from academics.security import ROLE_EDITOR
 from academics.ui.views.academics import _get_academic_choices
 from tests.ui.views.academics import AcademicViewTester
 from lbrc_flask.database import db
@@ -27,23 +28,20 @@ class AddAcademicFormTester(FormTester):
         )
 
 
-class AddAcademicViewBaseTester(AcademicViewTester):
+class AddAcademicViewTester(AcademicViewTester):
     @property
     def endpoint(self):
         return 'ui.add_author'
 
 
-class TestAddAcademicRequiresLogin(AddAcademicViewBaseTester, RequiresLoginTester):
+class TestAddAcademicRequiresLogin(AddAcademicViewTester, RequiresLoginTester):
     ...
 
 
-class AddAcademicViewTester(AddAcademicViewBaseTester):
-    @pytest.fixture(autouse=True)
-    def set_editor_user(self, editor_user):
-        pass
-
-
 class TestAddAcademicGet(AddAcademicViewTester, FlaskViewLoggedInTester):
+    def user_to_login(self, faker):
+        return faker.user().get_in_db(rolename=ROLE_EDITOR)
+
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
