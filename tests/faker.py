@@ -11,6 +11,7 @@ from academics.model.publication import Journal, Keyword, NihrAcknowledgement, P
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.model.catalog import primary_catalogs
+from academics.security import ROLE_EDITOR
 
 
 class ThemeCreator(FakeCreator):
@@ -87,6 +88,9 @@ class UserCreator(BaseUserCreator):
             result.folders.append(folder)
 
         return result
+    
+    def editor(self):
+        return self.get(rolename=ROLE_EDITOR, save=True)
 
 
 class AcademicFakeCreator(FakeCreator):

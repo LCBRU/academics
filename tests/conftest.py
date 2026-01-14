@@ -2,13 +2,10 @@ import pytest
 from faker import Faker
 from lbrc_flask.pytest.fixtures import *
 from lbrc_flask.pytest.faker import LbrcFlaskFakerProvider
-from lbrc_flask.pytest.helpers import login
-from lbrc_flask.security import add_user_to_role
 from academics import create_app
 from academics.config import TestConfig
 from academics.security import init_authorization
 from tests.faker import AcademicsProvider
-from academics.security import ROLE_EDITOR
 
 
 @pytest.fixture(scope="function", autouse=True)

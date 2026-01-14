@@ -5,7 +5,6 @@ from flask import url_for
 import pytest
 from lbrc_flask.pytest.testers import IndexTester, RequiresLoginTester, PanelListContentAsserter, PagedResultSet, TableContentAsserter, ResultSet
 from academics.model.academic import Academic
-from academics.security import ROLE_EDITOR
 
 
 class AcademicIndexTester:
@@ -290,7 +289,7 @@ class TestAcademicEditorIndex(AcademicIndexTester, IndexTester):
         return AcademicEditorRowContentAsserter
     
     def user_to_login(self, faker):
-        return faker.user().get_in_db(rolename=ROLE_EDITOR)
+        return faker.user().editor()
 
     @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())

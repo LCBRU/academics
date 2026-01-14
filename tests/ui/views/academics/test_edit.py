@@ -5,7 +5,6 @@ from lbrc_flask.pytest.form_tester import FormTesterField
 from sqlalchemy import select
 from lbrc_flask.database import db
 from academics.model.academic import Academic
-from academics.security import ROLE_EDITOR
 from tests.ui.views.academics import AcademicFormTester, AcademicViewTester
 
 
@@ -26,7 +25,7 @@ class TestAcademicEditRequiresLogin(AcademicEditViewTester, RequiresLoginTester)
 
 class TestAcademicEditGet(AcademicEditViewTester, FlaskViewLoggedInTester):
     def user_to_login(self, faker):
-        return faker.user().get_in_db(rolename=ROLE_EDITOR)
+        return faker.user().editor()
 
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
@@ -37,7 +36,7 @@ class TestAcademicEditGet(AcademicEditViewTester, FlaskViewLoggedInTester):
 
 class TestAcademicEditPost(AcademicEditViewTester, FlaskViewLoggedInTester):
     def user_to_login(self, faker):
-        return faker.user().get_in_db(rolename=ROLE_EDITOR)
+        return faker.user().editor()
 
     def test__post__valid(self):
         new_user = self.faker.user().get_in_db()
