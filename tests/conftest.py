@@ -17,17 +17,6 @@ def authorization_setup(client, faker):
 
 
 @pytest.fixture(scope="function")
-def loggedin_user(client, faker):
-    return login(client, faker)
-
-
-@pytest.fixture(scope="function")
-def editor_user(loggedin_user):
-    add_user_to_role(loggedin_user, ROLE_EDITOR)
-    return loggedin_user
-
-
-@pytest.fixture(scope="function")
 def app(tmp_path):
     class LocalTestConfig(TestConfig):
         FILE_UPLOAD_DIRECTORY = tmp_path
