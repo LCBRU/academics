@@ -56,7 +56,7 @@ class TestAcademicEditPost(AcademicEditViewTester, FlaskViewLoggedInTester):
         "missing_field", AcademicFormTester().mandatory_fields_edit,
     )
     def test__post__missing_mandatory_field(self, missing_field: FormTesterField):
-        expected = self.faker.academic().get()
+        expected = self.faker.academic().get(save=False)
         data = self.get_data_from_object(expected)
         data[missing_field.field_name] = ''
 

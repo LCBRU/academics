@@ -9,7 +9,7 @@ from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTest
 
 #     @pytest.fixture(autouse=True)
 #     def set_existing(self, client, faker):
-#         self.folder_doi = faker.folder_doi().get()
+#         self.folder_doi = faker.folder_doi().get(save=False)
 #         self.parameters['folder_id'] = self.folder_doi.folder.id
 #         self.parameters['doi'] = self.folder_doi.doi
 

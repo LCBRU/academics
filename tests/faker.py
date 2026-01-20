@@ -142,7 +142,7 @@ class SourceFakeCreator(FakeCreator):
         if (academic := args.get('academic')) is not None:
             academic_id = academic.id
         
-        affiliations = args.get('affiliations', [self.faker.affiliation().get() for _ in range(randint(1, 3))])
+        affiliations = args.get('affiliations', [self.faker.affiliation().get(save=save) for _ in range(randint(1, 3))])
         first_name = args.get('first_name', self.faker.first_name())
         initials = args.get('initials', ''.join(self.faker.random_letters(length=self.faker.random_int(min=0, max=3))))
         last_name = args.get('last_name', self.faker.last_name())
