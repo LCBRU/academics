@@ -75,22 +75,22 @@ for u in all_users:
 folders = list(db.session.execute(select(Folder)).scalars())
 
 # Journal
-journals = fake.journal().get_list_in_db(item_count=randint(20, 40))
+journals = fake.journal().get_list(save=True, item_count=randint(20, 40))
 
 # Sponsor
-fake.sponsor().get_list_in_db(item_count=randint(20, 40))
+fake.sponsor().get_list(save=True, item_count=randint(20, 40))
 fake.sponsor().get(save=True, name='Leicester NIHR')
 fake.sponsor().get(save=True, name='Nottingham National Institute for Health Research')
 fake.sponsor().get(save=True, name='Northampton National Institute for Health and Care Research')
 sponsors = list(db.session.execute(select(Sponsor)).scalars())
 
 # Keyword
-keywords = fake.keyword().get_list_in_db(
+keywords = fake.keyword().get_list(save=True, 
     item_count=randint(20, 40)
 )
 
 # Affiliations
-fake.affiliation().get_list_in_db(item_count=randint(20, 40))
+fake.affiliation().get_list(save=True, item_count=randint(20, 40))
 fake.affiliation().get(save=True, name='Leicester NIHR')
 fake.affiliation().get(save=True, name='Nottingham National Institute for Health Research')
 fake.affiliation().get(save=True, name='Northampton National Institute for Health and Care Research')
@@ -115,14 +115,14 @@ sources = []
 
 for a in academics:
     sources.extend(
-        fake.source().get_list_in_db(
+        fake.source().get_list(save=True, 
             item_count=randint(1, 5),
             academic=a,
     ))
 
 # Additional Sources not linked to academics
 sources.extend(
-    fake.source().get_list_in_db(
+    fake.source().get_list(save=True, 
         item_count=randint(200, 300),
         academic=None,
     )
