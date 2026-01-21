@@ -15,7 +15,7 @@ class AcademicEditViewTester(AcademicViewTester):
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.existing = faker.academic().get_in_db()
+        self.existing = faker.academic().get(save=True)
         self.parameters['id'] = self.existing.id
 
 
@@ -39,7 +39,7 @@ class TestAcademicEditPost(AcademicEditViewTester, FlaskViewLoggedInTester):
         return faker.user().editor()
 
     def test__post__valid(self):
-        new_user = self.faker.user().get_in_db()
+        new_user = self.faker.user().get(save=True)
         expected = self.faker.academic().get(user_id=new_user.id, save=False)
         data = self.get_data_from_object(expected)
 

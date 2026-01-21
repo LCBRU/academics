@@ -47,7 +47,7 @@ other_users = []
 
 for _ in range(randint(10, 20)):
     email = fake.email(domain='le.ac.uk')
-    other_users.append(fake.user().get_in_db(
+    other_users.append(fake.user().get(save=True, 
         email=email,
         password='ct*i0*t*0',
     ))
@@ -67,7 +67,7 @@ for u in all_users:
     not_owner_users = [ou for ou in all_users if ou != u]
 
     for _ in range(randint(1, 4)):
-        fake.folder().get_in_db(
+        fake.folder().get(save=True, 
             owner=u,
             shared_users=set(sample(not_owner_users, randint(0, len(not_owner_users) // 2)))
         )
@@ -79,9 +79,9 @@ journals = fake.journal().get_list_in_db(item_count=randint(20, 40))
 
 # Sponsor
 fake.sponsor().get_list_in_db(item_count=randint(20, 40))
-fake.sponsor().get_in_db(name='Leicester NIHR')
-fake.sponsor().get_in_db(name='Nottingham National Institute for Health Research')
-fake.sponsor().get_in_db(name='Northampton National Institute for Health and Care Research')
+fake.sponsor().get(save=True, name='Leicester NIHR')
+fake.sponsor().get(save=True, name='Nottingham National Institute for Health Research')
+fake.sponsor().get(save=True, name='Northampton National Institute for Health and Care Research')
 sponsors = list(db.session.execute(select(Sponsor)).scalars())
 
 # Keyword
@@ -91,9 +91,9 @@ keywords = fake.keyword().get_list_in_db(
 
 # Affiliations
 fake.affiliation().get_list_in_db(item_count=randint(20, 40))
-fake.affiliation().get_in_db(name='Leicester NIHR')
-fake.affiliation().get_in_db(name='Nottingham National Institute for Health Research')
-fake.affiliation().get_in_db(name='Northampton National Institute for Health and Care Research')
+fake.affiliation().get(save=True, name='Leicester NIHR')
+fake.affiliation().get(save=True, name='Nottingham National Institute for Health Research')
+fake.affiliation().get(save=True, name='Northampton National Institute for Health and Care Research')
 affiliations = list(db.session.execute(select(Affiliation)).scalars())
 
 # NIHR Acknowledgements
@@ -102,7 +102,7 @@ acknowledgements = list(db.session.execute(select(NihrAcknowledgement)).scalars(
 
 # Academics
 academics = [
-    fake.academic().get_in_db(
+    fake.academic().get(save=True, 
         initialised=True,
         has_left_brc=(randint(1, 10) >= 9),
         create_user=(randint(1, 10) >= 9),
@@ -130,7 +130,7 @@ sources.extend(
 
 # Publications and Catalog Publications
 for _ in range(randint(400, 600)):
-    p = fake.publication().get_in_db()
+    p = fake.publication().get(save=True)
 
     for s in sample(academics, choice([0, 0, 0, 0, 1, 2])):
         p.supplementary_authors.append(s)
@@ -139,7 +139,7 @@ for _ in range(randint(400, 600)):
     db.session.commit()
 
     # for catalog in sample(primary_catalogs(), randint(1, len(primary_catalogs()))):
-    #     fake.catalog_publication().get_in_db(
+    #     fake.catalog_publication().get(save=True, 
     #         publication=p,
     #         catalog=catalog,
     #     )

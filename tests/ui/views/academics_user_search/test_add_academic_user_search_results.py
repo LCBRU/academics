@@ -9,7 +9,7 @@ class AcademicUserSearchResultsViewTester:
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.existing = faker.academic().get_in_db()
+        self.existing = faker.academic().get(save=True)
         self.parameters['academic_id'] = self.existing.id
 
 

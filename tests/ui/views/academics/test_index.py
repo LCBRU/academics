@@ -144,7 +144,7 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
 
         for _ in range(item_count):
             academics.append(
-                self.faker.academic().get_in_db(last_name=next(last_names), first_name=next(first_names))
+                self.faker.academic().get(save=True, last_name=next(last_names), first_name=next(first_names))
             )
 
         return academics
@@ -249,8 +249,8 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
     @pytest.mark.parametrize("count_without", [1, 23])
     def test__get__theme(self, item_count, current_page, count_without):
-        the_theme = self.faker.theme().get_in_db()
-        other_theme = self.faker.theme().get_in_db()
+        the_theme = self.faker.theme().get(save=True)
+        other_theme = self.faker.theme().get(save=True)
         academics = self.faker.academic().get_list_in_db(item_count=item_count, theme=the_theme)
         academics_without = self.faker.academic().get_list_in_db(item_count=count_without)
         academics_withother = self.faker.academic().get_list_in_db(item_count=count_without, theme=other_theme)
@@ -263,7 +263,7 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
     @pytest.mark.parametrize("count_with", [1, 23])
     def test__get__without_theme(self, item_count, current_page, count_with):
-        other_theme = self.faker.theme().get_in_db()
+        other_theme = self.faker.theme().get(save=True)
         academics = self.faker.academic().get_list_in_db(item_count=item_count)
         academics_without = self.faker.academic().get_list_in_db(item_count=count_with, theme=other_theme)
 
@@ -316,8 +316,8 @@ class TestAcademicSourcesIndex(AcademicIndexTester, IndexTester):
         self.get_and_assert(current_page, academics)
 
     def test__get__orcid_mismatch(self):
-        academic = self.faker.academic().get_in_db(orcid="0000-0002-1825-0099")
+        academic = self.faker.academic().get(save=True, orcid="0000-0002-1825-0099")
 
-        self.faker.source().get_in_db(academic=academic, orcid="0000-0002-1825-0097")
+        self.faker.source().get(save=True, academic=academic, orcid="0000-0002-1825-0097")
 
         self.get_and_assert(1, [academic])
