@@ -40,7 +40,7 @@ class TestAcademicEditPost(AcademicEditViewTester, FlaskViewLoggedInTester):
 
     def test__post__valid(self):
         new_user = self.faker.user().get_in_db()
-        expected = self.faker.academic().get(user_id=new_user.id)
+        expected = self.faker.academic().get(user_id=new_user.id, save=False)
         data = self.get_data_from_object(expected)
 
         resp = self.post(data)
