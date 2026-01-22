@@ -37,18 +37,23 @@ class FolderDoiCreator(FakeCreator):
     cls = FolderDoi
     
     def _create_item(self, save: bool, args: FakeCreatorArgs):
-        folder = args.get_or_by_id_or_create(
-            object_key='folder',
-            creator=self.faker.folder(),
-        )
-        
-        if 'doi' in args.arguments:
-            doi = args.arguments['doi']
+        if "folder" in args:
+            folder = args.get('folder')
+        elif "folder_id" in args:
+            folder = self.faker.folder().get_by_id(args.get('folder_id'))
         else:
-            publication = args.get_or_by_id_or_create(
-                object_key='publication',
-                creator=self.faker.publication(),
-            )
+            folder = self.faker.folder().get(save=save)
+        
+        if 'doi' in args:
+            doi = args.get('doi')
+        elif "publication" in args:
+            publication = args.get('publication')
+            doi = publication.doi
+        elif "publication_id" in args:
+            publication = self.faker.publication().get_by_id(args.get('publication_id'))
+            doi = publication.doi
+        else:
+            publication = self.faker.publication().get(save=save)
             doi = publication.doi
 
         return self.cls(
@@ -178,30 +183,37 @@ class PublicationFakeCreator(FakeCreator):
         doi = args.get('doi', self.faker.doi())
         vancouver = args.get('vancouver', f"{self.faker.last_name()}, {self.faker.first_name()[0]}. Sample Publication Title. Journal Name. {self.faker.year()};{self.faker.random_int(min=1, max=100)}({self.faker.random_int(min=1, max=12)}):{self.faker.random_int(min=1, max=500)}-{self.faker.random_int(min=501, max=1000)}.")
         refresh_full_details = args.get('refresh_full_details', self.faker.random.choice([True, False]))
-        auto_nihr_acknowledgement = args.get_or_by_id_or_create(
-            object_key='auto_nihr_acknowledgement',
-            creator=self.faker.nihr_acknowledgement(),
-        )
-        nihr_acknowledgement = args.get_or_by_id_or_create(
-            object_key='nihr_acknowledgement',
-            creator=self.faker.nihr_acknowledgement(),
-        )
+
+        if 'auto_nihr_acknowledgement' in args:
+            auto_nihr_acknowledgement = args.get('auto_nihr_acknowledgement')
+        elif 'auto_nihr_acknowledgement_id' in args:
+            auto_nihr_acknowledgement = self.faker.nihr_acknowledgement().get_by_id(args.get('auto_nihr_acknowledgement_id'))
+        else:
+            auto_nihr_acknowledgement = self.faker.nihr_acknowledgement().get(save=save)
+
+        if 'nihr_acknowledgement' in args:
+            nihr_acknowledgement = args.get('nihr_acknowledgement')
+        elif 'nihr_acknowledgement_id' in args:
+            nihr_acknowledgement = self.faker.nihr_acknowledgement().get_by_id(args.get('nihr_acknowledgement_id'))
+        else:
+            nihr_acknowledgement = self.faker.nihr_acknowledgement().get(save=save)
+
         strict_nihr_acknowledgement_match = args.get('strict_nihr_acknowledgement', self.faker.pyint())
         preprint = args.get('preprint', self.faker.random.choice([True, False]))
-        institutions = set(args.get_list_or_by_ids_or_news(
-            object_key='institutions',
-            creator=self.faker.institution(),
-            ids_key='institution_ids',
-            count=self.faker.random_int(min=1, max=3),
-        ))
-        folders = set(
-            args.get_list_or_by_ids_or_news(
-                object_key='folders',
-                creator=self.faker.folder(),
-                ids_key='folder_ids',
-                count=self.faker.random_int(min=1, max=3),
-            )
-        )
+
+        if "institutions" in args:
+            institutions = args.get('institutions')
+        elif "institution_ids" in args:
+            institutions = [self.faker.institution().get_by_id(id) for id in args.get('institution_ids')]
+        else:
+            institutions = self.faker.institution().get_list(save=save, count=self.faker.random_int(min=1, max=3))
+
+        if "folders" in args:
+            folders = set(args.get('folders'))
+        elif "folder_ids" in args:
+            folders = set(self.faker.folder().get_by_ids(args.get('folder_ids')))
+        else:
+            folders = set(self.faker.folder().get_list(save=save, count=self.faker.random_int(min=1, max=3)))
 
         return self.cls(
             doi = doi,
@@ -222,12 +234,14 @@ class CatalogPublicationFakeCreator(FakeCreator):
     cls = Publication
     
     def _create_item(self, save: bool, args: FakeCreatorArgs):
-        publication = args.get_or_by_id_or_create(
-            object_key='publication',
-            creator=self.faker.publication(),
-        )
+        if 'publication' in args:
+            publication = args.get('publication')
+        elif 'publication_id' in args:
+            publication = self.faker.publication().get_by_id(args.get('publication_id'))
+        else:
+            publication = self.faker.publication().get(save=save)
 
-        if 'doi' in args.arguments:
+        if 'doi' in args:
             doi = args.get('doi')
         elif publication is not None:
             doi = publication.doi
@@ -237,6 +251,34 @@ class CatalogPublicationFakeCreator(FakeCreator):
         publication_cover_date = args.get('publication_cover_date', self.faker.date_between(start_date='-2y', end_date='today'))
         publication_period_start = args.get('publication_period_start', publication_cover_date)
         publication_period_end = args.get('publication_period_end', publication_cover_date)
+
+        if "journal" in args:
+            journal = args.get('journal')
+        elif "journal_id" in args:
+            journal = self.faker.journal().get_by_id(args.get('journal_id'))
+        else:
+            journal = self.faker.journal().get(save=save)
+
+        if "sponsors" in args:
+            sponsors = args.get('sponsors')
+        elif "sponsor_ids" in args:
+            sponsors = [self.faker.sponsor().get_by_id(id) for id in args.get('sponsor_ids')]
+        else:
+            sponsors = self.faker.sponsor().get_list(save=save, count=self.faker.random_int(min=1, max=3))
+
+        if "keywords" in args:
+            keywords = args.get('keywords')
+        elif "keyword_ids" in args:
+            keywords = [self.faker.keyword().get_by_id(id) for id in args.get('keyword_ids')]
+        else:
+            keywords = self.faker.keyword().get_list(save=save, count=self.faker.random_int(min=1, max=5))
+
+        if "catalog_publication_sources" in args:
+            catalog_publication_sources = args.get('catalog_publication_sources')
+        elif "catalog_publication_source_ids" in args:
+            catalog_publication_sources = [self.faker.source().get_by_id(id) for id in args.get('catalog_publication_source_ids')]
+        else:
+            catalog_publication_sources = self.faker.source().get_list(save=save, count=self.faker.random_int(min=1, max=5))
 
         return self.cls(
             publication = publication,
@@ -255,35 +297,11 @@ class CatalogPublicationFakeCreator(FakeCreator):
             pages = args.get('pages', f'p{self.faker.random_int(min=1, max=100)}'),
             funding_text = args.get('funding_text', self.faker.paragraph(nb_sentences=3)),
             href = args.get('href', self.faker.uri()),
-            journal = args.get_or_by_id_or_create(
-                object_key='journal',
-                creator=self.faker.journal(),
-            ),
+            journal = journal,
             is_open_access = args.get('is_open_access', self.faker.random.choice([True, False])),
-            sponsors = set(
-                args.get_list_or_by_ids_or_news(
-                    object_key='sponsors',
-                    creator=self.faker.sponsor(),
-                    ids_key='sponsor_ids',
-                    count=self.faker.random_int(min=1, max=3),
-                )
-            ),
-            keywords=set(
-                args.get_list_or_by_ids_or_news(
-                    object_key='keywords',
-                    creator=self.faker.keyword(),
-                    ids_key='keyword_ids',
-                    count=self.faker.random_int(min=1, max=5),
-                )
-            ),
-            catalog_publication_sources=set(
-                args.get_list_or_by_ids_or_news(
-                    object_key='catalog_publication_sources',
-                    creator=self.faker.source(),
-                    ids_key='catalog_publication_source_ids',
-                    count=self.faker.random_int(min=1, max=5),
-                )
-            ),
+            sponsors=sponsors,
+            keywords=set(keywords),
+            catalog_publication_sources=set(catalog_publication_sources),
         )
     
 
