@@ -6,12 +6,10 @@ from .. import blueprint
 from academics.ui.views.decorators import assert_folder_user
 from flask import flash, redirect, render_template, render_template_string, url_for
 from sqlalchemy import select
-from academics.model.folder import Folder, FolderDoi
+from academics.model.folder import Folder
 from academics.model.publication import Publication
 from lbrc_flask.database import db
-from datetime import datetime, timezone
-from lbrc_flask.security import current_user_id
-from lbrc_flask.response import refresh_response
+from lbrc_flask.response import refresh_response, refresh_details
 from wtforms import TextAreaField
 from lbrc_flask.forms import FlashingForm
 from wtforms.validators import DataRequired
@@ -25,8 +23,7 @@ class UploadFolderDois(FlashingForm):
 def folderdoi_delete(folder_id, doi):
     remove_doi_from_folder(folder_id, doi)
     db.session.commit()
-
-    return render_publication_folders(doi)
+    return refresh_details()
 
 
 @blueprint.route("/folder/<int:id>/upload_dois", methods=['GET', 'POST'])
@@ -64,19 +61,3 @@ def publication_create_folder():
     db.session.commit()
 
     return redirect(url_for('ui.folders'))
-
-
-def render_publication_folders(doi):
-    pq = select(Publication).where(Publication.doi == doi)
-
-    template = '''
-        {% from "ui/_folder_dois.html" import render_publication_folders with context %}
-
-        {{ render_publication_folders(publication, folders) }}
-    '''
-
-    return render_template_string(
-        template,
-        publication=db.session.execute(pq).unique().scalar(),
-        folders=db.session.execute(select(Folder)).scalars().all(),
-    )
