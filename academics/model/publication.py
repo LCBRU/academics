@@ -14,7 +14,6 @@ from academics.model.institutions import Institution
 from sqlalchemy.ext.associationproxy import association_proxy
 
 
-
 DOI_URL = 'doi.org'
 ORCID_URL = 'orcid.org'
 
@@ -194,10 +193,16 @@ class Publication(db.Model, AuditMixin):
     refresh_full_details: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
     auto_nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
-    auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[auto_nihr_acknowledgement_id])
+    auto_nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(
+        lazy="selectin",
+        foreign_keys=[auto_nihr_acknowledgement_id],
+    )
 
     nihr_acknowledgement_id = mapped_column(ForeignKey(NihrAcknowledgement.id), nullable=True)
-    nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(lazy="selectin", foreign_keys=[nihr_acknowledgement_id])
+    nihr_acknowledgement: Mapped[NihrAcknowledgement] = relationship(
+        lazy="selectin",
+        foreign_keys=[nihr_acknowledgement_id],
+    )
 
     strict_nihr_acknowledgement_match: Mapped[int] = mapped_column(nullable=True)
 

@@ -2,12 +2,12 @@ from datetime import datetime
 from random import choice, choices, randint
 import string
 from functools import cache
-from academics.model.academic import Academic, Affiliation, Source
+from academics.model.academic import Academic, Affiliation, CatalogPublicationsSources, Source
 from faker.providers import BaseProvider
 from lbrc_flask.pytest.faker import FakeCreator, UserCreator as BaseUserCreator, FakeCreatorArgs
 from academics.model.folder import Folder, FolderDoi
 from academics.model.institutions import Institution
-from academics.model.publication import Journal, Keyword, NihrAcknowledgement, Publication, Sponsor, Subtype
+from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Sponsor, Subtype
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.model.catalog import primary_catalogs
@@ -100,35 +100,35 @@ class AcademicFakeCreator(FakeCreator):
     cls = Academic
     
     def _create_item(self, save: bool, args: FakeCreatorArgs):
-        has_left_brc = args.get('has_left_brc', False)
+        has_left_brc = args.get('has_left_brc', (randint(1, 10) >= 9))
         left_brc_date = args.get('left_brc_date')
 
         if has_left_brc and left_brc_date is None:
             left_brc_date = datetime.strptime(self.faker.date(), '%Y-%m-%d').date()
         
-        user_id = args.get('user_id')
+        params = {
+            'first_name': args.get('first_name', self.faker.first_name()),
+            'last_name': args.get('last_name', self.faker.last_name()),
+            'initials': args.get('initials', ''.join(self.faker.random_letters(length=self.faker.random_int(min=0, max=3)))),
+            'orcid': args.get('orcid', ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15)))),
+            'google_scholar_id': args.get('google_scholar_id', ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15)))),
+            'updating': args.get('updating', False),
+            'initialised': args.get('initialised', True),
+            'error': args.get('error', False),
+            'has_left_brc': has_left_brc,
+            'left_brc_date': left_brc_date,
+        }
 
-        if (args.get('create_user', False) == True):
+        if "user_id" in args:
+            params['user_id'] = args.get('user_id')
+        elif "user" in args:
+            user = args.get('user')
+            params['user'] = user
+        elif (randint(1, 10) >= 9):
             user = self.faker.user().get(save=save)
+            params['user'] = user
 
-        if (user := args.get('user')) is not None:
-            user_id = user.id
-
-        result = self.cls(
-            first_name = args.get('first_name', self.faker.first_name()),
-            last_name = args.get('last_name', self.faker.last_name()),
-            initials = args.get('initials', ''.join(self.faker.random_letters(length=self.faker.random_int(min=0, max=3)))),
-            orcid = args.get('orcid', ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15)))),
-            google_scholar_id = args.get('google_scholar_id', ''.join(choices(string.ascii_uppercase + string.digits, k=randint(10, 15)))),
-            # here
-            updating = args.get('updating', False),
-            initialised = args.get('initialised', True),
-            error = args.get('error', False),
-            has_left_brc = has_left_brc,
-            left_brc_date = left_brc_date,
-            user = user,
-            user_id = user_id
-        )
+        result = self.cls(**params)
 
         if (theme := args.get('theme')) is not None:
             result.themes.append(theme)
@@ -204,18 +204,25 @@ class PublicationFakeCreator(FakeCreator):
         if "institutions" in args:
             institutions = args.get('institutions')
         elif "institution_ids" in args:
-            institutions = [self.faker.institution().get_by_id(id) for id in args.get('institution_ids')]
+            institutions = set([self.faker.institution().get_by_id(id) for id in args.get('institution_ids')])
         else:
-            institutions = self.faker.institution().get_list(save=save, count=self.faker.random_int(min=1, max=3))
+            institutions = set(self.faker.institution().get_list(save=save, item_count=self.faker.random_int(min=1, max=3)))
 
         if "folders" in args:
             folders = set(args.get('folders'))
         elif "folder_ids" in args:
             folders = set(self.faker.folder().get_by_ids(args.get('folder_ids')))
         else:
-            folders = set(self.faker.folder().get_list(save=save, count=self.faker.random_int(min=1, max=3)))
+            folders = set(self.faker.folder().get_list(save=save, item_count=self.faker.random_int(min=1, max=3)))
 
-        return self.cls(
+        if 'supplementary_authors' in args:
+            supplementary_authors = args.get('supplementary_authors')
+        elif 'supplementary_author_ids' in args:
+            supplementary_authors = set([self.faker.academic().get_by_id(id) for id in args.get('supplementary_author_ids')])
+        else:
+            supplementary_authors = set(self.faker.academic().get_list(save=save, item_count=self.faker.random_int(min=0, max=2)))
+
+        result = self.cls(
             doi = doi,
             vancouver = vancouver,
             validation_historic = validation_historic,
@@ -226,12 +233,23 @@ class PublicationFakeCreator(FakeCreator):
             strict_nihr_acknowledgement_match = strict_nihr_acknowledgement_match,
             preprint = preprint,
             institutions = institutions,
-            # folders = folders,
         )
+
+        for folder in folders:
+            self.faker.folder_doi().get(
+                save=save,
+                folder=folder,
+                doi=result.doi,
+            )
+        
+        for author in supplementary_authors:
+            result.supplementary_authors.append(author)
+
+        return result
     
 
 class CatalogPublicationFakeCreator(FakeCreator):
-    cls = Publication
+    cls = CatalogPublication
     
     def _create_item(self, save: bool, args: FakeCreatorArgs):
         if 'publication' in args:
@@ -260,27 +278,20 @@ class CatalogPublicationFakeCreator(FakeCreator):
             journal = self.faker.journal().get(save=save)
 
         if "sponsors" in args:
-            sponsors = args.get('sponsors')
+            sponsors = set(args.get('sponsors'))
         elif "sponsor_ids" in args:
-            sponsors = [self.faker.sponsor().get_by_id(id) for id in args.get('sponsor_ids')]
+            sponsors = set([self.faker.sponsor().get_by_id(id) for id in args.get('sponsor_ids')])
         else:
-            sponsors = self.faker.sponsor().get_list(save=save, count=self.faker.random_int(min=1, max=3))
+            sponsors = set(self.faker.sponsor().get_list(save=save, item_count=self.faker.random_int(min=1, max=3)))
 
         if "keywords" in args:
-            keywords = args.get('keywords')
+            keywords = set(args.get('keywords'))
         elif "keyword_ids" in args:
-            keywords = [self.faker.keyword().get_by_id(id) for id in args.get('keyword_ids')]
+            keywords = set([self.faker.keyword().get_by_id(id) for id in args.get('keyword_ids')])
         else:
-            keywords = self.faker.keyword().get_list(save=save, count=self.faker.random_int(min=1, max=5))
+            keywords = set(self.faker.keyword().get_list(save=save, item_count=self.faker.random_int(min=1, max=5)))
 
-        if "catalog_publication_sources" in args:
-            catalog_publication_sources = args.get('catalog_publication_sources')
-        elif "catalog_publication_source_ids" in args:
-            catalog_publication_sources = [self.faker.source().get_by_id(id) for id in args.get('catalog_publication_source_ids')]
-        else:
-            catalog_publication_sources = self.faker.source().get_list(save=save, count=self.faker.random_int(min=1, max=5))
-
-        return self.cls(
+        result = self.cls(
             publication = publication,
             refresh_full_details = args.get('refresh_full_details', self.faker.random.choice([True, False])),
             catalog = args.get('catalog', choice(primary_catalogs)),
@@ -301,8 +312,24 @@ class CatalogPublicationFakeCreator(FakeCreator):
             is_open_access = args.get('is_open_access', self.faker.random.choice([True, False])),
             sponsors=sponsors,
             keywords=set(keywords),
-            catalog_publication_sources=set(catalog_publication_sources),
         )
+
+        if "sources" in args:
+            sources = args.get('sources')
+        elif "source_ids" in args:
+            sources = [self.faker.source().get_by_id(id) for id in args.get('sources_ids')]
+        else:
+            sources = self.faker.source().get_list(save=save, item_count=self.faker.random_int(min=1, max=5))
+
+        for source in sources:
+            result.catalog_publication_sources.append(
+                CatalogPublicationsSources(
+                    catalog_publication=result,
+                    source=source,
+                )
+            )
+
+        return result
     
 
 class NihrAcknowledgementFakeCreator(FakeCreator):
