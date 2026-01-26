@@ -28,15 +28,39 @@ class FolderCreator(FakeCreator):
     cls = Folder
 
     def _create_item(self, save: bool, args: FakeCreatorArgs):
-        return self.cls(
+        params = dict(
             name = args.get('name', self.faker.unique.word()),
+            description = args.get('description', self.faker.sentence(nb_words=6)),
+            autofill_year = args.get('autofill_year', None),
+            author_access = args.get('author_access', self.faker.random.choice([True, False])),
         )
+
+        if 'owner' in args:
+            owner = args.get('owner')
+
+            if owner.id is not None:
+                params['owner_id'] = owner.id
+            else:
+                params['owner'] = owner
+        elif 'owner_id' in args:
+            params['owner_id'] = args.get('owner_id')
+        else:
+            params['owner'] = self.faker.user().get(save=save)
+
+        return self.cls(**params)
+    
+    def assert_equal(self, expected: Folder, actual: Folder):
+        assert expected.name == actual.name
+        assert expected.description == actual.description
+        assert expected.autofill_year == actual.autofill_year
+        assert expected.owner_id == actual.owner_id
 
 
 class FolderDoiCreator(FakeCreator):
     cls = FolderDoi
     
     def _create_item(self, save: bool, args: FakeCreatorArgs):
+        print(f"Folder {args.get('folder')}")
         if "folder" in args:
             folder = args.get('folder')
         elif "folder_id" in args:
@@ -44,6 +68,8 @@ class FolderDoiCreator(FakeCreator):
         else:
             folder = self.faker.folder().get(save=save)
         
+        print(f"DOI {args.get('doi')}")
+        print(f"publication {args.get('publication')}")
         if 'doi' in args:
             doi = args.get('doi')
         elif "publication" in args:
@@ -57,7 +83,7 @@ class FolderDoiCreator(FakeCreator):
             doi = publication.doi
 
         return self.cls(
-            folder_id = folder.id,
+            folder = folder,
             doi = doi,
         )
 

@@ -254,7 +254,6 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
         academics = self.faker.academic().get_list(save=True, item_count=item_count, theme=the_theme)
         academics_without = self.faker.academic().get_list(save=True, item_count=count_without)
         academics_withother = self.faker.academic().get_list(save=True, item_count=count_without, theme=other_theme)
-
         self.parameters['theme_id'] = the_theme.id
 
         self.get_and_assert(current_page, academics)
@@ -276,7 +275,6 @@ class TestAcademicIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("sources_per_academic", [1, 2, 5])
     def test__get__different_numbers_of_sources(self, item_count, current_page, sources_per_academic):
         academics = self.faker.academic().get_list(save=True, item_count=item_count)
-
         for a in academics:
             self.faker.source().get_list(save=True, item_count=sources_per_academic, academic=a)
 
@@ -309,7 +307,6 @@ class TestAcademicSourcesIndex(AcademicIndexTester, IndexTester):
     @pytest.mark.parametrize("sources_per_academic", [1, 2, 3])
     def test__get__different_numbers_of_sources(self, item_count, current_page, sources_per_academic):
         academics = self.faker.academic().get_list(save=True, item_count=item_count)
-
         for a in academics:
             self.faker.source().get_list(save=True, item_count=sources_per_academic, academic=a)
 

@@ -3,7 +3,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from random import randint, sample, choice
+from random import randint, sample
 from lbrc_flask.database import db
 from lbrc_flask.security import init_roles, init_users
 from academics.security import ROLE_EDITOR, ROLE_VALIDATOR, get_roles
@@ -64,7 +64,6 @@ fake.sponsor().get(save=True, name='Northampton National Institute for Health an
 
 # Keyword
 fake.keyword().get_list(save=True, item_count=randint(20, 40))
-
 # Affiliations
 fake.affiliation().get_list(save=True, item_count=randint(20, 40))
 fake.affiliation().get(save=True, name='Leicester NIHR')
@@ -80,7 +79,6 @@ fake.academic().get_list(save=True, item_count=randint(20, 40))
 # Sources
 for a in fake.academic().all_from_db():
     fake.source().get_list(save=True, item_count=randint(1, 5), academic=a)
-
 # Additional Sources not linked to academics
 fake.source().get_list(save=True, item_count=randint(200, 300), academic=None)
 
