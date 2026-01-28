@@ -207,7 +207,7 @@ def is_folder_name_duplicate(name: str, folder_id: Optional[int]):
 
 
 def folder_academic_query():
-    pfq = publication_folder_query()
+    pfq = publication_folder_query().subquery()
 
     q = (
         select(

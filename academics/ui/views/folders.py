@@ -388,7 +388,7 @@ def folder_add_publication(folder_id):
     p: Publication = db.get_or_404(Publication, id)
 
     add_doi_to_folder(f.id, p.doi)
-    db.session.commmit()
+    db.session.commit()
 
     return refresh_response()
 
@@ -509,7 +509,9 @@ class FolderAddDois(FlashingForm):
 
         results = []
 
-        for doi in self.dois_combined.data.split():
+        dois = self.dois_combined.data or ''
+
+        for doi in dois.split():
             for j in junk:
                 doi = doi.replace(j, '')
             

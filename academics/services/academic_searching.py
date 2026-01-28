@@ -35,7 +35,7 @@ def academic_search_query(search_data):
     if x := search_data.get('folder_id'):
         x = int(x)
 
-        faq = folder_academic_query()
+        faq = folder_academic_query().subquery()
 
         q = q.where(Academic.id.in_(
             select(faq.c.academic_id)
