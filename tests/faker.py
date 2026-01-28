@@ -47,6 +47,13 @@ class FolderCreator(FakeCreator):
         else:
             params['owner'] = self.faker.user().get(save=save)
 
+        if "shared_users" in args:
+            params['shared_users'] = set(args.get('shared_users'))
+        elif "shared_user_ids" in args:
+            params['shared_users'] = set([self.faker.user().get_by_id(id) for id in args.get('shared_user_ids')])
+        else:
+            params['shared_users'] = set(self.faker.user().get_list(save=save, item_count=self.faker.random_int(min=1, max=3)))
+
         return self.cls(**params)
     
     def assert_equal(self, expected: Folder, actual: Folder):

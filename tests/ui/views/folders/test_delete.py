@@ -2,7 +2,7 @@ import pytest
 from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester
 
 
-class FolderDoiDeleteViewBaseTester:
+class FolderDeleteViewBaseTester:
     @property
     def endpoint(self):
         return 'ui.folder_delete'
@@ -13,13 +13,13 @@ class FolderDoiDeleteViewBaseTester:
         self.parameters['id'] = self.folder.id
 
 
-class TestFolderDoiDeleteRequiresLogin(FolderDoiDeleteViewBaseTester, RequiresLoginTester):
+class TestFolderDeleteRequiresLogin(FolderDeleteViewBaseTester, RequiresLoginTester):
     @property
     def request_method(self):
         return self.post
 
 
-class TestFolderDoiDeleteGet(FolderDoiDeleteViewBaseTester, FlaskViewLoggedInTester):
+class TestFolderDeleteGet(FolderDeleteViewBaseTester, FlaskViewLoggedInTester):
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker, login_fixture):
         self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)

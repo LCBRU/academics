@@ -246,7 +246,7 @@ def best_catalog_publications(search_data=None):
     q = select(
             CatalogPublication.id,
             func.row_number().over(partition_by=CatalogPublication.publication_id, order_by=[CatalogPublication.catalog.desc(), CatalogPublication.id.desc()]).label('priority')
-        ).subquery()
+        )
 
     search_data = search_data or {}
 
@@ -254,6 +254,8 @@ def best_catalog_publications(search_data=None):
         x = int(x)
         q = q.join(CatalogPublication.publication)
         q = q.where(Publication.folders.any(Folder.id == x))
+
+    q = q.subquery()
 
     return (
         select(q.c.id)

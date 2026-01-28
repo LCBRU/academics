@@ -214,15 +214,6 @@ def folder_remove_shared_user(id, user_id):
     return refresh_response()
 
 
-@blueprint.route("/folder/<int:folder_id>/doi/delete_publication/<path:doi>", methods=['POST'])
-@assert_folder_user()
-def folder_delete_publication(folder_id, doi):
-    remove_doi_from_folder(folder_id, doi)
-    db.session.commit()
-
-    return refresh_response()
-
-
 @blueprint.route("/folder/<int:folder_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/acadmic/<int:academic_id>/publications")
 @blueprint.route("/folder/<int:folder_id>/theme/<int:theme_id>/publications")
