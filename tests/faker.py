@@ -6,6 +6,7 @@ from academics.model.academic import Academic, Affiliation, CatalogPublicationsS
 from faker.providers import BaseProvider
 from lbrc_flask.pytest.faker import FakeCreator, UserCreator as BaseUserCreator, FakeCreatorArgs
 from academics.model.folder import Folder, FolderDoi
+from academics.model.group import Group
 from academics.model.institutions import Institution
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Sponsor, Subtype
 from academics.model.security import User
@@ -22,6 +23,49 @@ class ThemeCreator(FakeCreator):
         return self.cls(
             name = args.get('name', self.faker.unique.word()),
         )
+
+
+class GroupCreator(FakeCreator):
+    cls = Group
+
+    def _create_item(self, save: bool, args: FakeCreatorArgs):
+        params = dict(
+            name = args.get('name', self.faker.unique.word()),
+        )
+
+        if 'owner' in args:
+            owner = args.get('owner')
+
+            if owner.id is not None:
+                params['owner_id'] = owner.id
+            else:
+                params['owner'] = owner
+        elif 'owner_id' in args:
+            params['owner_id'] = args.get('owner_id')
+        else:
+            params['owner'] = self.faker.user().get(save=save)
+
+        if "shared_users" in args:
+            params['shared_users'] = set(args.get('shared_users'))
+        elif "shared_user_ids" in args:
+            params['shared_users'] = set([self.faker.user().get_by_id(id) for id in args.get('shared_user_ids')])
+        else:
+            params['shared_users'] = set(self.faker.user().get_list(save=save, item_count=self.faker.random_int(min=1, max=3)))
+
+        if "academics" in args:
+            params['academics'] = set(args.get('academics'))
+        elif "academic_ids" in args:
+            params['academics'] = set([self.faker.academic().get_by_id(id) for id in args.get('academic_ids')])
+        else:
+            params['academics'] = set(self.faker.academic().get_list(save=save, item_count=self.faker.random_int(min=1, max=3)))
+
+        return self.cls(**params)
+
+    def assert_equal(self, expected: Group, actual: Group):
+        assert expected.name == actual.name
+        assert expected.owner_id == actual.owner_id
+        # assert expected.academics == actual.academics
+        # assert expected.shared_users == actual.shared_users
 
 
 class FolderCreator(FakeCreator):
@@ -492,3 +536,6 @@ class AcademicsProvider(BaseProvider):
     def institution(self):
         return InstitutionFakeCreator(self)
 
+    @cache
+    def group(self):
+        return GroupCreator(self)

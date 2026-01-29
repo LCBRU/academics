@@ -2,40 +2,40 @@ import pytest
 from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester
 
 
-class FolderRemoveShareduserViewBaseTester:
+class GroupRemoveShareduserViewBaseTester:
     @property
     def endpoint(self):
-        return 'ui.folder_remove_shared_user'
+        return 'ui.group_remove_shared_user'
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
         self.shared_user = faker.user().get(save=True)
-        self.folder = faker.folder().get(
+        self.group = faker.group().get(
             save=True,
             shared_users=[self.shared_user],
         )
 
-        self.parameters['id'] = self.folder.id
+        self.parameters['id'] = self.group.id
         self.parameters['user_id'] = self.shared_user.id
 
 
-class TestFolderAddSharedUserRequiresLogin(FolderRemoveShareduserViewBaseTester, RequiresLoginTester):
+class TestGroupRemoveSharedUserRequiresLogin(GroupRemoveShareduserViewBaseTester, RequiresLoginTester):
     @property
     def request_method(self):
         return self.post
 
 
-class TestFolderAddSharedUserGet(FolderRemoveShareduserViewBaseTester, FlaskViewLoggedInTester):
+class TestGroupRemoveSharedUserGet(GroupRemoveShareduserViewBaseTester, FlaskViewLoggedInTester):
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker, login_fixture):
         self.shared_user = faker.user().get(save=True)
-        self.folder = faker.folder().get(
+        self.group = faker.group().get(
             save=True,
             shared_users=[self.shared_user],
             owner_id=self.loggedin_user.id,
         )
 
-        self.parameters['id'] = self.folder.id
+        self.parameters['id'] = self.group.id
         self.parameters['user_id'] = self.shared_user.id
 
     @pytest.mark.app_crsf(True)
