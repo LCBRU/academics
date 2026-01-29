@@ -12,7 +12,7 @@ from academics.model.publication import CatalogPublication, Journal, Keyword, Ni
 from academics.model.security import User
 from academics.model.theme import Theme
 from academics.model.catalog import primary_catalogs
-from academics.security import ROLE_EDITOR
+from academics.security import ROLE_EDITOR, ROLE_VALIDATOR
 
 
 class ThemeCreator(FakeCreator):
@@ -171,6 +171,9 @@ class UserCreator(BaseUserCreator):
     
     def editor(self, save):
         return self.get(rolename=ROLE_EDITOR, save=save)
+
+    def validator(self, save):
+        return self.get(rolename=ROLE_VALIDATOR, save=save)
 
 
 class AcademicFakeCreator(FakeCreator):

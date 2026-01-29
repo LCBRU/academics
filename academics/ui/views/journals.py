@@ -20,6 +20,7 @@ class JournalSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(search_placeholder='Search Name', **kwargs)
 
+
 @blueprint.route("/journals/")
 def journals():
     search_form = JournalSearchForm(formdata=request.args)
