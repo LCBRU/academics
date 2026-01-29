@@ -8,6 +8,7 @@ from lbrc_flask.pytest.faker import FakeCreator, UserCreator as BaseUserCreator,
 from academics.model.folder import Folder, FolderDoi
 from academics.model.group import Group
 from academics.model.institutions import Institution
+from academics.model.objective import Objective
 from academics.model.publication import CatalogPublication, Journal, Keyword, NihrAcknowledgement, Publication, Sponsor, Subtype
 from academics.model.security import User
 from academics.model.theme import Theme
@@ -19,16 +20,44 @@ class ThemeCreator(FakeCreator):
     cls = Theme
     DEFAULT_VALUES = Theme.DEFAULT_VALUES
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             name = args.get('name', self.faker.unique.word()),
         )
 
 
+class ObjectiveCreator(FakeCreator):
+    cls = Objective
+    
+    def _create_item(self, save, args: FakeCreatorArgs):
+        params = dict(
+            name = args.get('name', self.faker.unique.word()),
+            completed = args.get('completed', self.faker.random.choice([True, False])),
+        )
+
+        if 'theme' in args:
+            theme = args.get('theme')
+
+            if theme.id is not None:
+                params['theme_id'] = theme.id
+            else:
+                params['theme'] = theme
+        elif 'theme_id' in args:
+            params['theme_id'] = args.get('theme_id')
+        else:
+            params['theme'] = self.faker.theme().get(save=save)
+
+        return self.cls(**params)
+
+    def assert_equal(self, expected: Objective, actual: Objective):
+        assert expected.name == actual.name
+        assert expected.theme_id == actual.theme_id
+
+
 class GroupCreator(FakeCreator):
     cls = Group
 
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         params = dict(
             name = args.get('name', self.faker.unique.word()),
         )
@@ -71,7 +100,7 @@ class GroupCreator(FakeCreator):
 class FolderCreator(FakeCreator):
     cls = Folder
 
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         params = dict(
             name = args.get('name', self.faker.unique.word()),
             description = args.get('description', self.faker.sentence(nb_words=6)),
@@ -110,7 +139,7 @@ class FolderCreator(FakeCreator):
 class FolderDoiCreator(FakeCreator):
     cls = FolderDoi
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         print(f"Folder {args.get('folder')}")
         if "folder" in args:
             folder = args.get('folder')
@@ -142,7 +171,7 @@ class FolderDoiCreator(FakeCreator):
 class AffiliationCreator(FakeCreator):
     cls = Affiliation
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             catalog = args.get('catalog', choice(primary_catalogs)),
             catalog_identifier = args.get('catalog_identifier', self.faker.unique.pystr(min_chars=5, max_chars=20)),
@@ -159,7 +188,7 @@ class AffiliationCreator(FakeCreator):
 class UserCreator(BaseUserCreator):
     cls = User
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         result = super()._create_item(save=save, args=args)
 
         result.theme = args.get('theme', self.faker.theme().get(save=save))
@@ -179,7 +208,7 @@ class UserCreator(BaseUserCreator):
 class AcademicFakeCreator(FakeCreator):
     cls = Academic
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         has_left_brc = args.get('has_left_brc', (randint(1, 10) >= 9))
         left_brc_date = args.get('left_brc_date')
 
@@ -219,7 +248,7 @@ class AcademicFakeCreator(FakeCreator):
 class SourceFakeCreator(FakeCreator):
     cls = Source
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         academic_id = args.get('academic_id')
 
         if (academic := args.get('academic')) is not None:
@@ -257,7 +286,7 @@ class SourceFakeCreator(FakeCreator):
 class PublicationFakeCreator(FakeCreator):
     cls = Publication
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         validation_historic = args.get('validation_historic', self.faker.random.choice([True, False]))
         not_brc = args.get('not_brc', self.faker.random.choice([True, False]))
         doi = args.get('doi', self.faker.doi())
@@ -331,7 +360,7 @@ class PublicationFakeCreator(FakeCreator):
 class CatalogPublicationFakeCreator(FakeCreator):
     cls = CatalogPublication
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         if 'publication' in args:
             publication = args.get('publication')
         elif 'publication_id' in args:
@@ -416,7 +445,7 @@ class NihrAcknowledgementFakeCreator(FakeCreator):
     cls = NihrAcknowledgement
     DEFAULT_VALUES = NihrAcknowledgement.DEFAULT_VALUES
 
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             name = args.get('name', self.faker.unique.word()),
             acknowledged = args.get('acknowledged', self.faker.boolean()),
@@ -428,7 +457,7 @@ class SubtypeFakeCreator(FakeCreator):
     cls = Subtype
     DEFAULT_VALUES = Subtype.DEFAULT_VALUES
 
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             code = args.get('code', self.faker.unique.word()),
             description = args.get('description', self.faker.unique.sentence(nb_words=3)),
@@ -438,7 +467,7 @@ class SubtypeFakeCreator(FakeCreator):
 class JournalFakeCreator(FakeCreator):
     cls = Journal
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             name = args.get('name', self.faker.unique.company()),
             preprint = args.get('preprint', self.faker.random.choice([True, False])),
@@ -448,7 +477,7 @@ class JournalFakeCreator(FakeCreator):
 class SponsorFakeCreator(FakeCreator):
     cls = Sponsor
 
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             name = args.get('name', self.faker.unique.company()),
         )   
@@ -457,7 +486,7 @@ class SponsorFakeCreator(FakeCreator):
 class KeywordFakeCreator(FakeCreator):
     cls = Keyword
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             keyword = args.get('keyword', self.faker.unique.word()),
         )
@@ -466,7 +495,7 @@ class KeywordFakeCreator(FakeCreator):
 class InstitutionFakeCreator(FakeCreator):
     cls = Institution
     
-    def _create_item(self, save: bool, args: FakeCreatorArgs):
+    def _create_item(self, save, args: FakeCreatorArgs):
         return self.cls(
             catalog = args.get('catalog', choice(primary_catalogs)),
             catalog_identifier = args.get('catalog_identifier', self.faker.unique.pystr(min_chars=5, max_chars=20)),
@@ -542,3 +571,7 @@ class AcademicsProvider(BaseProvider):
     @cache
     def group(self):
         return GroupCreator(self)
+
+    @cache
+    def objective(self):
+        return ObjectiveCreator(self)

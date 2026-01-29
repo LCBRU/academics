@@ -40,8 +40,6 @@ class ObjectiveEditForm(FlashingForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        print(self.theme_id.widget)
-
         self.theme_id.choices = [(t.id, t.name) for t in Theme.query.all()]
 
 
