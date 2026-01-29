@@ -25,7 +25,7 @@ class TestAcademicEditRequiresLogin(AcademicEditViewTester, RequiresLoginTester)
 
 class TestAcademicEditGet(AcademicEditViewTester, FlaskViewLoggedInTester):
     def user_to_login(self, faker):
-        return faker.user().editor()
+        return faker.user().editor(save=True)
 
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
@@ -36,7 +36,7 @@ class TestAcademicEditGet(AcademicEditViewTester, FlaskViewLoggedInTester):
 
 class TestAcademicEditPost(AcademicEditViewTester, FlaskViewLoggedInTester):
     def user_to_login(self, faker):
-        return faker.user().editor()
+        return faker.user().editor(save=True)
 
     def test__post__valid(self):
         new_user = self.faker.user().get(save=True)

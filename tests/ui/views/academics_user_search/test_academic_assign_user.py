@@ -25,7 +25,7 @@ class TestAcademicAssignUserRequiresLogin(AcademicAssignUserViewTester, Requires
 
 class TestAcademicAssignUserPost(AcademicAssignUserViewTester, FlaskViewLoggedInTester):
     def user_to_login(self, faker):
-        return faker.user().editor()
+        return faker.user().editor(save=True)
 
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):

@@ -169,8 +169,8 @@ class UserCreator(BaseUserCreator):
 
         return result
     
-    def editor(self):
-        return self.get(rolename=ROLE_EDITOR, save=True)
+    def editor(self, save):
+        return self.get(rolename=ROLE_EDITOR, save=save)
 
 
 class AcademicFakeCreator(FakeCreator):

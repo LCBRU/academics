@@ -23,7 +23,7 @@ class TestUpdateAcademicRequiresLogin(UpdateAcademicViewTester, RequiresLoginTes
 
 class TestUpdateAcademicPost(UpdateAcademicViewTester, FlaskViewLoggedInTester):
     def user_to_login(self, faker):
-        return faker.user().editor()
+        return faker.user().editor(save=True)
 
     @pytest.mark.app_crsf(True)
     @patch('academics.ui.views.academics.run_jobs_asynch') # Mocking as cereal tasks do not work in testing

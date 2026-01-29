@@ -287,7 +287,7 @@ class TestAcademicEditorIndex(AcademicIndexTester, IndexTester):
         return AcademicEditorRowContentAsserter
     
     def user_to_login(self, faker):
-        return faker.user().editor()
+        return faker.user().editor(save=True)
 
     @pytest.mark.parametrize("item_count", PagedResultSet.test_page_edges())
     @pytest.mark.parametrize("current_page", PagedResultSet.test_current_pages())
