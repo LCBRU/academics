@@ -295,7 +295,7 @@ def publication_supplementary_author_search_results(publication_id, page=1):
     )
 
 
-@blueprint.route("/publication/<int:publication_id>/supplementary_author/add", methods=['GET', 'POST'])
+@blueprint.route("/publication/<int:publication_id>/supplementary_author/add", methods=['POST'])
 def publication_add_supplementary_author(publication_id):
     p: Publication = db.get_or_404(Publication, publication_id)
 
@@ -393,6 +393,7 @@ def catalog_publication_edit(id=None):
         submit_label='Add' if id is None else 'Save',
         url=url_for('ui.catalog_publication_edit', id=id),
     )
+
 
 @blueprint.route("/catalog_publication/<int:id>/delete", methods=['POST'])
 def catalog_publication_delete(id):

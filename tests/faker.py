@@ -443,7 +443,29 @@ class CatalogPublicationFakeCreator(FakeCreator):
             )
 
         return result
-    
+
+    def assert_equal(self, expected: CatalogPublication, actual: CatalogPublication):
+        # assert expected.publication_id == actual.publication_id
+        # assert expected.refresh_full_details == actual.refresh_full_details
+        # assert expected.catalog == actual.catalog
+        # assert expected.catalog_identifier == actual.catalog_identifier
+        assert expected.doi == actual.doi
+        assert expected.title == actual.title
+        assert expected.publication_cover_date == actual.publication_cover_date
+        # assert expected.publication_period_start == actual.publication_period_start
+        # assert expected.publication_period_end == actual.publication_period_end
+        # assert expected.subtype_id == actual.subtype_id
+        # assert expected.abstract == actual.abstract
+        # assert expected.volume == actual.volume
+        # assert expected.issue == actual.issue
+        # assert expected.pages == actual.pages
+        # assert expected.funding_text == actual.funding_text
+        # assert expected.href == actual.href
+        # assert expected.journal == actual.journal
+        # assert expected.is_open_access == actual.is_open_access
+        # assert expected.sponsors == actual.sponsors
+        # assert expected.keywords == actual.keywords
+
 
 class NihrAcknowledgementFakeCreator(FakeCreator):
     cls = NihrAcknowledgement
