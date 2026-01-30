@@ -9,6 +9,11 @@ class FolderEditViewTester:
     def endpoint(self):
         return 'ui.folder_edit'
 
+    @pytest.fixture(autouse=True)
+    def set_existing(self, client, faker):
+        self.folder = faker.folder().get(save=True, owner_id=self.user_to_login(faker).id)
+        self.parameters['id'] = self.folder.id
+
 
 class FolderEditFormTester(FormTester):
     def __init__(self, has_csrf=False):
@@ -34,18 +39,10 @@ class FolderEditFormTester(FormTester):
 
 
 class TestFolderEditRequiresLogin(FolderEditViewTester, RequiresLoginTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker):
-        self.folder = faker.folder().get(save=True)
-        self.parameters['id'] = self.folder.id
+    ...
 
 
 class TestFolderEditGet(FolderEditViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.folder.id
-
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
@@ -54,11 +51,6 @@ class TestFolderEditGet(FolderEditViewTester, FlaskViewLoggedInTester):
         
 
 class TestFolderEditPost(FolderEditViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.folder.id
-
     def test__post__valid(self):
         expected = self.faker.folder().get(save=False, owner_id=self.loggedin_user.id)
         data = self.get_data_from_object(expected)

@@ -13,6 +13,7 @@ class FolderRemoveShareduserViewBaseTester:
         self.folder = faker.folder().get(
             save=True,
             shared_users=[self.shared_user],
+            owner_id=self.user_to_login(faker).id,
         )
 
         self.parameters['id'] = self.folder.id
@@ -26,18 +27,6 @@ class TestFolderAddSharedUserRequiresLogin(FolderRemoveShareduserViewBaseTester,
 
 
 class TestFolderAddSharedUserGet(FolderRemoveShareduserViewBaseTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.shared_user = faker.user().get(save=True)
-        self.folder = faker.folder().get(
-            save=True,
-            shared_users=[self.shared_user],
-            owner_id=self.loggedin_user.id,
-        )
-
-        self.parameters['id'] = self.folder.id
-        self.parameters['user_id'] = self.shared_user.id
-
     @pytest.mark.app_crsf(True)
     def test__post(self):
         resp = self.post()

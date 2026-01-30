@@ -10,7 +10,7 @@ class FolderEmailAuthorsViewBaseTester:
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.folder = faker.folder().get(save=True)
+        self.folder = faker.folder().get(save=True, owner_id=self.user_to_login(faker).id)
         self.theme = faker.theme().get(save=True)
         self.parameters['folder_id'] = self.folder.id
         self.parameters['theme_id'] = self.theme.id
@@ -23,13 +23,6 @@ class TestFolderEmailAuthorsRequiresLogin(FolderEmailAuthorsViewBaseTester, Requ
 
 
 class TestFolderEmailAuthorsPost(FolderEmailAuthorsViewBaseTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.theme = faker.theme().get(save=True)
-        self.parameters['folder_id'] = self.folder.id
-        self.parameters['theme_id'] = self.theme.id
-
     @patch('academics.ui.views.folders.email_theme_folder_academics_publication') # Mocking as cereal tasks do not work in testing
     @pytest.mark.app_crsf(True, )
     def test__post(self, email_theme_folder_academics_publication):

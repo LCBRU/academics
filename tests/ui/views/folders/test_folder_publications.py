@@ -10,7 +10,7 @@ class FolderPublicationsTester:
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
         faker.subtype().create_defaults()
-        self.folder = faker.folder().get(save=True)
+        self.folder = faker.folder().get(save=True, owner_id=self.user_to_login(faker).id)
         self.parameters['folder_id'] = self.folder.id
 
 
@@ -30,12 +30,6 @@ class TestFolderPublications(FolderPublicationsTester, IndexTester):
     @property
     def content_asserter(self) -> RowContentAsserter:
         return FolderPublicationsRowContentAsserter
-
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        faker.subtype().create_defaults()
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['folder_id'] = self.folder.id
 
     @pytest.mark.parametrize("item_count", PagedSize10ResultSet.test_page_edges())
     @pytest.mark.parametrize("current_page", PagedSize10ResultSet.test_current_pages())

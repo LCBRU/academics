@@ -9,6 +9,11 @@ class FolderAddDoisViewTester:
     def endpoint(self):
         return 'ui.folder_add_dois'
 
+    @pytest.fixture(autouse=True)
+    def set_existing(self, client, faker):
+        self.folder = faker.folder().get(save=True, owner_id=self.user_to_login(faker).id)
+        self.parameters['id'] = self.folder.id
+
 
 class FolderAddDoisFormTester(FormTester):
     def __init__(self, has_csrf=False):
@@ -28,18 +33,9 @@ class FolderAddDoisFormTester(FormTester):
 
 
 class TestFolderAddDoisRequiresLogin(FolderAddDoisViewTester, RequiresLoginTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker):
-        self.folder = faker.folder().get(save=True)
-        self.parameters['id'] = self.folder.id
-
+    ...
 
 class TestFolderAddDoisGet(FolderAddDoisViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.folder.id
-
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
@@ -48,11 +44,6 @@ class TestFolderAddDoisGet(FolderAddDoisViewTester, FlaskViewLoggedInTester):
         
 
 class TestFolderAddDoisPost(FolderAddDoisViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.folder.id
-
     def test__post__valid(self):
         resp = self.post()
 

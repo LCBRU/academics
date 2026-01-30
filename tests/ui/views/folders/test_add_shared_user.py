@@ -9,7 +9,7 @@ class FolderAddShareduserViewBaseTester:
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.folder = faker.folder().get(save=True)
+        self.folder = faker.folder().get(save=True, owner_id=self.user_to_login(faker).id)
         self.parameters['folder_id'] = self.folder.id
 
 
@@ -20,11 +20,6 @@ class TestFolderAddSharedUserRequiresLogin(FolderAddShareduserViewBaseTester, Re
 
 
 class TestFolderAddSharedUserGet(FolderAddShareduserViewBaseTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['folder_id'] = self.folder.id
-
     @pytest.mark.app_crsf(True)
     def test__post(self):
         user = self.faker.user().get(save=True)

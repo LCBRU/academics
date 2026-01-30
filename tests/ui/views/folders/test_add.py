@@ -36,12 +36,8 @@ class FolderAddFormTester(FormTester):
 class TestFolderAddRequiresLogin(FolderAddViewTester, RequiresLoginTester):
     ...
 
-class TestFolderAddGet(FolderAddViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.folder = faker.folder().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.folder.id
 
+class TestFolderAddGet(FolderAddViewTester, FlaskViewLoggedInTester):
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
