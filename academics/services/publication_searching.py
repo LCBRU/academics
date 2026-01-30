@@ -559,7 +559,7 @@ def all_series_configs(search_form):
 
 
 def get_publication_by_theme(search_form):
-    cat_pubs = catalog_publication_search_query(search_form).alias()
+    cat_pubs = catalog_publication_search_query(search_form).subquery()
     cpg = catalog_publication_themes(search_form.data)
 
     pub_themes = select(
@@ -618,7 +618,7 @@ def get_publication_by_academic(search_form):
 
 
 def get_publication_by_brc(search_form):
-    cat_pubs = catalog_publication_search_query(search_form)
+    cat_pubs = catalog_publication_search_query(search_form).subquery()
 
     q = select(
         cat_pubs.c.id,

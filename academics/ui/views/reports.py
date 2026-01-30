@@ -172,25 +172,3 @@ def reports_pdf():
         publications=publications,
         parameters=search_form.values_as_dict(),
     )
-
-
-@blueprint.route("/reports/test")
-def reports_test():
-    q = select(
-        CatalogPublication.title,
-        CatalogPublication.doi,
-        NihrAcknowledgement.name,
-    ).join(
-        CatalogPublication.publication
-    ).join(
-        Publication.nihr_acknowledgement,
-    )
-
-    results = db.session.execute(q).mappings()
-
-    return render_template(
-        'ui/reports/test.html',
-        results=results,
-    )
-
-

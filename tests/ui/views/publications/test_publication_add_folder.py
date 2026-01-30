@@ -1,4 +1,3 @@
-from functools import cache
 import pytest
 from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester, FlaskViewTester
 
