@@ -1,13 +1,18 @@
 import pytest
-from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester, ModalContentAsserter, ModalFormErrorContentAsserter
+from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester, ModalContentAsserter, ModalFormErrorContentAsserter, FlaskViewTester
 from lbrc_flask.pytest.asserts import assert__refresh_response
-from lbrc_flask.pytest.form_tester import FormTester, FormTesterTextField, FormTesterCheckboxField, FormTesterTextAreaField, FormTesterField
+from lbrc_flask.pytest.form_tester import FormTester, FormTesterTextField, FormTesterField
 
 
-class ObjectiveEditViewTester:
+class ObjectiveEditViewTester(FlaskViewTester):
     @property
     def endpoint(self):
         return 'ui.objective_edit'
+
+    @pytest.fixture(autouse=True)
+    def set_existing(self, client, faker):
+        self.objective = faker.objective().get(save=True, owner_id=self.user_to_login(faker).id)
+        self.parameters['id'] = self.objective.id
 
 
 class ObjectiveEditFormTester(FormTester):
@@ -26,18 +31,9 @@ class ObjectiveEditFormTester(FormTester):
 
 
 class TestObjectiveEditRequiresLogin(ObjectiveEditViewTester, RequiresLoginTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker):
-        self.objective = faker.objective().get(save=True)
-        self.parameters['id'] = self.objective.id
-
+    ...
 
 class TestObjectiveEditGet(ObjectiveEditViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.objective = faker.objective().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.objective.id
-
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
@@ -46,11 +42,6 @@ class TestObjectiveEditGet(ObjectiveEditViewTester, FlaskViewLoggedInTester):
         
 
 class TestObjectiveEditPost(ObjectiveEditViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.objective = faker.objective().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.objective.id
-
     def test__post__valid(self):
         theme = self.faker.theme().get(save=True)
         expected = self.faker.objective().get(save=False, owner_id=self.loggedin_user.id, theme_id=theme.id)

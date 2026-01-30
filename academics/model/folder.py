@@ -70,7 +70,7 @@ class FolderDoi(db.Model):
         return is_invalid_doi(self.doi)
 
 
-class FolderExcludedDoi(db.Model, AuditMixin, CommonMixin):
+class FolderExcludedDoi(AuditMixin, CommonMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     folder_id = mapped_column(ForeignKey(Folder.id), nullable=False, index=True)
     folder: Mapped[Folder] = relationship(

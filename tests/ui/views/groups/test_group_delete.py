@@ -9,7 +9,7 @@ class GroupDeleteViewBaseTester:
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.group = faker.group().get(save=True)
+        self.group = faker.group().get(save=True, owner_id=self.user_to_login(faker).id)
         self.parameters['id'] = self.group.id
 
 
@@ -20,11 +20,6 @@ class TestGroupDeleteRequiresLogin(GroupDeleteViewBaseTester, RequiresLoginTeste
 
 
 class TestGroupDeleteGet(GroupDeleteViewBaseTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.group = faker.group().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.group.id
-
     @pytest.mark.app_crsf(True)
     def test__post(self):
         resp = self.post()

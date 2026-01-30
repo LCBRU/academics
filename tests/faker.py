@@ -140,7 +140,6 @@ class FolderDoiCreator(FakeCreator):
     cls = FolderDoi
     
     def _create_item(self, save, args: FakeCreatorArgs):
-        print(f"Folder {args.get('folder')}")
         if "folder" in args:
             folder = args.get('folder')
         elif "folder_id" in args:
@@ -148,8 +147,6 @@ class FolderDoiCreator(FakeCreator):
         else:
             folder = self.faker.folder().get(save=save)
         
-        print(f"DOI {args.get('doi')}")
-        print(f"publication {args.get('publication')}")
         if 'doi' in args:
             doi = args.get('doi')
         elif "publication" in args:
@@ -400,6 +397,13 @@ class CatalogPublicationFakeCreator(FakeCreator):
         else:
             keywords = set(self.faker.keyword().get_list(save=save, item_count=self.faker.random_int(min=1, max=5)))
 
+        if "subtype" in args:
+            subtype = args.get("subtype")
+        elif "subtype_id" in args:
+            subtype = self.faker.subtype().get_by_id(args.get('subtype_id'))
+        else:
+            subtype = self.faker.subtype().get(save=save)
+
         result = self.cls(
             publication = publication,
             refresh_full_details = args.get('refresh_full_details', self.faker.random.choice([True, False])),
@@ -410,7 +414,7 @@ class CatalogPublicationFakeCreator(FakeCreator):
             publication_cover_date = publication_cover_date,
             publication_period_start = publication_period_start,
             publication_period_end = publication_period_end,
-            subtype = args.get('subtype', self.faker.subtype().choice_from_db()),
+            subtype = subtype,
             abstract = args.get('abstract', self.faker.paragraph(nb_sentences=5)),
             volume = args.get('volume', self.faker.random_int(min=1, max=12)),
             issue = args.get('issue', self.faker.random_int(min=1, max=30)),

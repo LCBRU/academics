@@ -1,13 +1,19 @@
 import pytest
 from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester, ModalContentAsserter, ModalFormErrorContentAsserter
 from lbrc_flask.pytest.asserts import assert__refresh_response
-from lbrc_flask.pytest.form_tester import FormTester, FormTesterTextField, FormTesterCheckboxField, FormTesterTextAreaField, FormTesterField
+from lbrc_flask.pytest.form_tester import FormTester, FormTesterTextField, FormTesterField
 
 
 class GroupEditViewTester:
     @property
     def endpoint(self):
         return 'ui.group_edit'
+
+    @pytest.fixture(autouse=True)
+    def set_existing(self, client, faker):
+        self.group = faker.group().get(save=True, owner_id=self.user_to_login(faker).id)
+        self.parameters['id'] = self.group.id
+
 
 
 class GroupEditFormTester(FormTester):
@@ -25,18 +31,9 @@ class GroupEditFormTester(FormTester):
 
 
 class TestGroupEditRequiresLogin(GroupEditViewTester, RequiresLoginTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker):
-        self.group = faker.group().get(save=True)
-        self.parameters['id'] = self.group.id
-
+    ...
 
 class TestGroupEditGet(GroupEditViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.group = faker.group().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.group.id
-
     @pytest.mark.app_crsf(True)
     def test__get__has_form(self):
         resp = self.get()
@@ -45,11 +42,6 @@ class TestGroupEditGet(GroupEditViewTester, FlaskViewLoggedInTester):
         
 
 class TestGroupEditPost(GroupEditViewTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.group = faker.group().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.group.id
-
     def test__post__valid(self):
         expected = self.faker.group().get(save=False, owner_id=self.loggedin_user.id)
         data = self.get_data_from_object(expected)

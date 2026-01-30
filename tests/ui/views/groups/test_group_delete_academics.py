@@ -13,10 +13,12 @@ class GroupDeleteAcademicViewBaseTester:
         self.group = faker.group().get(
             save=True,
             academics=[self.academic],
+            owner_id=self.user_to_login(faker).id,
         )
 
         self.parameters['group_id'] = self.group.id
         self.parameters['academic_id'] = self.academic.id
+
 
 class TestGroupDeleteAcademicRequiresLogin(GroupDeleteAcademicViewBaseTester, RequiresLoginTester):
     @property
@@ -25,18 +27,6 @@ class TestGroupDeleteAcademicRequiresLogin(GroupDeleteAcademicViewBaseTester, Re
 
 
 class TestGroupDeleteAcademicGet(GroupDeleteAcademicViewBaseTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.academic = faker.academic().get(save=True)
-        self.group = faker.group().get(
-            save=True,
-            academics=[self.academic],
-            owner_id=self.loggedin_user.id,
-        )
-
-        self.parameters['group_id'] = self.group.id
-        self.parameters['academic_id'] = self.academic.id
-
     @pytest.mark.app_crsf(True)
     def test__post(self):
         resp = self.post()

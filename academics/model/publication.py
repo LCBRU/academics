@@ -8,6 +8,7 @@ from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, Unicode, UnicodeText, UniqueConstraint, and_, func, select
 from sqlalchemy.ext.hybrid import hybrid_property
+from lbrc_flask.model import CommonMixin
 from sqlalchemy import SQLColumnExpression
 from academics.model.catalog import CATALOG_MANUAL, CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.institutions import Institution
@@ -31,12 +32,12 @@ catalog_publications_keywords = db.Table(
     db.Column('keyword_id', db.Integer(), db.ForeignKey('keyword.id'), primary_key=True),
 )
 
-class FundingAcr(db.Model):
+class FundingAcr(CommonMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
 
 
-class NihrAcknowledgement(db.Model):
+class NihrAcknowledgement(CommonMixin, db.Model):
     DEFAULT_VALUES = [
         {
             'name': 'NIHR Acknowledged',
@@ -115,7 +116,7 @@ class NihrAcknowledgement(db.Model):
         return None
 
 
-class Subtype(db.Model):
+class Subtype(CommonMixin, db.Model):
     DEFAULT_VALUES = [
         {'code': 'article', 'description': 'article'},
         {'code': 'book', 'description': 'book'},
@@ -135,7 +136,7 @@ class Subtype(db.Model):
         return Subtype.query.filter(Subtype.description.in_(['article', 'book'])).all()
 
 
-class Journal(db.Model):
+class Journal(CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("name", name='ux__journal__name'),
     )
@@ -145,7 +146,7 @@ class Journal(db.Model):
     preprint: Mapped[bool] = mapped_column(Boolean, nullable=True)
 
 
-class Sponsor(db.Model):
+class Sponsor(CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("name", name='ux__sponsor__name'),
     )
@@ -167,7 +168,7 @@ class Sponsor(db.Model):
         return any([n in self.name for n in self.NIHR_NAMES])
 
 
-class Keyword(db.Model):
+class Keyword(CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("keyword", name='ux__keyword__keyword'),
     )
@@ -184,7 +185,7 @@ institutions__publications = db.Table(
     db.Column('publication_id', db.Integer(), db.ForeignKey('publication.id'), primary_key=True),
 )
 
-class Publication(db.Model, AuditMixin):
+class Publication(AuditMixin, CommonMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     validation_historic: Mapped[bool] = mapped_column(default=False, nullable=True)
     not_brc: Mapped[bool] = mapped_column(default=False, nullable=True)
@@ -431,7 +432,7 @@ class Publication(db.Model, AuditMixin):
         return False
 
 
-class CatalogPublication(db.Model, AuditMixin):
+class CatalogPublication(AuditMixin, CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("catalog", "catalog_identifier", name='ux__CatalogPublication__catalog__catalog_identifier'),
     )

@@ -9,7 +9,7 @@ class GroupAddAcademicViewBaseTester:
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.group = faker.group().get(save=True)
+        self.group = faker.group().get(save=True, owner_id=self.user_to_login(faker).id)
         self.parameters['group_id'] = self.group.id
 
 
@@ -20,11 +20,6 @@ class TestGroupAddAcademicRequiresLogin(GroupAddAcademicViewBaseTester, Requires
 
 
 class TestGroupAddAcademicGet(GroupAddAcademicViewBaseTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.group = faker.group().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['group_id'] = self.group.id
-
     @pytest.mark.app_crsf(True)
     def test__post(self):
         academic = self.faker.academic().get(save=True)

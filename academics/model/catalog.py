@@ -8,3 +8,8 @@ primary_catalogs = [
     CATALOG_OPEN_ALEX,
     CATALOG_MANUAL,
 ]
+
+validation_catalogs = [
+    CATALOG_SCOPUS,
+    CATALOG_OPEN_ALEX,
+]

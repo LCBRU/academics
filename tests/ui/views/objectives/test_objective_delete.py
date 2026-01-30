@@ -1,15 +1,15 @@
 import pytest
-from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester
+from lbrc_flask.pytest.testers import RequiresLoginTester, FlaskViewLoggedInTester, FlaskViewTester
 
 
-class ObjectiveDeleteViewBaseTester:
+class ObjectiveDeleteViewBaseTester(FlaskViewTester):
     @property
     def endpoint(self):
         return 'ui.objective_delete'
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.objective = faker.objective().get(save=True)
+        self.objective = faker.objective().get(save=True, owner_id=self.user_to_login(faker).id)
         self.parameters['id'] = self.objective.id
 
 
@@ -20,11 +20,6 @@ class TestObjectiveDeleteRequiresLogin(ObjectiveDeleteViewBaseTester, RequiresLo
 
 
 class TestObjectiveDeleteGet(ObjectiveDeleteViewBaseTester, FlaskViewLoggedInTester):
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.objective = faker.objective().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.objective.id
-    
     @pytest.mark.app_crsf(True)
     def test__post(self):
         resp = self.post()

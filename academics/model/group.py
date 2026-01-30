@@ -4,6 +4,7 @@ from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
 from academics.model.academic import Academic
 from academics.model.security import User
+from lbrc_flask.model import CommonMixin
 
 
 groups__shared_users = db.Table(
@@ -18,7 +19,7 @@ groups__academics = db.Table(
     db.Column('academic_id', db.Integer(), db.ForeignKey(Academic.id), primary_key=True),
 )
 
-class Group(db.Model):
+class Group(CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("name", "owner_id", name='ux__group__name__owner_id'),
     )

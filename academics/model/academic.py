@@ -62,7 +62,7 @@ supplementary_authors = db.Table(
 )
 
 
-class Affiliation(db.Model):
+class Affiliation(CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("catalog", "catalog_identifier", name='ux__affiliation__catalog__catalog_identifier'),
     )
@@ -427,7 +427,7 @@ catalog_publications_sources_affiliations = db.Table(
 )
 
 
-class CatalogPublicationsSources(db.Model):
+class CatalogPublicationsSources(CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("catalog_publication_id", "ordinal", name='ux__CatalogPublicationsSources__cat_pub_id__ordinal'),
     )

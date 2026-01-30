@@ -1,10 +1,10 @@
-from sqlalchemy import Boolean, String, UnicodeText, UniqueConstraint
+from sqlalchemy import Boolean, String, UniqueConstraint
 from lbrc_flask.database import db
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.mysql import LONGTEXT
+from lbrc_flask.model import CommonMixin
 
 
-class Institution(db.Model):
+class Institution(CommonMixin, db.Model):
     __table_args__ = (
         UniqueConstraint("catalog", "catalog_identifier", name='ux__institution__catalog__catalog_identifier'),
     )

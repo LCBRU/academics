@@ -274,7 +274,6 @@ def scopus_author_search(search_string, search_non_local=False):
 
     if not current_app.config['SCOPUS_ENABLED']:
         logging.warn('SCOPUS Not Enabled')
-        print('B')
         return _test_author_search_data()
 
     re_orcid = re.compile(r'\d{4}-\d{4}-\d{4}-\d{4}$')

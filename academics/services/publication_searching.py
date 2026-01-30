@@ -272,8 +272,6 @@ def manual_only_catalog_publications():
         .where(~Publication.catalog_publications.any(CatalogPublication.catalog != CATALOG_MANUAL))
     )
 
-    print(q)
-
     return q
 
 def catalog_publication_academics(search_data=None):

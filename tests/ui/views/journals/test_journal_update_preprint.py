@@ -9,7 +9,7 @@ class JournalUpdatePreprintViewBaseTester:
 
     @pytest.fixture(autouse=True)
     def set_existing(self, client, faker):
-        self.journal = faker.journal().get(save=True)
+        self.journal = faker.journal().get(save=True, owner_id=self.user_to_login(faker).id)
         self.parameters['id'] = self.journal.id
         self.parameters['is_preprint'] = 1
 
@@ -24,12 +24,6 @@ class TestJournalUpdatePreprintGet(JournalUpdatePreprintViewBaseTester, FlaskVie
     def user_to_login(self, faker):
         return faker.user().validator(save=True)
     
-    @pytest.fixture(autouse=True)
-    def set_existing(self, client, faker, login_fixture):
-        self.journal = faker.journal().get(save=True, owner_id=self.loggedin_user.id)
-        self.parameters['id'] = self.journal.id
-        self.parameters['is_preprint'] = 1
-
     @pytest.mark.app_crsf(True)
     def test__post(self):
         resp = self.post()
