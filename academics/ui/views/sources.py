@@ -101,7 +101,7 @@ def academics_amend_potential_sources(id, academic_id, status):
 
 @blueprint.route("/sources/delete/<int:id>", methods=['POST'])
 @roles_accepted('editor')
-def delete_author(id):
+def delete_source(id):
     s = db.get_or_404(Source, id)
 
     db.session.delete(s)

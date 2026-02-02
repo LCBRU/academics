@@ -2,7 +2,7 @@ from datetime import datetime
 from random import choice, choices, randint
 import string
 from functools import cache
-from academics.model.academic import Academic, Affiliation, CatalogPublicationsSources, Source
+from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, CatalogPublicationsSources, Source
 from faker.providers import BaseProvider
 from lbrc_flask.pytest.faker import FakeCreator, UserCreator as BaseUserCreator, FakeCreatorArgs
 from academics.model.folder import Folder, FolderDoi
@@ -278,6 +278,46 @@ class SourceFakeCreator(FakeCreator):
         )
 
         return result
+
+    def assert_equal(self, expected: Source, actual: Source):
+        assert expected.academic_id == actual.academic_id
+
+
+class AcademicPotentialSourceFakeCreator(FakeCreator):
+    cls = AcademicPotentialSource
+    
+    def _create_item(self, save, args: FakeCreatorArgs):
+        params = {
+            'not_match': args.get('not_match', self.faker.random.choice([True, False]))
+        }
+
+        if 'academic' in args:
+            academic = args.get('academic')
+
+            if academic.id is not None:
+                params['academic_id'] = academic.id
+            else:
+                params['academic'] = academic
+
+        elif 'academic_id' in args:
+            params['academic_id'] = args.get('academic_id')
+        else:
+            params['academic'] = self.faker.academic().get(save=save)
+
+        if 'source' in args:
+            source = args.get('source')
+
+            if source.id is not None:
+                params['source_id'] = source.id
+            else:
+                params['source'] = source
+
+        elif 'source_id' in args:
+            params['source_id'] = args.get('source_id')
+        else:
+            params['source'] = self.faker.source().get(save=save)
+
+        return self.cls(**params)
 
 
 class PublicationFakeCreator(FakeCreator):
@@ -601,3 +641,7 @@ class AcademicsProvider(BaseProvider):
     @cache
     def objective(self):
         return ObjectiveCreator(self)
+
+    @cache
+    def academic_potential_source(self):
+        return AcademicPotentialSourceFakeCreator(self)

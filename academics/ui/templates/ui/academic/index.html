@@ -100,7 +100,7 @@
                                             {% if current_user.has_role('editor') %}
                                                 <a class="icon delete"
                                                     title="Delete author {{ au.display_name }}"
-                                                    hx-post="{{ url_for('ui.delete_author', id=au.id) }}"
+                                                    hx-post="{{ url_for('ui.delete_source', id=au.id) }}"
                                                     hx-confirm="Are you sure you wish to delete '{{ au.full_name }}'?"
                                                     href="javascript:;"></a>
                                             {% endif %}
