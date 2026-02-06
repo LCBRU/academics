@@ -24,7 +24,8 @@ from academics.model.theme import Theme
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
 def theme_select_choices():
-    return [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
+    themes = db.session.execute(select(Theme).order_by(Theme.name)).scalars().all()
+    return [('', '')] + [(t.id, t.name) for t in themes]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
@@ -46,24 +47,24 @@ def academic_select_choices(search_string=None):
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
 def keyword_select_choices(search_string):
-    q = Keyword.query.order_by(Keyword.keyword)
+    q = select(Keyword).order_by(Keyword.keyword)
 
     if search_string:
         for s in search_string.split():
-            q = q.filter(Keyword.keyword.like(f'%{s}%'))
+            q = q.where(Keyword.keyword.like(f'%{s}%'))
 
-    return [(k.id, k.keyword.title()) for k in q.all()]
+    return [(k.id, k.keyword.title()) for k in db.session.execute(q).scalars().all()]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
 def journal_select_choices(search_string):
-    q = Journal.query.order_by(Journal.name)
+    q = select(Journal).order_by(Journal.name)
 
     if search_string:
         for s in search_string.split():
-            q = q.filter(Journal.name.like(f'%{s}%'))
+            q = q.where(Journal.name.like(f'%{s}%'))
 
-    return [(j.id, j.name.title()) for j in q.all() if j.name]
+    return [(j.id, j.name.title()) for j in db.session.execute(q).scalars().all() if j.name]
 
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
@@ -88,7 +89,8 @@ def group_select_choices():
 
 @cached(cache=TTLCache(maxsize=1, ttl=60))
 def nihr_acknowledgement_select_choices():
-    return [(f.id, f.name.title()) for f in NihrAcknowledgement.query.order_by(NihrAcknowledgement.name).all()]
+    acks = db.session.execute(select(NihrAcknowledgement).order_by(NihrAcknowledgement.name)).scalars().all()
+    return [(f.id, f.name.title()) for f in acks]
 
 
 class PublicationSearchForm(SearchForm):
@@ -116,10 +118,13 @@ class PublicationSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(search_placeholder='Search Title, Journal or DOI', **kwargs)
 
+        subtypes = db.session.execute(select(Subtype).order_by(Subtype.description)).scalars().all()
+        themes = db.session.execute(select(Theme).order_by(Theme.name)).scalars().all()
+
         self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.journal_id.render_kw={'data-options-href': url_for('ui.publication_journal_options'), 'style': 'width: 300px'}
-        self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
-        self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in Theme.query.all()]
+        self.subtype_id.choices = [(t.id, t.description) for t in subtypes]
+        self.theme_id.choices = [('', '')] + [(t.id, t.name) for t in themes]
         self.keywords.render_kw={'data-options-href': url_for('ui.publication_keyword_options'), 'style': 'width: 300px'}
         self.folder_id.choices = [('', '')] + folder_select_choices()
         self.nihr_acknowledgement_ids.choices = [('-1', 'Unvalidated')] + nihr_acknowledgement_select_choices()
@@ -176,7 +181,9 @@ class PublicationSummarySearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(search_placeholder='Search Title, Journal or DOI', **kwargs)
 
-        self.subtype_id.choices = [(t.id, t.description) for t in Subtype.query.order_by(Subtype.description).all()]
+        subtypes = db.session.execute(select(Subtype).order_by(Subtype.description)).scalars().all()
+
+        self.subtype_id.choices = [(t.id, t.description) for t in subtypes]
         self.supress_validation_historic.label.text = f'Suprress Historic\n(before {current_app.config["HISTORIC_PUBLICATION_CUTOFF"]})'
         self.theme_id.choices = theme_select_choices()
         self.group_id.choices = group_select_choices()

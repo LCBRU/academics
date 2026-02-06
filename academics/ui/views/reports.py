@@ -115,10 +115,10 @@ def report_image(type='png'):
 
 def get_publication_chart_title(search_form):
     if search_form.is_summary_type_academic:
-        a : Academic = Academic.query.get_or_404(search_form.academic_id.data)
+        a: Academic = db.get_or_404(Academic, search_form.academic_id.data)
         type_title = a.full_name
     elif search_form.is_summary_type_theme:
-        t : Theme = Theme.query.get_or_404(search_form.theme_id.data)
+        t : Theme = db.get_or_404(search_form.theme_id.data)
         type_title = t.name
     else:
         type_title = 'BRC'

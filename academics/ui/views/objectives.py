@@ -11,6 +11,7 @@ from lbrc_flask.security import current_user_id, system_user_id
 from wtforms import SelectField
 from wtforms.validators import Length, DataRequired
 from lbrc_flask.response import refresh_response
+from sqlalchemy import select
 
 
 class ObjectiveSearchForm(SearchForm):
@@ -19,7 +20,9 @@ class ObjectiveSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(search_placeholder='Search Name', **kwargs)
 
-        choices = [(t.id, t.name) for t in Theme.query.all()]
+        themes = db.session.execute(select(Theme).order_by(Theme.name)).scalars().all()
+
+        choices = [(t.id, t.name) for t in themes]
 
         if choices:
             self.theme_id.choices = choices
@@ -40,7 +43,9 @@ class ObjectiveEditForm(FlashingForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.theme_id.choices = [(t.id, t.name) for t in Theme.query.all()]
+        themes = db.session.execute(select(Theme).order_by(Theme.name)).scalars().all()
+
+        self.theme_id.choices = [(t.id, t.name) for t in themes]
 
 
 @blueprint.route("/objectives/")
@@ -57,11 +62,13 @@ def objectives():
         error_out=False,
     )
 
+    users = db.session.execute(select(User).where(User.id.notin_([current_user_id(), system_user_id()]))).scalars().all()
+
     return render_template(
         "ui/objectives.html",
         search_form=search_form,
         objectives=objectives,
-        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
+        users=users,
         edit_objective_form=ObjectiveEditForm(),
         confirm_form=ConfirmForm(),
     )

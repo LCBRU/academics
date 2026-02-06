@@ -69,9 +69,13 @@ def publications():
         error_out=False,
     )
 
-    search_form.keywords.choices = [(k.id, k.keyword.title()) for k in Keyword.query.filter(Keyword.id.in_(search_form.keywords.data)).all()]
-    search_form.journal_id.choices = [(j.id, j.name.title()) for j in Journal.query.filter(Journal.id.in_(search_form.journal_id.data)).all()]
-    search_form.academic_id.choices = [(a.id, a.full_name) for a in Academic.query.filter(Academic.id.in_(search_form.academic_id.data)).all()]
+    keywords = db.session.execute(select(Keyword).where(Keyword.id.in_(search_form.keywords.data)).order_by(Keyword.keyword)).scalars().all()
+    journals = db.session.execute(select(Journal).where(Journal.id.in_(search_form.journal_id.data)).order_by(Journal.name)).scalars().all()
+    academics = db.session.execute(select(Academic).where(Academic.id.in_(search_form.academic_id.data)).order_by(Academic.last_name, Academic.first_name)).scalars().all()
+
+    search_form.keywords.choices = [(k.id, k.keyword.title()) for k in keywords]
+    search_form.journal_id.choices = [(j.id, j.name.title()) for j in journals]
+    search_form.academic_id.choices = [(a.id, a.full_name) for a in academics]
 
     folder_query = Folder.query
 
@@ -80,13 +84,15 @@ def publications():
         Folder.shared_users.any(User.id == current_user_id()),
     ))
 
+    acks = db.session.execute(select(NihrAcknowledgement)).scalars().all()
+
     return render_template(
         "ui/publication/index.html",
         search_form=search_form,
         publication_folder_form=PublicationFolderForm(),
         publications=publications,
         folders=folder_query.all(),
-        nihr_acknowledgements=NihrAcknowledgement.query.all(),
+        nihr_acknowledgements=acks,
     )
 
 
@@ -107,12 +113,12 @@ def validation():
 
     publications = db.paginate(select=q)
 
-    # print(publications.items)
+    acks = db.session.execute(select(NihrAcknowledgement)).scalars().all()
 
     return render_template(
         "ui/publication/validation.html",
         publications=publications,
-        nihr_acknowledgements=NihrAcknowledgement.query.all(),
+        nihr_acknowledgements=acks,
     )
 
 
@@ -229,10 +235,12 @@ def request_publication_bar(publication_id):
         {{ render_publication_bar(publication, current_user, nihr_acknowledgements) }}
     '''
 
+    acks = db.session.execute(select(NihrAcknowledgement)).scalars().all()
+
     return render_template_string(
         template,
         publication=publication,
-        nihr_acknowledgements=NihrAcknowledgement.query.all(),
+        nihr_acknowledgements=acks,
     )
 
 

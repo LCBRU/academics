@@ -133,7 +133,7 @@ class Subtype(CommonMixin, db.Model):
 
     @classmethod
     def get_validation_types(cls):
-        return Subtype.query.filter(Subtype.description.in_(['article', 'book'])).all()
+        return list(db.session.execute(select(Subtype).where(Subtype.description.in_(['article', 'book']))).scalars())
 
 
 class Journal(CommonMixin, db.Model):

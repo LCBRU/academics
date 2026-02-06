@@ -46,11 +46,13 @@ def groups():
         error_out=False,
     )
 
+    users = db.session.execute(select(User).where(User.id.notin_([current_user_id(), system_user_id()]))).scalars().all()
+
     return render_template(
         "ui/group/index.html",
         search_form=search_form,
         groups=groups,
-        users=User.query.filter(User.id.notin_([current_user_id(), system_user_id()])).all(),
+        users=users,
         edit_folder_form=GroupEditForm(),
         confirm_form=ConfirmForm(),
     )

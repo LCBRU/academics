@@ -50,7 +50,8 @@ class AddAuthorEditForm(FlashingForm):
         super().__init__(**kwargs)
 
         self.academic_id.choices = _get_academic_choices()
-        self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
+        themes = db.session.execute(select(Theme).order_by(Theme.name)).scalars().all()
+        self.themes.choices = [(t.id, t.name) for t in themes]
 
 
 class AcademicEditForm(FlashingForm):
@@ -67,7 +68,8 @@ class AcademicEditForm(FlashingForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.themes.choices = [(t.id, t.name) for t in Theme.query.all()]
+        themes = db.session.execute(select(Theme).order_by(Theme.name)).scalars().all()
+        self.themes.choices = [(t.id, t.name) for t in themes]
         users = db.session.execute(user_search_query({
             'search': get_value_from_all_arguments('search_string') or '',
         })).scalars()
@@ -154,10 +156,12 @@ def add_author_search():
     except:
         flash('Search failed.  Please tighten your search criteria.')
 
+    academics = db.session.execute(select(Academic).order_by(Academic.last_name, Academic.first_name))
+
     return render_template(
         "ui/academic/add_search.html",
         authors=authors,
-        academics=sorted(Academic.query.all(), key=lambda a: a.last_name + a.first_name),
+        academics=academics,
         search_form=search_form,
         add_author_form=AddAuthorForm(),
     )

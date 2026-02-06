@@ -12,7 +12,9 @@ class AcademicSearchForm(SearchForm):
     def __init__(self, **kwargs):
         super().__init__(search_placeholder='Search Academic Name', **kwargs)
 
-        self.theme_id.choices = [('', ''), (-1, '[Unset]')] + [(t.id, t.name) for t in Theme.query.all()]
+        themes = db.session.execute(select(Theme).order_by(Theme.name)).scalars().all()
+
+        self.theme_id.choices = [('', ''), (-1, '[Unset]')] + [(t.id, t.name) for t in themes]
 
 
 def academic_search_query(search_data):
