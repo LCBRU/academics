@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "academics"
+authors = [
+    {name = "Richard Bramley", email = "rabramley@gmail.com"},
+]
+version = "2.0.0"
+requires-python = "== 3.13.*"
+readme = "README.md"
+classifiers = ["License :: OSI Approved :: MIT License"]
+
+dependencies = [
+    "lbrc_flask @ git+https://github.com/LCBRU/lbrc_flask.git",
+    "cachetools",
+    "celery[redis]",
+    "elsapy",
+    "pandas",
+    "pyalex",
+    "requests",
+    "unidecode"
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
