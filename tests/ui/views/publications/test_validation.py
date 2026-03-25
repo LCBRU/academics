@@ -29,6 +29,7 @@ class TestValidationIndex(ValidationIndexTester, IndexTester):
     def assert_search_form(self, resp):
         pass # This view has no search form
 
+    @cache
     def user_to_login(self, faker):
         return faker.user().validator(save=True)
 
