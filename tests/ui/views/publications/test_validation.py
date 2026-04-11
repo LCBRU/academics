@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from functools import cache
 from random import choice
 import pytest
 from lbrc_flask.pytest.testers import IndexTester, RequiresLoginTester, PagedResultSet, PanelListContentAsserter, RowContentAsserter
