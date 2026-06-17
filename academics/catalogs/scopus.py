@@ -426,8 +426,7 @@ class Author(ElsAuthor):
             raise e
         
         if self.data is None:
-            logging.error(f'No error reading Scopus data, but data is still None for {self}')
-            raise Exception(f'No error reading Scopus data, but data is still None for {self}')
+            logging.error(f'No error reading Scopus data, but data is still None for {self.catalog_identifier}')
 
         self._set_initials()
         self._set_citation_count()
