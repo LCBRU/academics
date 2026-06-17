@@ -290,7 +290,7 @@ def _source_xref_for_author_data_list(author_datas):
 
     new_sources = []
 
-    for a in author_datas:
+    for a in unique_authors.values():
         if CatalogReference(a) in xref.keys():
             continue
 
