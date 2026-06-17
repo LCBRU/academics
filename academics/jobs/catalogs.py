@@ -252,7 +252,13 @@ def _affiliation_xref_for_author_data_list(author_datas):
 def _source_xref_for_publication_data_list(publication_datas):
     logging.debug('started')
 
-    authors = {CatalogReference(a): a for a in chain.from_iterable([p.authors for p in publication_datas])}
+    authors = {}
+
+    for a in chain.from_iterable([p.authors for p in publication_datas]):
+        if not a.catalog or not a.catalog_identifier:
+            logging.warning(f'Author {a.display_name} has no catalog or catalog_identifier.  Catalog: {a.catalog}, Catalog Identifier: {a.catalog_identifier}')
+        else:
+            authors[CatalogReference(a)] = a
 
     author_xref = _source_xref_for_author_data_list(authors.values())
 

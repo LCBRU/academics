@@ -258,7 +258,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         self.updating = True        
 
     def all_orcids(self):
-        return {self.orcid} | {s.orcid for s in self.sources if s.orcid}
+        return filter(None, {self.orcid} | {s.orcid for s in self.sources if s.orcid})
 
     def all_scopus_ids(self):
         return {s.catalog_identifier for s in self.sources if s.catalog_identifier and s.catalog == 'scopus'}
