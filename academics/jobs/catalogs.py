@@ -276,12 +276,12 @@ def _source_xref_for_author_data_list(author_datas):
     xref = {}
 
     keyfunc = lambda a: a.catalog
+    unique_authors = {CatalogReference(a): a for a in author_datas if a.catalog and a.catalog_identifier}
 
-    for cat, authors in groupby(sorted(author_datas, key=keyfunc), key=keyfunc):
-        unique_authors = {CatalogReference(a): a for a in authors}
+    for cat, authors in groupby(sorted(unique_authors.values(), key=keyfunc), key=keyfunc):
 
         q = select(Source).where(
-            Source.catalog_identifier.in_([a.catalog_identifier for a in unique_authors.values()])
+            Source.catalog_identifier.in_([a.catalog_identifier for a in authors])
         ).where(
             Source.catalog == cat
         )
