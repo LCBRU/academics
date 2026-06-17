@@ -10,7 +10,7 @@ load_dotenv()
 from academics.jobs.catalogs import RefreshAll
 
 from academics import create_app
-from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
+from lbrc_flask.async_jobs import run_jobs_asynch
 
 application = create_app()
 application.app_context().push()

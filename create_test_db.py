@@ -99,6 +99,7 @@ for _ in range(randint(400, 600)):
             catalog=catalog,
             keywords=set(fake.keyword().choices_from_db(k=randint(1, 5))),
             sources=set(fake.source().choices_from_db(k=randint(10, 30))),
+            subtype=fake.subtype().choice_from_db(),
         )
 
 db.session.commit()
