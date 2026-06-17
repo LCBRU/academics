@@ -479,16 +479,19 @@ class AffiliationRefresh(AsyncJob):
 
         if not affiliation:
             return
+
+        aff_data = None
         
         if affiliation.catalog == CATALOG_SCOPUS:
             aff_data = get_scopus_affiliation_data(affiliation.catalog_identifier)
         if affiliation.catalog == CATALOG_OPEN_ALEX:
             aff_data = get_open_alex_affiliation_data(affiliation.catalog_identifier)
 
-        aff_data.update_affiliation(affiliation)
+        if aff_data:
+            aff_data.update_affiliation(affiliation)
 
-        db.session.add(affiliation)
-        db.session.commit()
+            db.session.add(affiliation)
+            db.session.commit()
 
 
 class InstitutionRefreshAll(AsyncJob):
