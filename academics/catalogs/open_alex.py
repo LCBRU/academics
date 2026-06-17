@@ -14,6 +14,7 @@ from academics.model.academic import Academic, Source
 from academics.model.publication import CATALOG_OPEN_ALEX, DOI_URL, ORCID_URL
 from lbrc_flask.validators import parse_date
 from lbrc_flask.data_conversions import ensure_list
+import requests
 
 
 def get_open_alex():
@@ -201,14 +202,20 @@ def get_open_alex_affiliation_data(identifier):
 
 def get_open_alex_author_data(identifier):
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        logging.warn('OpenAlex Not Enabled')
+        logging.warning('OpenAlex Not Enabled')
         return None
 
-    author = Authors()[identifier]
+    try:
 
-    results = _get_author_datas([author], 'get_open_alex_author_data')
+        author = Authors()[identifier]
 
-    return next(iter(results), None)
+        results = _get_author_datas([author], 'get_open_alex_author_data')
+
+        return next(iter(results), None)
+
+    except requests.exceptions.HTTPError as e:
+        logging.warning(f'OpenAlex author not found for identifier: {identifier}')
+        return None
 
 
 def _get_affiliation_datas(affiliations, action):
