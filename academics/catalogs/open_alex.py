@@ -55,10 +55,14 @@ def get_open_alex_publication_data(identifier):
     pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
 
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        logging.warn('OpenAlex Not Enabled')
+        logging.warning('OpenAlex Not Enabled')
         return None
     
-    return _get_publication_data(Works()[identifier], 'get_open_alex_publication_data')
+    try:
+        return _get_publication_data(Works()[identifier], 'get_open_alex_publication_data')
+    except requests.exceptions.HTTPError as e:
+        logging.warning(f'OpenAlex publication not found for identifier: {identifier}')
+        return None
 
 
 def _get_publication_data(pubdata, action):
@@ -190,14 +194,20 @@ def abstract_from_inverted_index(inverted_index):
 
 def get_open_alex_affiliation_data(identifier):
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        logging.warn('OpenAlex Not Enabled')
+        logging.warning('OpenAlex Not Enabled')
         return None
 
-    affiliation = Institutions()[identifier]
+    try:
+        affiliation = Institutions()[identifier]
 
-    results = _get_affiliation_datas([affiliation], 'get_open_alex_affiliation_data')
+        results = _get_affiliation_datas([affiliation], 'get_open_alex_affiliation_data')
 
-    return next(iter(results), None)
+        return next(iter(results), None)
+
+    except requests.exceptions.HTTPError as e:
+        logging.warning(f'OpenAlex affiliation not found for identifier: {identifier}')
+        return None
+
 
 
 def get_open_alex_author_data(identifier):
