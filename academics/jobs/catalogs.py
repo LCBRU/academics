@@ -243,7 +243,9 @@ def _affiliation_xref_for_author_data_list(author_datas):
 
     results = {}
 
-    for a in author_datas:
+    valid_author_datas = [a for a in author_datas if a.catalog and a.catalog_identifier]
+
+    for a in valid_author_datas:
         results[CatalogReference(a)] = [xref[af] for af in {CatalogReference(af) for af in a.affiliations}]
 
     return results
