@@ -354,6 +354,8 @@ class Publication(AuditMixin, CommonMixin, db.Model):
             self.nihr_acknowledgement = self.auto_nihr_acknowledgement = NihrAcknowledgement.get_supplementary_status()
 
     def set_strict_from_guess(self):
+        if not self.best_catalog_publication:
+            return
         self.strict_nihr_acknowledgement_match = NihrAcknowledgement.get_strict_match(self.best_catalog_publication.funding_text)
 
     def set_preprint_from_guess(self):
