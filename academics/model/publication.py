@@ -297,10 +297,14 @@ class Publication(AuditMixin, CommonMixin, db.Model):
 
     @property
     def academics(self):
+        if not self.best_catalog_publication:
+            return []
         return self.best_catalog_publication.academics
 
     @property
     def themes(self):
+        if not self.best_catalog_publication:
+            return []
         return self.best_catalog_publication.themes
     
     def set_vancouver(self):
@@ -356,11 +360,17 @@ class Publication(AuditMixin, CommonMixin, db.Model):
         if not self.is_preprint_unset:
             return
         
+        if not self.best_catalog_publication:
+            return
+        
         if self.best_catalog_publication.journal:
             self.preprint = self.best_catalog_publication.journal.preprint
 
     @property
     def is_nihr_acknowledged(self):
+        if not self.best_catalog_publication:
+            return False
+        
         return any(chain(
             [s.is_nihr for s in self.best_catalog_publication.sponsors],
             [a.is_nihr for a in self.best_catalog_publication.affiliations]
@@ -385,6 +395,9 @@ class Publication(AuditMixin, CommonMixin, db.Model):
 
     @property
     def is_supplementary(self):
+        if not self.best_catalog_publication:
+            return False
+        
         if self._is_title_supplementary(self.best_catalog_publication.title):
             return True
 
