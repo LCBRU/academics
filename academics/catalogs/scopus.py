@@ -78,11 +78,11 @@ class ScopusClient(ElsClient):
             return json.loads(r.text)
         elif r.status_code == 429:
             next_allowed = datetime.fromtimestamp(int(r.headers.get("X-RateLimit-Reset", 0)))
-            logging.warn(f'QUOTA EXCEEDED: Next Request Allowed {next_allowed}')
+            logging.warning(f'QUOTA EXCEEDED: Next Request Allowed {next_allowed}')
             self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
             raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + "\nand using headers " + str(headers) + ":\n" + r.text)
         elif r.status_code == 404:
-            logging.warn(f'Resource not found: for URL {URL}')
+            logging.warning(f'Resource not found: for URL {URL}')
             raise ResourceNotFoundException(f'Resource not found: for URL {URL}')
         else:
             self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
@@ -104,7 +104,7 @@ def get_scopus_publication_data(scopus_id=None, doi=None, log_data=False):
     logging.debug('started')
 
     if not current_app.config['SCOPUS_ENABLED']:
-        logging.warn('SCOPUS Not Enabled')
+        logging.warning('SCOPUS Not Enabled')
         return []
     
     a = Abstract(scopus_id, doi)
@@ -165,7 +165,7 @@ def get_scopus_publications(identifier):
     logging.debug('started')
 
     if not current_app.config['SCOPUS_ENABLED']:
-        logging.warn('SCOPUS Not Enabled')
+        logging.warning('SCOPUS Not Enabled')
         return []
     
     search_results = DocumentSearch(identifier)
@@ -242,7 +242,7 @@ def get_scopus_author_data(identifier):
     logging.debug(f'Getting Scopus Author Data {identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
-        logging.warn('SCOPUS Not Enabled')
+        logging.warning('SCOPUS Not Enabled')
         return None
 
     result = Author(identifier)
@@ -257,7 +257,7 @@ def get_scopus_affiliation_data(identifier):
     logging.debug(f'Getting Scopus Affiliation Data {identifier}')
 
     if not current_app.config['SCOPUS_ENABLED']:
-        logging.warn('SCOPUS Not Enabled')
+        logging.warning('SCOPUS Not Enabled')
         return None
 
     result = ScopusAffiliation(identifier)
@@ -273,7 +273,7 @@ def scopus_similar_authors(academic: Academic):
 def scopus_author_search(search_string, search_non_local=False):
 
     if not current_app.config['SCOPUS_ENABLED']:
-        logging.warn('SCOPUS Not Enabled')
+        logging.warning('SCOPUS Not Enabled')
         return _test_author_search_data()
 
     re_orcid = re.compile(r'\d{4}-\d{4}-\d{4}-\d{4}$')
@@ -284,7 +284,6 @@ def scopus_author_search(search_string, search_non_local=False):
         q = f'AU-ID({search_string})'
     else:
         q = ' AND '.join({f'(AUTHLASTNAME({w}) OR AUTHFIRST({w}))' for w in search_string.split()})
-        # q = f'AUTHLASTNAME({search_string})'
 
     if search_non_local:
         auth_srch = ElsSearch(f'{q}','author')

@@ -32,7 +32,7 @@ def get_openalex_publications(identifier):
     pyalex.config.email = current_app.config['OPEN_ALEX_EMAIL']
 
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        logging.warn('OpenAlex Not Enabled')
+        logging.warning('OpenAlex Not Enabled')
         return []
 
     result = []
@@ -40,7 +40,6 @@ def get_openalex_publications(identifier):
     q = (
         Works()
             .filter(**{"author.id": identifier})
-            # .filter(publication_year=f'{date.today().year - 2}')
         )
 
     for w in chain(*q.paginate(per_page=200)):
@@ -150,7 +149,7 @@ def _translate_publication_author(author_dict, action):
 
 def open_alex_similar_authors(academic: Academic):
     if not current_app.config['OPEN_ALEX_ENABLED']:
-        logging.warn('OpenAlex Not Enabled')
+        logging.warning('OpenAlex Not Enabled')
         return []
 
     logging.info(f'Getting OpenAlex data for {academic.full_name}')
