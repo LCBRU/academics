@@ -88,8 +88,8 @@ class AutoFillFolders(AsyncJob):
             q = q.where(Publication.nihr_acknowledgement_id.in_(
                 [s.id for s in folder.only_include_acknowledgement_statuses]))
 
-        if len((bcp.doi or '').strip()) > 0:
-            for cp in db.session.execute(q).scalars():
+        for cp in db.session.execute(q).scalars():
+            if len((cp.doi or '').strip()) > 0:
                 db.session.add(FolderDoi(
                     folder_id=folder.id,
                     doi=cp.doi,
