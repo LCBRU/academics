@@ -85,8 +85,8 @@ class ScopusClient(ElsClient):
             logging.warning(f'Resource not found: for URL {URL}')
             raise ResourceNotFoundException(f'Resource not found: for URL {URL}')
         else:
-            self._status_msg="HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text
-            raise requests.HTTPError("HTTP " + str(r.status_code) + " Error from " + URL + " and using headers " + str(headers) + ": " + r.text)
+            self._status_msg="HTTP " + str(r.status_code) + "\n\nError from URL: " + URL + "\n\nHeaders " + str(headers) + "\n\nResponse:\n\n " + r.text
+            raise requests.HTTPError("HTTP " + str(r.status_code) + "\n\nError from URL: " + URL + "\n\nHeaders " + str(headers) + "\n\nResponse:\n\n " + r.text)
 
 
 @cache
