@@ -57,7 +57,7 @@ class SciValClient:
         elif r.status_code == 429:
             next_allowed = datetime.fromtimestamp(int(r.headers.get("X-RateLimit-Reset", 0)))
 
-            logging.warn(f'QUOTA EXCEEDED: Next Request Allowed {next_allowed}')
+            logging.warning(f'QUOTA EXCEEDED: Next Request Allowed {next_allowed}')
             raise requests.HTTPError(f"HTTP {str(r.status_code)} Error from {URL} using headers {str(self.headers)}:\n{r.text}")
         elif r.status_code == 404:
             raise ResourceNotFoundException(f'Resource not found: for URL {URL}')
@@ -74,7 +74,7 @@ def get_scival_publication_institutions(scopus_id=None, log_data=False):
     logging.debug('started')
 
     if not current_app.config['SCIVAL_ENABLED']:
-        logging.warn('SCIVAL Not Enabled')
+        logging.warning('SCIVAL Not Enabled')
         return []
 
     try:
@@ -96,7 +96,7 @@ def get_scival_publication_institutions(scopus_id=None, log_data=False):
         ) for i in result.get('publication', {}).get('institutions')]
 
     except Exception as e:
-        logging.warn(f'Scival NOT found for {scopus_id}')
+        logging.warning(f'Scival NOT found for {scopus_id}')
 
         return []
 
@@ -105,7 +105,7 @@ def get_scival_institution(institution_id=None):
     logging.debug('started')
 
     if not current_app.config['SCIVAL_ENABLED']:
-        logging.warn('SCIVAL Not Enabled')
+        logging.warning('SCIVAL Not Enabled')
         return []
 
     try:
@@ -127,6 +127,6 @@ def get_scival_institution(institution_id=None):
         )
 
     except Exception as e:
-        logging.warn(f'Institution NOT found for {institution_id}')
+        logging.warning(f'Institution NOT found for {institution_id}')
 
         return None
