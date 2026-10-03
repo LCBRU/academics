@@ -202,7 +202,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
     @property
     def publication_count(self) -> int:
         normal_ids = (
-            select(distinct(Publication.id))
+            select(Publication.id).distinct()
             .join(Publication.catalog_publications)
             .join(CatalogPublication.catalog_publication_sources)
             .join(CatalogPublicationsSources.source)
@@ -210,7 +210,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         )
 
         supplementary_ids = (
-            select(distinct(Publication.id))
+            select(Publication.id).distinct()
             .join(Publication.supplementary_authors)
             .where(Academic.id == self.id)
         )
@@ -223,7 +223,7 @@ class Academic(AuditMixin, CommonMixin, db.Model):
             ))
         )
 
-        return db.session.execute(q).scalar()    
+        return db.session.execute(q).scalar()
 
     @property
     def orcid_mismatch(self):
