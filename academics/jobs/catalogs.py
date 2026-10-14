@@ -784,6 +784,8 @@ class SourceRefresh(AsyncJob):
             logger.warning(f'Source {source.display_name} not found so setting it to be in error')
             source.error = True
 
+        source.academic.ensure_initialisation()
+
         db.session.add(source)
         db.session.commit()
         AsyncJobs.schedule(SourceGetPublications(source))
