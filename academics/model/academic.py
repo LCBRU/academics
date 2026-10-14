@@ -1,15 +1,26 @@
 import re
-from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint, distinct, func, or_, select
-from sqlalchemy.orm import Mapped, mapped_column, relationship, backref
-from sqlalchemy.ext.orderinglist import ordering_list
-from lbrc_flask.security import AuditMixin
-from lbrc_flask.model import CommonMixin
+from typing import ClassVar
+
 from lbrc_flask.database import db
+from lbrc_flask.model import CommonMixin
+from lbrc_flask.security import AuditMixin
+from sqlalchemy import (
+    Boolean,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    distinct,
+    func,
+    or_,
+    select,
+)
+from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
+
 from academics.model.catalog import CATALOG_OPEN_ALEX, CATALOG_SCOPUS
 from academics.model.publication import CatalogPublication, Publication
 from academics.model.security import User
 from academics.model.theme import Theme
-
 
 sources__affiliations = db.Table(
     'sources__affiliations',
@@ -86,7 +97,7 @@ class Affiliation(CommonMixin, db.Model):
     def summary(self):
         return '\n'.join(filter(None, [self.name, self.address, self.country]))
 
-    NIHR_NAMES = [
+    NIHR_NAMES: ClassVar[list[str]] = [
         'NIHR',
         'National Institute for Health Research',
         'National Institute for Health and Care Research',
@@ -94,7 +105,7 @@ class Affiliation(CommonMixin, db.Model):
 
     @property
     def is_nihr(self):
-        return any([n in self.name or '' for n in self.NIHR_NAMES])
+        return any(n in self.name or '' for n in self.NIHR_NAMES)
 
 
 class Academic(AuditMixin, CommonMixin, db.Model):
@@ -191,12 +202,12 @@ class Academic(AuditMixin, CommonMixin, db.Model):
         elif len(self.sources) == 0:
             return None
         else:
-            self._best_source = list(reversed(sorted(self.sources, key=lambda x: int(x.h_index or '0'))))[0]
+            self._best_source = max(self.sources, key=lambda x: int(x.h_index or '0'))
             return self._best_source
 
     @property
     def sources_by_h_index(self):
-        return list(reversed(sorted(self.sources, key=lambda x: int(x.h_index or '0'))))
+        return sorted(self.sources, key=lambda x: int(x.h_index or '0'), reverse=True)
 
 
     @property
@@ -227,11 +238,11 @@ class Academic(AuditMixin, CommonMixin, db.Model):
 
     @property
     def orcid_mismatch(self):
-        return any([s.orcid_mismatch for s in self.sources])
+        return any(s.orcid_mismatch for s in self.sources)
 
     @property
     def source_errors(self):
-        return any([s.error for s in self.sources])
+        return any(s.error for s in self.sources)
 
     @property
     def has_new_potential_sources(self):
