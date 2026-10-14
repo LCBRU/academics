@@ -1,10 +1,16 @@
-from lbrc_flask.database import db
-from academics.jobs.catalogs import ManaualCatalogPublicationsFindScopus, PublicationReGuessStatus, RefreshAll, InstitutionRefreshAll
 from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
+from lbrc_flask.database import db
 from lbrc_flask.response import refresh_response
 
+from academics.jobs.catalogs import (
+    InstitutionRefreshAll,
+    ManaualCatalogPublicationsFindScopus,
+    PublicationReGuessStatus,
+    RefreshAll,
+)
 from academics.jobs.publications import AutoFillFolders
+
 from .. import blueprint
 
 

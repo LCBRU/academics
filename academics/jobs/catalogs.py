@@ -1,28 +1,71 @@
 import logging
-from datetime import date, datetime, timezone
-from dateutil.relativedelta import relativedelta
-from unidecode import unidecode
+from datetime import UTC, date, datetime
 from itertools import chain, groupby
+from typing import ClassVar
+
+from dateutil.relativedelta import relativedelta
+from flask import current_app
 from lbrc_flask.async_jobs import AsyncJob, AsyncJobs
 from lbrc_flask.database import db
-from flask import current_app
+from lbrc_flask.validators import parse_date
 from sqlalchemy import delete, select
+from unidecode import unidecode
+
+from academics.catalogs.data_classes import CatalogReference
+from academics.catalogs.open_alex import (
+    get_open_alex_affiliation_data,
+    get_open_alex_author_data,
+    get_open_alex_publication_data,
+    get_openalex_publications,
+    open_alex_similar_authors,
+)
+from academics.catalogs.scival import (
+    get_scival_institution,
+    get_scival_publication_institutions,
+)
+from academics.catalogs.scopus import (
+    get_scopus_affiliation_data,
+    get_scopus_author_data,
+    get_scopus_publication_data,
+    get_scopus_publications,
+    scopus_similar_authors,
+)
+from academics.model.academic import (
+    Academic,
+    AcademicPotentialSource,
+    Affiliation,
+    CatalogPublicationsSources,
+    Source,
+    catalog_publications_sources_affiliations,
+)
+from academics.model.catalog import (
+    CATALOG_OPEN_ALEX,
+    CATALOG_SCIVAL,
+    CATALOG_SCOPUS,
+)
+from academics.model.institutions import Institution
+from academics.model.publication import (
+    CatalogPublication,
+    Journal,
+    Keyword,
+    NihrAcknowledgement,
+    Publication,
+    Sponsor,
+    Subtype,
+)
+from academics.model.raw_data import RawData
 from academics.services.publication_searching import manual_only_catalog_publications
 from academics.services.sources import create_potential_sources
-from academics.catalogs.data_classes import CatalogReference
-from academics.catalogs.open_alex import get_open_alex_affiliation_data, get_open_alex_author_data, get_open_alex_publication_data, get_openalex_publications, open_alex_similar_authors
-from academics.catalogs.scival import get_scival_institution, get_scival_publication_institutions
-from academics.catalogs.scopus import get_scopus_affiliation_data, get_scopus_author_data, get_scopus_publication_data, get_scopus_publications, scopus_similar_authors
-from academics.model.academic import Academic, AcademicPotentialSource, Affiliation, Source, CatalogPublicationsSources, catalog_publications_sources_affiliations, Affiliation, Source
-from academics.model.catalog import CATALOG_MANUAL, CATALOG_OPEN_ALEX, CATALOG_SCIVAL, CATALOG_SCOPUS
-from academics.model.institutions import Institution
-from academics.model.publication import CatalogPublication, NihrAcknowledgement, Journal, Keyword, Publication, Sponsor, Subtype
-from lbrc_flask.validators import parse_date
-from academics.model.raw_data import RawData
+
+logger = logging.getLogger(__name__)
+
+
+class JobException(Exception):
+    pass
 
 
 def _journal_xref_for_publication_data_list(publication_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     unique_names = {unidecode(p.journal_name).lower() for p in publication_datas}
 
@@ -30,7 +73,7 @@ def _journal_xref_for_publication_data_list(publication_datas):
 
     xref = {unidecode(j['name']).lower(): j['id'] for j in db.session.execute(q).mappings()}
 
-    new_journals = [Journal(name=n) for n in unique_names if unidecode(n).lower() not in xref.keys()]
+    new_journals = [Journal(name=n) for n in unique_names if unidecode(n).lower() not in xref]
 
     db.session.add_all(new_journals)
     db.session.commit()
@@ -41,7 +84,7 @@ def _journal_xref_for_publication_data_list(publication_datas):
 
 
 def _subtype_xref_for_publication_data_list(publication_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     descs = {p.subtype_description for p in publication_datas}
 
@@ -49,7 +92,7 @@ def _subtype_xref_for_publication_data_list(publication_datas):
 
     xref = {st['description'].lower(): st['id'] for st in db.session.execute(q).mappings()}
 
-    new_subtypes = [Subtype(code=d, description=d) for d in descs if d.lower() not in xref.keys()]
+    new_subtypes = [Subtype(code=d, description=d) for d in descs if d.lower() not in xref]
 
     db.session.add_all(new_subtypes)
     db.session.commit()
@@ -60,7 +103,7 @@ def _subtype_xref_for_publication_data_list(publication_datas):
 
 
 def _publication_xref_for_publication_data_list(publication_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     xref = {}
 
@@ -75,14 +118,14 @@ def _publication_xref_for_publication_data_list(publication_datas):
 
         xref = xref | {CatalogReference(cp): cp.publication for cp in db.session.execute(q).unique().scalars()}
 
-    for p in (p for p in publication_datas if CatalogReference(p) not in xref.keys() and p.doi):
+    for p in (p for p in publication_datas if CatalogReference(p) not in xref and p.doi):
         if pub := db.session.execute(
             select(Publication).where(Publication.doi == p.doi)
         ).unique().scalar_one_or_none():
             xref[CatalogReference(p)] = pub
 
-    xref = xref | _publication_xref_for_pub_data_with_doi([pd for pd in publication_datas if CatalogReference(pd) not in xref.keys() and pd.doi])
-    xref = xref | _publication_xref_for_pub_data_with_no_doi([pd for pd in publication_datas if CatalogReference(pd) not in xref.keys()])
+    xref = xref | _publication_xref_for_pub_data_with_doi([pd for pd in publication_datas if CatalogReference(pd) not in xref and pd.doi])
+    xref = xref | _publication_xref_for_pub_data_with_no_doi([pd for pd in publication_datas if CatalogReference(pd) not in xref])
 
     return {CatalogReference(p): xref[CatalogReference(p)] for p in publication_datas}
 
@@ -113,16 +156,16 @@ def _publication_xref_for_pub_data_with_no_doi(pub_data):
     
 
 def _sponsor_xref_for_publication_data_list(publication_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     unique_names = set(filter(None, [n for n in chain.from_iterable([p.funding_list for p in publication_datas])]))
-    unique_names = set([unidecode(n).lower() for n in unique_names])
+    unique_names = {unidecode(n).lower() for n in unique_names}
 
     q = select(Sponsor).where(Sponsor.name.in_(unique_names))
 
     xref = {unidecode(s.name).lower(): s for s in db.session.execute(q).scalars()}
 
-    new_sponsors = [Sponsor(name=u) for u in unique_names if u not in xref.keys()]
+    new_sponsors = [Sponsor(name=u) for u in unique_names if u not in xref]
 
     db.session.add_all(new_sponsors)
     db.session.commit()
@@ -136,7 +179,7 @@ def _sponsor_xref_for_publication_data_list(publication_datas):
 
 
 def _institutions(institution_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     q = select(Institution).where(
         Institution.catalog_identifier.in_([i.catalog_identifier for i in institution_datas])
@@ -145,7 +188,7 @@ def _institutions(institution_datas):
     xref = {i.catalog_identifier: i for i in db.session.execute(q).scalars()}
 
     for i in institution_datas:
-        if str(i.catalog_identifier) in xref.keys():
+        if str(i.catalog_identifier) in xref:
             continue
 
         new_i = Institution()
@@ -169,7 +212,7 @@ def _institutions(institution_datas):
 
 
 def _keyword_xref_for_publication_data_list(publication_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     unique_keywords = {unidecode(k.strip()).lower() for k in chain.from_iterable([p.keywords for p in publication_datas]) if k}
 
@@ -177,7 +220,7 @@ def _keyword_xref_for_publication_data_list(publication_datas):
 
     xref = {unidecode(k.keyword).lower(): k for k in db.session.execute(q).scalars()}
 
-    new_keywords = [Keyword(keyword=u) for u in unique_keywords if u not in xref.keys()]
+    new_keywords = [Keyword(keyword=u) for u in unique_keywords if u not in xref]
 
     db.session.add_all(new_keywords)
     db.session.commit()
@@ -191,7 +234,7 @@ def _keyword_xref_for_publication_data_list(publication_datas):
 
 
 def _affiliation_xref_for_author_data_list(author_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     author_datas = list(author_datas)
 
@@ -216,7 +259,7 @@ def _affiliation_xref_for_author_data_list(author_datas):
         new_affiliations = []
 
         for a in afils:
-            if CatalogReference(a) in xref.keys():
+            if CatalogReference(a) in xref:
                 continue
 
             new_affiliations.append(Affiliation(
@@ -252,7 +295,7 @@ def _affiliation_xref_for_author_data_list(author_datas):
 
 
 def _source_xref_for_publication_data_list(publication_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     all_authors = list(chain.from_iterable([p.authors for p in publication_datas]))
     valid_authors = [a for a in all_authors if a.catalog and a.catalog_identifier]
@@ -264,14 +307,14 @@ def _source_xref_for_publication_data_list(publication_datas):
 
     for p in publication_datas:
         publication_valid_authors = [a for a in p.authors if a.catalog and a.catalog_identifier]
-        publication_xref_authors = [a for a in publication_valid_authors if CatalogReference(a) in author_xref.keys()]
+        publication_xref_authors = [a for a in publication_valid_authors if CatalogReference(a) in author_xref]
         result[CatalogReference(p)] = [author_xref[CatalogReference(a)] for a in publication_xref_authors]
 
     return result
 
 
 def _source_xref_for_author_data_list(author_datas):
-    logging.debug('started')
+    logger.debug('started')
 
     xref = {}
 
@@ -291,7 +334,7 @@ def _source_xref_for_author_data_list(author_datas):
     new_sources = []
 
     for a in unique_authors.values():
-        if CatalogReference(a) in xref.keys():
+        if CatalogReference(a) in xref:
             continue
 
         new_sources.append(a.get_new_source())
@@ -309,7 +352,7 @@ def _source_xref_for_author_data_list(author_datas):
 
 
 def save_publications(new_pubs):
-    logging.info(len(new_pubs))
+    logger.info(len(new_pubs))
 
     journal_xref = _journal_xref_for_publication_data_list(new_pubs)
     subtype_xref = _subtype_xref_for_publication_data_list(new_pubs)
@@ -322,7 +365,7 @@ def save_publications(new_pubs):
 
     for p in new_pubs:
         cpr = CatalogReference(p)
-        logging.info(f'Saving Publication {cpr}')
+        logger.info(f'Saving Publication {cpr}')
 
         pub = pubs_xref[cpr]
 
@@ -426,13 +469,13 @@ def save_publications(new_pubs):
 
 
 class RefreshAll(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "RefreshAll",
     }
 
     def __init__(self):
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             retry=False,
         )
 
@@ -444,13 +487,13 @@ class RefreshAll(AsyncJob):
 
 
 class ManaualCatalogPublicationsFindScopus(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "ManaualCatalogPublicationsFindScopus",
     }
 
     def __init__(self):
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             retry=False,
         )
 
@@ -460,14 +503,14 @@ class ManaualCatalogPublicationsFindScopus(AsyncJob):
 
 
 class AffiliationRefresh(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "AffiliationRefresh",
     }
 
     def __init__(self, affiliation):
         db.session.refresh(affiliation)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=affiliation.id,
             retry=True,
             retry_timedelta_period='days',
@@ -495,13 +538,13 @@ class AffiliationRefresh(AsyncJob):
 
 
 class InstitutionRefreshAll(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "InstitutionRefreshAll",
     }
 
     def __init__(self):
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             retry=True,
             retry_timedelta_period='days',
             retry_timedelta_size='7',
@@ -517,14 +560,14 @@ class InstitutionRefreshAll(AsyncJob):
 
 
 class InstitutionRefresh(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "InstitutionRefresh",
     }
 
     def __init__(self, institution):
         db.session.refresh(institution)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=institution.id,
             retry=True,
             retry_timedelta_period='days',
@@ -538,12 +581,13 @@ class InstitutionRefresh(AsyncJob):
             return
         
         if institution.catalog != CATALOG_SCIVAL:
-            raise Exception(f'What?! Institution catalog is {institution.catalog}')
+            
+            raise JobException(f'What?! Institution catalog is {institution.catalog}')
 
         institution_data = get_scival_institution(institution.catalog_identifier)
 
         if not institution_data:
-            logging.warning(f'Institution not found {institution.catalog_identifier}')
+            logger.warning(f'Institution not found {institution.catalog_identifier}')
 
         institution_data.update_institution(institution)
 
@@ -552,14 +596,14 @@ class InstitutionRefresh(AsyncJob):
 
 
 class PublicationGetMissingScopus(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "PublicationGetMissingScopus",
     }
 
     def __init__(self, publication):
         db.session.refresh(publication)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=publication.id,
             retry=True,
             retry_timedelta_period='days',
@@ -572,20 +616,20 @@ class PublicationGetMissingScopus(AsyncJob):
         if not publication:
             return
 
-        if not publication.scopus_catalog_publication and publication.doi:
+        if not publication.scopus_catalog_publication and publication.doi:  # noqa: SIM102
             if pub_data := get_scopus_publication_data(doi=publication.doi):
                 save_publications([pub_data])
 
 
 class PublicationGetScivalInstitutions(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "PublicationGetScivalInstitutions",
     }
 
     def __init__(self, publication):
         db.session.refresh(publication)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=publication.id,
             retry=True,
             retry_timedelta_period='days',
@@ -603,14 +647,14 @@ class PublicationGetScivalInstitutions(AsyncJob):
 
 
 class PublicationInitialise(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "PublicationInitialise",
     }
 
     def __init__(self, publication):
         db.session.refresh(publication)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=publication.id,
             retry=True,
             retry_timedelta_period='days',
@@ -636,13 +680,13 @@ class PublicationInitialise(AsyncJob):
 
 
 class PublicationReGuessStatus(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "PublicationReGuessStatus",
     }
 
     def __init__(self):
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             retry=True,
             retry_timedelta_period='days',
             retry_timedelta_size='1',
@@ -670,14 +714,14 @@ class PublicationReGuessStatus(AsyncJob):
 
 
 class CatalogPublicationRefresh(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "CatalogPublicationRefresh",
     }
 
     def __init__(self, catalog_publication):
         db.session.refresh(catalog_publication)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=catalog_publication.id,
             retry=True,
             retry_timedelta_period='days',
@@ -703,14 +747,14 @@ class CatalogPublicationRefresh(AsyncJob):
 
 
 class SourceRefresh(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "SourceRefresh",
     }
 
     def __init__(self, source):
         db.session.refresh(source)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=source.id,
             retry=True,
             retry_timedelta_period='days',
@@ -738,7 +782,7 @@ class SourceRefresh(AsyncJob):
 
             author_data.update_source(source)
         else:
-            logging.warning(f'Source {source.display_name} not found so setting it to be in error')
+            logger.warning(f'Source {source.display_name} not found so setting it to be in error')
             source.error = True
 
         db.session.add(source)
@@ -747,14 +791,14 @@ class SourceRefresh(AsyncJob):
 
 
 class SourceGetPublications(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "SourceGetPublications",
     }
 
     def __init__(self, source):
         db.session.refresh(source)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=source.id,
             retry=True,
             retry_timedelta_period='days',
@@ -790,21 +834,21 @@ class SourceGetPublications(AsyncJob):
 
         save_publications(new_pubs)
 
-        source.last_fetched_datetime = datetime.now(timezone.utc)
+        source.last_fetched_datetime = datetime.now(UTC)
 
         db.session.add(source)
         db.session.commit()
 
 
 class AcademicInitialise(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "AcademicInitialise",
     }
 
     def __init__(self, academic):
         db.session.refresh(academic)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=academic.id,
             retry=True,
             retry_timedelta_period='days',
@@ -824,14 +868,14 @@ class AcademicInitialise(AsyncJob):
 
 
 class AcademicRefresh(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "AcademicRefresh",
     }
 
     def __init__(self, academic):
         db.session.refresh(academic)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=academic.id,
             retry=True,
             retry_timedelta_period='days',
@@ -852,14 +896,14 @@ class AcademicRefresh(AsyncJob):
 
 
 class AcademicFindNewPotentialSources(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "AcademicFindNewPotentialSources",
     }
 
     def __init__(self, academic):
         db.session.refresh(academic)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=academic.id,
             retry=True,
             retry_timedelta_period='days',
@@ -889,14 +933,14 @@ class AcademicFindNewPotentialSources(AsyncJob):
 
 
 class AcademicEnsureSourcesArePotential(AsyncJob):
-    __mapper_args__ = {
+    __mapper_args__: ClassVar[dict] = {
         "polymorphic_identity": "AcademicEnsureSourcesArePotential",
     }
 
     def __init__(self, academic):
         db.session.refresh(academic)
         super().__init__(
-            scheduled=datetime.now(timezone.utc),
+            scheduled=datetime.now(UTC),
             entity_id=academic.id,
             retry=True,
             retry_timedelta_period='days',
@@ -914,7 +958,7 @@ class AcademicEnsureSourcesArePotential(AsyncJob):
             .where(Source.academic == academic)
         ).scalars())
 
-        logging.debug(f'Missing proposed sources found: {missing_proposed_sources}')
+        logger.debug(f'Missing proposed sources found: {missing_proposed_sources}')
 
         for source in missing_proposed_sources:
             aps = AcademicPotentialSource(
