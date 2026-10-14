@@ -581,7 +581,6 @@ class InstitutionRefresh(AsyncJob):
             return
         
         if institution.catalog != CATALOG_SCIVAL:
-            
             raise JobException(f'What?! Institution catalog is {institution.catalog}')
 
         institution_data = get_scival_institution(institution.catalog_identifier)

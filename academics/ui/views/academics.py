@@ -1,26 +1,34 @@
+from functools import partial
+
 from flask import flash, render_template, request, url_for
-from lbrc_flask.forms import ConfirmForm, FlashingForm, SearchForm
-from lbrc_flask.database import db
-from lbrc_flask.response import trigger_response, refresh_response
-from sqlalchemy import delete, select
-from wtforms.fields.simple import HiddenField, StringField, BooleanField
-from wtforms import DateField, RadioField, SelectField
-from academics.jobs.catalogs import AcademicInitialise, AcademicRefresh
-from academics.catalogs.scopus import scopus_author_search
-from academics.model.academic import Academic, AcademicPotentialSource
-from academics.model.publication import CATALOG_SCOPUS
-from wtforms.validators import Length, DataRequired, Optional
-from sqlalchemy.orm import selectinload
 from flask_security import roles_accepted
 from lbrc_flask.async_jobs import AsyncJobs, run_jobs_asynch
+from lbrc_flask.database import db
+from lbrc_flask.forms import ConfirmForm, FlashingForm, MultiCheckboxField, SearchForm
 from lbrc_flask.requests import get_value_from_all_arguments
-from functools import partial
+from lbrc_flask.response import refresh_response, trigger_response
+from sqlalchemy import delete, select
+from sqlalchemy.orm import selectinload
+from wtforms import DateField, RadioField, SelectField
+from wtforms.fields.simple import BooleanField, HiddenField, StringField
+from wtforms.validators import DataRequired, Length, Optional
+
+from academics.catalogs.scopus import scopus_author_search
+from academics.jobs.catalogs import AcademicInitialise, AcademicRefresh
+from academics.model.academic import Academic, AcademicPotentialSource
+from academics.model.publication import CATALOG_SCOPUS
 from academics.model.security import User, UserPicker
 from academics.model.theme import Theme
-from academics.services.academic_searching import AcademicSearchForm, academic_search_query
-from academics.services.sources import create_potential_sources, get_sources_for_catalog_identifiers
+from academics.services.academic_searching import (
+    AcademicSearchForm,
+    academic_search_query,
+)
+from academics.services.sources import (
+    create_potential_sources,
+    get_sources_for_catalog_identifiers,
+)
 from academics.ui.views.users import render_user_search_add, user_search_query
-from lbrc_flask.forms import MultiCheckboxField
+
 from .. import blueprint
 
 
@@ -153,7 +161,7 @@ def add_author_search():
                 search_string=search_form.search.data,
                 search_non_local=search_form.show_non_local.data,
             )
-    except:
+    except:  # noqa: E722
         flash('Search failed.  Please tighten your search criteria.')
 
     academics = db.session.execute(select(Academic).order_by(Academic.last_name, Academic.first_name))
@@ -179,7 +187,7 @@ def add_author_search_results():
             search_string=search_form.search.data,
             search_non_local=search_form.show_non_local.data,
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(e)
         flash('Search failed.  Please tighten your search criteria.')
 
